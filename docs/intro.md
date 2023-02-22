@@ -2,46 +2,61 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Introduction
 
-Let's discover **Docusaurus in less than 5 minutes**.
+ExpressoTS is a TypeScript lightweight framework for building scalable, readable and maintainable server-side applications.
+The framework provides a level of abstraction on top of common HTTP server framework [Express](https://expressjs.com/) exposing their API's directly to the developer. This provides freedom and brings to the developer a tool that is well known and easy to use.
 
-## Getting Started
+## Philosophy
 
-Get started by **creating a new site**.
+Expresso TS is a developer-friendly framework designed to streamline the process of building server-side applications. With a focus on readability, maintainability, and scalability, Expresso TS aims to simplify the development process by providing a clear and concise structure.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+Gone are the days of tedious setup tasks such as configuring logging systems, handling authentication, and connecting to databases. With Expresso TS, developers can focus on what really matters - writing code. The framework takes care of the repetitive and time-consuming aspects of development, allowing developers to work more efficiently.
 
-### What you'll need
+One of the key features of Expresso TS is its flexible and extensible architecture. The framework provides a simple but powerful dependency injection system that enables developers to quickly and easily extend its functionality by creating and adding providers. This allows developers to seamlessly integrate new features throughout the entire application without having to worry about the complexities of integration.
 
-- [Node.js](https://nodejs.org/en/download/) version 16.14 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+Whether you're building a simple API or a complex enterprise application, Expresso TS can help you deliver your project on time and on budget. With a comprehensive set of tools and features, Expresso TS makes it easy to build high-quality, scalable, and maintainable server-side applications.
 
-## Generate a new site
+## Installation
 
-Generate a new Docusaurus site using the **classic template**.
+To start a new ExpressoTS project, you have two options: scaffold a new project using the [ExpressoTS CLI]("") or clone the starter project from GitHub. Although both methods produce the same outcome, we recommend using the Expresso CLI to create a new project, as it offers a more streamlined experience.
 
-The classic template will automatically be added to your project after you run the command:
+### Using the CLI
+
+To scaffold a project using the ExpressoTS CLI, simply run the following commands. The CLI will prompt you with a few questions and then create a new project directory with the name you provide, along with the @expressots/core package and a starter project structure.
 
 ```bash
-npm init docusaurus@latest my-website classic
+npm i -g @expressots/cli
+expressots new project-name
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+:::tip
+ExpressoTS offers two starter project options: opinionated and non-opinionated. Use the non-opinionated starter project for simple projects with only the minimum requirements. Choose the opinionated starter project for more complex projects with a complete starting point.
+:::
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+### Cloning the starter project
 
-## Start your site
-
-Run the development server:
+Alternatively, to install the TypeScript starter project with **Git**, run the following commands:
 
 ```bash
-cd my-website
+# non-opinionated starter project
+git clone --sparse https://github.com/expressots/expressots.git templates/01_non_opinionated --filter=blob:none 
+```
+
+```bash
+# opinionated starter project
+git clone --sparse https://github.com/expressots/expressots.git templates/02_opinionated --filter=blob:none 
+```
+
+```bash
+# cd 01_non_opinionated or cd 02_opinionated
+cd <your-project-option> 
+
+npm install
+
 npm run start
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
-
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
-
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+:::note
+Note that the `--sparse` flag requires a Git version of 2.25 or higher to be installed in order to work properly.
+:::
