@@ -133,12 +133,70 @@ bootstrap();
 
 To create an ExpressoTS application, there are two ways: using the AppInstance from the Application class, or extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the application life cycle, such as injecting and executing services before, after, and during application shutdown.
 
+In ExpressoTS, creating an application server to listen to inbound HTTP requests is not enough. The framework requires the creation of a container that organizes all application modules into a cohesive unit. Typically, this container is created in the app-container.ts file.
+
+After the container is created, the application can be created by passing the container as a parameter to the `AppInstance.create()` method or by extending the Application class.
+
+Once the container is created, modules can be injected into the application. These modules are the building blocks of an ExpressoTS application and are responsible for organizing the application's business logic into layers, including controllers and use cases.
+
+The controller layer handles incoming requests and returns appropriate responses, while the use case layer implements the business logic of the application.
+
+After creating a module, controllers can be injected into it, resulting in a fully hooked-up application flow.
+
+- Application creation
+
+```typescript
+const app = AppInstance.create(container);
+```
+
+- Module Injection
+
+```typescript
+const appContainer = new AppContainer();
+
+const container = appContainer.create([
+    // Add your modules here
+    AppModule,
+]);
+```
+
+- Controller Injection
+
+```typescript
+const appModule = CreateModule([
+    // Add your controllers here
+    AppController,
+])
+```
+
 :::info
 It is worth noting that a project created with the ExpressoTS CLI comes with an initial project structure that promotes adherence to a specific convention set by the framework. This ensures that each module has its own dedicated directory, helping developers maintain consistency throughout their codebase.
 :::
+
+## Running the Application
+
+Once the installation process is complete, you can start listening to HTTP requests based on the defined controller endpoint that will invoke the corresponding use case to generate the response. To do this, simply run the following command in your OS terminal:
+
+```bash
+npm run start
+```
+
+Once the application is up and running, you can access it by navigating to `http://localhost:3000/` in the non-opinionated starter project
 
 ## Framework
 
 ExpressoTS is a versatile framework that is not bound to any specific platform or technology. Leveraging popular Node.js libraries like InversifyJS and ExpressJS, it is designed to be lightweight, modular, customizable, and easy to use. Developers can expand the framework's capabilities by creating new providers that can be incorporated into their applications.
 
 We are currently working on building the project RoadMap and plan to add support for other popular Node.js HTTP frameworks, like Fastify and Koa, to the platform. Additionally, as we move towards the future, we intend to eliminate some of the dependencies that are currently part of the framework's core, such as IoC and decorators.
+
+---
+
+## Support the project
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- [Become a sponsor on GitHub]("")
+- Follow the organization on GitHub and Star the project
+- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
+- Contribute submitting issues and pull requests
+- Share the project with your friends and colleagues
