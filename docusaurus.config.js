@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'EXPRESSO TS',
+  title: 'Expresso TS',
   tagline: 'A lightweight, fast and easy to use TypeScript framework',
   favicon: 'img/favicon.ico',
 
@@ -64,7 +64,8 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: 'EXPRESSO TS',
+        title: 'Expresso TS',
+        hideOnScroll: true,
         logo: {
           alt: 'Expresso TS',
           src: 'img/logo.png',
@@ -76,7 +77,6 @@ const config = {
             position: 'right',
             label: 'Documentation',
           },
-          {to: '/blog', label: 'Blog', position: 'right'},
           {
             href: 'https://github.com/expressots/expressots',
             label: 'GitHub',
@@ -84,6 +84,12 @@ const config = {
           },
         ],
       },
+      stylesheets: [
+        {
+          href: '/css/custom.css',
+          type: 'text/css',
+        },
+      ],
       footer: {
         style: 'dark',
         links: [

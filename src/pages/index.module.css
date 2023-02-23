@@ -4,7 +4,7 @@
  */
 
 .heroBanner {
-  padding: 4rem 0;
+  padding: 8rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -14,9 +14,33 @@
   .heroBanner {
     padding: 2rem;
   }
+
+  .btnContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .navbar {
+    padding: 0;
+  }
 }
 
-.buttons {
+.btnContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 1rem
+}
+
+.button {
+  width: 180px;
+  height: 50px;
+  border-radius: 40px;
+  margin-top: 2rem;
+
   display: flex;
   align-items: center;
   justify-content: center;
