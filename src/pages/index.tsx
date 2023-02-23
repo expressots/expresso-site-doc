@@ -25,7 +25,7 @@ function HomepageHeader() {
         <div >
           <Link
             className={clsx("button button--secondary button--lg", styles.button)}
-            to="/docs/intro">
+            to="https://github.com/expressots/expressots">
             Source code
           </Link>
         </div>
