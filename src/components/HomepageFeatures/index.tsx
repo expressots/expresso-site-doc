@@ -11,31 +11,30 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Svg: require('@site/static/img/undraw_dev_focus_re_6iwt.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Built on a modular architecture and designed with simplicity in mind, 
+        it empowers developers to quickly create powerful applications.
       </>
     ),
   },
   {
     title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Svg: require('@site/static/img/undraw_product_teardown_re_m1pc.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        You can stop worrying about repetitive boilerplate tasks and focus on what
+        really matters - coding your business logic and delivering a high-quality product.
       </>
     ),
   },
   {
     title: 'Extensible',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Svg: require('@site/static/img/undraw_building_blocks_re_5ahy.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Ability to easily create adapters/providers that seamlessly integrate with the rest of the application.
       </>
     ),
   },
