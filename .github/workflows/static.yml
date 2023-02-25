@@ -24,11 +24,6 @@ jobs:
       - name: Build the site
         run: npm run build
 
-      - name: Setup SSH Agent
-        run: |
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
