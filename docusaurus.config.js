@@ -20,6 +20,7 @@ const config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'expressots', // Usually your GitHub org/user name.
   projectName: 'expressots.github.io', // Usually your repo name.
+  deploymentBranch: "gh-pages",
 
   onBrokenLinks: 'warn', // 'throw' | 'warn' | 'ignore'
   onBrokenMarkdownLinks: 'warn',
