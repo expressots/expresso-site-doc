@@ -21,6 +21,7 @@ const config = {
   organizationName: 'expressots', // Usually your GitHub org/user name.
   projectName: 'expresso-site-doc', // Usually your repo name.
   deploymentBranch: "gh-pages",
+  trailingSlash: false,
 
   onBrokenLinks: 'warn', // 'throw' | 'warn' | 'ignore'
   onBrokenMarkdownLinks: 'warn',
