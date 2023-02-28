@@ -21,9 +21,75 @@ By leveraging the power of Inversify, Expresso TS provides a scalable and modula
 | DTO IN / OUT          | Data transfer object that defines the format of the incoming and outgoing payload of the application.                                                                                                                                                                                                                                                           |
 | Controller            | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                           |
 | Use Case              | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
+| Provider | Component responsible for providing external functionality to the application. |
+| Repository | Component responsible for providing access to the database. |
 
-
+:::info
+Providers and Repositories are optional components. You can use them if you need to provide external functionality or access to the database.
+:::
 
 ## Workflow
 
-If you look at the diagram above, you can see that the workflow of an Expresso TS application is quite simple. After the application initialized with all the components hooked such as the container, modules and controllers, the server starts listening for incoming requests. When a request is received, the server will look for the appropriate route and execute the corresponding controller, in which we usually call endpoints. The controller then calls the appropriate use-case, which in turn calls the appropriate provider when required. Providers are the external components and they exist to provide extra functionality to the application. 
+The workflow of an Expresso TS application is straightforward, as shown in the diagram above. After initializing the application with all its components, including the container, modules, and controllers, the server starts listening for incoming requests. When a request is received, the server looks for the corresponding route and executes the associated controller, which typically exposes endpoints. The controller then calls the relevant use-case, which in turn calls the appropriate provider when required. Providers are external components that offer additional functionality to the application.
+
+## Application Class
+
+The Application class offers a way of creating and configuring the server, passing [Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html) upon server creation. As well as a listen method that starts the server and listens for incoming requests. In the listen method, developers can define not just the port number but also the server environment, which can be either development, staging, or production. As well as the developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
+
+```typescript
+// App create method
+const app = App.create(container, [
+    cors(),
+    cookieParser(),
+    express.static(path.join(__dirname, "public"))
+]);
+
+// App listen method
+app.listen(3000, ServerEnvironment.Development, {
+    appName: "Your App Name",
+    appVersion: "v1.0.0"
+})
+
+```
+
+:::tip
+The name and version of your app can be configured via either the .env file or package.json file. In the opinionated template, we use the package.json file to retrieve the app name and version.
+:::
+
+## Lifecycle Hooks
+
+Another important aspect of the Application class is life cycle hooks. These hooks allow developers to execute code before, after and on shutdown of the server. Important to note that in order to take advantage of these hooks, developers must created an App Class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
+
+```typescript
+    /* Add any service that you want to be initialized before the server starts */
+    protected configureServices(): void { }
+
+    /* Add any service that you want to execute after the server starts */
+    protected postServerInitialization(): void { }
+
+    /* Add any service that you want to execute after server is shutdown */
+    protected serverShutdown(): void {
+        process.exit(0);
+     }
+```
+
+Here is the lifecycle events of an Expresso TS application:
+
+![Application Lifecycle Hooks](./img/app-life-cycle.png)
+
+## Application Run Example
+
+```typescript
+// Using the CLI tool
+expressots new project-demo
+cd project-demo
+npm start
+```
+
+This is the message you should see in the console:
+
+![Application Run Example](./img/project-demo-msg.png)
+
+:::info
+We also provide an instance of the Application class called **AppInstance**, which only exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
+:::

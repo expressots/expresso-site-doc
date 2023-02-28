@@ -113,15 +113,19 @@ const config = {
             ],
           },
           {
-            title: 'More',
+            title: 'Code',
             items: [
               /* {
                 label: 'Blog',
                 to: '/blog',
               }, */
               {
-                label: 'NPM Package',
+                label: 'NPM Core',
                 href: 'https://www.npmjs.com/package/@expressots/core',
+              },
+              {
+                label: 'NPM CLI',
+                href: 'https://www.npmjs.com/package/@expressots/cli',
               },
               {
                 label: 'GitHub',
