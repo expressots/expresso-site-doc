@@ -135,7 +135,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-To create an ExpressoTS application, there are two ways: using the AppInstance from the Application class, or extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the application life cycle, such as injecting and executing services before, after, and during application shutdown.
+To create an ExpressoTS application, there are two ways: using the AppInstance from the Application class, or extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the [application life cycle](application.md#lifecycle-hooks), such as injecting and executing services before, after, and during application shutdown.
 
 In ExpressoTS, creating an application server to listen to inbound HTTP requests is not enough. The framework requires the creation of a container that organizes all application modules into a cohesive unit. Typically, this container is created in the app-container.ts file.
 
