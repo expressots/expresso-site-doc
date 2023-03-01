@@ -58,10 +58,12 @@ class AppController {
 }
 ```
 
+## Base Controller Class
+
 We also power a controller class with the `BaseController` class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
 Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or async callUseCaseAsync()`.
 
-These methods reinforce the idea of one use case per controller, and they are responsible for calling the us case that will implement the business logic of the controller.
+These methods reinforce the idea of one use case per controller, and they are responsible for calling the use case that will implement the business logic of the controller.
 
 The signature of this function is the following:
 
@@ -83,11 +85,24 @@ class AppController extends BaseController {
   }
 
   @httpGet("/")
-  execute(@response() res: any) {
-    return res.send(this.appUseCase.execute());
+  execute(@response() res: any): IAppResponseDTO {
+    return this.callUseCase(this.appUseCase.execute(),
+            res,
+            StatusCode.OK
+    );
   }
 }
 ```
+
+## HTTP Methods and Parameters Decorators
+
+HTTP methods and parameters decorators are a set of annotations used in Expresso TS applications to define the routing and request handling for HTTP requests.
+
+The HTTP methods decorators include @httpGet(), @httpPost(), @httpPut(), @httpPatch(), @httpHead(), @httpDelete(), and @httpMethod(). These decorators are used to define the HTTP method and the path of a specific route in the application.
+
+The parameters decorators include @queryParam(), @requestParam(), @requestBody(), @requestHeaders(), @cookies(), @next(), and @request(). These decorators are used to retrieve data from HTTP requests, such as query parameters, request headers, and request body.
+
+Using these decorators can simplify the routing and handling of HTTP requests in Node.js applications, and make the code more readable and maintainable.
 
 ### HTTP Methods Decorators
 
@@ -117,3 +132,16 @@ Here's a list of all available parameter decorators in Expresso TS, along with t
 | @requestHeaders(headerName?: string) | Injects a header from the request headers	            | execute(@requestHeaders('authorization') auth: string)
 | @cookies(cookieName?: string)	       | Injects a cookie from the request cookies	            | execute(@cookies('session') session: string)
 | @next()	                           | Injects the Express NextFunction object	            | execute(@next() next: NextFunction)
+
+
+---
+
+## Support the project
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- [Become a sponsor on GitHub]("")
+- Follow the organization on GitHub and Star the project
+- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
+- Contribute submitting issues and pull requests
+- Share the project with your friends and colleagues
