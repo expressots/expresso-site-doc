@@ -73,7 +73,7 @@ callUseCaseAsync(useCase: Promise<any>, res: any, successStatusCode: number);
 
 - `useCase`: The use case that will be called. This use case is injected in the controller constructor.
 - `res`: The response object from the express request.
-- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully.
+- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the StatusCode type for more information. 
 
 A more complete example of a controller class inheriting from the `BaseController` class is shown below:
 
