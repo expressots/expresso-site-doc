@@ -40,3 +40,13 @@ The implementation of use cases in Expresso TS follows the best practices of sof
 In addition, it is common to use constructors in the use cases to inject dependencies, such as providers and repositories. This allows for better modularity and testability of the code.
 
 It is important to adhere to the principle of single responsibility when implementing use cases. Each use case should only handle a specific business logic, and if you find yourself implementing multiple use cases in a single class, it is time to review your implementation to ensure that each use case has a clear and concise responsibility.
+
+## Support the project
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- [Become a sponsor on GitHub]("")
+- Follow the organization on GitHub and Star the project
+- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
+- Contribute submitting issues and pull requests
+- Share the project with your friends and colleagues

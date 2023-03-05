@@ -133,7 +133,6 @@ Here's a list of all available parameter decorators in Expresso TS, along with t
 | @cookies(cookieName?: string)	       | Injects a cookie from the request cookies	            | execute(@cookies('session') session: string)
 | @next()	                           | Injects the Express NextFunction object	            | execute(@next() next: NextFunction)
 
-
 ---
 
 ## Support the project

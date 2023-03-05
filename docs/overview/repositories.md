@@ -77,3 +77,13 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
   }
 }
 ```
+
+## Support the project
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- [Become a sponsor on GitHub]("")
+- Follow the organization on GitHub and Star the project
+- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
+- Contribute submitting issues and pull requests
+- Share the project with your friends and colleagues

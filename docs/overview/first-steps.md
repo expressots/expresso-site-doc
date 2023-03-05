@@ -26,7 +26,7 @@ Please make sure that [Node.js](https://nodejs.org) `version >=18.10.0` is insta
 
 ## Setup
 
-Setting up a new ExpressoTS project is quite simple with [ExpressoTS CLI](""). With `npm` installed you can scaffold a new project by running the following command:
+Setting up a new ExpressoTS project is quite simple with [ExpressoTS CLI](../cli/overview.md). With `npm` installed you can scaffold a new project by running the following command:
 
 ```bash
 npm i -g @expressots/cli

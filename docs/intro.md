@@ -19,7 +19,7 @@ Whether you're building a simple API or a complex enterprise application, Expres
 
 ## Installation
 
-To start a new ExpressoTS project, you have two options: scaffold a new project using the [ExpressoTS CLI]("") or clone the starter project from GitHub. Although both methods produce the same outcome, we recommend using the Expresso CLI to create a new project, as it offers a more streamlined experience.
+To start a new ExpressoTS project, you have two options: scaffold a new project using the [ExpressoTS CLI](./cli/overview.md) or clone the starter project from GitHub. Although both methods produce the same outcome, we recommend using the Expresso CLI to create a new project, as it offers a more streamlined experience.
 
 ### Using the CLI
 
