@@ -63,7 +63,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/ExpressoTS-social-card.png',
       navbar: {
         title: 'Expresso TS',
         hideOnScroll: true,
@@ -77,6 +77,12 @@ const config = {
             docId: 'intro',
             position: 'right',
             label: 'Documentation',
+          },
+          {
+            type: 'doc',
+            docId: 'governance',
+            position: 'right',
+            label: 'Governance',
           },
           {
             href: 'https://github.com/expressots/expressots',
