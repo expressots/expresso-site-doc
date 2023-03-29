@@ -58,12 +58,20 @@ class AppController {
 }
 ```
 
+:::info
+In the AppController class above we are using res as any `res:any` but can definitely use the `res:Response` type from the `express` package as we expose its types. This will allow you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
+:::
+
 ## Base Controller Class
 
 We also power a controller class with the `BaseController` class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
 Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or async callUseCaseAsync()`.
 
 These methods reinforce the idea of one use case per controller, and they are responsible for calling the use case that will implement the business logic of the controller.
+
+:::tip
+The callUseCase methods, available in both synchronous and asynchronous versions, are well-suited for returning status and JSON responses to clients, as the users just need to pass the useCase return, res:Response, and statusCode.
+:::
 
 The signature of this function is the following:
 
@@ -73,7 +81,13 @@ callUseCaseAsync(useCase: Promise<any>, res: any, successStatusCode: number);
 
 - `useCase`: The use case that will be called. This use case is injected in the controller constructor.
 - `res`: The response object from the express request.
-- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the StatusCode type for more information. 
+- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the StatusCode type for more information.
+
+The default response:
+
+```typescript
+return res.status(successStatusCode).json(dataReturn);
+```
 
 A more complete example of a controller class inheriting from the `BaseController` class is shown below:
 
