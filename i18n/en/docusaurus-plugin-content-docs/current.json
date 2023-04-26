@@ -1,0 +1,38 @@
+{
+  "title": {
+    "message": "Expresso TS",
+    "description": "The title for the website"
+  },
+  "tagline": {
+    "message": "A lightweight, fast and easy to use TypeScript framework",
+    "description": "The tagline for the website"
+  },
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Overview": {
+    "message": "Overview",
+    "description": "The label for category Overview in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Overview.link.generated-index.description": {
+    "message": "Expresso TS Framework Overview.",
+    "description": "The generated-index page description for category Overview in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.CLI": {
+    "message": "CLI",
+    "description": "The label for category CLI in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.CLI.link.generated-index.description": {
+    "message": "Expresso TS CLI Tool.",
+    "description": "The generated-index page description for category CLI in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorials": {
+    "message": "Tutorials",
+    "description": "The label for category Tutorials in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Tutorials.link.generated-index.description": {
+    "message": "Expresso TS Tutorials.",
+    "description": "The generated-index page description for category Tutorials in sidebar tutorialSidebar"
+  }
+}

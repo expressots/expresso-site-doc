@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './styles.module.css';
+import {translate} from '@docusaurus/Translate';
 
 type FeatureItem = {
   title: string;
@@ -10,31 +11,29 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: translate({message: "featuresEasyToUse"}),
     Svg: require('@site/static/img/undraw_dev_focus_re_6iwt.svg').default,
     description: (
       <>
-        Built on a modular architecture and designed with simplicity in mind, 
-        it empowers developers to quickly create powerful applications.
+        {translate({message: "featuresEasyToUseDesc"})}
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: translate({message: "featuresFocusOnWhatMatters"}),
     Svg: require('@site/static/img/undraw_product_teardown_re_m1pc.svg').default,
     description: (
       <>
-        You can stop worrying about repetitive boilerplate tasks and focus on what
-        really matters - coding your business logic and delivering a high-quality product.
+        {translate({message: "featuresFocusOnWhatMattersDesc"})}
       </>
     ),
   },
   {
-    title: 'Extensible',
+    title: translate({message: "featuresExtensible"}),
     Svg: require('@site/static/img/undraw_building_blocks_re_5ahy.svg').default,
     description: (
       <>
-        Ability to easily create adapters/providers that seamlessly integrate with the rest of the application.
+        {translate({message: "featuresExtensibleDesc"})}
       </>
     ),
   },

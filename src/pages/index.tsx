@@ -5,6 +5,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import BannerImage from '@site/static/img/expressoTS-Banner.png';
+import {translate} from '@docusaurus/Translate';
 
 import styles from './index.module.css';
 
@@ -14,20 +15,20 @@ function HomepageHeader() {
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
         <h1 className="hero__title"><img height="180px" width="auto" src={BannerImage} alt="Expresso TS Banner" /></h1>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className="hero__subtitle">{translate({message: "tagline"})}</p>
         <div className={styles.btnContainer}>
         <div>
           <Link
             className={clsx("button button--secondary button--lg", styles.button)}
             to="/docs/intro">
-            Documentation
+            {translate({message: "homepageDocumentation"})}
           </Link>
         </div>
         <div >
           <Link
             className={clsx("button button--secondary button--lg", styles.button)}
             to="https://github.com/expressots/expressots">
-            Source code
+            {translate({message: "homepageSourceCode"})}
           </Link>
         </div>
         </div>

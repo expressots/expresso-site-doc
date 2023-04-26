@@ -38,7 +38,7 @@
 .button {
   width: 180px;
   height: 50px;
-  border-radius: 40px;
+  border-radius: 5px;
   margin-top: 2rem;
 
   display: flex;

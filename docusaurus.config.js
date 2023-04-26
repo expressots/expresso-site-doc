@@ -31,7 +31,15 @@ const config = {
   // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'pt'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+      },
+      pt: {
+        label: 'Português',
+      },
+    },
   },
 
   presets: [
@@ -41,16 +49,6 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          //editUrl: 'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -64,12 +62,17 @@ const config = {
     ({
       // Replace with your project's social card
       image: 'img/ExpressoTS-social-card.png',
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: true,
+        respectPrefersColorScheme: false,
+      },
       navbar: {
         title: 'Expresso TS',
         hideOnScroll: true,
         logo: {
           alt: 'Expresso TS',
-          src: 'img/logo.png',
+          src: 'img/logo.png'
         },
         items: [
           {
@@ -87,9 +90,23 @@ const config = {
           {
             href: 'https://github.com/expressots/expressots',
             label: 'GitHub',
+            position: 'right',           
+            'aria-label': 'GitHub repository',
+          },
+          {
+            type: 'localeDropdown',
+            label: 'Language',
             position: 'right',
           },
         ],
+      },
+      announcementBar: {
+        id: 'supportus',
+        content:
+          'We are in the process of revamping our <b>documentation</b>. We kindly ask for your patience as we work diligently to enhance it for your benefit.',
+        backgroundColor: '#F3E99F',
+        textColor: '#091E42',
+        isCloseable: false,
       },
       stylesheets: [
         {
@@ -98,7 +115,7 @@ const config = {
         },
       ],
       footer: {
-        style: 'dark',
+        style: 'light',
         links: [
           {
             title: 'Docs',
@@ -121,10 +138,6 @@ const config = {
           {
             title: 'Code',
             items: [
-              /* {
-                label: 'Blog',
-                to: '/blog',
-              }, */
               {
                 label: 'NPM Core',
                 href: 'https://www.npmjs.com/package/@expressots/core',
@@ -140,7 +153,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Official ExpressoTS, Released under the MIT License.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Official ExpressoTS, Released under the MIT License.`,        
       },
       prism: {
         theme: lightCodeTheme,

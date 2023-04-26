@@ -1,0 +1,38 @@
+{
+  "link.title.Docs": {
+    "message": "Docs",
+    "description": "The title of the footer links column with title=Docs in the footer"
+  },
+  "link.title.Community": {
+    "message": "Community",
+    "description": "The title of the footer links column with title=Community in the footer"
+  },
+  "link.title.Code": {
+    "message": "Code",
+    "description": "The title of the footer links column with title=Code in the footer"
+  },
+  "link.item.label.Tutorial": {
+    "message": "Tutorial",
+    "description": "The label of footer link with label=Tutorial linking to /docs/intro"
+  },
+  "link.item.label.Twitch TV": {
+    "message": "Twitch TV",
+    "description": "The label of footer link with label=Twitch TV linking to https://www.twitch.tv/richardzampieri"
+  },
+  "link.item.label.NPM Core": {
+    "message": "NPM Core",
+    "description": "The label of footer link with label=NPM Core linking to https://www.npmjs.com/package/@expressots/core"
+  },
+  "link.item.label.NPM CLI": {
+    "message": "NPM CLI",
+    "description": "The label of footer link with label=NPM CLI linking to https://www.npmjs.com/package/@expressots/cli"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub",
+    "description": "The label of footer link with label=GitHub linking to https://github.com/expressots"
+  },
+  "copyright": {
+    "message": "Copyright © 2023 Official ExpressoTS, Released under the MIT License.",
+    "description": "The footer copyright"
+  }
+}
