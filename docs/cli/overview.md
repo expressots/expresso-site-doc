@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Overview
 
 The Expresso TS CLI is a command-line interface tool that helps you to create `ExpressoTS` projects, develop, and maintain your applications and resources created. It assists in multiple ways, including scaffolding the project as well as the services offered by the application such as use cases, controllers, providers and more.
@@ -35,10 +39,11 @@ Expresso TS is [MIT Licensed](https://github.com/expressots/expressots-cli/blob/
 
 ## Support the project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- [Become a sponsor on GitHub]("")
-- Follow the organization on GitHub and Star the project
-- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
-- Contribute submitting issues and pull requests
+- Become a sponsor on GitHub (work in progress)
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our [Discord](https://discord.com/invite/PyPJfGK)
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
 - Share the project with your friends and colleagues

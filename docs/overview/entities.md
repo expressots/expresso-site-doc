@@ -48,3 +48,14 @@ Remember that you should have one file per entity
 :::
 
 In the class above we have three new decorators: `@provide`, `@injectable` and `@inject`. The first one is used to tell the container that this class is going to be injected in other class. The second one is used to tell the container that this class is going to be instantiated by the container. The last one is used to tell the container that this class is going to be injected in the constructor of another class.
+
+## Support the project
+
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- Become a sponsor on GitHub (work in progress)
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our [Discord](https://discord.com/invite/PyPJfGK)
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Share the project with your friends and colleagues

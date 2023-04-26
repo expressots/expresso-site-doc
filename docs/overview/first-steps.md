@@ -28,16 +28,26 @@ Please make sure that [Node.js](https://nodejs.org) `version >=18.10.0` is insta
 
 Setting up a new ExpressoTS project is quite simple with [ExpressoTS CLI](../cli/overview.md). With `npm` installed you can scaffold a new project by running the following command:
 
+Install Expresso TS CLI Globally
+
 ```bash
 npm i -g @expressots/cli
-expressots new project-name
+```
+
+Create a new project
+
+```bash
+expressots new <project-name>
 ```
 
 :::tip
-ExpressoTS offers two starter project options: opinionated and non-opinionated. Use the non-opinionated starter project for simple projects with only the minimum requirements. Choose the opinionated starter project for more complex projects with a complete starting point.
+Expresso TS offers two projects template options:
+
+- **opinionated**: Opinionated template is made for more complex projects, as it provides a more layered architecture.
+- **non-opinionated**: Want to have the liberty to build and structure your project as you wish? Non opinionated template offers a very small footprint, with only the necessary files to get you started.
 :::
 
-After running the setup command, a `project-name` directory will be created. The `src` folder within this directory will serve as the main folder for your source code.
+After creating your project, with the desired **project-name**, a directory will spawn on your computer. Inside of this project-name directory you will find some files an folder The `src` folder within this directory will serve as the main folder for your source code.
 
 Depending on the project type you selected, the directory will have a different folder and file structure. Here are the specific folder and file structures for each project type:
 
@@ -197,10 +207,11 @@ We are currently working on building the project RoadMap and plan to add support
 
 ## Support the project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- [Become a sponsor on GitHub]("")
-- Follow the organization on GitHub and Star the project
-- Subscribe to the Twitch channel: [Richard Zampieri](https://www.twitch.tv/richardzampieri)
-- Contribute submitting issues and pull requests
+- Become a sponsor on GitHub (work in progress)
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our [Discord](https://discord.com/invite/PyPJfGK)
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
 - Share the project with your friends and colleagues

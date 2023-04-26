@@ -4,4 +4,8 @@ sidebar_position: 7
 
 # Governance
 
-# Team
+Coming soon...
+
+## Team
+
+Coming soon...
