@@ -78,6 +78,8 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 }
 ```
 
+---
+
 ## Support the project
 
 Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:

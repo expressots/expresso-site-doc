@@ -25,14 +25,21 @@ It is important to note that the use case should exclusively contain the busines
 Here is our Expresso TS simple implementation of the use case:
 
 ```typescript
-@provide(LoginUseCase)
-class LoginUseCase {
-  execute(): boolean {
-    return true;
+@provide(LoginUserUseCase)
+class LoginUserUseCase {
+
+  execute(payload: ILoginUserRequestDTO): boolean {
+    const { email, password } = payload;
+    
+    if (isAuthenticated(email, password)) {
+        return true;
+    }
+    
+    return false;
   }
 }
 
-export { AppUseCase };
+export { LoginUserUseCase };
 ```
 
 The implementation of use cases in Expresso TS follows the best practices of software design, where each use case is responsible for implementing a specific business logic. As shown in the example code snippet, a use case typically contains only one function, called execute, which is responsible for executing the business logic defined in that use case. The use case may also include a response DTO that defines the format of the response for that particular use case.
@@ -40,6 +47,8 @@ The implementation of use cases in Expresso TS follows the best practices of sof
 In addition, it is common to use constructors in the use cases to inject dependencies, such as providers and repositories. This allows for better modularity and testability of the code.
 
 It is important to adhere to the principle of single responsibility when implementing use cases. Each use case should only handle a specific business logic, and if you find yourself implementing multiple use cases in a single class, it is time to review your implementation to ensure that each use case has a clear and concise responsibility.
+
+---
 
 ## Support the project
 

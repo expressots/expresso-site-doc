@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Controllers
 
-Controllers act as the primary interface between the client and server in Node.js applications. They handle incoming requests, validate payloads against Input DTO, and emit responses in the DTO format output. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
+Controllers act as the primary interface between the client and server in Node.js applications. They handle incoming requests, validate payloads against Input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
 
 Data Transfer Object (DTO) is a commonly used design pattern in Node.js applications that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
 
@@ -43,7 +43,7 @@ As a result, DTOs help to segregate and filter the data being sent to the client
 
 The controller class in Expresso TS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
 
-Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the `@httpMethods()` decorator from the same package. Additionally, you can also annotate the parameters of the `execute()` method.
+Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[@httpMethods()](./decorators.md)** decorator from the same package. Additionally, you can also annotate the parameters of the `execute()` method.
 
 Here is an example of a simple Expresso TS controller class:
 
@@ -59,13 +59,13 @@ class AppController {
 ```
 
 :::info
-In the AppController class above we are using res as any `res:any` but can definitely use the `res:Response` type from the `express` package as we expose its types. This will allow you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
+In the AppController class above we are using res as any `res:any` but you can definitely use the `res:Response` type from the `express` package as we expose its types. This will allow you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
 :::
 
 ## Base Controller Class
 
-We also power a controller class with the `BaseController` class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
-Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or async callUseCaseAsync()`.
+We also power a controller class with the **BaseController** class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
+Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or callUseCaseAsync()`.
 
 These methods reinforce the idea of one use case per controller, and they are responsible for calling the use case that will implement the business logic of the controller.
 
@@ -73,10 +73,10 @@ These methods reinforce the idea of one use case per controller, and they are re
 The callUseCase methods, available in both synchronous and asynchronous versions, are well-suited for returning status and JSON responses to clients, as the users just need to pass the useCase return, res:Response, and statusCode.
 :::
 
-The signature of this function is the following:
+The signature of the `callUseCase` method:
 
 ```typescript
-callUseCaseAsync(useCase: Promise<any>, res: any, successStatusCode: number);
+callUseCase(useCase: any, res: any, successStatusCode: number);
 ```
 
 - `useCase`: The use case that will be called. This use case is injected in the controller constructor.
@@ -89,7 +89,7 @@ The default response:
 return res.status(successStatusCode).json(dataReturn);
 ```
 
-A more complete example of a controller class inheriting from the `BaseController` class is shown below:
+A more complete example of a controller class inheriting from the **BaseController** class is shown below:
 
 ```typescript
 @controller("/")
@@ -122,15 +122,15 @@ Using these decorators can simplify the routing and handling of HTTP requests in
 
 Here's a list of all available `@httpMethods()` decorators in Expresso TS, along with their description and usage:
 
-| Decorator	  | Description                                        | Usage                        |
-| ----------- | -------------------------------------------------- | ---------------------------- | 
-| @httpGet	  | Binds a controller method to a GET HTTP verb.      | @httpGet("/path")            |
-| @httpPost	  | Binds a controller method to a POST HTTP verb.     | @httpPost("/path")           |
-| @httpPut	  | Binds a controller method to a PUT HTTP verb.      | @httpPut("/path")            |
+| Decorator   | Description                                        | Usage                        |
+| ----------- | -------------------------------------------------- | ---------------------------- |
+| @httpGet    | Binds a controller method to a GET HTTP verb.      | @httpGet("/path")            |
+| @httpPost   | Binds a controller method to a POST HTTP verb.     | @httpPost("/path")           |
+| @httpPut    | Binds a controller method to a PUT HTTP verb.      | @httpPut("/path")            |
 | @httpPatch  | Binds a controller method to a PATCH HTTP verb.    | @httpPatch("/path")          |
-| @httpHead	  | Binds a controller method to a HEAD HTTP verb.	   | @httpHead("/path")           |
-| @httpDelete |	Binds a controller method to a DELETE HTTP verb.   | @httpDelete("/path")         |
-| @httpMethod |	Binds a controller method to a specified HTTP verb.| @httpMethod("verb", "/path") |
+| @httpHead   | Binds a controller method to a HEAD HTTP verb.     | @httpHead("/path")           |
+| @httpDelete | Binds a controller method to a DELETE HTTP verb.   | @httpDelete("/path")         |
+| @httpMethod | Binds a controller method to a specified HTTP verb.| @httpMethod("verb", "/path") |
 
 ### Parameter Decorators
 
