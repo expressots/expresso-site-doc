@@ -16,6 +16,8 @@ We are very open to feedback, ideas, and contributions. We are a community-drive
 
 Thank you again for being part of this journey with us, Happy Coding! 🚀
 
+___
+
 ## Support the project
 
 Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:

@@ -22,11 +22,11 @@ Better documentation: Strong typing can help make code more self-documenting by 
 
 ## Pre-requisites
 
-Please make sure that [Node.js](https://nodejs.org) `version >=18.10.0` is installed on your operating system.
+Please make sure that [Node.js](https://nodejs.org) **version >=18.10.0** is installed on your operating system.
 
 ## Setup
 
-Setting up a new ExpressoTS project is quite simple with [ExpressoTS CLI](../cli/overview.md). With `npm` installed you can scaffold a new project by running the following command:
+Setting up a new ExpressoTS project is quite simple with **[ExpressoTS CLI](../cli/overview.md)**. With `NPM` you can scaffold a new project by running the following command:
 
 Install Expresso TS CLI Globally
 
@@ -47,9 +47,7 @@ Expresso TS offers two projects template options:
 - **non-opinionated**: Want to have the liberty to build and structure your project as you wish? Non opinionated template offers a very small footprint, with only the necessary files to get you started.
 :::
 
-After creating your project, with the desired **project-name**, a directory will spawn on your computer. Inside of this project-name directory you will find some files an folder The `src` folder within this directory will serve as the main folder for your source code.
-
-Depending on the project type you selected, the directory will have a different folder and file structure. Here are the specific folder and file structures for each project type:
+After creating your project, with the desired **project-name**, and depending on the project type you selected, your project will have a different folder and file structure. Here are the specific folder and file structures for each project type:
 
 ### Non-opinionated starter project
 
@@ -65,7 +63,7 @@ project-name/
 │   ├── app.usecase.spec.ts
 ```
 
-What are these core files in the non-opinionated project type?
+Description
 
 | File Name             | Description                                                                                                          |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -86,13 +84,20 @@ project-name/
 │   │   └── user.entity.ts
 │   ├── providers/
 │   │   └── application/
-│   │       └── application.ts
+│   │       └── application.provider.ts
+│   │   └── bindingType/
+│   │       └── singleton.provider.ts
+│   │   └── db-in-memory/
+│   │       └── db-in-memory.provider.ts
 │   ├── repositories/
 │   │   └── user/
 │   │       └── user-repository.ts
 │   │   └── base-repository.interface.ts
 │   │   └── base-repository.ts
 │   ├── useCases/
+│   │   └── app/
+│   │       └── app.controller.ts
+│   │       └── app.module.ts
 │   │   └── ping/
 │   │       └── ping.controller.ts
 │   │       └── ping.dto.ts
@@ -103,13 +108,19 @@ project-name/
 │   │           └── create-user.controller.ts
 │   │           └── create-user.dto.ts
 │   │           └── create-user.usecase.ts
+│   │       └── findall/
+│   │           └── findall-user.controller.ts
+│   │           └── findall-user.dto.ts
+│   │           └── findall-user.usecase.ts
 │   │       └── user.module.ts
 │   ├── app-container.ts
 │   ├── env.ts
 │   ├── main.ts
+├── test/
+│   ├── ping.usecase.spec.ts
 ```
 
-What are these core folder and files in the opinionated project type?
+Description
 
 | File Name             | Description                                                                                                          |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
@@ -120,9 +131,41 @@ What are these core folder and files in the opinionated project type?
 | `app-container.ts`    | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit.|
 | `env.ts`              | This is an utility resource that maps .env variables.                                                                |
 | `main.ts`             | The main entry point of an **ExpressoTS** application.                                                               |
-| `ping.usecase.spec.ts`| A basic unit test for the **app.usecase**.                                                                           |
+| `ping.usecase.spec.ts`| A basic unit test for the **ping.usecase**.                                                                          |
+
+Extra information about **Providers**, **Use Cases** and the **Main** examples supplied in the **Opinionated** template project. Please see below:
+
+#### Providers
+
+Contain 3 providers:
+
+- **application**: This provider allows you to extend from the Application class from @expressots/core that provides the application **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
+
+- **bindingType/singleton**: This provider allows you to bind a class as a singleton. We use this provider to bind the `InMemoryDB` class as a singleton, so we can use the same instance of the `InMemoryDB` class in all the application.
+
+- **db-in-memory**: This is a simple in-memory database provider that allows you to store data in memory. We use this provider in the user use cases to store and retrieve user data.
+
+:::info
+**bindingType and InMemoryDB** provider are examples supplied to help you get started. You can remove them if you wish.
+:::
+
+#### Use Cases
+
+Contain 4 use cases:
+
+- **app**: returns `Hello from Expresso TS App`
+
+- **ping**: returns a json structure with `{start, end, ttl, message: 'pong'}`
+
+- **user/create**: creates a new user in the in-memory database
+
+- **user/findall**: returns all users from the in-memory database
+
+#### Main
 
 The  `main.ts` includes an async function that will bootstrap the ExpressoTS application.
+
+##### Opinionated
 
 ```typescript
 // Using the opinionated starter project where App extends Application class from @expressots/core
@@ -134,8 +177,25 @@ async function Bootstrap() {
   });
 }
 
-Bootstrap();
+// Or from .env
+async function Bootstrap() {
+    const app = App.create(container);
+    app.listen(
+        ENV.Application.PORT,
+        ServerEnvironment[ENV.Application.ENVIRONMENT],
+        {
+            appName: ENV.Application.APP_NAME,
+            appVersion: ENV.Application.APP_VERSION,
+        },
+    );
+}
 
+Bootstrap();
+```
+
+##### Non Opinionated
+
+```typescript
 // Using the non-opinionated starter project where AppInstance is an instance of the Application class from @expressots/core
 async function bootstrap() {
   const app = AppInstance.create(container);
@@ -145,25 +205,37 @@ async function bootstrap() {
 bootstrap();
 ```
 
-To create an ExpressoTS application, there are two ways: using the AppInstance from the Application class, or extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the [application life cycle](application.md#lifecycle-hooks), such as injecting and executing services before, after, and during application shutdown.
+### Creating an ExpressoTS Application
+
+To create an ExpressoTS application, there are two ways: using the AppInstance from the Application class, or extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the **[application life cycle](application.md#lifecycle-hooks)**, such as injecting and executing services before, after, and during application shutdown.
+
+#### The Container
 
 In ExpressoTS, creating an application server to listen to inbound HTTP requests is not enough. The framework requires the creation of a container that organizes all application modules into a cohesive unit. Typically, this container is created in the app-container.ts file.
 
+#### Application uses the Container
+
 After the container is created, the application can be created by passing the container as a parameter to the `AppInstance.create()` method or by extending the Application class.
+
+#### Injecting Modules in the Container
 
 Once the container is created, modules can be injected into the application. These modules are the building blocks of an ExpressoTS application and are responsible for organizing the application's business logic into layers, including controllers and use cases.
 
+#### Injecting Controllers in the Modules
+
 The controller layer handles incoming requests and returns appropriate responses, while the use case layer implements the business logic of the application.
+
+#### Fully Hooked-Up Application Flow
 
 After creating a module, controllers can be injected into it, resulting in a fully hooked-up application flow.
 
-- Application creation
+##### Application creation
 
 ```typescript
 const app = AppInstance.create(container);
 ```
 
-- Module Injection
+##### Module Injection
 
 ```typescript
 const appContainer = new AppContainer();
@@ -174,7 +246,7 @@ const container = appContainer.create([
 ]);
 ```
 
-- Controller Injection
+##### Controller Injection
 
 ```typescript
 const appModule = CreateModule([
@@ -191,19 +263,33 @@ It is worth noting that a project created with the ExpressoTS CLI comes with an 
 
 Once the installation process is complete, you can start listening to HTTP requests based on the defined controller endpoint that will invoke the corresponding use case to generate the response. To do this, simply run the following command in your OS terminal:
 
+### Running in Development Mode
+
 ```bash
-npm run start
+npm run dev
+```
+
+### Building the Production Bundle
+
+```bash
+npm run build
+```
+
+### Running the Production Bundle
+
+```bash
+npm run prod
 ```
 
 Once the application is up and running, you can access it by navigating to `http://localhost:3000/` in the non-opinionated starter project
 
-## Framework
+## Resume
 
 ExpressoTS is a versatile framework that is not bound to any specific platform or technology. Leveraging popular Node.js libraries like InversifyJS and ExpressJS, it is designed to be lightweight, modular, customizable, and easy to use. Developers can expand the framework's capabilities by creating new providers that can be incorporated into their applications.
 
 We are currently working on building the project RoadMap and plan to add support for other popular Node.js HTTP frameworks, like Fastify and Koa, to the platform. Additionally, as we move towards the future, we intend to eliminate some of the dependencies that are currently part of the framework's core, such as IoC and decorators.
 
----
+___
 
 ## Support the project
 

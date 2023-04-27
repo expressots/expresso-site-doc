@@ -4,13 +4,13 @@ sidebar_position: 3
 
 # App Container
 
-The Expresso TS uses [InversifyJS](https://inversify.io/) container as it is a powerful tool for managing dependencies in a TypeScript application. Also it is a type-aware container that can be used to manage the instantiation and resolution of objects, as well as the management of their life cycles.
+The Expresso TS uses **[InversifyJS](https://inversify.io/)** as its ioC (Inversion of Control) container as it is a powerful tool for managing dependency injection. It is a type-aware container that can be used to manage the instantiation and resolution of objects, as well as the management of their life cycles.
 
 The container provides a central location for managing dependencies and creating objects that depend on other objects. When a class is registered with the container, its dependencies are automatically resolved and injected into its constructor when it is instantiated. This allows for the creation of complex object graphs with minimal boilerplate code.
 
 Taking advantage of InversifyJS we created a wrapper to reduce complexity on how controllers, use cases, providers get injected within the application container. The wrapper is called `AppContainer` and it is responsible for registering all the application modules within the container.
 
-Here is an example of how to register modules within the container:
+Here is an example of how to register **[modules](./module.md)** within the container:
 
 ```typescript
 // Create a new container
@@ -39,6 +39,8 @@ Note that buildProviderModule() only works with providers and controllers that a
 :::
 
 The reason why we created the `AppContainer` class is to reduce the complexity of how the container is created and to provide a way to register modules without too much extra configuration.
+
+---
 
 ## Support the project
 
