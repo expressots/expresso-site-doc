@@ -45,6 +45,8 @@ Here is a complete list of all the decorators that are available in Expresso TS 
 | @cookies(cookieName?: string) | Injects a cookie from the request cookies. |
 | @next() | Injects the Express NextFunction object.|
 
+---
+
 ## Support the project
 
 Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:

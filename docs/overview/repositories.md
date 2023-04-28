@@ -4,13 +4,19 @@ sidebar_position: 8
 
 # Repositories
 
+In Expresso TS, a repository class typically includes methods such as create, update, find, findOne, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
+
+## The Repository Pattern
+
 The repository pattern is a design pattern commonly used in software development that provides a way to abstract the data persistence layer of an application. In TypeScript, this pattern can be implemented using classes that represent repositories, which are responsible for retrieving, storing, updating, and deleting data from a data store, such as a database.
 
-We do offer an example of how to implement a repository patterns in the opinionated template. You can find it using the [CLI tool](https://www.npmjs.com/package/@expressots/cli) or directly in the [templates](https://github.com/expressots/expressots/tree/main/templates) folder of the Expresso TS repository.
+We do offer an example of how to implement a repository patterns in the opinionated template. You can find it directly in the [templates](https://github.com/expressots/expressots/tree/main/templates) folder of the Expresso TS application.
+
+## Goal of the Repository Pattern
 
 The main goal of the repository pattern is to separate the business logic from the data access logic, allowing developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
 
-In Expresso TS, a repository class typically includes methods such as find, findOne, create, update, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as TypeORM or Sequelize, etc.
+## Benefit of Using the Repository Pattern
 
 By using a repository, the application can benefit from several advantages, such as:
 
@@ -20,15 +26,17 @@ By using a repository, the application can benefit from several advantages, such
 - Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
 - Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
 
+By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes.
+
+## Example
+
 We offer an example of Repository pattern implementation in the opinionated template of Expresso TS.
 
-:::note
-In Expresso TS, we implement the repository pattern in a specific folder called "repository", which is separated from the "provider" folder even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it should be used in the application.
-
-By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes.
+:::info
+In Expresso TS, we implement the repository pattern in a specific folder called **"repositories"**, which is separated from the **"provider"** folder intentionally, even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it is an important decoupled that the development of the application could benefit of.
 :::
 
-Here a code example of a simple repository implementation:
+### Base Repository Interface
 
 ```typescript
 interface IEntity {
@@ -42,7 +50,11 @@ interface IBaseRepository<T> {
   find(id: string): T | null;
   findAll(): T[];
 }
+```
 
+### Base Repository Class
+
+```typescript
 @provide(BaseRepository)
 class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
   private readonly USERDB: T[] = [];
