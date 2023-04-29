@@ -2,9 +2,87 @@
 sidebar_position: 2
 ---
 
-# Schematics Generate
+# Generate
 
-Work in progress ...
+In order to provide a better developer experience, the Expresso TS CLI provides a set of commands to help you to **scaffold** the application resources such as use cases, controllers, dto's, providers and services.
+
+This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
+
+## Command syntax
+
+Generate command can be expressed in its normal form:
+
+```bash
+expressots generate <resource> <structure>
+```
+
+Or in its short form:
+
+```bash
+expressots g <resource> <structure>
+```
+
+## Resource types
+
+Current available resources:
+
+| Long form   | short  |
+| ----------- | ------ |
+| usecase     | u      |
+| controller  | c      |
+| dto         | d      |
+| provider    | p      |
+| service     | s      |
+
+## Example of usage
+
+| Command                       | Expected result  
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| expressots g u user/find      | Use case to be created in the folder `useCases` with this folder structure: user/find     |
+| expressots g c user/find      | Controller to be created in the folder `useCases` inside of user/find                     |
+| expressots g d user/find      | DTO to be created in the folder `useCases` inside of user/find                            |
+| expressots g p email/email    | Provider to be created in the folder `providers` inside of user/find                      |
+| expressots g s user/find      | Service creates usecase, controller and dto and add them in the desired folder, user/find |
+
+All resources can be created using the structure `folder/subfolder/resource`.
+
+For services you can also take advantage of creating the use case, controller and dto at once using the structure `entity_action` or `entity-action`. Example: `expressots g s user-create`.
+
+:::caution
+What determine where the resources will be created is the `expressots.config.ts` configuration file located in the project root folder.
+:::
+
+:::info
+All usecases, controllers and dtos are being created inside of the `useCases` folder. This is not set on the stone, it might change in the soon future.
+:::
+
+## Expresso TS Config File
+
+The configuration file is located in the root folder of the project and it's called `expressots.config.ts`. This file is used to configure the CLI and the project.
+
+Here is the current configuration file with all the available options:
+
+```typescript
+import { ExpressoConfig, Pattern } from "@expressots/core";
+
+const config: ExpressoConfig = {
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: false,
+};
+
+export default config;
+```
+
+- **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
+- **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
+- **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
+
+## Recommendation
+
+Try to use as many different forms of creating resources as possible. This will help you to understand how the CLI works and how to use it in your favor. As well as, it will help us to improve the CLI and make it more robust.
+
+---
 
 ## Support the project
 
