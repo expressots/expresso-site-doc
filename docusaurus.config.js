@@ -61,7 +61,10 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/ExpressoTS-social-card.png',
+      image: 'img/expressots-discord-banner-darkbg.png',
+      metadata: [{
+        name: 'keywords', content: "expressots, framework, nodejs, typescript, javascript"
+      }],
       colorMode: {
         defaultMode: 'light',
         disableSwitch: true,
