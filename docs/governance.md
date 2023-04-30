@@ -43,3 +43,16 @@ Each major decision in Expresso TS starts with a proposal. Proposals can be writ
 | :---------: | :---------: | :---------: | :---------: |
 | ![Felipe](https://media.licdn.com/dms/image/C5603AQHqhETnq-MVIg/profile-displayphoto-shrink_200_200/0/1517551799345?e=1688601600&v=beta&t=lk2tIJK0GHBDmtt8w9GbEfu0Uc6R-lsF2jxKJ4SIruQ) | ![Juliano](https://media.licdn.com/dms/image/C4D03AQFhxVMRmlQaXQ/profile-displayphoto-shrink_200_200/0/1646588361167?e=1688601600&v=beta&t=AlM6_oQdBI10JoZJ9YylMdPaY3tDC6jKUL31VTGgyGY) | ![Rodrigo](https://media.licdn.com/dms/image/C5603AQH2lBLzVxl3cQ/profile-displayphoto-shrink_200_200/0/1631156117097?e=1688601600&v=beta&t=qwl-IxUu-66M_QG293Rnr02ATQGdT4cI-7e21FNqREk) | ![Pedro](https://media.licdn.com/dms/image/C5603AQGM4BZY9DLwzw/profile-displayphoto-shrink_200_200/0/1517520964466?e=1688601600&v=beta&t=Fi0qJlCabj0y_7GHkvbtEF06GKGCKIVJ58MEN3xfAwg) |
 | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/felipe-fontana/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/f0ntana) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/juliano-leonardo-soares/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/juliano-soares) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/rodrigo-da-hora/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/dahorarodrigo) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/pedroavargas/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/expressots/) |
+
+---
+
+## Support the project
+
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- Become a sponsor on GitHub (work in progress)
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our [Discord](https://discord.com/invite/PyPJfGK)
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Share the project with your friends and colleagues
