@@ -2,28 +2,27 @@
 sidebar_position: 12
 ---
 
-# Status Code
+# Código de status
 
-Status code is a way to represent the result of a request. These HTTP responses indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
+O código de status é uma forma de representar o resultado de uma requisição. Essas respostas HTTP indicam se uma solicitação HTTP específica foi concluída com êxito. As respostas são agrupadas em cinco classes:
 
-- Informational responses (100-199)
-- Successful responses (200-299)
-- Redirection messages (300-399)
-- Client error responses (400-499)
-- Server error responses (500-599)
+- Respostas informativas (100-199)
+- Respostas bem-sucedidas (200-299)
+- Mensagens de redirecionamento (300-399)
+- Respostas de erro do cliente (400-499)
+- Respostas de erro do servidor (500-599)
 
-You can find more details about the status code in the **[MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)**.
+Você encontra aqui mais detalhes sobre os códigos de status **[MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)**.
 
 :::tip
-The status codes listed below are defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
+Os códigos de status aqui mostrados estão definidos na [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
 :::
 
-## Expresso TS Status Code
+## ExpressoTS código de status
 
-In Expresso TS, we have a list of all status codes listed in the MDN that you can use in your application.
-Here is an example of use:
+Em Expresso TS, temos uma lista de todos os códigos de status listados na MDN que você pode usar em sua aplicação. Aqui está um exemplo de uso:
 
-### In a Controller
+### Em uma controladora
 
 ```typescript
 import { StatusCode } from "@expressots/core";
@@ -48,7 +47,7 @@ class CreateUserController extends BaseController {
 }
 ```
 
-### In a Use Case
+### Em um caso de uso
 
 ```typescript
 import { StatusCode } from "@expressots/core";
@@ -97,13 +96,13 @@ class CreateUserUseCase {
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

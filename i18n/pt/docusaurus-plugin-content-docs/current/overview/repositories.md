@@ -2,41 +2,45 @@
 sidebar_position: 8
 ---
 
-# Repositories
+# Repositórios
 
-In Expresso TS, a repository class typically includes methods such as create, update, find, findOne, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
+No Expresso TS, uma classe de repositório geralmente inclui métodos como create, update, find, findOne e delete, que correspondem a operações comuns de CRUD (Create, Read, Update, Delete) no armazenamento de dados. Esses métodos podem ser implementados usando uma biblioteca de banco de dados ou uma ferramenta de ORM (Object-Relational Mapping) como o **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
 
-## The Repository Pattern
+## O padrão de repositório
 
-The repository pattern is a design pattern commonly used in software development that provides a way to abstract the data persistence layer of an application. In TypeScript, this pattern can be implemented using classes that represent repositories, which are responsible for retrieving, storing, updating, and deleting data from a data store, such as a database.
+O padrão repository é um padrão de design comumente usado no desenvolvimento de software que fornece uma maneira de abstrair a camada de persistência de dados de uma aplicação. Em TypeScript, esse padrão pode ser implementado usando classes que representam repositórios, que são responsáveis por recuperar, armazenar, atualizar e excluir dados de uma fonte de dados, como um banco de dados.
 
-We do offer an example of how to implement a repository patterns in the opinionated template. You can find it directly in the [templates](https://github.com/expressots/expressots/tree/main/templates) folder of the Expresso TS application.
+Nós oferecemos um exemplo de como implementar o padrão de repositório no modelo de projeto do Expresso TS. Você pode encontrá-lo diretamente no [templates](https://github.com/expressots/expressots/tree/main/templates), pasta template do ExpressoTS.
 
-## Goal of the Repository Pattern
+## Objetivo do padrão de repositório
 
-The main goal of the repository pattern is to separate the business logic from the data access logic, allowing developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
+O objetivo principal do padrão repository é separar a lógica de negócio da lógica de acesso aos dados, permitindo que os desenvolvedores escrevam código mais focado nos requisitos de negócio da aplicação, em vez dos detalhes técnicos de como os dados são armazenados e acessados.
 
-## Benefit of Using the Repository Pattern
+## Benefícios de usar o padrão de repositório
 
-By using a repository, the application can benefit from several advantages, such as:
+Ao usar um repositório, a aplicação pode se beneficiar de várias vantagens, tais como:
 
-- Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
-- Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
-- Separation of concerns: the repository separates the business logic from the data access logic, making the code easier to read, test, and maintain.
-- Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
-- Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
+- Centralização da lógica de acesso a dados: toda a lógica de acesso a dados é contida dentro do repositório, tornando mais fácil manter e alterar a implementação do armazenamento de dados sem afetar o resto da aplicação.
 
-By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes.
+- Abstração dos detalhes do armazenamento de dados: o repositório fornece uma camada de abstração que oculta os detalhes de como os dados são armazenados e acessados, permitindo que a aplicação trabalhe com dados de uma forma mais abstrata e consistente.
 
-## Example
+- Separação de preocupações: o repositório separa a lógica de negócios da lógica de acesso a dados, tornando o código mais fácil de ler, testar e manter.
 
-We offer an example of Repository pattern implementation in the opinionated template of Expresso TS.
+- Melhoria na testabilidade: o repositório pode ser facilmente simulado ou substituído em testes de unidade, permitindo testar com mais profundidade a lógica de negócios sem precisar se conectar a um armazenamento de dados real.
+
+- Em geral, o padrão repository é uma ferramenta poderosa que pode ajudar os desenvolvedores a construir aplicativos TypeScript escaláveis e fáceis de manter que estão mais focados nos requisitos de negócios e menos nos detalhes de implementação técnica.
+
+Ao usar o padrão repository, podemos facilmente trocar o mecanismo de armazenamento de dados subjacente sem afetar o restante do código da aplicação. Por exemplo, podemos mudar de um banco de dados relacional para um banco de dados NoSQL, ou até mesmo para um mecanismo de armazenamento completamente diferente, como uma API da web, com alterações mínimas no restante do código da aplicação. Além disso, o padrão repository pode tornar mais fácil testar a aplicação, já que podemos usar repositórios simulados para simular o armazenamento de dados para fins de teste.
+
+## Exemplo
+
+Oferecemos um exemplo de implementação do padrão Repository no template opinativo do Expresso TS.
 
 :::info
-In Expresso TS, we implement the repository pattern in a specific folder called **"repositories"**, which is separated from the **"provider"** folder intentionally, even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it is an important decoupled that the development of the application could benefit of.
+No Expresso TS, implementamos o padrão repository em uma pasta específica chamada "repositories", que é separada da pasta "provider" intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
 :::
 
-### Base Repository Interface
+### Interface do base repositório
 
 ```typescript
 interface IEntity {
@@ -52,7 +56,7 @@ interface IBaseRepository<T> {
 }
 ```
 
-### Base Repository Class
+### Classe base repositório
 
 ```typescript
 @provide(BaseRepository)
@@ -92,13 +96,13 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

@@ -5,55 +5,58 @@ sidebar_position: 10
 # Decorators
 
 Here is a complete list of all the decorators that are available in Expresso TS as wel as a brief description of what they do.
+Aqui está uma lista completa de todos os decoradores que estão disponíveis no ExpressoTS, bem como uma breve descrição do que eles fazem.
 
-## Class decorators
+## Decoradores de classes
 
-| Decorator | Description |
-| --------- | ----------- |
-| @provide  | Binds a class to a dependency injection container. |
-| @injectable | Marks a class as available to be injected. |
-| @inject | Marks a class as available to be injected in the constructor of another class. |
+| Decoradores | Descrição                                                                       |
+| ----------- | ------------------------------------------------------------------------------- |
+| @provide    | Vincula a classe ao container de injeção de dependência.                        |
+| @injectable | Marca a classe como disponível para ser injetada.                               |
+| @inject     | Marca a classe como disponível para ser injetada no construtor de outra classe. |
 
-## Controller decorators
+## Decoradores do controlador
 
-| Decorator | Description |
-| --------- | ----------- |
-| @controller | Marks a class as a controller. |
+| Decoradores | Descrição                                                                       |
+| ----------- | ----------------------------------------- |
+| @controller | Marca a classe como controller injetável. |
 
-### HTTP method decorators
+### Decoradores de métodos HTTP
 
-| Decorator | Description |
-| --------- | ----------- |
-@httpGet | Binds a controller method to a GET HTTP verb.|
-@httpPost |	Binds a controller method to a POST HTTP verb.|
-@httpPut | Binds a controller method to a PUT HTTP verb.|
-@httpPatch | Binds a controller method to a PATCH HTTP verb.|
-@httpHead |	Binds a controller method to a HEAD HTTP verb.|
-@httpDelete | Binds a controller method to a DELETE HTTP verb.|
-|@httpMethod | Binds a controller method to a specified HTTP verb.|
+| Decorador   | Descrição                                                          | Uso                          |
+| ----------- | ------------------------------------------------------------------ | ---------------------------- |
+| @httpGet    | Vincula um método de controlador a um verbo HTTP GET.              | @httpGet("/path")            |
+| @httpPost   | Vincula um método de controlador a um verbo HTTP POST.             | @httpPost("/path")           |
+| @httpPut    | Vincula um método de controlador a um verbo HTTP PUT.              | @httpPut("/path")            |
+| @httpPatch  | Vincula um método de controlador a um verbo HTTP PATCH.            | @httpPatch("/path")          |
+| @httpHead   | Vincula um método de controlador a um verbo HTTP HEAD.             | @httpHead("/path")           |
+| @httpDelete | Vincula um método de controlador a um verbo HTTP DELETE.           | @httpDelete("/path")         |
+| @httpMethod | Vincula um método de controlador a um verbo HTTP especificado.     | @httpMethod("verb", "/path") |
 
-### Parameter decorators
+### Decoradores de parâmetros
 
- Decorator | Description |
-| --------- | ----------- |
-| @request() | Injects the Express Request object.|
-| @response() | Injects the Express Response object.|
-| @requestParam(paramName?: string) | Injects a parameter from the request URL path.|
-| @queryParam(paramName?: string) | Injects a parameter from the request URL query string.|
-| @requestBody() | Injects the request body payload.|
-| @requestHeaders(headerName?: string) | Injects a header from the request headers.|	
-| @cookies(cookieName?: string) | Injects a cookie from the request cookies. |
-| @next() | Injects the Express NextFunction object.|
+Aqui está uma lista de todos os decoradores de parâmetros disponíveis no Expresso TS, juntamente com sua descrição e uso:
+
+| Decorator	                           | Description	                                        | Usage
+| ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
+| @request()	                         | Injeta objeto Express Request	                    | execute(@request() req: Request)
+| @response()	                         | Injeta objeto Express Response	                | execute(@response() res: Response)
+| @requestParam(paramName?: string)	   | Injeta um parâmetro da URL da solicitação	        | execute(@requestParam('id') id: string)
+| @queryParam(paramName?: string)	     | Injeta um parâmetro da string de consulta da URL da solicitação | execute(@queryParam('searchTerm') searchTerm: string)
+| @requestBody()	                     | Injeta a carga útil do corpo da solicitação	                    | execute(@requestBody() body: MyDTO)
+| @requestHeaders(headerName?: string) | Injeta um cabeçalho dos cabeçalhos da solicitação            | execute(@requestHeaders('authorization') auth: string)
+| @cookies(cookieName?: string)	       | Injeta um cookie dos cookies da solicitação   | execute(@cookies('session') session: string)
+| @next()	                           | Injeta o objeto NextFunction do Express	            | execute(@next() next: NextFunction)
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

@@ -2,31 +2,31 @@
 sidebar_position: 2
 ---
 
-# Generate
+# Gerar recursos
 
-In order to provide a better developer experience, the Expresso TS CLI provides a set of commands to help you to **scaffold** the application resources such as use cases, controllers, dto's, providers and services.
+Para proporcionar uma melhor experiência de desenvolvedor, a CLI do Expresso TS fornece um conjunto de comandos para ajudar a criar os recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
 
-This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
+Este comando permite que os desenvolvedores estejam à frente da curva, gerando o código boilerplate para a aplicação, para que possam se concentrar na lógica de negócios.
 
-## Command syntax
+## Comandos
 
-Generate command can be expressed in its normal form:
+O comando para gerar recursos podem ser expressados de duas formas:
 
 ```bash
 expressots generate <resource> <structure>
 ```
 
-Or in its short form:
+Ou em sua forma curta:
 
 ```bash
 expressots g <resource> <structure>
 ```
 
-## Resource types
+## Tipos de recursos
 
-Current available resources:
+Recursos atualmente disponíveis para serem gerados:
 
-| Long form   | short  |
+| Forma longa | curta  |
 | ----------- | ------ |
 | usecase     | u      |
 | controller  | c      |
@@ -34,33 +34,33 @@ Current available resources:
 | provider    | p      |
 | service     | s      |
 
-## Example of usage
+## Exemplo de uso
 
-| Command                       | Expected result  
+| Comando                       | Resultado esperado  
 | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| expressots g u user/find      | Use case to be created in the folder `useCases` with this folder structure: user/find     |
-| expressots g c user/find      | Controller to be created in the folder `useCases` inside of user/find                     |
-| expressots g d user/find      | DTO to be created in the folder `useCases` inside of user/find                            |
-| expressots g p email/email    | Provider to be created in the folder `providers` inside of user/find                      |
-| expressots g s user/find      | Service creates usecase, controller and dto and add them in the desired folder, user/find |
+| expressots g u user/find      | Caso de uso para ser criado na pasta useCases com esta estrutura de pasta: user/find      |
+| expressots g c user/find      | Controlador para ser criado na pasta useCases dentro de user/find                         |
+| expressots g d user/find      | DTO a ser criado na pasta `useCases` dentro de user/find                                  |
+| expressots g p email/email    | Provedor a ser criado na pasta `providers` dentro de user/find                            |
+| expressots g s user/find      | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find             |
 
-All resources can be created using the structure `folder/subfolder/resource`.
+Todos os recursos podem ser criados usando a estrutura `pasta/subpasta/recurso.`
 
-For services you can also take advantage of creating the use case, controller and dto at once using the structure `entity_action` or `entity-action`. Example: `expressots g s user-create`.
+Para serviços, você também pode aproveitar para criar o caso de uso, o controlador e o DTO de uma só vez usando a estrutura `entidade_ação` ou `entidade-ação`. Exemplo: `expressots g s user-create.`
 
 :::caution
-What determine where the resources will be created is the `expressots.config.ts` configuration file located in the project root folder.
+O que determina onde os recursos serão criados é o arquivo de configuração `expressots.config.ts`, localizado na pasta raiz do projeto.
 :::
 
 :::info
-All usecases, controllers and dtos are being created inside of the `useCases` folder. This is not set on the stone, it might change in the soon future.
+Todos os casos de uso, controladores e DTOs estão sendo criados dentro da pasta `useCases`. Isso não está definido em pedra e pode mudar em breve.
 :::
 
-## Expresso TS Config File
+## ExpressoTS arquivo de configuração
 
-The configuration file is located in the root folder of the project and it's called `expressots.config.ts`. This file is used to configure the CLI and the project.
+O arquivo de configuração está localizado na pasta raiz do projeto e é chamado de `expressots.config.ts`. Este arquivo é usado para configurar o CLI e o projeto.
 
-Here is the current configuration file with all the available options:
+Aqui está o arquivo de configuração atual com todas as opções disponíveis:
 
 ```typescript
 import { ExpressoConfig, Pattern } from "@expressots/core";
@@ -74,23 +74,23 @@ const config: ExpressoConfig = {
 export default config;
 ```
 
-- **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
-- **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
-- **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
+- **sourceRoot**: a pasta raiz que será usada pelo CLI para criar os recursos. Padrão: `src`
+- **scaffoldPattern**: o padrão que será usado para criar os recursos. Padrão: `Pattern.KEBAB_CASE`. Exemplo: `user-create`
+- **opinionated**: se for verdadeiro, o CLI criará os recursos usando a estrutura de pasta com opinião.
 
-## Recommendation
+## Recomendações
 
-Try to use as many different forms of creating resources as possible. This will help you to understand how the CLI works and how to use it in your favor. As well as, it will help us to improve the CLI and make it more robust.
+Tente utilizar o maior número possível de formas de criação de recursos disponíveis. Isso irá ajudá-lo a entender como a CLI funciona e como utilizá-la em seu benefício. Além disso, isso nos ajudará a melhorar a CLI e torná-la mais robusta.
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

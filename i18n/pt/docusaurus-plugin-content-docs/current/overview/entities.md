@@ -2,15 +2,15 @@
 sidebar_position: 9
 ---
 
-# Entities
+# Entidades
 
-Entities are the core components of an Expresso TS application. They are the objects that are used to represent the data that is going to be manipulated by the application.
+As entidades são os componentes principais de uma aplicação Expresso TS. Elas são os objetos que são usados para representar os dados que serão manipulados pela aplicação.
 
-If an entity changes, most likely use cases and controllers will also change. This is because the use cases and controllers are responsible for manipulating the data represented by the entities.
+Se uma entidade mudar, provavelmente os casos de uso e controladores também mudarão. Isso ocorre porque os casos de uso e controladores são responsáveis por manipular os dados representados pelas entidades.
 
-## Entity Example
+## Exemplo de entidade
 
-Here a simple example of an entity User and it's properties:
+Um exemplo simples de uma entidade User e suas propriedades:
 
 ```typescript
 @provide(User)
@@ -32,29 +32,28 @@ class User {
 ```
 
 :::tip
-Remember that you should have one file per entity
+Lembre-se que você deve ter um arquivo por entidade
 :::
 
-## Entities and Encapsulation
+## Entidades e encapsulamento
 
-This section is dedicated to promote a reflection when you think about entities. For years we have been told that entities or classes properties should be encapsulated, its methods should abstract the internal implementation and expose only the necessary information to the outside world. This is a good practice when thinking about Object Oriented Programming Paradigm, however this is not always the best approach.
+Esta seção é dedicada a promover uma reflexão quando se pensa em entidades. Por anos, nos foi dito que as propriedades das entidades ou classes devem ser encapsuladas, seus métodos devem abstrair a implementação interna e expor apenas as informações necessárias para o mundo externo. Esta é uma boa prática ao pensar no Paradigma de Programação Orientada a Objetos, no entanto, nem sempre é a melhor abordagem.
 
-If you think about it, classes, or entities, whatever you call it, are just a way to represent data. They are just a way to group data together.
-With this in mind, classes or entities became much more simple to maintain and understand, as they don't contain any logic.
+Se você pensar sobre isso, classes ou entidades, qualquer que seja o nome que você dê a elas, são apenas uma maneira de representar dados. Elas são apenas uma maneira de agrupar dados juntos. Com isso em mente, as classes ou entidades se tornam muito mais simples de manter e entender, pois não contêm nenhuma lógica.
 
-This way of thinking is called **[Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)** and it's a very controversial topic. It's not the purpose of this documentation to discuss this topic, but it's important to mention it, as it's a very important concept when thinking about Expresso TS.
+Esta forma de pensar é chamada de **[Modelo de Domínio Anêmico](https://martinfowler.com/bliki/AnemicDomainModel.html)** e é um tópico muito controverso. Não é o objetivo desta documentação discutir este tópico, mas é importante mencioná-lo, já que é um conceito muito importante quando se pensa em ExpressoTS.
 
-**Say good bye to God classes, and say hello to simple entities, say hello to data.**
+**Diga adeus as classes God, seja bemvindo simples entidades, seja bemvindo o dado.**
 
-___
+---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

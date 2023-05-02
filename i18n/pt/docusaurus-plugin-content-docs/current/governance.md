@@ -2,28 +2,28 @@
 sidebar_position: 7
 ---
 
-# Governance
+# Governança
 
-Expresso TS is built by its community. We welcome and appreciate contributions of all kinds. There are many ways to help, from reporting issues, contributing code, and helping us improve our community.
+Expresso TS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
 
-## Core Team
+## Time principal
 
-Currently we have a small core team of constant contributors. We are looking to expand this team to include more people from the community with a wide range of skills and interests.
+Atualmente, temos uma pequena equipe principal de colaboradores constantes. Estamos procurando expandir esta equipe para incluir mais pessoas da comunidade com uma ampla gama de habilidades e interesses.
 
-This team is currently overseeing the following items:
+Atualmente, essa equipe está supervisionando os seguintes itens:
 
-- Documentation
-- Community Management
-- Social Media Presence
-- Technical Support
-- Expresso Core, CLI and Providers
-- Expresso Extra Packages
+- Documentação
+- Gerenciamento da Comunidade
+- Presença nas Redes Sociais
+- Suporte Técnico
+- Expresso Core, CLI e Providers
+- Pacotes Extra do Expresso
 - Site
-- Expresso Features
-- Expresso Issues and Pull Requests
+- Recursos do Expresso
+- Problemas e Pull Requests do Expresso
 - DevOps
 - CI/CD
-- Testing
+- Testes
 - Roadmap
 
 ## Decision Making
@@ -46,13 +46,13 @@ Each major decision in Expresso TS starts with a proposal. Proposals can be writ
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

@@ -2,54 +2,54 @@
 sidebar_position: 11
 ---
 
-# Dependencies
+# Dependencias
 
-The purpose of this section is to list all dependencies used by Expresso TS and our vision about dependency management.
+O propósito desta seção é listar todas as dependências usadas pelo ExpressoTS e nossa visão sobre o gerenciamento de dependências.
 
-## Dependency Management
+## Gestão de dependências
 
-We know that having dependencies accelerates the development process, but it also increases the project complexity and the maintenance cost. Also, another aspect that we consider is the security risks that a dependency can bring to the project.
+Sabemos que ter dependências acelera o processo de desenvolvimento, mas também aumenta a complexidade do projeto e o custo de manutenção. Além disso, outro aspecto que consideramos é o risco de segurança que uma dependência pode trazer para o projeto.
 
-Our goal is to keep the number of dependencies as low as possible, trying to use only the ones that are really necessary and not part of our core Expresso TS framework mechanics. With that in mind we have in the Roadmap some of the dependencies that we would like to replace by our own implementation. More news about that soon.
+Nosso objetivo é manter o número de dependências o mais baixo possível, tentando usar apenas as que são realmente necessárias e que não fazem parte dos mecanismos principais do framework Expresso TS. Com isso em mente, temos em nosso Roadmap algumas dependências que gostaríamos de substituir por nossa própria implementação. Mais notícias em breve.
 
-In this meanwhile we will keep watching closely the dependencies, using tools like **[Dependabot](https://dependabot.com/)** to keep them up to date and also using tools like **[Snyk](https://snyk.io/)** to keep an eye of the security risks.
+Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando ferramentas como o **[Dependabot](https://dependabot.com/)** para mantê-las atualizadas e também utilizando ferramentas como o **[Snyk](https://snyk.io/)** para ficar de olho nos riscos de segurança.
 
-## Utilities
+## Pacotes Utilitários
 
-- @commitlint/cli: Lint commit messages
-- @commitLint/config-conventional: Lint commit messages
-- @release-it/conventional-changelog: Generate changelog
-- chalk: Terminal string styling
-- dotenv: Loads environment variables from .env file
+- @commitlint/cli: Lint mensagens de commit
+- @commitLint/config-conventional: Lint mensagens de commit
+- @release-it/conventional-changelog: Gera changelog
+- chalk: Estilo para terminal
+- dotenv: Carregar variáveis de ambiente
 - husky: Git hooks
-- prettier: Code formatter
+- prettier: Formatador de códigos
 - eslint: Linting code
-- ts-node-dev: Typescript runner
-- tsconfig-paths: Resolve paths from tsconfig.json
+- ts-node-dev: Executa arquivos de typescript
+- tsconfig-paths: Resolve caminhos através do tsconfig.json
 
-## Core Packages
+## Pacotes Core
 
-- express: Http server framework
+- express: Servidor Http
 - inversify: IoC container
-- inversify-express-utils: Express integration for inversify
-- inversify-binding-decorators: Decorators for inversify
-- winston: Logging library
-- reflect-metadata: Polyfill for metadata reflection API
+- inversify-express-utils: Integração do inversify para o Express
+- inversify-binding-decorators: Decoradores do inversify
+- winston: Lib de log
+- reflect-metadata: Polyfill para metadados e reflexão
 
-## Test
+## Teste
 
-- jest: Testing framework
-- ts-jest: Typescript support for jest
+- jest: Framework de teste
+- ts-jest: Suporte para typescript no jest
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

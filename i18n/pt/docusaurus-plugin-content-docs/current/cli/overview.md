@@ -2,58 +2,58 @@
 sidebar_position: 1
 ---
 
-# Overview
+# Visão geral
 
-The Expresso TS CLI is a command-line interface tool that helps you to **create** `ExpressoTS` projects and **scaffold** the application resources such as use cases, controllers, dto's, providers and services.
+O CLI do Expresso TS é uma ferramenta de interface de linha de comando que ajuda a criar projetos ExpressoTS e scaffolds de recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
 
 :::info
-We use in this tutorial the `npm` package manager, but you can use your favorite package manager such as `yarn` or `pnpm`.
+Neste tutorial, usamos o gerenciador de pacotes npm, mas você pode usar o seu gerenciador de pacotes favorito, como yarn ou pnpm.
 :::
 
-## Installation 💻
+## Instalação
 
-First install the CLI globally using the command below:
+Primeiro instalamos o CLI globalmente usando o comando abaixo:
 
 ```bash
 npm install -g @expressots/cli
 ```
 
-## Basic usage
+## Uso básico
 
 ```bash
 expressots <command> [options]
 ```
 
-### Help
+### Ajuda
 
-Verify the available commands and options:
+Para verificar os comandos e opções disponíveis:
 
 ```bash
 expressots --help
 ```
 
-### Version
+### Versão
 
-Verify the CLI version:
+Verificar a versão da CLI:
 
 ```bash
 expressots --version
 ```
 
-## Create an Expresso TS Project
+## Criando um projeto ExpressoTS
 
-There are two options to create a new project, interactively or silently (passing the options as arguments)
+Há duas opções para criar um novo projeto, interativamente ou silenciosamente (passando as opções como argumentos).
 
-### New project interactively
+### Criando projeto interativamente
 
 ```bash
 expressots new <project-name>
 ```
 
-### New project silently
+### Criando projeto de silenciosamente
 
 ```bash
-expressots new <project-name> -p <package-manager> -t <template>
+expressots new <nome-do-projeto> -p <gerenciador-de-pacote> -t <template>
 ```
 
 - **package-manager**: `npm`, `yarn` or `pnpm`
@@ -61,13 +61,13 @@ expressots new <project-name> -p <package-manager> -t <template>
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas

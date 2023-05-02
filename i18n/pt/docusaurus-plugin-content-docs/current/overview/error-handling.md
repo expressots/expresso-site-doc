@@ -2,36 +2,36 @@
 sidebar_position: 13
 ---
 
-# Error Handling
+# Gerenciamento de Error
 
-When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. Expresso TS providers a simple and easy way to handle errors.
+Quando se trata de tratamento de erros em APIs TypeScript do Node.js, existem várias práticas recomendadas e abordagens que você pode seguir. O Expresso TS fornece uma maneira simples e fácil de lidar com erros.
 
-- We use HTTP status codes appropriately: HTTP **[status codes](./status-code.md)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
+- Nós usamos os códigos de status HTTP: HTTP **[status codes](./status-code.md)** são usados para indicar o estado de uma resposta. É importante usá-los de forma apropriada em sua API para indicar o sucesso ou falha de uma operação.
 
-- We use a consistent error format: Define a consistent error format across your API so that consumers can easily understand and handle errors.
+- Utilizamos um formato de erro consistente: defina um formato de erro consistente em toda a sua API para que os consumidores possam entender e lidar facilmente com os erros.
 
-- We handle errors in middleware: Middleware functions are a great way to handle errors in a centralized location.
+- Tratamos erros em middleware: funções middleware são uma ótima maneira de lidar com erros em um local centralizado.
 
-- We use try-catch blocks: Use try-catch blocks to handle synchronous errors in your code. If an error occurs in the try block, the catch block can handle it. Be sure to throw the error so that it can be handled by our error handling middleware.
+- Utilizamos blocos try-catch: utilize blocos try-catch para lidar com erros síncronos em seu código. Se um erro ocorrer no bloco try, o bloco catch pode lidar com ele. Certifique-se de lançar o erro para que ele possa ser tratado pelo nosso middleware de tratamento de erro.
 
-- We use async/await error handling: When using async/await, you can use try-catch blocks to handle synchronous errors in your code. However, you also need to handle any asynchronous errors that may occur.
+- Utilizamos tratamento de erros async/await: ao usar async/await, você pode usar blocos try-catch para lidar com erros síncronos em seu código. No entanto, você também precisa lidar com quaisquer erros assíncronos que possam ocorrer.
 
-- We log errors: Logging errors is important for debugging and monitoring.
+- Registramos erros: registrar erros é importante para depuração e monitoramento.
 
-## Our Approach
+## Nossa solução
 
-We developed a standardized error class called `AppError` that can help to provide more detailed and informative error messages that can be easily interpreted and acted upon by developers.
+Nós desenvolvemos uma classe de erro padronizada chamada AppError que pode ajudar a fornecer mensagens de erro mais detalhadas e informativas que podem ser facilmente interpretadas e atuadas pelos desenvolvedores.
 
-In addition, the `Report` class provides a centralized location for throwing and handling errors, which can simplify error handling throughout the application.
+Além disso, a classe Report fornece um local centralizado para lançar e lidar com erros, o que pode simplificar o tratamento de erros em toda a aplicação.
 
-The errorHandler function provides a centralized location for handling errors that occur during request processing. By defining a standard error response format, it helps to ensure consistency in error messages that are returned to clients.
+A função errorHandler fornece um local centralizado para lidar com erros que ocorrem durante o processamento de solicitações. Ao definir um formato padrão de resposta de erro, ajuda a garantir consistência nas mensagens de erro que são retornadas aos clientes.
 
-This approach is best used in applications with a large codebase or complex business logic, where errors may occur frequently and need to be handled consistently across different parts of the application.
+Essa abordagem é melhor usada em aplicativos com um grande código base ou lógica de negócios complexa, onde os erros podem ocorrer com frequência e precisam ser tratados de forma consistente em diferentes partes da aplicação.
 
-### AppError Class
+### Classe AppError
 
-The AppError class extends the built-in Error class, adding a status code and service property.
-It is designed for handling application-specific errors with more detailed information.
+A classe AppError estende a classe nativa Error, adicionando um código de status e uma propriedade de serviço.
+Ela é projetada para lidar com erros específicos da aplicação com informações mais detalhadas.
 
 ```typescript
 class AppError extends Error {
@@ -40,10 +40,10 @@ class AppError extends Error {
     public service: string;
 
     /**
-     * Constructs a new AppError instance.
-     * @param statusCode - The status code associated with the error.
-     * @param message - The error message.
-     * @param service - An optional service name related to the error.
+     * Construtor da classe AppError.
+     * @param statusCode - código de status HTTP.
+     * @param message - Mensagem de erro.
+     * @param service - Nome do serviço reportando o erro.
      */
     constructor(statusCode: number, message: string, service?: string) {
         super(message);
@@ -54,16 +54,17 @@ class AppError extends Error {
 }
 ```
 
-### Report Error
+### Método Report.Error
 
 Report class is a utility class to manage and throw application-specific errors.
+Report é uma classe utilitária para gerenciar e lançar erros específicos da aplicação.
 
 ```typescript
 class Report {
 
     /**
-     * Error method takes an instance of AppError and throws it.
-     * @param error - An instance of AppError containing error details.
+     * O método Error é usado para lançar erros específicos da aplicação.
+     * @param error - Instância da classe AppError
      */
     public static Error(error: AppError) {
     
@@ -85,11 +86,11 @@ export default errorHandler;
 ```
 
 :::info
-function `errorHandler()` is a custom Express error-handling middleware function.
-It logs the error, sets the status code, and sends a JSON response containing the status code and error message.
+A função errorHandler() é uma função middleware de tratamento de erro personalizada do Express.
+Ela registra o erro, define o código de status e envia uma resposta JSON contendo o código de status e a mensagem de erro.
 :::
 
-## Example of Use
+## Exemplo de uso
 
 ```typescript
  Report.Error(new AppError(StatusCode.BadRequest, "User already exists", "create-user-usecase"));
@@ -138,25 +139,25 @@ class CreateUserUseCase {
 }
 ```
 
-## Error Components Description
+## Descrição dos componentes de tratamento de erro
 
-| Object          | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| Report.Error    | Static method to report known errors                         |
-| AppError        | App Error object that carries error stack, message and code  |
-| StatusCode      | Binds a controller method to a PUT HTTP verb.                |
-| Error Message   | Binds a controller method to a PUT HTTP verb.                |
-| Error Service   | Binds a controller method to a PUT HTTP verb.                |
+| Object          | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| Report.Error    | Método estático para reportar erros conhecidos.                |
+| AppError        | Classe que carrega o error stack, mensagem e código de erro.   |
+| StatusCode      | Código de status HTTP                                          |
+| Error Message   | Mensagem de erro                                               |
+| Error Service   | Serviço que originou o erro, a ser utilizado no sistema de log |
 
 ---
 
-## Support the project
+## Apoie o projeto
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Become a sponsor on GitHub (work in progress)
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Compartilhe o projeto com seus amigos e colegas
