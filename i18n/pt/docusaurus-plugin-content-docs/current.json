@@ -11,6 +11,10 @@
     "message": "Próximo",
     "description": "O rótulo para a versão atual"
   },
+  "sidebar.tutorialSidebar.Intro": {
+    "message": "Introdução",
+    "description": "O rótulo para a categoria Visão geral na barra lateral tutorialSidebar"
+  },
   "sidebar.tutorialSidebar.category.Overview": {
     "message": "Visão geral",
     "description": "O rótulo para a categoria Visão geral na barra lateral tutorialSidebar"

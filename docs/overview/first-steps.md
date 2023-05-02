@@ -289,15 +289,15 @@ ExpressoTS is a versatile framework that is not bound to any specific platform o
 
 We are currently working on building the project RoadMap and plan to add support for other popular Node.js HTTP frameworks, like Fastify and Koa, to the platform. Additionally, as we move towards the future, we intend to eliminate some of the dependencies that are currently part of the framework's core, such as IoC and decorators.
 
-___
+---
 
 ## Support the project
 
 Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a sponsor on GitHub (work in progress)
+- Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
 - Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our [Discord](https://discord.com/invite/PyPJfGK)
+- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
 - Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
 - Share the project with your friends and colleagues

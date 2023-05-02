@@ -36,27 +36,43 @@ ExpressoTS offers two starter project options: opinionated and non-opinionated. 
 
 ### Cloning the starter project
 
-Alternatively, to install the TypeScript starter project with **Git**, run the following commands:
+Alternatively, to install the TypeScript starter project with Git, run the following commands:
 
 ```bash
 # non-opinionated starter project
-git clone --sparse https://github.com/expressots/expressots.git templates/01_non_opinionated --filter=blob:none 
+git clone --sparse https://github.com/expressots/expressots.git templates/non_opinionated --filter=blob:none 
 ```
 
 ```bash
 # opinionated starter project
-git clone --sparse https://github.com/expressots/expressots.git templates/02_opinionated --filter=blob:none 
+git clone --sparse https://github.com/expressots/expressots.git templates/opinionated --filter=blob:none 
 ```
 
 ```bash
-# cd 01_non_opinionated or cd 02_opinionated
 cd <your-project-option> 
-
+# installing dependencies
 npm install
-
-npm run start
+# executing the project in development mode
+npm run dev
+# generating production build
+npm run build
+# executing the project in production mode
+npm run prod
 ```
 
 :::note
 Note that the `--sparse` flag requires a Git version of 2.25 or higher to be installed in order to work properly.
 :::
+
+---
+
+## Support the project
+
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Share the project with your friends and colleagues
