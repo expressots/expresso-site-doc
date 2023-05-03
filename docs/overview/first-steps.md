@@ -169,7 +169,7 @@ The  `main.ts` includes an async function that will bootstrap the ExpressoTS app
 
 ```typescript
 // Using the opinionated starter project where App extends Application class from @expressots/core
-async function Bootstrap() {
+async function bootstrap() {
   const app = App.create(container);
   app.listen(3000, ServerEnvironment.Production, {
     appName: ENV.Application.APP_NAME,
@@ -178,7 +178,7 @@ async function Bootstrap() {
 }
 
 // Or from .env
-async function Bootstrap() {
+async function bootstrap() {
     const app = App.create(container);
     app.listen(
         ENV.Application.PORT,
@@ -190,7 +190,7 @@ async function Bootstrap() {
     );
 }
 
-Bootstrap();
+bootstrap();
 ```
 
 ##### Non Opinionated
