@@ -1,6 +1,6 @@
 {
   "title": {
-    "message": "Expresso TS",
+    "message": "ExpressoTS",
     "description": "The title for the website"
   },
   "tagline": {
@@ -16,7 +16,7 @@
     "description": "The label for category Overview in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Overview.link.generated-index.description": {
-    "message": "Expresso TS Framework Overview.",
+    "message": "ExpressoTS Framework Overview.",
     "description": "The generated-index page description for category Overview in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.CLI": {
@@ -24,7 +24,7 @@
     "description": "The label for category CLI in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.CLI.link.generated-index.description": {
-    "message": "Expresso TS CLI Tool.",
+    "message": "ExpressoTS CLI Tool.",
     "description": "The generated-index page description for category CLI in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Tutorials": {
@@ -32,7 +32,7 @@
     "description": "The label for category Tutorials in sidebar tutorialSidebar"
   },
   "sidebar.tutorialSidebar.category.Tutorials.link.generated-index.description": {
-    "message": "Expresso TS Tutorials.",
+    "message": "ExpressoTS Tutorials.",
     "description": "The generated-index page description for category Tutorials in sidebar tutorialSidebar"
   }
 }

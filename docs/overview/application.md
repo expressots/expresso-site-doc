@@ -4,21 +4,21 @@ sidebar_position: 2
 
 # Application
 
-The Application Overview provides a comprehensive demonstration of the main components of an Expresso TS application. At the heart of an Expresso TS application lies the Application class, which serves as the foundation for creating and configuring the server. Additionally, the Application class makes use of the application container from Inversify that loads all the modules, including their respective routes [controllers]. This ensures a streamlined and efficient process for handling incoming requests and delivering the appropriate responses.
+The Application Overview provides a comprehensive demonstration of the main components of an ExpressoTS application. At the heart of an ExpressoTS application lies the Application class, which serves as the foundation for creating and configuring the server. Additionally, the Application class makes use of the application container from Inversify that loads all the modules, including their respective routes [controllers]. This ensures a streamlined and efficient process for handling incoming requests and delivering the appropriate responses.
 
 ![Application Overiview](./img/app-overview.png)
 
-Expresso TS is a web application framework that provides a simple wrapper around popular HTTP servers like [Express](https://expressjs.com), [Fastify](https://www.fastify.io/), or [Koa](https://koajs.com/).
+ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like [Express](https://expressjs.com), [Fastify](https://www.fastify.io/), or [Koa](https://koajs.com/).
 
 :::info
 Currently, Expresso TS only supports Express, as we tested it thoroughly.
 :::
 
-The architecture of an Expresso TS application is based on [Inversify's](https://inversify.io/) IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
+The architecture of an ExpressoTS application is around of the **[Inversify's](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
 
-By leveraging the power of Inversify, Expresso TS provides a scalable and modular architecture that helps to decouple components and improve maintainability. This allows developers to focus on writing clean and maintainable code, rather than worrying about dependency management.
+By leveraging the power of Inversify, ExpressoTS provides a custom Dependency Injection system that is scalable and modular, an architecture that helps to decouple components and improve maintainability. This allows developers to focus on writing clean and maintainable code.
 
-## Application Components Breakdown
+## Application components breakdown
 
 | Component             | Description                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -26,24 +26,71 @@ By leveraging the power of Inversify, Expresso TS provides a scalable and modula
 | Controller            | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                           |
 | Use Case              | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
 | Provider | Component responsible for providing external functionality to the application. |
-| Repository | Component responsible for providing access to the database. |
+| Repository | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations |
 
 :::info
-Providers and Repositories are optional components. You can use them if you need to provide external functionality or access to the database.
+Providers and Repositories are optional components. You can use them if you need to provide extra functionality to your application such as database integration, logging system, authentication, email etc.
 :::
 
 ## Workflow
 
-The workflow of an Expresso TS application is straightforward, as shown in the diagram above. After initializing the application with all its components, including the container, modules, and controllers, the server starts listening for incoming requests. When a request is received, the server looks for the corresponding route and executes the associated controller, which typically exposes endpoints. The controller then calls the relevant use-case, which in turn calls the appropriate provider when required. Providers are external components that offer additional functionality to the application.
+The workflow of an ExpressoTS application is straightforward, as shown in the diagram above. 
+
+1. After initializing the application with all its components, including the container, modules, and controllers, the server starts listening for incoming requests.
+2. When a request is received, the server looks for the corresponding route and executes the associated controller, which typically exposes endpoints.
+3. The controller then calls the relevant use-case, which in turn calls the appropriate provider when required. Providers are external components that offer additional functionality to the application.
 
 :::warning Initializing the Application without a controller
-Expresso TS will prevent you to do that as there are no listeners to handle incoming requests. You will see the following message in the console:
+ExpressoTS will prevent you to do that as there are no listeners to handle incoming requests. You will see the following message in the console:
 ***No controllers have been found! Please ensure that you have register at least one Controller.***
 :::
 
-## Application Class
+## Application class
 
 The Application class offers a way of creating and configuring the server, passing [Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html) or other middlewares upon server creation.
+
+Application class definition
+
+```typescript
+class Application {
+    /**
+     * Configure services that should be initialized before the server starts.
+     */
+    protected configureServices(): void { }
+
+    /**
+     * Configure services that should be executed after the server starts.
+     */
+    protected postServerInitialization(): void { }
+
+    /**
+     * Perform actions or cleanup after the server is shutdown.
+     */
+    protected serverShutdown(): void {
+        process.exit(0);
+    }
+
+    public create(container: Container, middlewares: express.RequestHandler[] = []): Application { }
+
+    public listen(port: number, environment: ServerEnvironment, consoleMessage?: IApplicationMessageToConsole) { }
+}
+```
+
+### Create method
+
+Create method allows developers to pass the container and middlewares to the server.
+
+```typescript
+async function Bootstrap() {
+    App.create(container, [
+        express.json(),
+        express.urlencoded({ extended: true }),
+        cors({
+            origin: "*",
+        }),
+    ]);
+}
+```
 
 Also provides a listen method that starts the server and listens for incoming requests. In the listen method, developers can define not just the port number but also the server environment, which can be either development, staging, or production. As well as the developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
@@ -51,18 +98,7 @@ Also provides a listen method that starts the server and listens for incoming re
 We also provide an instance of the Application class called **AppInstance**, which only exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
 :::
 
-### Application Create
-
-```typescript
-// App create method
-const app = App.create(container, [
-    cors(),
-    cookieParser(),
-    express.static(path.join(__dirname, "public"))
-]);
-```
-
-### Application Listen
+### Listen method
 
 ```typescript
 // App listen method
@@ -76,17 +112,25 @@ app.listen(3000, ServerEnvironment.Development, {
 The name and version of your app can be configured via either the .env file or package.json file. In the opinionated template, we use the package.json file to retrieve the app name and version.
 :::
 
-### Application Server Environment
+### Application server environment
 
-For now this is a working progress functionality. What it does is simply display the environment in the console when the server starts. The colored console message helps developers to quickly identity the environment the server is running on.
+For now this is a working in progress functionality. What it does is simply display the environment in the console when the server starts. The colored console message helps developers to quickly identify the environment the server is running on.
+
+Here is the enum available of the server environment:
+
+```typescript
+ServerEnvironment.Development;
+ServerEnvironment.Staging;
+ServerEnvironment.Production;
+```
 
 :::caution SPOILER ALERT
-The idea is to actually load all the environment variables corresponding to the environment the server is running on.
+The goal with this functionality is to allow developers to load environment variables based on the environment the server is running on. For example, if the server is running on development, load the .env.dev file, if the server is running on staging, load the .env.stg file, and if the server is running on production, load the .env.prod file. Also, we are planning to load environment variables from remote sources such as AWS Parameter Store, AWS Secrets Manager, Azure Key, Vault, etc.
 :::
 
-## Application Lifecycle Hooks
+## Application lifecycle hooks
 
-Another important aspect of the Application class is life cycle hooks. These hooks allow developers to execute code before, after and on shutdown of the server. Important to note that in order to take advantage of these hooks, developers must created an App Class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
+Another important aspect of the Application class is life cycle hooks. These hooks allow developers to execute code before, after and on the server shutdown. Important to note that in order to take advantage of these hooks, developers must created an App Class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
 
 ```typescript
     /* Add any service that you want to be initialized before the server starts */
@@ -101,11 +145,11 @@ Another important aspect of the Application class is life cycle hooks. These hoo
      }
 ```
 
-### Hooks Execution Order
+### Hooks execution order
 
 ![Application Lifecycle Hooks](./img/app-life-cycle.png)
 
-## Application Scripts
+## Application scripts
 
 Please see below all the available scripts that you can use to run, build and test your application.
 The command column shows NPM as the package manager, but you can use Yarn or any other package manager of your choice.
@@ -121,7 +165,7 @@ The command column shows NPM as the package manager, but you can use Yarn or any
 | format      | Format the code using prettier                     | npm run format               |
 | lint        | Lint code using eslint                             | npm run lint                 |
 
-## Running the Application
+## Running the application
 
 ```bash
 npm run dev

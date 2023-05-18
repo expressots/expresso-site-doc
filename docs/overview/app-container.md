@@ -4,13 +4,54 @@ sidebar_position: 3
 
 # App Container
 
-The Expresso TS uses **[InversifyJS](https://inversify.io/)** as its ioC (Inversion of Control) container as it is a powerful tool for managing dependency injection. It is a type-aware container that can be used to manage the instantiation and resolution of objects, as well as the management of their life cycles.
+The ExpressoTS uses **[InversifyJS](https://inversify.io/)** as its ioC (Inversion of Control) container. It is a powerful tool for managing dependency injection. It is a type-aware container that can be used to manage the instantiation and resolution of objects, as well as the management of their life cycles.
 
-The container provides a central location for managing dependencies and creating objects that depend on other objects. When a class is registered with the container, its dependencies are automatically resolved and injected into its constructor when it is instantiated. This allows for the creation of complex object graphs with minimal boilerplate code.
+The container provides a central location for managing dependencies and creating objects that depend on other objects. When a class is registered with the container, it becomes immediately available for injection into other classes. This allows for the creation of complex object graphs with minimal boilerplate code.
 
 Taking advantage of InversifyJS we created a wrapper to reduce complexity on how controllers, use cases, providers get injected within the application container. The wrapper is called `AppContainer` and it is responsible for registering all the application modules within the container.
 
-Here is an example of how to register **[modules](./module.md)** within the container:
+## Creating the container
+
+Upon creating the application container it is possible to define the default scope of the container. The default scope is `RequestScope` which means that all the dependencies will be created once per request. This is the common scope for most web applications used in other frameworks such as Spring Boot or .NET Core as well.
+
+Here is an example on how to create a container:
+
+```typescript
+const appContainer = new AppContainer();
+
+const container = appContainer.create([
+    // Register all the modules
+]);
+```
+
+## Defining the container scope
+
+As mentioned above, if the `defaultScope` is not provided, the default is set to RequestScope. However, it is possible to change the default scope by passing the `defaultScope` as a second argument to the module injection. The BindingScopeEnum is an enum that contains the following values:
+
+- `BindingScopeEnum.Singleton` - The dependency will be created once and will be shared across all requests.
+- `BindingScopeEnum.Request` - The dependency will be created once per request.
+- `BindingScopeEnum.Transient` - The dependency will be created every time it is requested.
+
+```typescript
+const appContainer = new AppContainer();
+
+const container = appContainer.create(
+    [
+        // Add your modules here
+    ],
+    BindingScopeEnum.Singleton,
+);
+```
+
+:::tip
+If you don't pass the `defaultScope` as a second argument, the default scope is set to `RequestScope`.
+:::
+
+## Registering modules
+
+The `AppContainer` class has a `create` method that receives an array of modules and returns the container with all the modules registered. The container here created is the same container that is used by the `Application` class to initialize the server.
+
+Once the container is created developers can register **[modules](./module.md)** within the container:
 
 ```typescript
 // Create a new container
@@ -26,19 +67,7 @@ const container = appContainer.create([
 export default container;
 ```
 
-The `AppContainer` class has a `create` method that receives an array of modules and returns the container with all the modules registered. The container here created is the same container that is used by the `Application` class to initialize the server.
-
-:::note
-InversifyJS contains a helper function called `buildProviderModule()` that can be used to create a module that automatically registers all providers and controllers in a given directory.
-
-The function takes a string argument that represents the path to the directory containing the provider and controller classes, and returns a module that can be registered with the InversifyJS container. The module will automatically register all provider and controller classes in the directory and its subdirectories.
-
-This is a useful feature when building large applications with many providers and controllers, as it allows you to easily register them all without having to manually register each one.
-
-Note that buildProviderModule() only works with providers and controllers that are decorated with the @injectable() decorator.
-:::
-
-The reason why we created the `AppContainer` class is to reduce the complexity of how the container is created and to provide a way to register modules without too much extra configuration.
+The reason why we created the `AppContainer` class is to reduce the complexity of how the container is constructed using Inversify directly, also was to provide a way to register modules without too much extra configuration.
 
 ---
 
