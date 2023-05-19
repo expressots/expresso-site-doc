@@ -4,9 +4,13 @@ sidebar_position: 7
 
 # Providers
 
-From the perspective of clean architecture, **Providers** are responsible for providing data and/or mechanics to higher-level components in the system, such as Use Cases or Presenters, and they can abstract the details of how the data/mechanic is actually retrieved, stored or executed. This abstraction enables the system to easily switch between different data sources/providers without affecting the higher-level components.
+From the perspective of the ExpressoTS Architecture, `Providers` are responsible for supplying data and/or mechanics to the application, abstracting the details of how the data/mechanic is actually implemented. This abstraction aligned with the Dependency Injection Container enables the developer to easily switch between different data sources/providers without affecting the other parts of the application as they are decoupled.
 
-Providers can be implemented as classes or functions, and they typically make use of infrastructure components such as databases, web services, or file systems to actually retrieve or store data, and perform other tasks. The goal of a Provider is to encapsulate all the details of these lower-level components and present a simple, high-level interface to the rest of the system.
+Providers can be implemented as classes or functions. They are typically replaceable components make use of infrastructure components, for example databases, authorization modules, email systems and etc. 
+
+## Provider goal
+
+The goal of a Provider is to encapsulate all the details of the "replaceable" components and present a simple, high-level interface to the rest of the system.
 
 In the context of dependency injection, providers are used to decouple the creation and configuration of objects from their use, which allows for easier testing, maintainability, and scalability of the codebase. By using providers to manage dependencies, developers can avoid tightly coupling components together and instead focus on the high-level design of the system.
 
@@ -18,7 +22,7 @@ Expresso TS uses providers to extend the application capability by providing add
 
 ## Example
 
-Let's take the example provided in the Use Case section.
+Let's take the example provided in the **[Use Case](usecase.md#example)** section.
 
 In this scenario, the user is attempting to log in to the system, and as per the specification, the user can attempt to input their credentials three times before the system locks their account. If the user's account is locked, the system dispatches an email to notify the user.
 
@@ -28,7 +32,7 @@ One of the immediate benefits of using providers is that they facilitate easier 
 
 ### Provider implementation
 
-Here is an example of provider implementation in Expresso TS for sending emails:
+Here is an example of provider implementation in ExpressoTS for sending emails:
 
 We are using **[Mailtrap](https://mailtrap.io/)** as our email provider and the nodemailer library to send emails.
 
@@ -110,7 +114,7 @@ export { MailTrapProvider, EmailType };
 In this implementation there is an auxiliary private function and the single public interface called `sendEmail()` that is going to be used in the use case.
 The provider is injected in the constructor to be used by the use case.
 
-### Use Case consuming the provider
+### Use case consuming the provider
 
 Here is the use case implementation making use of the provider:
 
@@ -137,7 +141,7 @@ class LoginUserUseCase {
 export { LoginUserUseCase };
 ```
 
-In the Use Case above we injected MailTrapProvider in the constructor making use of the ioC container. In the execute() method of the Use Case we are calling the sendEmail() method of the provider to send an email to the user in case of a non successful login.
+In the Use Case above we injected MailTrapProvider in the constructor making use of the ExpressoTS container. In the execute() method of the Use Case we are calling the `sendEmail()` method of the provider to send an email to the user in case of a non successful login.
 
 ---
 

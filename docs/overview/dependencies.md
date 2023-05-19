@@ -4,9 +4,9 @@ sidebar_position: 12
 
 # Dependencies
 
-The purpose of this section is to list all dependencies used by Expresso TS and our vision about dependency management.
+The purpose of this section is to list all dependencies used by ExpressoTS and our vision about dependency management.
 
-## Dependency Management
+## Dependency management
 
 We know that having dependencies accelerates the development process, but it also increases the project complexity and the maintenance cost. Also, another aspect that we consider is the security risks that a dependency can bring to the project.
 
@@ -27,7 +27,7 @@ In this meanwhile we will keep watching closely the dependencies, using tools li
 - ts-node-dev: Typescript runner
 - tsconfig-paths: Resolve paths from tsconfig.json
 
-## Core Packages
+## Core packages
 
 - express: Http server framework
 - inversify: IoC container

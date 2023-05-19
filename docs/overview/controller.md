@@ -156,14 +156,50 @@ Here's a list of all available parameter decorators in Expresso TS, along with t
 
 | Decorator                            | Description                                            | Usage
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| @request()                           | Injects the Express Request object	                    | execute(@request() req: Request)
-| @response()                          | Injects the Express Response object	                  | execute(@response() res: Response)
-| @requestParam(paramName?: string)    | Injects a parameter from the request URL path	        | execute(@requestParam('id') id: string)
-| @queryParam(paramName?: string)      | Injects a parameter from the request URL query string	| execute(@queryParam('searchTerm') searchTerm: string)
-| @requestBody()                       | Injects the request body payload	                      | execute(@requestBody() body: MyDTO)
-| @requestHeaders(headerName?: string) | Injects a header from the request headers	            | execute(@requestHeaders('authorization') auth: string)
-| @cookies(cookieName?: string)        | Injects a cookie from the request cookies	            | execute(@cookies('session') session: string)
-| @next()                              | Injects the Express NextFunction object	              | execute(@next() next: NextFunction)
+| @request()                           | Injects the Express Request object                     | execute(@request() req: Request)
+| @response()                          | Injects the Express Response object                    | execute(@response() res: Response)
+| @requestParam(paramName?: string)    | Injects a parameter from the request URL path          | execute(@requestParam('id') id: string)
+| @queryParam(paramName?: string)      | Injects a parameter from the request URL query string  | execute(@queryParam('searchTerm') searchTerm: string)
+| @requestBody()                       | Injects the request body payload                       | execute(@requestBody() body: MyDTO)
+| @requestHeaders(headerName?: string) | Injects a header from the request headers              | execute(@requestHeaders('authorization') auth: string)
+| @cookies(cookieName?: string)        | Injects a cookie from the request cookies              | execute(@cookies('session') session: string)
+| @next()                              | Injects the Express NextFunction object                | execute(@next() next: NextFunction)
+
+## A MVC approach
+
+Despite in the opinionated template we recommend one controller and one use case per route, you can definitely use the MVC approach or any other pattern you want. For this we recommend the use of a `non-opinionated` template, in which the developer have freedom to customize his application.
+
+Here is an example of use MVC approach, which contains a single controller class that handles the request for a product resource:
+
+```typescript
+@controller("/product")
+class ProductController {
+    @httpPost("/")
+    create(@response() res: any) {
+        return res.status(201).json({ message: "Product created" });
+    }
+
+    @httpGet("/")
+    list(@response() res: any) {
+        return res.status(200).json({ message: "Product listed" });
+    }
+
+    @httpGet("/:id")
+    get(@response() res: any) {
+        return res.status(200).json({ message: "Product get" });
+    }
+
+    @httpPatch("/:id")
+    update(@response() res: any) {
+        return res.status(200).json({ message: "Product updated" });
+    }
+
+    @httpDelete("/:id")
+    delete(@response() res: any) {
+        return res.status(200).json({ message: "Product deleted" });
+    }
+}
+```
 
 ---
 

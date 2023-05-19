@@ -43,6 +43,10 @@ describe("PingUseCase", () => {
 });
 ```
 
+:::caution SPOILER ALERT
+We have in our Roadmap the implementation of a test library that wraps a modern testing framework to provide a simple and intuitive API for writing unit and integration tests.
+:::
+
 ---
 
 ## Support the project

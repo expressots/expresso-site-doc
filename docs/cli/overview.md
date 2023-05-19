@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Overview
 
-The Expresso TS CLI is a command-line interface tool that helps you to **create** `ExpressoTS` projects and **scaffold** the application resources such as use cases, controllers, dto's, providers and services.
+The ExpressoTS CLI is a command-line interface tool that helps you to `create` ExpressoTS projects and `scaffold` the application resources such as use cases, controllers, dto's, providers and services.
 
 :::info
 We use in this tutorial the `npm` package manager, but you can use your favorite package manager such as `yarn` or `pnpm`.
@@ -40,17 +40,17 @@ Verify the CLI version:
 expressots --version
 ```
 
-## Create an Expresso TS Project
+## Create a project
 
 There are two options to create a new project, interactively or silently (passing the options as arguments)
 
-### New project interactively
+### Interactively
 
 ```bash
 expressots new <project-name>
 ```
 
-### New project silently
+### Silently
 
 ```bash
 expressots new <project-name> -p <package-manager> -t <template>
