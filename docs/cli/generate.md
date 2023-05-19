@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Generate
 
-In order to provide a better developer experience, the Expresso TS CLI provides a set of commands to help you to **scaffold** the application resources such as use cases, controllers, dto's, providers and services.
+In order to provide a better developer experience, the ExpressoTS CLI provides a set of commands to help you to scaffold the application resources such as use cases, controllers, dto's, providers and services.
 
 This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
 
@@ -53,10 +53,10 @@ What determine where the resources will be created is the `expressots.config.ts`
 :::
 
 :::info
-All usecases, controllers and dtos are being created inside of the `useCases` folder. This is not set on the stone, it might change in the soon future.
+All usecases, controllers and dtos are being created inside of the `useCases` folder. This is not set on the stone, it might change in the future.
 :::
 
-## Expresso TS Config File
+## ExpressoTS config file
 
 The configuration file is located in the root folder of the project and it's called `expressots.config.ts`. This file is used to configure the CLI and the project.
 

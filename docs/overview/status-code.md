@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Status Code
@@ -18,10 +18,9 @@ You can find more details about the status code in the **[MDN Web Docs](https://
 The status codes listed below are defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
 :::
 
-## Expresso TS Status Code
+## ExpressoTS status code
 
-In Expresso TS, we have a list of all status codes listed in the MDN that you can use in your application.
-Here is an example of use:
+In ExpressoTS, we have a list of all status codes listed in the MDN that you can use in your application. Here is an example of use:
 
 ### In a Controller
 

@@ -4,21 +4,21 @@ sidebar_position: 8
 
 # Repositories
 
-In Expresso TS, a repository class typically includes methods such as create, update, find, findOne, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
+In ExpressoTS, a repository class typically includes methods such as create, update, find, findOne, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
 
-## The Repository Pattern
+## The repository pattern
 
 The repository pattern is a design pattern commonly used in software development that provides a way to abstract the data persistence layer of an application. In TypeScript, this pattern can be implemented using classes that represent repositories, which are responsible for retrieving, storing, updating, and deleting data from a data store, such as a database.
 
-We do offer an example of how to implement a repository patterns in the opinionated template. You can find it directly in the [templates](https://github.com/expressots/expressots/tree/main/templates) folder of the Expresso TS application.
+We do offer an example of how to implement a repository patterns in the opinionated template. You can find it directly in the **[repository](https://github.com/expressots/expressots/tree/main/templates/opinionated/src/repositories)** folder of the ExpressoTS application.
 
-## Goal of the Repository Pattern
+## Goal of the repository pattern
 
 The main goal of the repository pattern is to separate the business logic from the data access logic, allowing developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
 
-## Benefit of Using the Repository Pattern
+## Benefit of using the repository pattern
 
-By using a repository, the application can benefit from several advantages, such as:
+By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes. Here are some of the benefits of using the repository pattern:
 
 - Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
 - Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
@@ -26,17 +26,15 @@ By using a repository, the application can benefit from several advantages, such
 - Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
 - Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
 
-By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes.
-
 ## Example
 
-We offer an example of Repository pattern implementation in the opinionated template of Expresso TS.
+We offer an example of Repository pattern implementation in the opinionated template of ExpressoTS.
 
 :::info
-In Expresso TS, we implement the repository pattern in a specific folder called **"repositories"**, which is separated from the **"provider"** folder intentionally, even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it is an important decoupled that the development of the application could benefit of.
+In ExpressoTS, we implement the repository pattern in a specific folder called **"repositories"**, which is separated from the **"provider"** folder intentionally, even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it is an important decoupled that the development of the application could benefit of.
 :::
 
-### Base Repository Interface
+### Base repository interface
 
 ```typescript
 interface IEntity {
@@ -52,7 +50,7 @@ interface IBaseRepository<T> {
 }
 ```
 
-### Base Repository Class
+### Base repository class
 
 ```typescript
 @provide(BaseRepository)
@@ -87,6 +85,17 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
   findAll(): T[] {
     return this.DB;
   }
+}
+```
+
+### User repository
+
+```typescript
+@provide(UserRepository)
+class UserRepository extends BaseRepository<User> {
+    constructor() {
+        super();
+    }
 }
 ```
 

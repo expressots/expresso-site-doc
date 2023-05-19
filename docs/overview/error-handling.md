@@ -1,10 +1,10 @@
 ---
-sidebar_position: 13
+sidebar_position: 14
 ---
 
 # Error Handling
 
-When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. Expresso TS providers a simple and easy way to handle errors.
+When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. ExpressoTS providers a simple and easy way to handle errors.
 
 - We use HTTP status codes appropriately: HTTP **[status codes](./status-code.md)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
 
@@ -18,7 +18,7 @@ When it comes to error handling in Node.js TypeScript APIs, there are several be
 
 - We log errors: Logging errors is important for debugging and monitoring.
 
-## Our Approach
+## Our approach
 
 We developed a standardized error class called `AppError` that can help to provide more detailed and informative error messages that can be easily interpreted and acted upon by developers.
 
@@ -28,9 +28,9 @@ The errorHandler function provides a centralized location for handling errors th
 
 This approach is best used in applications with a large codebase or complex business logic, where errors may occur frequently and need to be handled consistently across different parts of the application.
 
-### AppError Class
+### AppError class
 
-The AppError class extends the built-in Error class, adding a status code and service property.
+The `AppError` class extends the built-in Error class, adding a status code and service property.
 It is designed for handling application-specific errors with more detailed information.
 
 ```typescript
@@ -54,7 +54,7 @@ class AppError extends Error {
 }
 ```
 
-### Report Error
+### Report error
 
 Report class is a utility class to manage and throw application-specific errors.
 
@@ -89,7 +89,7 @@ function `errorHandler()` is a custom Express error-handling middleware function
 It logs the error, sets the status code, and sends a JSON response containing the status code and error message.
 :::
 
-## Example of Use
+## Example of use
 
 ```typescript
  Report.Error(new AppError(StatusCode.BadRequest, "User already exists", "create-user-usecase"));
@@ -138,15 +138,15 @@ class CreateUserUseCase {
 }
 ```
 
-## Error Components Description
+## Error components description
 
-| Object          | Description                                                  |
-| --------------- | ------------------------------------------------------------ |
-| Report.Error    | Static method to report known errors                         |
-| AppError        | App Error object that carries error stack, message and code  |
-| StatusCode      | Binds a controller method to a PUT HTTP verb.                |
-| Error Message   | Binds a controller method to a PUT HTTP verb.                |
-| Error Service   | Binds a controller method to a PUT HTTP verb.                |
+| Object          | Description                                                             |
+| --------------- | ----------------------------------------------------------------------- |
+| Report.Error    | Static method to report known errors                                    |
+| AppError        | App Error object that carries error stack, message and code             |
+| StatusCode      | Http responses code and message                                         |
+| Error Message   | Error message detail that the developer wants to log                    |
+| Error Service   | To be used in the log system to indicate where the error was generated  |
 
 ---
 

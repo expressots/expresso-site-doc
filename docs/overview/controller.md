@@ -4,11 +4,15 @@ sidebar_position: 5
 
 # Controllers
 
-Controllers act as the primary interface between the client and server in Node.js applications. They handle incoming requests, validate payloads against Input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
+Controllers act as the primary interface between the client and server in ExpressoTS applications. They handle incoming requests, validate payloads against Input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
 
-Data Transfer Object (DTO) is a commonly used design pattern in Node.js applications that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
+## DTO pattern
+
+Data Transfer Object (DTO) is a commonly used design pattern that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
 
 Using DTOs can improve application performance and scalability by reducing the data transfer between the client and server and providing more efficient ways to process and handle data within the application.
+
+### DTO example
 
 For example, imagine a user registration scenario where name, email, and password are collected, and ID is auto-generated. The user object DTO for Input and Response could have possible formats, as shown below:
 
@@ -41,11 +45,11 @@ As a result, DTOs help to segregate and filter the data being sent to the client
 
 ## Controller Class
 
-The controller class in Expresso TS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
+The controller class in ExpressoTS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
 
-Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[@httpMethods()](./decorators.md)** decorator from the same package. Additionally, you can also annotate the parameters of the `execute()` method.
+Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[@httpMethods()](./decorators.md)** decorators. Additionally, you can also annotate the parameters of the `execute()` method.
 
-Here is an example of a simple Expresso TS controller class:
+Here is an example of a simple ExpressoTS controller class:
 
 ```typescript
 @controller("/")
@@ -64,7 +68,7 @@ In the AppController class above we are using res as any `res:any` but you can d
 
 ## Base Controller Class
 
-We also power a controller class with the **BaseController** class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
+We also power a controller class with the `BaseController` class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
 Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or callUseCaseAsync()`.
 
 These methods reinforce the idea of one use case per controller, and they are responsible for calling the use case that will implement the business logic of the controller.
@@ -108,19 +112,33 @@ class AppController extends BaseController {
 }
 ```
 
-## HTTP Methods and Parameters Decorators
+## Controller scope
 
-HTTP methods and parameters decorators are a set of annotations used in Expresso TS applications to define the routing and request handling for HTTP requests.
+The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope. However you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum enum values.
 
-The HTTP methods decorators include @httpGet(), @httpPost(), @httpPut(), @httpPatch(), @httpHead(), @httpDelete(), and @httpMethod(). These decorators are used to define the HTTP method and the path of a specific route in the application.
+:::info
+If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
+The `@scope` decorator can only be used in specific controllers if the module scope is not defined.
+:::
 
-The parameters decorators include @queryParam(), @requestParam(), @requestBody(), @requestHeaders(), @cookies(), @next(), and @request(). These decorators are used to retrieve data from HTTP requests, such as query parameters, request headers, and request body.
+Here is an example of usage:
 
-Using these decorators can simplify the routing and handling of HTTP requests in Node.js applications, and make the code more readable and maintainable.
+```typescript
+@scope(BindingScopeEnum.Singleton)
+@controller("/")
+class CreateUserController extends BaseController { }
+```
 
-### HTTP Methods Decorators
+The controller above will be scoped as `Singleton` and will be shared across all requests.
 
-Here's a list of all available `@httpMethods()` decorators in Expresso TS, along with their description and usage:
+## Controller decorators
+
+HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests.
+Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
+
+### HTTP methods decorators
+
+Here's a list of all available `@httpMethods()` decorators in ExpressoTS, along with their description and usage:
 
 | Decorator   | Description                                        | Usage                        |
 | ----------- | -------------------------------------------------- | ---------------------------- |
@@ -132,20 +150,56 @@ Here's a list of all available `@httpMethods()` decorators in Expresso TS, along
 | @httpDelete | Binds a controller method to a DELETE HTTP verb.   | @httpDelete("/path")         |
 | @httpMethod | Binds a controller method to a specified HTTP verb.| @httpMethod("verb", "/path") |
 
-### Parameter Decorators
+### Parameter decorators
 
 Here's a list of all available parameter decorators in Expresso TS, along with their description and usage:
 
-| Decorator	                           | Description	                                        | Usage
+| Decorator                            | Description                                            | Usage
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| @request()	                       | Injects the Express Request object	                    | execute(@request() req: Request)
-| @response()	                       | Injects the Express Response object	                | execute(@response() res: Response)
-| @requestParam(paramName?: string)	   | Injects a parameter from the request URL path	        | execute(@requestParam('id') id: string)
-| @queryParam(paramName?: string)	   | Injects a parameter from the request URL query string	| execute(@queryParam('searchTerm') searchTerm: string)
-| @requestBody()	                   | Injects the request body payload	                    | execute(@requestBody() body: MyDTO)
-| @requestHeaders(headerName?: string) | Injects a header from the request headers	            | execute(@requestHeaders('authorization') auth: string)
-| @cookies(cookieName?: string)	       | Injects a cookie from the request cookies	            | execute(@cookies('session') session: string)
-| @next()	                           | Injects the Express NextFunction object	            | execute(@next() next: NextFunction)
+| @request()                           | Injects the Express Request object                     | execute(@request() req: Request)
+| @response()                          | Injects the Express Response object                    | execute(@response() res: Response)
+| @requestParam(paramName?: string)    | Injects a parameter from the request URL path          | execute(@requestParam('id') id: string)
+| @queryParam(paramName?: string)      | Injects a parameter from the request URL query string  | execute(@queryParam('searchTerm') searchTerm: string)
+| @requestBody()                       | Injects the request body payload                       | execute(@requestBody() body: MyDTO)
+| @requestHeaders(headerName?: string) | Injects a header from the request headers              | execute(@requestHeaders('authorization') auth: string)
+| @cookies(cookieName?: string)        | Injects a cookie from the request cookies              | execute(@cookies('session') session: string)
+| @next()                              | Injects the Express NextFunction object                | execute(@next() next: NextFunction)
+
+## A MVC approach
+
+Despite in the opinionated template we recommend one controller and one use case per route, you can definitely use the MVC approach or any other pattern you want. For this we recommend the use of a `non-opinionated` template, in which the developer have freedom to customize his application.
+
+Here is an example of use MVC approach, which contains a single controller class that handles the request for a product resource:
+
+```typescript
+@controller("/product")
+class ProductController {
+    @httpPost("/")
+    create(@response() res: any) {
+        return res.status(201).json({ message: "Product created" });
+    }
+
+    @httpGet("/")
+    list(@response() res: any) {
+        return res.status(200).json({ message: "Product listed" });
+    }
+
+    @httpGet("/:id")
+    get(@response() res: any) {
+        return res.status(200).json({ message: "Product get" });
+    }
+
+    @httpPatch("/:id")
+    update(@response() res: any) {
+        return res.status(200).json({ message: "Product updated" });
+    }
+
+    @httpDelete("/:id")
+    delete(@response() res: any) {
+        return res.status(200).json({ message: "Product deleted" });
+    }
+}
+```
 
 ---
 

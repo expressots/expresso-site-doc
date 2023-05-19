@@ -18,6 +18,24 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 
 ---
 
+## How to read the doc
+
+- **[links](intro.md)**: All bold texts are links to other pages of the documentation or external links.
+- `code`: helps emphasize code snippets and commands, or key technical terms.
+- Alerts: are used to highlight important information.
+:::note Used to express general information
+:::
+:::tip This is a tip
+:::
+:::info Extra information that is not vital
+:::
+:::caution Used to indicate spoilers
+:::
+:::warning Used to indicate when something could go wrong
+:::
+
+---
+
 ## Support the project
 
 Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:

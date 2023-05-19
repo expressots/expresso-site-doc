@@ -20,7 +20,7 @@ function HomepageHeader() {
         <div>
           <Link
             className={clsx("button button--secondary button--lg", styles.button)}
-            to="/docs/intro">
+            to="/docs/hello">
             {translate({message: "homepageDocumentation"})}
           </Link>
         </div>
