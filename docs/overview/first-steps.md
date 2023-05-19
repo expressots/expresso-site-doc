@@ -180,7 +180,7 @@ async function Bootstrap() {
 
 ```typescript
 // Using the opinionated starter project where App extends Application class from @expressots/core
-async function Bootstrap() {
+async function bootstrap() {
   const app = App.create(container);
   app.listen(3000, ServerEnvironment.Production, {
     appName: ENV.Application.APP_NAME,
@@ -188,8 +188,13 @@ async function Bootstrap() {
   });
 }
 
+<<<<<<< HEAD
 // Replacing the ServerEnvironment enum with the .env variable
 async function Bootstrap() {
+=======
+// Or from .env
+async function bootstrap() {
+>>>>>>> main
     const app = App.create(container);
     app.listen(
         ENV.Application.PORT,
@@ -201,7 +206,7 @@ async function Bootstrap() {
     );
 }
 
-Bootstrap();
+bootstrap();
 ```
 
 ##### Non opinionated
