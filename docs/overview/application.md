@@ -6,7 +6,7 @@ sidebar_position: 2
 
 The Application Overview provides a comprehensive demonstration of the main components of an ExpressoTS application. At the heart of an ExpressoTS application lies the Application class, which serves as the foundation for creating and configuring the server. Additionally, the Application class makes use of the application container from Inversify that loads all the modules, including their respective routes [controllers]. This ensures a streamlined and efficient process for handling incoming requests and delivering the appropriate responses.
 
-![Application Overiview](./img/app-overview.png)
+![Application Overview](./img/app-overview.png)
 
 ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like [Express](https://expressjs.com), [Fastify](https://www.fastify.io/), or [Koa](https://koajs.com/).
 
