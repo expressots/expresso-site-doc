@@ -1,41 +1,34 @@
-# Website
+<p align="center">
+  <a href="https://expresso-ts.com/" target="blank"><img src="https://github.com/expressots/expressots/blob/main/media/expressots.png" width="120" alt="Expresso TS Logo" /></a>
+</p>
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+# Expresso TS
 
-### Installation
+A Typescript + [Node.js]("https://nodejs.org/en/") lightweight framework for quick building scalable, easy to read and maintain, server-side applications 🚀
 
-```
-$ yarn
-```
+## Getting Started
 
-### Local Development
+- Here is our [Official Documentation](https://expresso-ts.com/)
+- Checkout our [First Steps documentation](https://expresso-ts.com/docs/overview/first-steps)
+- Our [CLI Documentation](https://expresso-ts.com/docs/category/cli)
 
-```
-$ yarn start
-```
+## Questions
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+For questions and support please use the Official [Discord Channel](https://discord.com/invite/PyPJfGK). We have a very active community there, that will be happy to help you. Post your questions in the channel called **HELP EXPRESSO TS** and forum called **help**.
 
-### Build
+## Issues
 
-```
-$ yarn build
-```
+The [Issue Reporting Channel](https://github.com/expressots/expressots/issues) is for bug report and feature request **only**.
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Before you create an issue, please make sure you read the [Contribution Guidelines](CONTRIBUTING.md).
 
-### Deployment
+## Support the project
 
-Using SSH:
+Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+- Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Share the project with your friends and colleagues
