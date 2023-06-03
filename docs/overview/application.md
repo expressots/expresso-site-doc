@@ -20,13 +20,13 @@ By leveraging the power of Inversify, ExpressoTS provides a custom Dependency In
 
 ## Application components breakdown
 
-| Component             | Description                                                                                                                                                                                                                                                                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DTO IN / OUT          | Data transfer object that defines the format of the incoming and outgoing payload of the application.                                                                                                                                                                                                                                                           |
-| Controller            | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                           |
-| Use Case              | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
-| Provider | Component responsible for providing external functionality to the application. |
-| Repository | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations |
+| Component    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DTO IN / OUT | Data transfer object that defines the format of the incoming and outgoing payload of the application.                                                                                                                                                                                                                                                                                                                                                      |
+| Controller   | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                                                                                                                       |
+| Use Case     | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
+| Provider     | Component responsible for providing external functionality to the application.                                                                                                                                                                                                                                                                                                                                                                             |
+| Repository   | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations                                                                                                                                                                                                                                                                                                                                  |
 
 :::info
 Providers and Repositories are optional components. You can use them if you need to provide extra functionality to your application such as database integration, logging system, authentication, email etc.
@@ -34,7 +34,7 @@ Providers and Repositories are optional components. You can use them if you need
 
 ## Workflow
 
-The workflow of an ExpressoTS application is straightforward, as shown in the diagram above. 
+The workflow of an ExpressoTS application is straightforward, as shown in the diagram above.
 
 1. After initializing the application with all its components, including the container, modules, and controllers, the server starts listening for incoming requests.
 2. When a request is received, the server looks for the corresponding route and executes the associated controller, which typically exposes endpoints.
@@ -42,70 +42,77 @@ The workflow of an ExpressoTS application is straightforward, as shown in the di
 
 :::warning Initializing the Application without a controller
 ExpressoTS will prevent you to do that as there are no listeners to handle incoming requests. You will see the following message in the console:
-***No controllers have been found! Please ensure that you have register at least one Controller.***
+**_No controllers have been found! Please ensure that you have register at least one Controller._**
 :::
 
 ## Application class
 
-The Application class offers a way of creating and configuring the server, passing [Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html) or other middlewares upon server creation.
+The Application class offers a way of creating and configuring the server, passing **[Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middlewares upon server creation.
 
 Application class definition
 
 ```typescript
 class Application {
-    /**
-     * Configure services that should be initialized before the server starts.
-     */
-    protected configureServices(): void { }
+  /**
+   * Configure services that should be initialized before the server starts.
+   */
+  protected configureServices(): void {}
 
-    /**
-     * Configure services that should be executed after the server starts.
-     */
-    protected postServerInitialization(): void { }
+  /**
+   * Configure services that should be executed after the server starts.
+   */
+  protected postServerInitialization(): void {}
 
-    /**
-     * Perform actions or cleanup after the server is shutdown.
-     */
-    protected serverShutdown(): void {
-        process.exit(0);
-    }
+  /**
+   * Perform actions or cleanup after the server is shutdown.
+   */
+  protected serverShutdown(): void {
+    process.exit(0);
+  }
 
-    public create(container: Container, middlewares: express.RequestHandler[] = []): Application { }
+  public create(
+    container: Container,
+    middlewares: express.RequestHandler[] = []
+  ): Application {}
 
-    public listen(port: number, environment: ServerEnvironment, consoleMessage?: IApplicationMessageToConsole) { }
+  public listen(
+    port: number,
+    environment: ServerEnvironment,
+    consoleMessage?: IApplicationMessageToConsole
+  ) {}
 }
 ```
-
-### Create method
-
-Create method allows developers to pass the container and middlewares to the server.
-
-```typescript
-async function Bootstrap() {
-    App.create(container, [
-        express.json(),
-        express.urlencoded({ extended: true }),
-        cors({
-            origin: "*",
-        }),
-    ]);
-}
-```
-
-Also provides a listen method that starts the server and listens for incoming requests. In the listen method, developers can define not just the port number but also the server environment, which can be either development, staging, or production. As well as the developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
 :::info
 We also provide an instance of the Application class called **AppInstance**, which only exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
 :::
 
+### Create method
+
+Create method allows developers to pass the container and middlewares to the server. To pass middlewares you don't need to use `app.use()`, just simply pass the middleware and it's configuration as demonstrated below:
+
+```typescript
+async function Bootstrap() {
+  App.create(container, [
+    express.json(),
+    express.urlencoded({ extended: true }),
+    cors({
+      origin: "*",
+    }),
+  ]);
+}
+```
+
 ### Listen method
+
+The listen method starts the server and listens for incoming requests. In the listen method, developers can define not just the port number but also the server environment, which can be either development, staging, or production. As well as the developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
 ```typescript
 // App listen method
 app.listen(3000, ServerEnvironment.Development, {
-    appName: "Your App Name",
-    appVersion: "v1.0.0"
-})
+  appName: "Your App Name",
+  appVersion: "v1.0.0",
+});
 ```
 
 :::tip
@@ -154,16 +161,16 @@ Another important aspect of the Application class is life cycle hooks. These hoo
 Please see below all the available scripts that you can use to run, build and test your application.
 The command column shows NPM as the package manager, but you can use Yarn or any other package manager of your choice.
 
-| Script      | Description                                        | Command                      |
-| ----------- | -------------------------------------------------- | ---------------------------- |
-| build       | Build the production bundle in a ./dist folder     | npm run build                |
-| dev         | Runs in development watch mode                     | npm run dev                  |
-| prod        | Runs in production mode based on built bundle      | npm run prod                 |
-| test        | Run your tests located in the test folder          | npm run test                 |
-| test:watch  | Run your tests in watch and interactive mode       | npm run test:watch           |
-| test:cov    | Produces test coverage report                      | npm run test:cov             |
-| format      | Format the code using prettier                     | npm run format               |
-| lint        | Lint code using eslint                             | npm run lint                 |
+| Script     | Description                                    | Command            |
+| ---------- | ---------------------------------------------- | ------------------ |
+| build      | Build the production bundle in a ./dist folder | npm run build      |
+| dev        | Runs in development watch mode                 | npm run dev        |
+| prod       | Runs in production mode based on built bundle  | npm run prod       |
+| test       | Run your tests located in the test folder      | npm run test       |
+| test:watch | Run your tests in watch and interactive mode   | npm run test:watch |
+| test:cov   | Produces test coverage report                  | npm run test:cov   |
+| format     | Format the code using prettier                 | npm run format     |
+| lint       | Lint code using eslint                         | npm run lint       |
 
 ## Running the application
 

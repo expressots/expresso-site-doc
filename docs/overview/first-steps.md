@@ -56,10 +56,10 @@ After creating your project, with the desired `<project-name>`, and depending on
 ```tree
 project-name/
 ├── src/
-│   ├── app-container.ts
-│   ├── app-controller.ts
-│   ├── app-module.ts
-│   ├── app-usecase.ts
+│   ├── app.container.ts
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.usecase.ts
 │   ├── main.ts
 ├── test/
 │   ├── app.usecase.spec.ts
@@ -67,16 +67,18 @@ project-name/
 
 Description
 
-| File Name             | Description                                                                                                          |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `app-container.ts`    | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit.|
-| `app.controller.ts`   | A basic controller with a single route.                                                                              |
-| `app.module.ts`       | Application root module.                                                                                             |
-| `app.usecase.ts`      | A basic use case with a single method.                                                                               |
-| `main.ts`             | The main entry point of an ExpressoTS application.                                                                   |
-| `app.usecase.spec.ts` | A basic unit test for the app.usecase.                                                                               |
+| File Name             | Description                                                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `app.container.ts`    | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit. |
+| `app.controller.ts`   | A basic controller with a single route.                                                                               |
+| `app.module.ts`       | Application root module.                                                                                              |
+| `app.usecase.ts`      | A basic use case with a single method.                                                                                |
+| `main.ts`             | The main entry point of an ExpressoTS application.                                                                    |
+| `app.usecase.spec.ts` | A basic unit test for the app.usecase.                                                                                |
 
 ### Opinionated project template
+
+In the opininated project template we provide a full CRUD example for a user entity, with all the necessary layers and files to get you started.
 
 ```tree
 project-name/
@@ -98,22 +100,30 @@ project-name/
 │   │   └── app/
 │   │       └── app.controller.ts
 │   │       └── app.module.ts
-│   │   └── ping/
-│   │       └── ping.controller.ts
-│   │       └── ping.dto.ts
-│   │       └── ping.module.ts
-│   │       └── ping.usecase.ts
+│   │       └── app.usecase.ts
 │   │   └── user/
 │   │       └── create/
-│   │           └── create-user.controller.ts
-│   │           └── create-user.dto.ts
-│   │           └── create-user.usecase.ts
+│   │           └── user-create.controller.ts
+│   │           └── user-create.dto.ts
+│   │           └── user-create.usecase.ts
+|   │       └── delete/
+│   │           └── user-delete.controller.ts
+│   │           └── user-delete.dto.ts
+│   │           └── user-delete.usecase.ts
+│   │       └── find/
+│   │           └── user-find.controller.ts
+│   │           └── user-find.dto.ts
+│   │           └── user-find.usecase.ts
 │   │       └── findall/
-│   │           └── findall-user.controller.ts
-│   │           └── findall-user.dto.ts
-│   │           └── findall-user.usecase.ts
+│   │           └── user-findall.controller.ts
+│   │           └── user-findall.dto.ts
+│   │           └── user-findall.usecase.ts
+│   │       └── findall/
+│   │           └── user-findall.controller.ts
+│   │           └── user-findall.dto.ts
+│   │           └── user-findall.usecase.ts
 │   │       └── user.module.ts
-│   ├── app-container.ts
+│   ├── app.container.ts
 │   ├── env.ts
 │   ├── main.ts
 ├── test/
@@ -122,16 +132,16 @@ project-name/
 
 Description
 
-| File Name             | Description                                                                                                          |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `entities/`           | This folder contains class definitions, or models with their attributes, properties and methods.                     |
-| `providers/`          | This folder contains the layer responsible to provide externals resources to the application, also known as adapters.|
-| `repositories/`       | Additional folder containing an example of repository pattern implementation, database layer communication.          |
-| `useCases/`           | The use case folder contains the use cases implementation of operations that can be performed in the application.    |
-| `app-container.ts`    | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit.|
-| `env.ts`              | This is an utility resource that maps .env variables.                                                                |
-| `main.ts`             | The main entry point of an ExpressoTS application.                                                                   |
-| `ping.usecase.spec.ts`| A basic unit test for the ping.usecase.                                                                              |
+| File Name              | Description                                                                                                           |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `entities/`            | This folder contains class definitions, or models with their attributes, properties and methods.                      |
+| `providers/`           | This folder contains the layer responsible to provide externals resources to the application, also known as adapters. |
+| `repositories/`        | Additional folder containing an example of repository pattern implementation, database layer communication.           |
+| `useCases/`            | The use case folder contains the use cases implementation of operations that can be performed in the application.     |
+| `app.container.ts`     | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit. |
+| `env.ts`               | This is an utility resource that maps .env variables.                                                                 |
+| `main.ts`              | The main entry point of an ExpressoTS application.                                                                    |
+| `ping.usecase.spec.ts` | A basic unit test for the ping.usecase.                                                                               |
 
 Below you can find some extra information about **[Providers](./providers.md)**, **[Use Cases](./usecase.md)** and the **[Main](./application.md)** entry point of an ExpressoTS application used in the Opinionated template.
 
@@ -156,21 +166,20 @@ The use cases in the Opinionated template are organized in 3 modules:
 Here are the endpoints in each module:
 
 - **[AppModule]/app.controller**: returns `Hello from Expresso TS App`
-
-- **[PingModule]/ping.controller**: returns a json structure with `{start, end, ttl, message: 'pong'}`
-
-- **[UserModule]/create-user.controller**: creates a new user in the in-memory database
-
-- **[UserModule]/findall-user.controller**: returns all users from the in-memory database
+- **[UserModule]/user-create.controller**: creates a new user in the in-memory database
+- **[UserModule]/user-delete.controller**: delete a user by `id` in the in-memory database
+- **[UserModule]/user-find.controller**: return one user from the in-memory database
+- **[UserModule]/user-findall.controller**: returns all users from the in-memory database
+- **[UserModule]/user-update.controller**: update a user info from the in-memory database
 
 #### Main
 
-The  `main.ts` includes an async function that will bootstrap the ExpressoTS application.
+The `main.ts` includes an async function that will bootstrap the ExpressoTS application.
 
 ##### Opinionated in its simple form
 
 ```typescript
-async function Bootstrap() {
+async function bootstrap() {
   const app = App.create(container);
   app.listen(3000, ServerEnvironment.Production);
 }
@@ -188,22 +197,17 @@ async function bootstrap() {
   });
 }
 
-<<<<<<< HEAD
-// Replacing the ServerEnvironment enum with the .env variable
-async function Bootstrap() {
-=======
 // Or from .env
 async function bootstrap() {
->>>>>>> main
-    const app = App.create(container);
-    app.listen(
-        ENV.Application.PORT,
-        ServerEnvironment[ENV.Application.ENVIRONMENT],
-        {
-            appName: ENV.Application.APP_NAME,
-            appVersion: ENV.Application.APP_VERSION,
-        },
-    );
+  const app = App.create(container);
+  app.listen(
+    ENV.Application.PORT,
+    ServerEnvironment[ENV.Application.ENVIRONMENT],
+    {
+      appName: ENV.Application.APP_NAME,
+      appVersion: ENV.Application.APP_VERSION,
+    }
+  );
 }
 
 bootstrap();
@@ -225,7 +229,7 @@ bootstrap();
 
 To bootstrap an ExpressoTS application, there are two ways:
 
-- Using the AppInstance:  which is an instance of the Application class that provides the `create()` and `listen()` methods.
+- Using the AppInstance: which is an instance of the Application class that provides the `create()` and `listen()` methods.
 - Extending the Application class. By extending the Application class, you can take advantage of its built-in mechanisms for controlling the **[application life cycle hooks](application.md#application-lifecycle-hooks)**, such as injecting and executing services before, after, and during application shutdown.
 
 Application Instance
@@ -235,8 +239,8 @@ import { AppInstance, ServerEnvironment } from "@expressots/core";
 import { container } from "./app-container";
 
 export async function bootstrap() {
-    const app = AppInstance.create(container);
-    app.listen(3000, ServerEnvironment.Development);
+  const app = AppInstance.create(container);
+  app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -250,17 +254,17 @@ import { provide } from "inversify-binding-decorators";
 
 @provide(App)
 class App extends Application {
-    protected configureServices(): void {
-        Environments.checkAll();
-    }
+  protected configureServices(): void {
+    Environments.checkAll();
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    protected postServerInitialization(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  protected postServerInitialization(): void {}
 
-    protected serverShutdown(): void {
-        log(LogLevel.Info, "Server is shutting down", "logger-provider");
-        super.serverShutdown();
-    }
+  protected serverShutdown(): void {
+    log(LogLevel.Info, "Server is shutting down", "logger-provider");
+    super.serverShutdown();
+  }
 }
 
 const appInstance = new App();
@@ -275,12 +279,12 @@ import { App } from "@providers/application/application.provider";
 import { container } from "app-container";
 import { ServerEnvironment } from "@expressots/core";
 
-async function Bootstrap() {
-    const app = App.create(container);
-    app.listen(3000, ServerEnvironment.Development);
+async function bootstrap() {
+  const app = App.create(container);
+  app.listen(3000, ServerEnvironment.Development);
 }
 
-Bootstrap();
+bootstrap();
 ```
 
 ## The container
@@ -316,8 +320,8 @@ const app = AppInstance.create(container);
 const appContainer = new AppContainer();
 
 const container = appContainer.create([
-    // Add your modules here
-    AppModule,
+  // Add your modules here
+  AppModule,
 ]);
 ```
 
@@ -325,9 +329,9 @@ const container = appContainer.create([
 
 ```typescript
 const appModule = CreateModule([
-    // Add your controllers here
-    AppController,
-])
+  // Add your controllers here
+  AppController,
+]);
 ```
 
 :::info

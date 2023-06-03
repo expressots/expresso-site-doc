@@ -10,7 +10,7 @@ This command allows developers to stay ahead of the curve by generating the boil
 
 ## Command syntax
 
-Generate command can be expressed in its normal form:
+Generate command can be expressed as followed:
 
 ```bash
 expressots generate <resource> <structure>
@@ -22,27 +22,46 @@ Or in its short form:
 expressots g <resource> <structure>
 ```
 
+### Command structure
+
+We provide two different structures to scaffold the resources:
+
+- **[entity-action]**: `expressots generate service user-create`
+  This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts
+
+- **[folder/subfolder/resource]**: `expressots generate service user/create`
+  This will create this folder structure: `/user/create` and the file: `create.[resource].ts
+
+  If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots generate service user/create/`
+  Structure: `user/create/` and the file: `create.[resource].ts`
+
+### Resource root folder
+
+- The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
+- In the opinionated mode, the root folder is the `src` folder and the resources scaffolded with `service, usecase, dto, controller` are created inside of the `useCases` folder.
+- Entities are created inside of the `entities` folder, and providers inside of the `providers` folder.
+
 ## Resource types
 
 Current available resources:
 
-| Long form   | short  |
-| ----------- | ------ |
-| usecase     | u      |
-| controller  | c      |
-| dto         | d      |
-| provider    | p      |
-| service     | s      |
+| Long form  | short |
+| ---------- | ----- |
+| usecase    | u     |
+| controller | c     |
+| dto        | d     |
+| provider   | p     |
+| service    | s     |
 
 ## Example of usage
 
-| Command                       | Expected result  
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| expressots g u user/find      | Use case to be created in the folder `useCases` with this folder structure: user/find     |
-| expressots g c user/find      | Controller to be created in the folder `useCases` inside of user/find                     |
-| expressots g d user/find      | DTO to be created in the folder `useCases` inside of user/find                            |
-| expressots g p email/email    | Provider to be created in the folder `providers` inside of user/find                      |
-| expressots g s user/find      | Service creates usecase, controller and dto and add them in the desired folder, user/find |
+| Command                    | Expected result                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| expressots g u user/find   | Use case to be created in the folder `useCases` with this folder structure: user/find     |
+| expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                     |
+| expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                            |
+| expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                      |
+| expressots g s user/find   | Service creates usecase, controller and dto and add them in the desired folder, user/find |
 
 All resources can be created using the structure `folder/subfolder/resource`.
 
@@ -66,9 +85,9 @@ Here is the current configuration file with all the available options:
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-    sourceRoot: "src",
-    scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: false,
+  sourceRoot: "src",
+  scaffoldPattern: Pattern.KEBAB_CASE,
+  opinionated: false,
 };
 
 export default config;

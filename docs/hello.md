@@ -6,9 +6,9 @@ sidebar_position: 0
 
 Thank you for embarking on this journey with us to create an ambitious and exciting developer experience that is continuously improving. 🎉🎉🎉
 
-Expresso TS is so simple yet efficient in getting the job done. We want to continue doing that, abstract all the complexities that the software development world brings and make it easy for you to build your next project.
+ExpressoTS is so simple yet efficient in getting the job done. We want to continue doing that, abstract all the complexities that the software development world brings and make it easy for you to build your next project.
 
-If you think about it, every programming language feature, framework built, is to accelerate your development process, however we are continuously failing in delivering good documentation, good developer experience (**everything should simply work**), plus reducing the amount of boilerplate code you have to write.
+If you think about it, every programming language feature, framework built, is to accelerate your development process, however we are continuously failing in delivering good documentation, good developer experience plus reducing the amount of boilerplate code you have to write. Everything should simply work!
 
 This is our commitment, to make your life easier, and to make you more productive.
 
@@ -23,16 +23,16 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 - **[links](intro.md)**: All bold texts are links to other pages of the documentation or external links.
 - `code`: helps emphasize code snippets and commands, or key technical terms.
 - Alerts: are used to highlight important information.
-:::note Used to express general information
-:::
-:::tip This is a tip
-:::
-:::info Extra information that is not vital
-:::
-:::caution Used to indicate spoilers
-:::
-:::warning Used to indicate when something could go wrong
-:::
+  :::note Used to express general information
+  :::
+  :::tip This is a tip
+  :::
+  :::info Extra information that is not vital
+  :::
+  :::caution Used to indicate spoilers
+  :::
+  :::warning Used to indicate when something could go wrong
+  :::
 
 ---
 
