@@ -20,39 +20,11 @@ When it comes to error handling in Node.js TypeScript APIs, there are several be
 
 ## Our approach
 
-We developed a standardized error class called `AppError` that can help to provide more detailed and informative error messages that can be easily interpreted and acted upon by developers.
-
-In addition, the `Report` class provides a centralized location for throwing and handling errors, which can simplify error handling throughout the application.
+We developed a standardized error reporting class called `Report` that provides a centralized location for throwing and handling errors, which can simplify error handling throughout the application.
 
 The errorHandler function provides a centralized location for handling errors that occur during request processing. By defining a standard error response format, it helps to ensure consistency in error messages that are returned to clients.
 
 This approach is best used in applications with a large codebase or complex business logic, where errors may occur frequently and need to be handled consistently across different parts of the application.
-
-### AppError class
-
-The `AppError` class extends the built-in Error class, adding a status code and service property.
-It is designed for handling application-specific errors with more detailed information.
-
-```typescript
-class AppError extends Error {
-
-    public statusCode: number;
-    public service: string;
-
-    /**
-     * Constructs a new AppError instance.
-     * @param statusCode - The status code associated with the error.
-     * @param message - The error message.
-     * @param service - An optional service name related to the error.
-     */
-    constructor(statusCode: number, message: string, service?: string) {
-        super(message);
-
-        this.statusCode = statusCode;
-        this.service = service;
-    }
-}
-```
 
 ### Report error
 
@@ -62,22 +34,23 @@ Report class is a utility class to manage and throw application-specific errors.
 class Report {
 
     /**
-     * Error method takes an instance of AppError and throws it.
-     * @param error - An instance of AppError containing error details.
+     * Error method takes an instance of Error and throws it.
+     * @param error - An instance of Error or a string representing the error message.
+     * @param statusCode - The HTTP status code of the error.
+     * @param service - The service where the error occurred.
      */
-    public static Error(error: AppError) {
-    
-        throw error;
-    }
+    public static Error(error: Error | string, statusCode?: number, service?: string): void { }
 }
 ```
 
+Once you report a known error through the `Report.Error()` method, the error will be handled by the `errorHandler()` middleware and will be returned to the client in the json parsed format.
+
 ### Middleware
 
+This middleware function is used to handle errors that occur during request processing.
+
 ```typescript
-function errorHandler(error: AppError, req: Request, res: Response, next: NextFunction): void {
-    
-    log(LogLevel.Error, error, error.service || "service-undefined");
+function errorHandler(error: IAppError, req: Request, res: Response, next: NextFunction): void {
     res.status(error.statusCode || StatusCode.InternalServerError).json({statusCode: error.statusCode, error: error.message});
 }
 
@@ -92,8 +65,12 @@ It logs the error, sets the status code, and sends a JSON response containing th
 ## Example of use
 
 ```typescript
- Report.Error(new AppError(StatusCode.BadRequest, "User already exists", "create-user-usecase"));
+Report.Error(error, StatusCode.BadRequest, "your-service");
+// Or
+Report.Error("your-error", StatusCode.BadRequest, "your-service");
 ```
+
+Use case example:
 
 ```typescript
 @provide(CreateUserUseCase)
@@ -107,13 +84,7 @@ class CreateUserUseCase {
             const userAlreadyExists = await this.userRepository.findByEmail(email);
 
             if (userAlreadyExists) {
-                Report.Error(
-                    new AppError(
-                        StatusCode.BadRequest,
-                        "User already exists",
-                        "create-user-usecase",
-                    ),
-                );
+                Report.Error("User already exists", StatusCode.BadRequest, "create-user-usecase");
             }
 
             const user: User | null = this.userRepository.create(new User(name, email));
@@ -143,7 +114,7 @@ class CreateUserUseCase {
 | Object          | Description                                                             |
 | --------------- | ----------------------------------------------------------------------- |
 | Report.Error    | Static method to report known errors                                    |
-| AppError        | App Error object that carries error stack, message and code             |
+| IAppError       | App Error interface that defines error object format                    |
 | StatusCode      | Http responses code and message                                         |
 | Error Message   | Error message detail that the developer wants to log                    |
 | Error Service   | To be used in the log system to indicate where the error was generated  |

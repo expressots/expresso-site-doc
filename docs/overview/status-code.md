@@ -65,13 +65,7 @@ class CreateUserUseCase {
             );
 
             if (!user) {
-                Report.Error(
-                    new AppError(
-                        StatusCode.BadRequest, // Status code
-                        "User already exists",
-                        "create-user-usecase",
-                    ),
-                );
+                Report.Error("User already exists", StatusCode.BadRequest,"create-user-usecase");
             }
 
             let response: ICreateUserResponseDTO;
