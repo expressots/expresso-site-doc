@@ -32,14 +32,6 @@ Verify the available commands and options:
 expressots --help
 ```
 
-### Version
-
-Verify CLI version:
-
-```bash
-expressots --version
-```
-
 ### Info
 
 Providers information about your Operational System, Project and CLI version:
@@ -79,7 +71,7 @@ The flag `-d` is optional and it's used to specify the directory where the proje
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

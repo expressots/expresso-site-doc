@@ -45,11 +45,11 @@ Como resultado, os DTOs ajudam a segregar e filtrar os dados enviados ao cliente
 
 ## Classe Controller
 
-A classe controller no Expresso TS representa o endpoint que você deseja criar para a sua aplicação. Você pode definir a rota e o método HTTP para o controller usando o decorador `@controller()` do [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
+A classe controller no ExpressoTS representa o endpoint que você deseja criar para a sua aplicação. Você pode definir a rota e o método HTTP para o controller usando o decorador `@controller()` do [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
 
 Cada classe de controlador contém um único método chamado `execute()` que manipula a solicitação e envia a resposta. Este método é anotado **[@httpMethods()](./decorators.md)** com decorador do mesmo pacote Inversify. Adicionalmente os parâmetros do método `execute()` pode também ser anotados.
 
-Aqui está um exemplo de uma classe de controlador Expresso TS:
+Aqui está um exemplo de uma classe de controlador ExpressoTS:
 
 ```typescript
 @controller("/")
@@ -57,7 +57,7 @@ class AppController {
   
   @httpGet("/")
   execute(@response() res: any) {
-    return res.send("Hello from Expresso TS!");
+    return res.send("Hello from ExpressoTS!");
   }
 }
 ```
@@ -132,19 +132,13 @@ class CreateUserController extends BaseController { }
 
 O controlador acima terá o escopo de `Singleton` e será compartilhado entre todas as solicitações.
 
-## Métodos HTTP e decoradores de parametros
+## Decoradores do controlador
 
-Os decoradores de métodos HTTP e parâmetros são um conjunto de anotações usadas em aplicações Expresso TS para definir o roteamento e o tratamento de solicitações HTTP.
-
-Os decoradores de métodos HTTP incluem @httpGet(), @httpPost(), @httpPut(), @httpPatch(), @httpHead(), @httpDelete() e @httpMethod(). Esses decoradores são usados para definir o método HTTP e o caminho de uma rota específica na aplicação.
-
-Os decoradores de parâmetros incluem @queryParam(), @requestParam(), @requestBody(), @requestHeaders(), @cookies(), @next() e @request(). Esses decoradores são usados para recuperar dados de solicitações HTTP, como parâmetros de consulta, cabeçalhos de solicitação e corpo da solicitação.
-
-O uso desses decoradores pode simplificar o roteamento e o tratamento de solicitações HTTP em aplicações Node.js e tornar o código mais legível e fácil de manter.
+Os decoradores de métodos HTTP e parâmetros são um conjunto de anotações usadas em aplicações ExpressoTS para definir o roteamento e o tratamento de solicitações HTTP. O uso desses decoradores pode simplificar o roteamento e o tratamento de solicitações HTTP em aplicações Node.js e tornar o código mais legível e fácil de manter.
 
 ### Decoradores de métodos HTTP
 
-Aqui está uma lista de todos os decoradores `@httpMethods()` disponíveis no Expresso TS, juntamente com sua descrição e uso:
+Aqui está uma lista de todos os decoradores `@httpMethods()` disponíveis no ExpressoTS, juntamente com sua descrição e uso:
 
 | Decorador   | Descrição                                                          | Uso                          |
 | ----------- | ------------------------------------------------------------------ | ---------------------------- |
@@ -158,7 +152,7 @@ Aqui está uma lista de todos os decoradores `@httpMethods()` disponíveis no Ex
 
 ### Decoradores de parâmetros
 
-Aqui está uma lista de todos os decoradores de parâmetros disponíveis no Expresso TS, juntamente com sua descrição e uso:
+Aqui está uma lista de todos os decoradores de parâmetros disponíveis no ExpressoTS, juntamente com sua descrição e uso:
 
 | Decorator	                           | Descrição	                                        | Uso
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
@@ -211,7 +205,7 @@ class ProductController {
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

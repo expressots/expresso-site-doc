@@ -43,7 +43,7 @@ Decoradores disponíveis para seus métodos de controlador.
 
 ### Decoradores de parâmetros
 
-Aqui está uma lista de todos os decoradores de parâmetros disponíveis no Expresso TS, juntamente com sua descrição e uso:
+Aqui está uma lista de todos os decoradores de parâmetros disponíveis no ExpressoTS, juntamente com sua descrição e uso:
 
 | Decorador	                           | Descrição	                                        | Uso
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
@@ -60,7 +60,7 @@ Aqui está uma lista de todos os decoradores de parâmetros disponíveis no Expr
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

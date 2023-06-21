@@ -4,21 +4,15 @@ sidebar_position: 4
 
 # Módulos
 
-Antes de explicar o que é um módulo único, vamos falar primeiro sobre o que é um módulo de contêiner.
-
 Um módulo de contêiner é uma coleção de serviços, no nosso caso mais especificamente `Controllers` e suas dependências que podem ser registrados e resolvidos pelo contêiner InversifyJS.
 
-Um módulo de contêiner é uma classe que exporta um objeto Module do inversify, que é essencialmente um objeto de configuração que define as ligações entre serviços (no Expresso TS, serviços são Controllers) e suas dependências. O objeto Module possui um método de ligação que permite definir ligações entre serviços e suas dependências.
+Um módulo de contêiner é uma classe que exporta um objeto Module do inversify, que é essencialmente um objeto de configuração que define as ligações entre serviços (no ExpressoTS, serviços são Controllers) e suas dependências. O objeto Module possui um método de ligação que permite definir ligações entre serviços e suas dependências.
 
 Para entender completamente como você pode registrar suas classes, como casos de uso, entidades, provedores, repositórios, auxiliares, etc., leia a seção **[Injeção de dependência](di.md)**. Essencialmente, temos um grupo de decoradores que substitui o escopo padrão do Container.
 
 ## Module or container module
 
 Com o ExpressoTS, você não precisa se preocupar em fazer ligações manualmente, criamos uma função auxiliar chamada `CreateModule` que recebe um array de controladores e retorna um módulo com todos os controladores registrados e suas dependências injetadas.
-
-:::caution ALERTA DE SPOILER
-Estamos criando um mecanismo para que você possa determinar os tipos de vinculação de suas classes, para ter mais controle sobre as ligações, decidindo quando usar o escopo `Singleton`, `Transient` ou `Request`.
-:::
 
 ## Container do módulo
 
@@ -28,7 +22,7 @@ Uma vez que um módulo de contêiner tenha sido definido, ele pode ser carregado
 
 Módulos de contêiner podem ser uma ferramenta poderosa para gerenciar grandes aplicações com gráficos de dependência complexos, pois permitem que você organize seu código em partes menores e mais gerenciáveis e tornem mais fácil o entendimento das relações entre diferentes partes da aplicação.
 
-Um módulo de contêiner, ou simplesmente um módulo Expresso TS, é definido no exemplo abaixo:
+Um módulo de contêiner, ou simplesmente um módulo ExpressoTS, é definido no exemplo abaixo:
 
 ```typescript
 const AppModule = CreateModule([
@@ -65,7 +59,7 @@ A precedência do escopo é definida da seguinte forma: escopo `AppContainer` > 
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

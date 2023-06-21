@@ -4,19 +4,19 @@ sidebar_position: 2
 
 # Aplicação
 
-A Visão Geral da Aplicação fornece uma demonstração abrangente dos principais componentes de uma aplicação Expresso TS. No coração de uma aplicação Expresso TS encontra-se a classe Application, que serve como base para criar e configurar o servidor. Além disso, a classe Application faz uso do container de aplicação do Inversify que carrega todos os módulos, incluindo suas respectivas rotas [controllers]. Isso garante um processo simplificado e eficiente para lidar com as solicitações de entrada e fornecer as respostas apropriadas.
+A Visão Geral da Aplicação fornece uma demonstração abrangente dos principais componentes de uma aplicação ExpressoTS. No coração de uma aplicação ExpressoTS encontra-se a classe Application, que serve como base para criar e configurar o servidor. Além disso, a classe Application faz uso do container de aplicação do Inversify que carrega todos os módulos, incluindo suas respectivas rotas [controllers]. Isso garante um processo simplificado e eficiente para lidar com as solicitações de entrada e fornecer as respostas apropriadas.
 
 ![Application Overiview](./img/app-overview.png)
 
 ExpressoTS é um framework para aplicações web que fornece uma camada simples de abstração em torno de servidores HTTP populares como **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, ou **[Koa](https://koajs.com/)**.
 
 :::info
-Atualmente, o Expresso TS suporta apenas o Express, pois testamos minuciosamente essa integração.
+Atualmente, o ExpressoTS suporta apenas o Express, pois testamos minuciosamente essa integração.
 :::
 
-A arquitetura de uma aplicação Expresso TS é baseado no **[Inversify's](https://inversify.io/)** Container IoC, que é usado para identificar e injetar dependências nos construtores de classes. Essa abordagem permite que o contêiner IoC carregue todos os módulos necessários, incluindo suas rotas (controladores) respectivas. Ao usar casos de uso e provedores conforme necessário, os roteadores podem lidar com solicitações recebidas.
+A arquitetura de uma aplicação ExpressoTS é baseado no **[Inversify's](https://inversify.io/)** Container IoC, que é usado para identificar e injetar dependências nos construtores de classes. Essa abordagem permite que o contêiner IoC carregue todos os módulos necessários, incluindo suas rotas (controladores) respectivas. Ao usar casos de uso e provedores conforme necessário, os roteadores podem lidar com solicitações recebidas.
 
-Ao aproveitar o poder do Inversify, o Expresso TS fornece uma arquitetura escalável e modular que ajuda a desacoplar componentes e melhorar a manutenção do código. Isso permite que os desenvolvedores se concentrem em escrever um código limpo e fácil de manter, em vez de se preocupar com a gestão de dependências.
+Ao aproveitar o poder do Inversify, o ExpressoTS fornece uma arquitetura escalável e modular que ajuda a desacoplar componentes e melhorar a manutenção do código. Isso permite que os desenvolvedores se concentrem em escrever um código limpo e fácil de manter, em vez de se preocupar com a gestão de dependências.
 
 ## Detalhe dos componentes da aplicação
 
@@ -34,22 +34,20 @@ Provedores e repositórios são componentes opcionais. Você pode usá-los se pr
 
 ## Fluxo de Trabalho
 
-O fluxo de trabalho de uma aplicação Expresso TS é direto, conforme mostrado no diagrama acima. 
+O fluxo de trabalho de uma aplicação ExpressoTS é direto, conforme mostrado no diagrama acima. 
 
 1. Após inicializar a aplicação com todos os seus componentes, incluindo o contêiner, módulos e controladores, o servidor começa a ouvir as solicitações recebidas. 
 2. Quando uma solicitação é recebida, o servidor procura a rota correspondente e executa o controlador associado, que geralmente expõe endpoints. 
 3. O controlador então chama o caso de uso relevante, que por sua vez chama o provedor apropriado quando necessário. Os provedores são componentes externos que oferecem funcionalidade adicional à aplicação.
 
 :::warning Inicialização da aplicação sem controladores
-O Expresso TS irá impedir que você faça isso, pois não há ouvintes para lidar com as solicitações recebidas. Você verá a seguinte mensagem no console:
+O ExpressoTS irá impedir que você faça isso, pois não há ouvintes para lidar com as solicitações recebidas. Você verá a seguinte mensagem no console:
 **_Nenhum controlador foi encontrado! Por favor, certifique-se de registrar pelo menos um controlador._**
 :::
 
 ## Classe Aplication
 
 A classe Application oferece uma forma de criar e configurar o servidor, passando **[Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html)** ou outro middlewares durante a criação do servidor.
-
-Também fornece um método listen que inicia o servidor e aguarda por requisições de entrada. No método listen, os desenvolvedores podem definir não apenas o número da porta, mas também o ambiente do servidor, que pode ser de desenvolvimento, teste ou produção. Além disso, os desenvolvedores podem definir o nome e a versão da aplicação para serem exibidos no console quando o servidor inicia, como mostrado no exemplo a seguir:
 
 Definição da classe Aplication
 
@@ -188,7 +186,7 @@ Dependendo do ambiente em que está executando a aplicação, você verá a segu
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

@@ -17,7 +17,7 @@ In the context of dependency injection, providers are used to decouple the creat
 Overall, providers are an important aspect of clean code because they help to promote loose coupling, maintainability, and flexibility in software systems.
 
 :::info
-Expresso TS uses providers to extend the application capability by providing additional functionalities.
+ExpressoTS uses providers to extend the application capability by providing additional functionalities.
 :::
 
 ## Example
@@ -97,7 +97,7 @@ class MailTrapProvider {
                         email: Env.Mailtrap.INBOX_ALIAS
                     },
                     from: {
-                        name: "Expresso TS",
+                        name: "ExpressoTS",
                         email: "noreply@expresso-ts.com"
                     },
                     subject: "Successfully logged in!",
@@ -147,7 +147,7 @@ In the Use Case above we injected MailTrapProvider in the constructor making use
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

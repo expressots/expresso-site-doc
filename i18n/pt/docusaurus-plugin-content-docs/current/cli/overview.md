@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Visão geral
 
-O CLI do Expresso TS é uma ferramenta de interface de linha de comando que ajuda a `criar` projetos ExpressoTS e `scaffolds` de recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
+O CLI do ExpressoTS é uma ferramenta de interface de linha de comando que ajuda a `criar` projetos ExpressoTS e `scaffolds` de recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
 
 :::info
 Neste tutorial, usamos o gerenciador de pacotes `npm`, mas você pode usar o seu gerenciador de pacotes favorito, como `yarn` ou `pnpm`.
@@ -30,14 +30,6 @@ Para verificar os comandos e opções disponíveis:
 
 ```bash
 expressots --help
-```
-
-### Versão
-
-Verificar a versão da CLI:
-
-```bash
-expressots --version
 ```
 
 ### Informação
@@ -79,7 +71,7 @@ A flag `-d` é opcional e serve para especificar o diretório onde o projeto ser
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

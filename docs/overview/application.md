@@ -11,7 +11,7 @@ The Application Overview provides a comprehensive demonstration of the main comp
 ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, or **[Koa](https://koajs.com/)**.
 
 :::info
-Currently, Expresso TS only supports Express, as we tested it thoroughly.
+Currently, ExpressoTS only supports Express, as we tested it thoroughly.
 :::
 
 The architecture of an ExpressoTS application is around of the **[Inversify's](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
@@ -48,8 +48,6 @@ ExpressoTS will prevent you to do that as there are no listeners to handle incom
 ## Application class
 
 The Application class offers a way of creating and configuring the server, passing **[Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middlewares upon server creation.
-
-It also provides a listen method that starts the server and waits for incoming requests. In the listen method, developers can define not only the port number, but also the server environment, which can be development, test, or production. Additionally, developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
 Application class definition
 
@@ -188,7 +186,7 @@ Depending on the environment you are running the application, you will see the f
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

@@ -20,7 +20,7 @@ Os códigos de status aqui mostrados estão definidos na [RFC 9110](https://http
 
 ## ExpressoTS código de status
 
-Em Expresso TS, temos uma lista de todos os códigos de status listados na MDN que você pode usar em sua aplicação. Aqui está um exemplo de uso:
+Em ExpressoTS, temos uma lista de todos os códigos de status listados na MDN que você pode usar em sua aplicação. Aqui está um exemplo de uso:
 
 ### Em uma controladora
 
@@ -98,7 +98,7 @@ class CreateUserUseCase {
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

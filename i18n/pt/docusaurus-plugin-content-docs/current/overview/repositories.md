@@ -4,13 +4,13 @@ sidebar_position: 8
 
 # Repositórios
 
-No Expresso TS, uma classe de repositório geralmente inclui métodos como create, update, find, findOne e delete, que correspondem a operações comuns de CRUD (Create, Read, Update, Delete) no armazenamento de dados. Esses métodos podem ser implementados usando uma biblioteca de banco de dados ou uma ferramenta de ORM (Object-Relational Mapping) como o **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
+No ExpressoTS, uma classe de repositório geralmente inclui métodos como create, update, find, findOne e delete, que correspondem a operações comuns de CRUD (Create, Read, Update, Delete) no armazenamento de dados. Esses métodos podem ser implementados usando uma biblioteca de banco de dados ou uma ferramenta de ORM (Object-Relational Mapping) como o **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
 
 ## O padrão de repositório
 
 O padrão repository é um padrão de design comumente usado no desenvolvimento de software que fornece uma maneira de abstrair a camada de persistência de dados de uma aplicação. Em TypeScript, esse padrão pode ser implementado usando classes que representam repositórios, que são responsáveis por recuperar, armazenar, atualizar e excluir dados de uma fonte de dados, como um banco de dados.
 
-Nós oferecemos um exemplo de como implementar o padrão de repositório no modelo de projeto do Expresso TS. Você pode encontrá-lo diretamente no [templates](https://github.com/expressots/expressots/tree/main/templates), pasta template do ExpressoTS.
+Nós oferecemos um exemplo de como implementar o padrão de repositório no modelo de projeto do ExpressoTS. Você pode encontrá-lo diretamente no [templates](https://github.com/expressots/expressots/tree/main/templates), pasta template do ExpressoTS.
 
 ## Objetivo do padrão de repositório
 
@@ -32,10 +32,10 @@ Ao usar o padrão de repositório, podemos trocar facilmente o mecanismo de arma
 
 ## Exemplo
 
-Oferecemos um exemplo de implementação do padrão Repository no template opinativo do Expresso TS.
+Oferecemos um exemplo de implementação do padrão Repository no template opinativo do ExpressoTS.
 
 :::info
-No Expresso TS, implementamos o padrão repository em uma pasta específica chamada  **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
+No ExpressoTS, implementamos o padrão repository em uma pasta específica chamada  **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
 :::
 
 ### Interface do base repositório
@@ -107,7 +107,7 @@ class UserRepository extends BaseRepository<User> {
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

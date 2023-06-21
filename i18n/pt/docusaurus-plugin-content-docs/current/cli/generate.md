@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Gerar recursos
 
-Para proporcionar uma melhor experiência de desenvolvedor, a CLI do Expresso TS fornece um conjunto de comandos para ajudar a criar os recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
+Para proporcionar uma melhor experiência de desenvolvedor, a CLI do ExpressoTS fornece um conjunto de comandos para ajudar a criar os recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
 
 Este comando permite que os desenvolvedores estejam à frente da curva, gerando o código boilerplate para a aplicação, para que possam se concentrar na lógica de negócios.
 
@@ -105,7 +105,7 @@ Tente utilizar o maior número possível de formas de criação de recursos disp
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

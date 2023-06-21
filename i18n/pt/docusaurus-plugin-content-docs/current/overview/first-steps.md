@@ -45,10 +45,10 @@ expressots new <nome-do-projeto> -t <template> -p <gerenciado-de-pacotes>
 ```
 
 :::tip
-Expresso TS oferece duas opções de modelos de projetos:
+ExpressoTS oferece duas opções de modelos de projetos:
 
-- **opinativo**: O modelo opinativo é feito para projetos mais complexos, já que fornece uma estrutura de projeto mais robusta e uma arquitetura em camadas.
-- **não-opinativo**: Quer ter a liberdade de construir e estruturar seu projeto como desejar? O modelo não-opinativo oferece uma estrutura simples, com apenas os arquivos necessários para começar.
+- Opinativo: O modelo opinativo é feito para projetos mais complexos, já que fornece uma estrutura de projeto mais robusta e uma arquitetura em camadas.
+- Não-opinativo: Quer ter a liberdade de construir e estruturar seu projeto como desejar? O modelo não-opinativo oferece uma estrutura simples, com apenas os arquivos necessários para começar.
 :::
 
 Depois de criar seu projeto, com o `nome-do-projeto` desejado e dependendo do tipo de projeto selecionado, seu projeto terá uma estrutura de pasta e arquivo diferente. Aqui estão as estruturas específicas de pasta e arquivo para cada tipo de projeto:
@@ -73,8 +73,8 @@ nome-do-projeto/
 | `app.controller.ts`   | Um controller básico com uma rota simples.                                                                           |
 | `app.module.ts`       | Módulo da aplicação.                                                                                                 |
 | `app.usecase.ts`      | Um caso de uso com único método, chamado `execute()`.                                                                |
-| `main.ts`             | O ponto de partida de uma aplicação **ExpressoTS**.                                                                  |
-| `app.usecase.spec.ts` | Exemplo de test unitário do **app.usecase**.                                                                         |
+| `main.ts`             | O ponto de partida de uma aplicação ExpressoTS.                                                                  |
+| `app.usecase.spec.ts` | Exemplo de test unitário do app.usecase.                                                                         |
 
 ### Template opinativo
 
@@ -141,14 +141,14 @@ Informações adicionais sobre **[Provedores](./providers.md)**, **[Casos de Uso
 
 Existe 3 provedores:
 
-- **application**: Esse provedor permite estender a classe Application do @expressots/core, que fornece os **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
+- application: Esse provedor permite estender a classe Application do @expressots/core, que fornece os **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
 
-- **bindingType/singleton**: Esse provedor permite ligar uma classe como um singleton. Usamos esse provedor para vincular a classe InMemoryDB como um singleton, para que possamos usar a mesma instância da classe InMemoryDB em toda a aplicação.
+- bindingType/singleton: Esse provedor permite ligar uma classe como um singleton. Usamos esse provedor para vincular a classe InMemoryDB como um singleton, para que possamos usar a mesma instância da classe InMemoryDB em toda a aplicação.
 
-- **db-in-memory**: Esse é um provedor de banco de dados simples em memória que permite armazenar dados em memória. Usamos esse provedor nos casos de uso de usuário para armazenar e recuperar dados de usuário.
+- db-in-memory: Esse é um provedor de banco de dados simples em memória que permite armazenar dados em memória. Usamos esse provedor nos casos de uso de usuário para armazenar e recuperar dados de usuário.
 
 :::info
-**bindingType and InMemoryDB** Os provedores são exemplos fornecidos para ajudá-lo a começar. Você pode removê-los se desejar.
+bindingType and InMemoryDB Os provedores são exemplos fornecidos para ajudá-lo a começar. Você pode removê-los se desejar.
 :::
 
 #### Caso de uso
@@ -159,12 +159,12 @@ Os casos de uso no modelo Opinativo são organizados em 3 módulos:
 
 Aqui estão os endpoints em cada módulo:
 
-- **[AppModule]/app.controller**: retorna `Hello from Expresso TS App`
-- **[UserModule]/user-create.controller**: cria um novo usuário no banco de dados na memória
-- **[UserModule]/user-delete.controller**: excluir um usuário por `id` no banco de dados na memória
-- **[UserModule]/user-find.controller**: retornar um usuário do banco de dados na memória
-- **[UserModule]/user-findall.controller**: retorna todos os usuários do banco de dados na memória
-- **[UserModule]/user-update.controller**: atualizar as informações de um usuário do banco de dados na memória
+- [AppModule]/app.controller: retorna `Hello from ExpressoTS App`
+- [UserModule]/user-create.controller: cria um novo usuário no banco de dados na memória
+- [UserModule]/user-delete.controller: excluir um usuário por `id` no banco de dados na memória
+- [UserModule]/user-find.controller: retornar um usuário do banco de dados na memória
+- [UserModule]/user-findall.controller: retorna todos os usuários do banco de dados na memória
+- [UserModule]/user-update.controller: atualizar as informações de um usuário do banco de dados na memória
 
 #### Main
 
@@ -369,7 +369,7 @@ Atualmente, estamos trabalhando na construção da RoadMap do projeto e planejam
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

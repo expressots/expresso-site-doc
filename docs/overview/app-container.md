@@ -69,21 +69,11 @@ export default container;
 
 The reason why we created the `AppContainer` class is to reduce the complexity of how the container is constructed using Inversify directly, also was to provide a way to register modules without too much extra configuration.
 
-:::note
-InversifyJS contains a helper function called `buildProviderModule()` that can be used to build a module that automatically registers all providers and controllers in a given directory.
-
-The function takes a string argument that represents the path to the directory containing the provider and controller classes, and returns a module that can be registered in the InversifyJS container. The module will automatically register all provider and controller classes in the directory and its subdirectories.
-
-This is a useful feature when building large applications with many providers and controllers, as it allows you to easily register them without having to manually register them one by one.
-
-Note that buildProviderModule() only works with providers and controllers that are decorated with the @injectable() decorator.
-:::
-
 ---
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

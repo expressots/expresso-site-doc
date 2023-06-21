@@ -43,7 +43,7 @@ Decorators available for your controller methods.
 
 ### Parameter decorators
 
-Here is a list of all parameter decorators available in Expresso TS, along with their description and usage:
+Here is a list of all parameter decorators available in ExpressoTS, along with their description and usage:
 
 | Decorator	                           | Description	                                        | Usage
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
@@ -60,7 +60,7 @@ Here is a list of all parameter decorators available in Expresso TS, along with 
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star тнР the project

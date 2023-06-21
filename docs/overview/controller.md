@@ -57,7 +57,7 @@ class AppController {
   
   @httpGet("/")
   execute(@response() res: any) {
-    return res.send("Hello from Expresso TS!");
+    return res.send("Hello from ExpressoTS!");
   }
 }
 ```
@@ -134,13 +134,7 @@ The controller above will be scoped as `Singleton` and will be shared across all
 
 ## Controller decorators
 
-HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests.
-
-HTTP method decorators include @httpGet(), @httpPost(), @httpPut(), @httpPatch(), @httpHead(), @httpDelete(), and @httpMethod(). These decorators are used to define the HTTP method and path of a specific route in the application.
-
-Parameter decorators include @queryParam(), @requestParam(), @requestBody(), @requestHeaders(), @cookies(), @next(), and @request(). These decorators are used to retrieve data from HTTP requests such as query parameters, request headers, and request body.
-
-Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
+HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests. Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
 
 ### HTTP methods decorators
 
@@ -158,7 +152,7 @@ Here's a list of all available `@httpMethods()` decorators in ExpressoTS, along 
 
 ### Parameter decorators
 
-Here's a list of all available parameter decorators in Expresso TS, along with their description and usage:
+Here's a list of all available parameter decorators in ExpressoTS, along with their description and usage:
 
 | Decorator                            | Description                                            | Usage
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
@@ -211,7 +205,7 @@ class ProductController {
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # Governança
 
-Expresso TS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
+ExpressoTS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
 
 ## Time Principal
 
@@ -28,7 +28,7 @@ Atualmente, essa equipe está supervisionando os seguintes itens:
 
 ## Tomada de Decisão
 
-Cada decisão importante no Expresso TS começa com uma proposta. As propostas podem ser escritas por qualquer pessoa da comunidade. A equipe principal revisará a proposta e decidirá se a aceitará, rejeitará ou solicitará mais informações.
+Cada decisão importante no ExpressoTS começa com uma proposta. As propostas podem ser escritas por qualquer pessoa da comunidade. A equipe principal revisará a proposta e decidirá se a aceitará, rejeitará ou solicitará mais informações.
 
 **[Corrija um bug ou envie uma proposta](https://github.com/expressots/expressots/issues/new/choose)**
 
@@ -48,7 +48,7 @@ Cada decisão importante no Expresso TS começa com uma proposta. As propostas p
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

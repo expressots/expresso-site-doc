@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # Entidades
 
-As entidades são os componentes principais de uma aplicação Expresso TS. Elas são os objetos que são usados para representar os dados que serão manipulados pela aplicação.
+As entidades são os componentes principais de uma aplicação ExpressoTS. Elas são os objetos que são usados para representar os dados que serão manipulados pela aplicação.
 
 Se uma entidade mudar, provavelmente os casos de uso e controladores também mudarão. Isso ocorre porque os casos de uso e controladores são responsáveis por manipular os dados representados pelas entidades.
 
@@ -127,7 +127,7 @@ Como mencionado acima, existem várias outras abordagens, desde que você perman
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
