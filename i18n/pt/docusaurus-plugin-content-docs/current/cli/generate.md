@@ -13,14 +13,33 @@ Este comando permite que os desenvolvedores estejam à frente da curva, gerando 
 O comando para gerar recursos podem ser expressados de duas formas:
 
 ```bash
-expressots generate <resource> <structure>
+expressots generate <recurso> <estrutura>
 ```
 
 Ou em sua forma curta:
 
 ```bash
-expressots g <resource> <structure>
+expressots g <recurso> <estrutura>
 ```
+
+### Estrutura de comando
+
+Nós fornecemos duas estruturas diferentes para estruturar os recursos:
+
+- **[entidade-ação]**: `expressots generate service user-create`
+  Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `user-create.[recurso].ts`
+
+- **[pasta/subpasta/recurso]**: `expressots generate service user/create`
+  Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `create.[recurso].ts`
+
+  Se você adicionar `/` no final da estrutura, o CLI criará o recurso dentro da pasta. Exemplo: `expressots generate service user/create/`
+  Estrutura: `user/create/` e o arquivo: `create.[recurso].ts`
+
+### Pasta raiz do recurso
+
+- A pasta raiz de todos os recursos é a `src`. Isso pode ser alterado no arquivo `expressots.config.ts`.
+- No modo opinativo, a pasta raiz é o `src` e os recursos montados com `service, usecase, dto, controller` são criados dentro do `useCases`.
+- As entidades são criadas dentro do `entities`, e provedores dentro do `providers`.
 
 ## Tipos de recursos
 
@@ -38,8 +57,8 @@ Recursos atualmente disponíveis para serem gerados:
 
 | Comando                       | Resultado esperado  
 | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| expressots g u user/find      | Caso de uso para ser criado na pasta useCases com esta estrutura de pasta: user/find      |
-| expressots g c user/find      | Controlador para ser criado na pasta useCases dentro de user/find                         |
+| expressots g u user/find      | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find      |
+| expressots g c user/find      | Controlador para ser criado na pasta `useCases` dentro de user/find                         |
 | expressots g d user/find      | DTO a ser criado na pasta `useCases` dentro de user/find                                  |
 | expressots g p email/email    | Provedor a ser criado na pasta `providers` dentro de user/find                            |
 | expressots g s user/find      | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find             |

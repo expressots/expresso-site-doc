@@ -18,7 +18,7 @@ O objetivo principal do padrão repository é separar a lógica de negócio da l
 
 ## Benefícios de usar o padrão de repositório
 
-Ao usar um repositório, a aplicação pode se beneficiar de várias vantagens, tais como:
+Ao usar o padrão de repositório, podemos trocar facilmente o mecanismo de armazenamento de dados subjacente sem afetar o restante do aplicativo. Por exemplo, podemos mudar de um banco de dados relacional para um banco de dados NoSQL ou até mesmo um mecanismo de armazenamento completamente diferente, como uma API da Web, com alterações mínimas no restante do código do aplicativo. Além disso, o padrão de repositório pode facilitar o teste do aplicativo, pois podemos usar repositórios fictícios para simular o armazenamento de dados para fins de teste. Aqui estão alguns dos benefícios de usar o padrão de repositório:
 
 - Centralização da lógica de acesso a dados: toda a lógica de acesso a dados é contida dentro do repositório, tornando mais fácil manter e alterar a implementação do armazenamento de dados sem afetar o resto da aplicação.
 
@@ -30,14 +30,12 @@ Ao usar um repositório, a aplicação pode se beneficiar de várias vantagens, 
 
 - Em geral, o padrão repository é uma ferramenta poderosa que pode ajudar os desenvolvedores a construir aplicativos TypeScript escaláveis e fáceis de manter que estão mais focados nos requisitos de negócios e menos nos detalhes de implementação técnica.
 
-Ao usar o padrão repository, podemos facilmente trocar o mecanismo de armazenamento de dados subjacente sem afetar o restante do código da aplicação. Por exemplo, podemos mudar de um banco de dados relacional para um banco de dados NoSQL, ou até mesmo para um mecanismo de armazenamento completamente diferente, como uma API da web, com alterações mínimas no restante do código da aplicação. Além disso, o padrão repository pode tornar mais fácil testar a aplicação, já que podemos usar repositórios simulados para simular o armazenamento de dados para fins de teste.
-
 ## Exemplo
 
 Oferecemos um exemplo de implementação do padrão Repository no template opinativo do Expresso TS.
 
 :::info
-No Expresso TS, implementamos o padrão repository em uma pasta específica chamada "repositories", que é separada da pasta "provider" intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
+No Expresso TS, implementamos o padrão repository em uma pasta específica chamada  **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
 :::
 
 ### Interface do base repositório
@@ -90,6 +88,17 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 
   findAll(): T[] {
     return this.DB;
+  }
+}
+```
+
+### User repository
+
+```typescript
+@provide(UserRepository)
+class UserRepository extends BaseRepository<User> {
+  constructor() {
+    super();
   }
 }
 ```

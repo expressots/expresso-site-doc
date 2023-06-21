@@ -1,8 +1,8 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 ---
 
-# Dependencias
+# Dependências
 
 O propósito desta seção é listar todas as dependências usadas pelo ExpressoTS e nossa visão sobre o gerenciamento de dependências.
 

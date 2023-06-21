@@ -15,7 +15,7 @@ We use in this tutorial the `npm` package manager, but you can use your favorite
 First install the CLI globally using the command below:
 
 ```bash
-npm install @expressots/cli -g
+npm install -g @expressots/cli
 ```
 
 ## Basic usage
@@ -30,6 +30,14 @@ Verify the available commands and options:
 
 ```bash
 expressots --help
+```
+
+### Version
+
+Verify CLI version:
+
+```bash
+expressots --version
 ```
 
 ### Info

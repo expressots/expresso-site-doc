@@ -4,9 +4,13 @@ sidebar_position: 7
 
 # Provedores
 
-Do ponto de vista da arquitetura limpa, os Providers são responsáveis por fornecer dados e/ou mecanismos para componentes de nível superior no sistema, como casos de uso ou apresentadores, e podem abstrair os detalhes de como os dados/mecanismos são realmente recuperados, armazenados ou executados. Essa abstração permite que o sistema mude facilmente entre diferentes fontes/provedores de dados sem afetar os componentes de nível superior.
+Do ponto de vista da arquitetura limpa, os `Providers` são responsáveis por fornecer dados e/ou mecanismos para componentes de nível superior no sistema, como casos de uso ou apresentadores, e podem abstrair os detalhes de como os dados/mecanismos são realmente recuperados, armazenados ou executados. Essa abstração permite que o sistema mude facilmente entre diferentes fontes/provedores de dados sem afetar os componentes de nível superior.
 
 Os provedores podem ser implementados como classes ou funções, e normalmente fazem uso de componentes de infraestrutura, como bancos de dados, serviços da web ou sistemas de arquivos para realmente recuperar ou armazenar dados e executar outras tarefas. O objetivo de um provedor é encapsular todos os detalhes desses componentes de nível inferior e apresentar uma interface simples e de alto nível para o resto do sistema.
+
+## Objetivo do provedor
+
+O objetivo de um Provedor é encapsular todos os detalhes dos componentes "substituíveis" e apresentar uma interface simples e de alto nível para o resto do sistema.
 
 No contexto da injeção de dependência, os provedores são usados para desacoplar a criação e configuração de objetos de seu uso, o que permite testes mais fáceis, manutenção e escalabilidade do código. Ao usar provedores para gerenciar dependências, os desenvolvedores podem evitar o acoplamento estreito de componentes e, em vez disso, focar no design de alto nível do sistema.
 
@@ -18,7 +22,7 @@ O Expresso TS utiliza providers para estender a capacidade da aplicação fornec
 
 ## Exemplo
 
-Vamos pegar o exemplo fornecido na seção Use Case.
+Vamos pegar o exemplo fornecido na seção **[Use Case](usecase.md#example)**.
 
 Neste cenário, o usuário está tentando fazer login no sistema, e de acordo com a especificação, o usuário pode tentar inserir suas credenciais três vezes antes que o sistema bloqueie sua conta. Se a conta do usuário estiver bloqueada, o sistema envia um e-mail para notificar o usuário.
 

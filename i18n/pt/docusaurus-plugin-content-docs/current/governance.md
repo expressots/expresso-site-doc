@@ -6,7 +6,7 @@ sidebar_position: 7
 
 Expresso TS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
 
-## Time principal
+## Time Principal
 
 Atualmente, temos uma pequena equipe principal de colaboradores constantes. Estamos procurando expandir esta equipe para incluir mais pessoas da comunidade com uma ampla gama de habilidades e interesses.
 
@@ -26,13 +26,13 @@ Atualmente, essa equipe está supervisionando os seguintes itens:
 - Testes
 - Roadmap
 
-## Decision Making
+## Tomada de Decisão
 
-Each major decision in Expresso TS starts with a proposal. Proposals can be written by anyone in the community. The core team will review the proposal and decide whether to accept it, reject it, or ask for more information.
+Cada decisão importante no Expresso TS começa com uma proposta. As propostas podem ser escritas por qualquer pessoa da comunidade. A equipe principal revisará a proposta e decidirá se a aceitará, rejeitará ou solicitará mais informações.
 
-**[Fix a bug or submit a proposal](https://github.com/expressots/expressots/issues/new/choose)**
+**[Corrija um bug ou envie uma proposta](https://github.com/expressots/expressots/issues/new/choose)**
 
-## Team
+## Time
 
 | Richard Zampieri            | Daniel Boll            | Vitor Caminha            | Ariel Betti            |
 | :---------: | :---------: | :---------: | :---------: |

@@ -52,7 +52,7 @@ If your entity has dependencies, you can inject them using the `@inject` decorat
 @provide(User)
 class User {
     
-    constructor(@inject("logger") private logger: Logger) {}
+  constructor(@inject("logger") private logger: Logger) {}
 }
 ```
 
@@ -63,10 +63,10 @@ Avoid marking constructors with primitive parameters as injectable. This is beca
 ```typescript
 @provide(User)
 class User {
-    name: string;
-    constructor(name: string) {
-        this.name = name;
-    }
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
 }
 ```
 
@@ -93,27 +93,27 @@ Here is an example of a factory:
 ```typescript
 @provide(User)
 class User implements IEntity {
-    public id: string;
-    public name!: string;
-    public email!: string;
+  public id: string;
+  public name!: string;
+  public email!: string;
 
-    constructor() {
-        this.id = randomUUID();
-    }
+  constructor() {
+    this.id = randomUUID();
+  }
 }
 
 interface IUserFactory {
-    create(name: string, email: string): User;
+  create(name: string, email: string): User;
 }
 
 @provide(UserFactory)
 class UserFactory implements IUserFactory {
-    create(name: string, email: string): User {
-        const user = new User();
-        user.name = name;
-        user.email = email;
-        return user;
-    }
+  create(name: string, email: string): User {
+    const user = new User();
+    user.name = name;
+    user.email = email;
+    return user;
+  }
 }
 
 export { User, UserFactory };

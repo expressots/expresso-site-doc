@@ -20,9 +20,9 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 
 ## How to read the doc
 
-- **[links](intro.md)**: All bold texts are links to other pages of the documentation or external links.
-- `code`: helps emphasize code snippets and commands, or key technical terms.
-- Alerts: are used to highlight important information.
+- **[links](./overview/intro.md)**: All bold texts are links to other pages of the documentation or external links.
+- `code`: Helps emphasize code snippets and commands, or key technical terms.
+- Alerts: Are used to highlight important information.
   :::note Used to express general information
   :::
   :::tip This is a tip

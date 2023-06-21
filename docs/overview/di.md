@@ -38,10 +38,10 @@ Here is a breakdown of the DI components used in ExpressoTS:
 
 | Components   | Description                                            |
 | ------------ | ------------------------------------------------------------------------------------------------- |
-| Container    | The DI container of the ExpressoTS application                                                    |
-| Module       | A container module is typically used to group related controllers and their dependencies together |
-| Controller   | Primary interface between the client and server. Responsible to handle incoming requests          |
-| Classes      | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc  |
+| Container    | The DI container of the ExpressoTS application.                                                    |
+| Module       | A container module is typically used to group related controllers and their dependencies together. |
+| Controller   | Primary interface between the client and server. Responsible to handle incoming requests.          |
+| Classes      | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc.  |
 
 ### Resume
 

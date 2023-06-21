@@ -4,6 +4,8 @@ sidebar_position: 4
 
 # Modules
 
+Before explaining what a single module is, let's talk first about what a container module is.
+
 A module or container module is a collection of services, in our case more specifically `Controllers` and their dependencies that can be registered and resolved by ExpressoTS custom InversifyJS container wrapper.
 
 A container module is a class that exports an Inversify Module object, which is essentially a configuration object that defines the bindings for the controllers. The Module object has a bind method that allows you to define bindings between services and their dependencies.
@@ -13,6 +15,12 @@ In order to fully understand how you can register your classes, such as usecases
 ## Module or container module
 
 With ExpressoTS you don't have to worry about doing bindings manually, we created a helper function called `CreateModule` that receives an array of controllers and returns a module with all the controllers registered and their dependencies injected.
+
+:::caution SPOILER ALERT
+We are creating a mechanism for you to determine the binding types of your classes, to have more control over the bindings, deciding when to use the `Singleton`, `Transient` or `Request` scope.
+:::
+
+## Module Container
 
 A container module is typically used to group related controllers and their dependencies together, making it easier to register and manage them in the container. For example, you could create a container module that defines the bindings for a set of data access controllers, or a set of business logic services.
 

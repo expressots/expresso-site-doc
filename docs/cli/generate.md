@@ -27,10 +27,10 @@ expressots g <resource> <structure>
 We provide two different structures to scaffold the resources:
 
 - **[entity-action]**: `expressots generate service user-create`
-  This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts
+  This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts`
 
 - **[folder/subfolder/resource]**: `expressots generate service user/create`
-  This will create this folder structure: `/user/create` and the file: `create.[resource].ts
+  This will create this folder structure: `/user/create` and the file: `create.[resource].ts`
 
   If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots generate service user/create/`
   Structure: `user/create/` and the file: `create.[resource].ts`
@@ -61,7 +61,7 @@ Current available resources:
 | expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                     |
 | expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                            |
 | expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                      |
-| expressots g s user/find   | Service creates usecase, controller and dto and add them in the desired folder, user/find |
+| expressots g s user/find   | Service creates usecase, controller and dto and add them in the desired folder user/find |
 
 All resources can be created using the structure `folder/subfolder/resource`.
 
@@ -85,9 +85,9 @@ Here is the current configuration file with all the available options:
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-  sourceRoot: "src",
-  scaffoldPattern: Pattern.KEBAB_CASE,
-  opinionated: false,
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: false,
 };
 
 export default config;

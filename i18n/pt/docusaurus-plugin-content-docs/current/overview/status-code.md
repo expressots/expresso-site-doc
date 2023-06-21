@@ -1,8 +1,8 @@
 ---
-sidebar_position: 12
+sidebar_position: 13
 ---
 
-# Código de status
+# Código de Status
 
 O código de status é uma forma de representar o resultado de uma requisição. Essas respostas HTTP indicam se uma solicitação HTTP específica foi concluída com êxito. As respostas são agrupadas em cinco classes:
 

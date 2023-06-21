@@ -19,23 +19,23 @@ For example, imagine a user registration scenario where name, email, and passwor
 ```typescript
 // UserCreateInputDTO
 interface UserCreateInputDTO {
-    name: string;
-    email: string;
-    password: string;
+  name: string;
+  email: string;
+  password: string;
 }
 
 // UserCreateResponseDTO
 interface UserCreateResponseDTO {
-    id: string;
-    name: string;
-    status: string;
+  id: string;
+  name: string;
+  status: string;
 }
 
 // Payload json format
 {
-    "name": string,
-    "email": string,
-    "password": string
+  "name": string,
+  "email": string,
+  "password": string
 }
 ```
 
@@ -66,9 +66,10 @@ class AppController {
 In the AppController class above we are using res as any `res:any` but you can definitely use the `res:Response` type from the `express` package as we expose its types. This will allow you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
 :::
 
-## Base Controller Class
+## BaseController Class
 
 We also power a controller class with the `BaseController` class that offers in the constructor a parameter that the developer can indicate what service or domain he is currently building. This helps the log system throw errors with more information about the context of the error and where the error occurred.
+
 Another advantage of using the `BaseController` class is that it offers a method in two different versions async and sync, which is the `callUseCase() or callUseCaseAsync()`.
 
 These methods reinforce the idea of one use case per controller, and they are responsible for calling the use case that will implement the business logic of the controller.
@@ -85,7 +86,7 @@ callUseCase(useCase: any, res: any, successStatusCode: number);
 
 - `useCase`: The use case that will be called. This use case is injected in the controller constructor.
 - `res`: The response object from the express request.
-- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the StatusCode type for more information.
+- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the **[Http Status Code](./status-code.md)** type for more information.
 
 The default response:
 
@@ -105,8 +106,8 @@ class AppController extends BaseController {
   @httpGet("/")
   execute(@response() res: any): IAppResponseDTO {
     return this.callUseCase(this.appUseCase.execute(),
-            res,
-            StatusCode.OK
+      res,
+      StatusCode.OK
     );
   }
 }
@@ -134,6 +135,11 @@ The controller above will be scoped as `Singleton` and will be shared across all
 ## Controller decorators
 
 HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests.
+
+HTTP method decorators include @httpGet(), @httpPost(), @httpPut(), @httpPatch(), @httpHead(), @httpDelete(), and @httpMethod(). These decorators are used to define the HTTP method and path of a specific route in the application.
+
+Parameter decorators include @queryParam(), @requestParam(), @requestBody(), @requestHeaders(), @cookies(), @next(), and @request(). These decorators are used to retrieve data from HTTP requests such as query parameters, request headers, and request body.
+
 Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
 
 ### HTTP methods decorators
@@ -156,14 +162,14 @@ Here's a list of all available parameter decorators in Expresso TS, along with t
 
 | Decorator                            | Description                                            | Usage
 | ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| @request()                           | Injects the Express Request object                     | execute(@request() req: Request)
-| @response()                          | Injects the Express Response object                    | execute(@response() res: Response)
-| @requestParam(paramName?: string)    | Injects a parameter from the request URL path          | execute(@requestParam('id') id: string)
-| @queryParam(paramName?: string)      | Injects a parameter from the request URL query string  | execute(@queryParam('searchTerm') searchTerm: string)
-| @requestBody()                       | Injects the request body payload                       | execute(@requestBody() body: MyDTO)
-| @requestHeaders(headerName?: string) | Injects a header from the request headers              | execute(@requestHeaders('authorization') auth: string)
-| @cookies(cookieName?: string)        | Injects a cookie from the request cookies              | execute(@cookies('session') session: string)
-| @next()                              | Injects the Express NextFunction object                | execute(@next() next: NextFunction)
+| @request()                           | Injects the Express Request object.                     | execute(@request() req: Request)
+| @response()                          | Injects the Express Response object.                    | execute(@response() res: Response)
+| @requestParam(paramName?: string)    | Injects a parameter from the request URL path.          | execute(@requestParam('id') id: string)
+| @queryParam(paramName?: string)      | Injects a parameter from the request URL query string.  | execute(@queryParam('searchTerm') searchTerm: string)
+| @requestBody()                       | Injects the request body payload.                       | execute(@requestBody() body: MyDTO)
+| @requestHeaders(headerName?: string) | Injects a header from the request headers.              | execute(@requestHeaders('authorization') auth: string)
+| @cookies(cookieName?: string)        | Injects a cookie from the request cookies.              | execute(@cookies('session') session: string)
+| @next()                              | Injects the Express NextFunction object.                | execute(@next() next: NextFunction)
 
 ## A MVC approach
 
@@ -174,30 +180,30 @@ Here is an example of use MVC approach, which contains a single controller class
 ```typescript
 @controller("/product")
 class ProductController {
-    @httpPost("/")
-    create(@response() res: any) {
-        return res.status(201).json({ message: "Product created" });
-    }
+  @httpPost("/")
+  create(@response() res: any) {
+    return res.status(201).json({ message: "Product created" });
+  }
 
-    @httpGet("/")
-    list(@response() res: any) {
-        return res.status(200).json({ message: "Product listed" });
-    }
+  @httpGet("/")
+  list(@response() res: any) {
+    return res.status(200).json({ message: "Product listed" });
+  }
 
-    @httpGet("/:id")
-    get(@response() res: any) {
-        return res.status(200).json({ message: "Product get" });
-    }
+  @httpGet("/:id")
+  get(@response() res: any) {
+    return res.status(200).json({ message: "Product get" });
+  }
 
-    @httpPatch("/:id")
-    update(@response() res: any) {
-        return res.status(200).json({ message: "Product updated" });
-    }
+  @httpPatch("/:id")
+  update(@response() res: any) {
+    return res.status(200).json({ message: "Product updated" });
+  }
 
-    @httpDelete("/:id")
-    delete(@response() res: any) {
-        return res.status(200).json({ message: "Product deleted" });
-    }
+  @httpDelete("/:id")
+  delete(@response() res: any) {
+    return res.status(200).json({ message: "Product deleted" });
+  }
 }
 ```
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Teste
@@ -42,6 +42,10 @@ describe("PingUseCase", () => {
     });
 });
 ```
+
+:::caution SPOILER ALERT
+Temos em nosso Roadmap a implementação de uma biblioteca de testes que envolve um framework de testes moderno para fornecer uma API simples e intuitiva para escrever testes unitários e de integração.
+:::
 
 ---
 

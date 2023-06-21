@@ -21,9 +21,13 @@ The main goal of the repository pattern is to separate the business logic from t
 By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes. Here are some of the benefits of using the repository pattern:
 
 - Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
+
 - Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
+
 - Separation of concerns: the repository separates the business logic from the data access logic, making the code easier to read, test, and maintain.
+
 - Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
+
 - Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
 
 ## Example
@@ -93,9 +97,9 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 ```typescript
 @provide(UserRepository)
 class UserRepository extends BaseRepository<User> {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 ```
 

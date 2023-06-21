@@ -6,7 +6,7 @@ sidebar_position: 7
 
 From the perspective of the ExpressoTS Architecture, `Providers` are responsible for supplying data and/or mechanics to the application, abstracting the details of how the data/mechanic is actually implemented. This abstraction aligned with the Dependency Injection Container enables the developer to easily switch between different data sources/providers without affecting the other parts of the application as they are decoupled.
 
-Providers can be implemented as classes or functions. They are typically replaceable components make use of infrastructure components, for example databases, authorization modules, email systems and etc. 
+Providers can be implemented as classes or functions, and typically make use of infrastructure components such as databases, web services, or file systems to actually retrieve or store data and perform other tasks. A provider's goal is to encapsulate all the details of these low-level components and present a simple, high-level interface to the rest of the system.
 
 ## Provider goal
 

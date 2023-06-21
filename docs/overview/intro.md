@@ -19,17 +19,14 @@ Whether you're building a simple API or a complex enterprise application, Expres
 
 ## Installing the CLI
 
-Before creating a project make sure you have ExpressoTS **[CLI](../cli/overview.md)** installed globally on your machine.
-
-```bash
-npm i -g @expressots/cli
-```
+To start a new ExpressoTS project, you have two options: create a new project using [ExpressoTS CLI](../cli/overview.md) or clone the initial project from GitHub. While both methods produce the same result, we recommend using the Expresso CLI to create a new project as it offers a more streamlined experience.
 
 ## Creating a new project
 
 To create a project using the CLI, simply run the following commands. The CLI will prompt you with a few questions and then create a new project directory with the name you provide, along with the @expressots/core package and a starter project structure.
 
 ```bash
+npm i -g @expressots/cli
 expressots new <project-name>
 ```
 
@@ -46,12 +43,32 @@ ExpressoTS offers two starter project options: opinionated and non-opinionated.
 - Choose the opinionated starter project for more complex projects with a complete starting point.
 :::
 
+### Cloning the initial project
+
+To install the TypeScript starter project with Git, run the following commands:
+
+```bash
+# non-opinionated
+git clone --sparse https://github.com/expressots/expressots.git templates/non_opinionated --filter=blob:none 
+```
+
+```bash
+# opinionated
+git clone --sparse https://github.com/expressots/expressots.git templates/opinionated --filter=blob:none 
+```
+
 ### Accessing your project
 
 After creating your project you can access it by running the following command:
 
 ```bash
 cd <your-project-option>
+```
+
+### Install dependencies
+
+```bash
+npm install
 ```
 
 ### Executing in development mode
@@ -71,6 +88,10 @@ npm run build
 ```bash
 npm run prod
 ```
+
+:::note
+Note that the `--sparse` option requires Git to be installed at version 2.25 or higher to work properly.
+:::
 
 ---
 

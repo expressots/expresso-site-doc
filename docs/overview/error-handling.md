@@ -113,11 +113,11 @@ class CreateUserUseCase {
 
 | Object          | Description                                                             |
 | --------------- | ----------------------------------------------------------------------- |
-| Report.Error    | Static method to report known errors                                    |
-| IAppError       | App Error interface that defines error object format                    |
-| StatusCode      | Http responses code and message                                         |
-| Error Message   | Error message detail that the developer wants to log                    |
-| Error Service   | To be used in the log system to indicate where the error was generated  |
+| Report.Error    | Static method to report known errors.                                    |
+| IAppError       | App Error interface that defines error object format.                    |
+| StatusCode      | Http responses code and message.                                         |
+| Error Message   | Error message detail that the developer wants to log.                    |
+| Error Service   | To be used in the log system to indicate where the error was generated.  |
 
 ---
 
