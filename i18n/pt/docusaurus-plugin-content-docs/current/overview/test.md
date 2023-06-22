@@ -1,5 +1,5 @@
 ---
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Teste
@@ -43,11 +43,15 @@ describe("PingUseCase", () => {
 });
 ```
 
+:::caution SPOILER ALERT
+Temos em nosso Roadmap a implementação de uma biblioteca de testes que envolve um framework de testes moderno para fornecer uma API simples e intuitiva para escrever testes unitários e de integração.
+:::
+
 ---
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

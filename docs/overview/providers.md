@@ -6,7 +6,7 @@ sidebar_position: 7
 
 From the perspective of the ExpressoTS Architecture, `Providers` are responsible for supplying data and/or mechanics to the application, abstracting the details of how the data/mechanic is actually implemented. This abstraction aligned with the Dependency Injection Container enables the developer to easily switch between different data sources/providers without affecting the other parts of the application as they are decoupled.
 
-Providers can be implemented as classes or functions. They are typically replaceable components make use of infrastructure components, for example databases, authorization modules, email systems and etc. 
+Providers can be implemented as classes or functions, and typically make use of infrastructure components such as databases, web services, or file systems to actually retrieve or store data and perform other tasks. A provider's goal is to encapsulate all the details of these low-level components and present a simple, high-level interface to the rest of the system.
 
 ## Provider goal
 
@@ -17,7 +17,7 @@ In the context of dependency injection, providers are used to decouple the creat
 Overall, providers are an important aspect of clean code because they help to promote loose coupling, maintainability, and flexibility in software systems.
 
 :::info
-Expresso TS uses providers to extend the application capability by providing additional functionalities.
+ExpressoTS uses providers to extend the application capability by providing additional functionalities.
 :::
 
 ## Example
@@ -97,7 +97,7 @@ class MailTrapProvider {
                         email: Env.Mailtrap.INBOX_ALIAS
                     },
                     from: {
-                        name: "Expresso TS",
+                        name: "ExpressoTS",
                         email: "noreply@expresso-ts.com"
                     },
                     subject: "Successfully logged in!",
@@ -147,7 +147,7 @@ In the Use Case above we injected MailTrapProvider in the constructor making use
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

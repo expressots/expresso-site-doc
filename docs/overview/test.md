@@ -11,7 +11,7 @@ Unit testing and integration testing are both important in any application devel
 - **Integration tests**: on the other hand, test the interactions between different components or modules of the application, including how they interact with external dependencies and services. Unlike unit tests, integration tests involve testing the application as a whole, rather than individual units in isolation. Integration tests are important because they help to ensure that the application is functioning correctly as a whole, and that different components are working together as expected.
 
 :::tip
-Combining unit tests and integration tests can be beneficial because it allows developers to test both individual units of code and the application as a whole.
+Combining unit tests and integration tests can be beneficial because it allows developers to test both individual units of code and the application as a whole. This helps ensure that each piece of code is working correctly on its own and in conjunction with other parts of the application. Furthermore, combining tests can provide more complete test coverage and identify problems at different levels of abstraction, from individual functions to complete system interaction with external components.
 :::
 
 ## Our Example use Jest as a the test runner
@@ -51,7 +51,7 @@ We have in our Roadmap the implementation of a test library that wraps a modern 
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

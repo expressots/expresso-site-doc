@@ -38,10 +38,10 @@ Here is a breakdown of the DI components used in ExpressoTS:
 
 | Components   | Description                                            |
 | ------------ | ------------------------------------------------------------------------------------------------- |
-| Container    | The DI container of the ExpressoTS application                                                    |
-| Module       | A container module is typically used to group related controllers and their dependencies together |
-| Controller   | Primary interface between the client and server. Responsible to handle incoming requests          |
-| Classes      | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc  |
+| Container    | The DI container of the ExpressoTS application.                                                    |
+| Module       | A container module is typically used to group related controllers and their dependencies together. |
+| Controller   | Primary interface between the client and server. Responsible to handle incoming requests.          |
+| Classes      | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc.  |
 
 ### Resume
 
@@ -114,7 +114,7 @@ To define scope bindings the enum BindingScopeEnum can be used.
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

@@ -113,17 +113,17 @@ class CreateUserUseCase {
 
 | Object          | Description                                                             |
 | --------------- | ----------------------------------------------------------------------- |
-| Report.Error    | Static method to report known errors                                    |
-| IAppError       | App Error interface that defines error object format                    |
-| StatusCode      | Http responses code and message                                         |
-| Error Message   | Error message detail that the developer wants to log                    |
-| Error Service   | To be used in the log system to indicate where the error was generated  |
+| Report.Error    | Static method to report known errors.                                    |
+| IAppError       | App Error interface that defines error object format.                    |
+| StatusCode      | Http responses code and message.                                         |
+| Error Message   | Error message detail that the developer wants to log.                    |
+| Error Service   | To be used in the log system to indicate where the error was generated.  |
 
 ---
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

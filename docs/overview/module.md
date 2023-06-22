@@ -14,6 +14,8 @@ In order to fully understand how you can register your classes, such as usecases
 
 With ExpressoTS you don't have to worry about doing bindings manually, we created a helper function called `CreateModule` that receives an array of controllers and returns a module with all the controllers registered and their dependencies injected.
 
+## Module Container
+
 A container module is typically used to group related controllers and their dependencies together, making it easier to register and manage them in the container. For example, you could create a container module that defines the bindings for a set of data access controllers, or a set of business logic services.
 
 Once a container module has been defined, it can be loaded into the `AppContainer` using the `appContainer.create()` method, which takes the container module class as an argument. Refer to the **[App container](app-container.md)** section for more information. This will register all services and dependencies defined in the module automatically, making them available for injection in other parts of your application.
@@ -57,7 +59,7 @@ Scope precedence is defined as follows: `AppContainer` scope > `Module` scope > 
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

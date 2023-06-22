@@ -4,7 +4,7 @@ sidebar_position: 7
 
 # Governance
 
-Expresso TS is built by its community. We welcome and appreciate contributions of all kinds. There are many ways to help, from reporting issues, contributing code, and helping us improve our community.
+ExpressoTS is built by its community. We welcome and appreciate contributions of all kinds. There are many ways to help, from reporting issues, contributing code, and helping us improve our community.
 
 ## Core Team
 
@@ -28,7 +28,7 @@ This team is currently overseeing the following items:
 
 ## Decision Making
 
-Each major decision in Expresso TS starts with a proposal. Proposals can be written by anyone in the community. The core team will review the proposal and decide whether to accept it, reject it, or ask for more information.
+Each major decision in ExpressoTS starts with a proposal. Proposals can be written by anyone in the community. The core team will review the proposal and decide whether to accept it, reject it, or ask for more information.
 
 **[Fix a bug or submit a proposal](https://github.com/expressots/expressots/issues/new/choose)**
 
@@ -48,7 +48,7 @@ Each major decision in Expresso TS starts with a proposal. Proposals can be writ
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

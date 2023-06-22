@@ -4,9 +4,9 @@ sidebar_position: 7
 
 # Governança
 
-Expresso TS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
+ExpressoTS é construído pela sua comunidade. Nós acolhemos e apreciamos contribuições de todos os tipos. Há muitas maneiras de ajudar, desde a reportagem de problemas, a contribuição de código e o auxílio para melhorar nossa comunidade.
 
-## Time principal
+## Time Principal
 
 Atualmente, temos uma pequena equipe principal de colaboradores constantes. Estamos procurando expandir esta equipe para incluir mais pessoas da comunidade com uma ampla gama de habilidades e interesses.
 
@@ -26,13 +26,13 @@ Atualmente, essa equipe está supervisionando os seguintes itens:
 - Testes
 - Roadmap
 
-## Decision Making
+## Tomada de Decisão
 
-Each major decision in Expresso TS starts with a proposal. Proposals can be written by anyone in the community. The core team will review the proposal and decide whether to accept it, reject it, or ask for more information.
+Cada decisão importante no ExpressoTS começa com uma proposta. As propostas podem ser escritas por qualquer pessoa da comunidade. A equipe principal revisará a proposta e decidirá se a aceitará, rejeitará ou solicitará mais informações.
 
-**[Fix a bug or submit a proposal](https://github.com/expressots/expressots/issues/new/choose)**
+**[Corrija um bug ou envie uma proposta](https://github.com/expressots/expressots/issues/new/choose)**
 
-## Team
+## Time
 
 | Richard Zampieri            | Daniel Boll            | Vitor Caminha            | Ariel Betti            |
 | :---------: | :---------: | :---------: | :---------: |
@@ -48,7 +48,7 @@ Each major decision in Expresso TS starts with a proposal. Proposals can be writ
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

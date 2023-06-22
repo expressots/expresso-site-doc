@@ -26,7 +26,7 @@ Please make sure that [Node.js](https://nodejs.org) `version >=18.10.0` is insta
 
 ## Setup
 
-Setting up a new ExpressoTS project is quite simple with **[CLI](../cli/overview.md)**. First install the CLI globally with `NPM`:
+Setting up a new ExpressoTS project is quite simple with **[ExpressoTS CLI](../cli/overview.md)**. First install the CLI globally with `NPM`:
 
 ```bash
 npm i -g @expressots/cli
@@ -44,10 +44,12 @@ Or adding template name and package manager as arguments:
 expressots new <project-name> -t <template-name> -p <package-manager>
 ```
 
-Templates available:
+:::tip
+ExpressoTS offers two options for project templates:
 
 - Non-opinionated: Want to have the liberty to build and structure your project as you wish? Non opinionated template offers a very small footprint, with only the necessary files to get you started.
 - Opinionated: Opinionated template is made for more complex projects, as it provides a more layered architecture.
+:::
 
 After creating your project, with the desired `<project-name>`, and depending on the project template you have selected, your project will have a different folder and file structure. Here are the specific folder and file structures for each project template:
 
@@ -65,14 +67,12 @@ project-name/
 │   ├── app.usecase.spec.ts
 ```
 
-Description
-
 | File Name             | Description                                                                                                           |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `app.container.ts`    | The Inversify Server container is responsible for organizing all the modules of the application into a cohesive unit. |
 | `app.controller.ts`   | A basic controller with a single route.                                                                               |
 | `app.module.ts`       | Application root module.                                                                                              |
-| `app.usecase.ts`      | A basic use case with a single method.                                                                                |
+| `app.usecase.ts`      | A basic use case with a single method, called `execute()`.                                                                                |
 | `main.ts`             | The main entry point of an ExpressoTS application.                                                                    |
 | `app.usecase.spec.ts` | A basic unit test for the app.usecase.                                                                                |
 
@@ -130,8 +130,6 @@ project-name/
 │   ├── ping.usecase.spec.ts
 ```
 
-Description
-
 | File Name              | Description                                                                                                           |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `entities/`            | This folder contains class definitions, or models with their attributes, properties and methods.                      |
@@ -147,14 +145,16 @@ Below you can find some extra information about **[Providers](./providers.md)**,
 
 #### Providers
 
-Contain 2 providers:
+Contain 3 providers:
 
-- **application**: This provider is a class that extend from the Application class from @expressots/core that provides the application **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
+- application: This provider is a class that extend from the Application class from @expressots/core that provides the application **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
 
-- **db-in-memory**: This is a simple in-memory database provider that allows you to store data in memory. We use this provider in the User use cases to store and retrieve user data.
+- bindingType/singleton: This provider lets you bind a class as a singleton. We use this provider to bind the InMemoryDB class as a singleton so that we can use the same instance of the InMemoryDB class throughout the application.
+
+- db-in-memory: This is a simple in-memory database provider that allows you to store data in memory. We use this provider in the User use cases to store and retrieve user data.
 
 :::info
-**InMemoryDB** provider is an example supplied to help you get started with a simple CRUD operation. You can remove this provider if you wish.
+bindingType and InMemoryDB provider is an example supplied to help you get started with a simple CRUD operation. You can remove this provider if you wish.
 :::
 
 #### Use cases
@@ -165,12 +165,12 @@ The use cases in the Opinionated template are organized in 3 modules:
 
 Here are the endpoints in each module:
 
-- **[AppModule]/app.controller**: returns `Hello from Expresso TS App`
-- **[UserModule]/user-create.controller**: creates a new user in the in-memory database
-- **[UserModule]/user-delete.controller**: delete a user by `id` in the in-memory database
-- **[UserModule]/user-find.controller**: return one user from the in-memory database
-- **[UserModule]/user-findall.controller**: returns all users from the in-memory database
-- **[UserModule]/user-update.controller**: update a user info from the in-memory database
+- [AppModule]/app.controller: returns `Hello from ExpressoTS App`
+- [UserModule]/user-create.controller: creates a new user in the in-memory database
+- [UserModule]/user-delete.controller: delete a user by `id` in the in-memory database
+- [UserModule]/user-find.controller: return one user from the in-memory database
+- [UserModule]/user-findall.controller: returns all users from the in-memory database
+- [UserModule]/user-update.controller: update a user info from the in-memory database
 
 #### Main
 
@@ -179,6 +179,7 @@ The `main.ts` includes an async function that will bootstrap the ExpressoTS appl
 ##### Opinionated in its simple form
 
 ```typescript
+// Using opinionated start project where App extends @expressots/core Application class
 async function bootstrap() {
   const app = App.create(container);
   app.listen(3000, ServerEnvironment.Production);
@@ -293,7 +294,7 @@ In ExpressoTS, creating an application server to listen to inbound HTTP requests
 
 ### Application uses the container
 
-After the container is created in the `app-container` file, the application can be created by passing the container as a parameter to the `AppInstance.create(container)` method.
+After the container is created in the `app-container` file, the application can be created by passing the container as a parameter to the `AppInstance.create(container)` method or by extending the Application class.
 
 ### Injecting modules in the container
 
@@ -374,7 +375,7 @@ We are currently working on building the project RoadMap and plan to add support
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

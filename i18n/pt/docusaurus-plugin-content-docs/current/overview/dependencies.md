@@ -1,8 +1,8 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 ---
 
-# Dependencias
+# Dependências
 
 O propósito desta seção é listar todas as dependências usadas pelo ExpressoTS e nossa visão sobre o gerenciamento de dependências.
 
@@ -10,7 +10,7 @@ O propósito desta seção é listar todas as dependências usadas pelo Expresso
 
 Sabemos que ter dependências acelera o processo de desenvolvimento, mas também aumenta a complexidade do projeto e o custo de manutenção. Além disso, outro aspecto que consideramos é o risco de segurança que uma dependência pode trazer para o projeto.
 
-Nosso objetivo é manter o número de dependências o mais baixo possível, tentando usar apenas as que são realmente necessárias e que não fazem parte dos mecanismos principais do framework Expresso TS. Com isso em mente, temos em nosso Roadmap algumas dependências que gostaríamos de substituir por nossa própria implementação. Mais notícias em breve.
+Nosso objetivo é manter o número de dependências o mais baixo possível, tentando usar apenas as que são realmente necessárias e que não fazem parte dos mecanismos principais do framework ExpressoTS. Com isso em mente, temos em nosso Roadmap algumas dependências que gostaríamos de substituir por nossa própria implementação. Mais notícias em breve.
 
 Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando ferramentas como o **[Dependabot](https://dependabot.com/)** para mantê-las atualizadas e também utilizando ferramentas como o **[Snyk](https://snyk.io/)** para ficar de olho nos riscos de segurança.
 
@@ -45,7 +45,7 @@ Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

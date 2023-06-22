@@ -8,10 +8,10 @@ The Application Overview provides a comprehensive demonstration of the main comp
 
 ![Application Overview](./img/app-overview.png)
 
-ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like [Express](https://expressjs.com), [Fastify](https://www.fastify.io/), or [Koa](https://koajs.com/).
+ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, or **[Koa](https://koajs.com/)**.
 
 :::info
-Currently, Expresso TS only supports Express, as we tested it thoroughly.
+Currently, ExpressoTS only supports Express, as we tested it thoroughly.
 :::
 
 The architecture of an ExpressoTS application is around of the **[Inversify's](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
@@ -26,7 +26,7 @@ By leveraging the power of Inversify, ExpressoTS provides a custom Dependency In
 | Controller   | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                                                                                                                       |
 | Use Case     | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
 | Provider     | Component responsible for providing external functionality to the application.                                                                                                                                                                                                                                                                                                                                                                             |
-| Repository   | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations                                                                                                                                                                                                                                                                                                                                  |
+| Repository   | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations.                                                                                                                                                                                                                                                                                                                                  |
 
 :::info
 Providers and Repositories are optional components. You can use them if you need to provide extra functionality to your application such as database integration, logging system, authentication, email etc.
@@ -163,14 +163,14 @@ The command column shows NPM as the package manager, but you can use Yarn or any
 
 | Script     | Description                                    | Command            |
 | ---------- | ---------------------------------------------- | ------------------ |
-| build      | Build the production bundle in a ./dist folder | npm run build      |
-| dev        | Runs in development watch mode                 | npm run dev        |
-| prod       | Runs in production mode based on built bundle  | npm run prod       |
-| test       | Run your tests located in the test folder      | npm run test       |
-| test:watch | Run your tests in watch and interactive mode   | npm run test:watch |
-| test:cov   | Produces test coverage report                  | npm run test:cov   |
-| format     | Format the code using prettier                 | npm run format     |
-| lint       | Lint code using eslint                         | npm run lint       |
+| build      | Build the production bundle in a ./dist folder. | npm run build      |
+| dev        | Runs in development watch mode.                 | npm run dev        |
+| prod       | Runs in production mode based on built bundle.  | npm run prod       |
+| test       | Run your tests located in the test folder.      | npm run test       |
+| test:watch | Run your tests in watch and interactive mode.   | npm run test:watch |
+| test:cov   | Produces test coverage report.                  | npm run test:cov   |
+| format     | Format the code using prettier.                 | npm run format     |
+| lint       | Lint code using eslint.                         | npm run lint       |
 
 ## Running the application
 
@@ -186,7 +186,7 @@ Depending on the environment you are running the application, you will see the f
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

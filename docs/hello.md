@@ -20,9 +20,9 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 
 ## How to read the doc
 
-- **[links](intro.md)**: All bold texts are links to other pages of the documentation or external links.
-- `code`: helps emphasize code snippets and commands, or key technical terms.
-- Alerts: are used to highlight important information.
+- **[links](./overview/intro.md)**: All bold texts are links to other pages of the documentation or external links.
+- `code`: Helps emphasize code snippets and commands, or key technical terms.
+- Alerts: Are used to highlight important information.
   :::note Used to express general information
   :::
   :::tip This is a tip
@@ -38,7 +38,7 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

@@ -4,10 +4,10 @@ sidebar_position: 1
 
 # Visão geral
 
-O CLI do Expresso TS é uma ferramenta de interface de linha de comando que ajuda a criar projetos ExpressoTS e scaffolds de recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
+O CLI do ExpressoTS é uma ferramenta de interface de linha de comando que ajuda a `criar` projetos ExpressoTS e `scaffolds` de recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
 
 :::info
-Neste tutorial, usamos o gerenciador de pacotes npm, mas você pode usar o seu gerenciador de pacotes favorito, como yarn ou pnpm.
+Neste tutorial, usamos o gerenciador de pacotes `npm`, mas você pode usar o seu gerenciador de pacotes favorito, como `yarn` ou `pnpm`.
 :::
 
 ## Instalação
@@ -32,38 +32,46 @@ Para verificar os comandos e opções disponíveis:
 expressots --help
 ```
 
-### Versão
+### Informação
 
-Verificar a versão da CLI:
+Informações dos provedores sobre seu Sistema Operacional, Projeto e versão CLI:
 
 ```bash
-expressots --version
+expressots info
 ```
 
 ## Criando um projeto ExpressoTS
 
 Há duas opções para criar um novo projeto, interativamente ou silenciosamente (passando as opções como argumentos).
+Aqui está a sintaxe completa do comando:
+
+```bash
+expressots new <nome-do-projeto> -p <gerenciador-de-pacote> -t <template> -d <diretório>
+```
 
 ### Criando projeto interativamente
 
 ```bash
-expressots new <project-name>
+expressots new <nome-do-projeto>
 ```
 
-### Criando projeto de silenciosamente
+### Criando projeto silenciosamente
 
 ```bash
-expressots new <nome-do-projeto> -p <gerenciador-de-pacote> -t <template>
+expressots new <nome-do-projeto> -p <gerenciador-de-pacote> -t <template> -d <diretório>
 ```
 
-- **package-manager**: `npm`, `yarn` or `pnpm`
+- **gerenciador-de-pacote**: `npm`, `yarn` or `pnpm`
 - **template**: `opinionated` or `non-opinionated`
+- **directory**: `./meu-projeto`
+
+A flag `-d` é opcional e serve para especificar o diretório onde o projeto será criado. Se não for especificado, o projeto será criado no diretório atual.
 
 ---
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto

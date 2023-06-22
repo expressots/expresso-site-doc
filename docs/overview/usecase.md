@@ -40,7 +40,7 @@ class LoginUserUseCase {
     const { email, password } = payload;
     
     if (isAuthenticated(email, password)) {
-        return true;
+      return true;
     }
     
     return false;
@@ -54,6 +54,8 @@ export { LoginUserUseCase };
 
 The implementation of use cases in ExpressoTS follows the best practices of software design, where each use case is responsible for implementing a specific business logic. As shown in the example code snippet, a use case typically contains only one function, called execute, which is responsible for executing the business logic defined in that use case. The use case may also include a response DTO that defines the format of the response for that particular use case.
 
+Also, it is common to use constructors in use cases to inject dependencies such as providers and repositories. This allows for better code modularity and testability.
+
 ### Constructor injection
 
 With ExpressoTS **[Dependency Injection](di.md)** system we can use the constructor in the use cases to inject dependencies, such as providers, repositories, entities or any other helper class necessary to deliver the usecase response. This allows for better modularity and testability of the code.
@@ -63,9 +65,12 @@ Here is an example of a use case with constructor injection:
 ```typescript
 class ExampleUseCase {
   
-  constructor(private yourInjection1: Injection1, private yourInjection2: Injection2) {}  
+  constructor(
+    private yourInjection1: Injection1, 
+    private yourInjection2: Injection2
+  ) {}  
   
-execute() {
+  execute() {
     this.yourInjection1.foo();
     this.yourInjection2.bar();
   }
@@ -80,7 +85,7 @@ It is important to adhere to the principle of single responsibility when impleme
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

@@ -15,7 +15,7 @@ We use in this tutorial the `npm` package manager, but you can use your favorite
 First install the CLI globally using the command below:
 
 ```bash
-npm install @expressots/cli -g
+npm install -g @expressots/cli
 ```
 
 ## Basic usage
@@ -71,7 +71,7 @@ The flag `-d` is optional and it's used to specify the directory where the proje
 
 ## Support the project
 
-Expresso TS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
 - Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project

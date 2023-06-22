@@ -4,21 +4,25 @@ sidebar_position: 7
 
 # Provedores
 
-Do ponto de vista da arquitetura limpa, os Providers são responsáveis por fornecer dados e/ou mecanismos para componentes de nível superior no sistema, como casos de uso ou apresentadores, e podem abstrair os detalhes de como os dados/mecanismos são realmente recuperados, armazenados ou executados. Essa abstração permite que o sistema mude facilmente entre diferentes fontes/provedores de dados sem afetar os componentes de nível superior.
+Do ponto de vista da arquitetura limpa, os `Providers` são responsáveis por fornecer dados e/ou mecanismos para componentes de nível superior no sistema, como casos de uso ou apresentadores, e podem abstrair os detalhes de como os dados/mecanismos são realmente recuperados, armazenados ou executados. Essa abstração permite que o sistema mude facilmente entre diferentes fontes/provedores de dados sem afetar os componentes de nível superior.
 
 Os provedores podem ser implementados como classes ou funções, e normalmente fazem uso de componentes de infraestrutura, como bancos de dados, serviços da web ou sistemas de arquivos para realmente recuperar ou armazenar dados e executar outras tarefas. O objetivo de um provedor é encapsular todos os detalhes desses componentes de nível inferior e apresentar uma interface simples e de alto nível para o resto do sistema.
+
+## Objetivo do provedor
+
+O objetivo de um Provedor é encapsular todos os detalhes dos componentes "substituíveis" e apresentar uma interface simples e de alto nível para o resto do sistema.
 
 No contexto da injeção de dependência, os provedores são usados para desacoplar a criação e configuração de objetos de seu uso, o que permite testes mais fáceis, manutenção e escalabilidade do código. Ao usar provedores para gerenciar dependências, os desenvolvedores podem evitar o acoplamento estreito de componentes e, em vez disso, focar no design de alto nível do sistema.
 
 Em geral, os provedores são um aspecto importante do código limpo porque ajudam a promover o desacoplamento, a manutenibilidade e a flexibilidade em sistemas de software.
 
 :::info
-O Expresso TS utiliza providers para estender a capacidade da aplicação fornecendo funcionalidades adicionais.
+O ExpressoTS utiliza providers para estender a capacidade da aplicação fornecendo funcionalidades adicionais.
 :::
 
 ## Exemplo
 
-Vamos pegar o exemplo fornecido na seção Use Case.
+Vamos pegar o exemplo fornecido na seção **[Use Case](usecase.md#example)**.
 
 Neste cenário, o usuário está tentando fazer login no sistema, e de acordo com a especificação, o usuário pode tentar inserir suas credenciais três vezes antes que o sistema bloqueie sua conta. Se a conta do usuário estiver bloqueada, o sistema envia um e-mail para notificar o usuário.
 
@@ -28,7 +32,7 @@ Um dos benefícios imediatos do uso de providers é que eles facilitam testes ma
 
 ### Implementação do Provedor
 
-Aqui está um exemplo de implementação de um provedor em Expresso TS para envio de e-mails:
+Aqui está um exemplo de implementação de um provedor em ExpressoTS para envio de e-mails:
 
 Nós estamos usando **[Mailtrap](https://mailtrap.io/)** como nosso provedor de email e a lib nodemailer para enviar emails.
 
@@ -93,7 +97,7 @@ class MailTrapProvider {
                         email: Env.Mailtrap.INBOX_ALIAS
                     },
                     from: {
-                        name: "Expresso TS",
+                        name: "ExpressoTS",
                         email: "noreply@expresso-ts.com"
                     },
                     subject: "Successfully logged in!",
@@ -142,7 +146,7 @@ No caso de uso acima, injetamos o `MailTrapProvider` no construtor fazendo uso d
 
 ## Apoie o projeto
 
-Expresso TS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
+ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
 - Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
 - Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
