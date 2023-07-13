@@ -106,9 +106,9 @@ const config = {
       announcementBar: {
         id: 'supportus',
         content:
-          'We are in the process of revamping our <b>documentation</b>. We kindly ask for your patience as we work diligently to enhance it for your benefit.',
-        backgroundColor: '#F3E99F',
-        textColor: '#091E42',
+          'Current Version: v1.5.0',
+        backgroundColor: '#111',
+        textColor: '#19CE59',
         isCloseable: false,
       },
       stylesheets: [
