@@ -106,7 +106,7 @@ const config = {
       announcementBar: {
         id: 'supportus',
         content:
-          'Current Version: v1.5.0',
+          'Current Version: v1.5.1',
         backgroundColor: '#111',
         textColor: '#19CE59',
         isCloseable: false,
