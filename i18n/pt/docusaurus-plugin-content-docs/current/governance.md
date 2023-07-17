@@ -13,13 +13,13 @@ Atualmente, temos uma pequena equipe principal de colaboradores constantes. Esta
 Atualmente, essa equipe está supervisionando os seguintes itens:
 
 - Documentação
+- Site
 - Gerenciamento da Comunidade
 - Presença nas Redes Sociais
 - Suporte Técnico
-- Expresso Core, CLI e Providers
-- Pacotes Extra do Expresso
-- Site
-- Recursos do Expresso
+- ExpressoTS Core, CLI e Providers
+- Pacotes Extra do ExpressoTS
+- Recursos do ExpressoTS e Inovacões
 - Problemas e Pull Requests do Expresso
 - DevOps
 - CI/CD
@@ -30,19 +30,19 @@ Atualmente, essa equipe está supervisionando os seguintes itens:
 
 Cada decisão importante no ExpressoTS começa com uma proposta. As propostas podem ser escritas por qualquer pessoa da comunidade. A equipe principal revisará a proposta e decidirá se a aceitará, rejeitará ou solicitará mais informações.
 
+:::caution ALERTA DE SPOILER
+Estamos migrando o quadro do projeto e o roteiro de Jira para GitHub Projects. Isso nos permitirá ter um processo mais aberto e transparente, bem como permitir que a comunidade participe de maneira mais ativa no projeto.
+:::
+
 **[Corrija um bug ou envie uma proposta](https://github.com/expressots/expressots/issues/new/choose)**
 
 ## Time
 
-| Richard Zampieri            | Daniel Boll            | Vitor Caminha            | Ariel Betti            |
-| :---------: | :---------: | :---------: | :---------: |
-| ![Richard](https://media.licdn.com/dms/image/C5603AQGzx4CyZp0mag/profile-displayphoto-shrink_200_200/0/1617857614290?e=1688601600&v=beta&t=GO9leZMLxpfAEDqudzUzbyWyDI_cVFvtZgOCeoH2Drw) | ![Daniel](https://media.licdn.com/dms/image/C4D03AQGtxkyN6YLr_A/profile-displayphoto-shrink_200_200/0/1619953387937?e=1688601600&v=beta&t=B2vlXweyJqwhKE8yC3V-Xj1kKCF-Kvdafs_aF8wEfuI) | ![Vitor](https://media.licdn.com/dms/image/C4E03AQER3r47ZO_MOQ/profile-displayphoto-shrink_200_200/0/1536025577602?e=1688601600&v=beta&t=CvxI-W_FiukDu-UXyLE_nMGOzKM0YR85u1jKq5FCE1M) | ![Ariel](https://media.licdn.com/dms/image/D4E03AQGHxgqJJ_L6xA/profile-displayphoto-shrink_200_200/0/1677513940426?e=1688601600&v=beta&t=fEMa_W8VLb1VYrWi7bwzOGhYtFik1tliIlBIRs4rH-4) |
-| [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/richardzampieri/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/rsaz) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/daniel-boll/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/Daniel-Boll) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/vitorcaminha/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/VitorCaminha) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/ariel-betti/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/ArielBetti) |
+Conheça a equipe de colaboradores regulares: **[Team](https://expresso-ts.com/team)**
 
-| Felipe Fontana            | Juliano Soares            | Rodrigo da Hora            | Pedro Vargas           |
-| :---------: | :---------: | :---------: | :---------: |
-| ![Felipe](https://media.licdn.com/dms/image/C5603AQHqhETnq-MVIg/profile-displayphoto-shrink_200_200/0/1517551799345?e=1688601600&v=beta&t=lk2tIJK0GHBDmtt8w9GbEfu0Uc6R-lsF2jxKJ4SIruQ) | ![Juliano](https://media.licdn.com/dms/image/C4D03AQFhxVMRmlQaXQ/profile-displayphoto-shrink_200_200/0/1646588361167?e=1688601600&v=beta&t=AlM6_oQdBI10JoZJ9YylMdPaY3tDC6jKUL31VTGgyGY) | ![Rodrigo](https://media.licdn.com/dms/image/C5603AQH2lBLzVxl3cQ/profile-displayphoto-shrink_200_200/0/1631156117097?e=1688601600&v=beta&t=qwl-IxUu-66M_QG293Rnr02ATQGdT4cI-7e21FNqREk) | ![Pedro](https://media.licdn.com/dms/image/C5603AQGM4BZY9DLwzw/profile-displayphoto-shrink_200_200/0/1517520964466?e=1688601600&v=beta&t=Fi0qJlCabj0y_7GHkvbtEF06GKGCKIVJ58MEN3xfAwg) |
-| [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/felipe-fontana/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/f0ntana) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/juliano-leonardo-soares/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/juliano-soares) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/rodrigo-da-hora/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/dahorarodrigo) | [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/pedroavargas/) [![GitHub](https://img.shields.io/badge/-GitHub-black?style=flat-square&logo=github&logoColor=white)](https://github.com/expressots/) |
+## Quer ajudar?
+
+**[Corriga um bug or submeta uma idéia](https://github.com/expressots/expressots/issues/new/choose)**
 
 ---
 
