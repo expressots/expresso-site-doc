@@ -3,6 +3,20 @@
 
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const axios = require('axios');
+
+let currentVersion = '1.5.1';
+axios.default.get('https://api.github.com/repos/expressots/expressots/releases')
+  .then(response => {
+    const latestRelease = response.data[0];
+    const version = latestRelease.tag_name;
+
+    currentVersion = version;
+  })
+  .catch(error => {
+    console.error('Error fetching GitHub releases:', error);
+  });
+
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -106,7 +120,7 @@ const config = {
       announcementBar: {
         id: 'supportus',
         content:
-          'Current Version: v1.5.1',
+          `Current Version: v${currentVersion}`,
         backgroundColor: '#111',
         textColor: '#19CE59',
         isCloseable: false,
