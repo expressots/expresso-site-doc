@@ -1,8 +1,8 @@
 {
-  "label": "Tutorials",
+  "label": "Tutoriais",
   "position": 5,
   "link": {
     "type": "generated-index",
-    "description": "Expresso TS Tutorials."
+    "description": "Expresso TS Tutoriais."
   }
 }
