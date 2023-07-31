@@ -118,10 +118,6 @@ project-name/
 │   │           └── user-findall.controller.ts
 │   │           └── user-findall.dto.ts
 │   │           └── user-findall.usecase.ts
-│   │       └── findall/
-│   │           └── user-findall.controller.ts
-│   │           └── user-findall.dto.ts
-│   │           └── user-findall.usecase.ts
 │   │       └── user.module.ts
 │   ├── app.container.ts
 │   ├── env.ts
