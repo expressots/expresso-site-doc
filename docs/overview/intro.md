@@ -5,7 +5,7 @@ sidebar_position: 0
 # Introduction
 
 ExpressoTS is a TypeScript lightweight framework for building scalable, readable and maintainable server-side applications.
-The framework provides a level of abstraction on top of common HTTP server framework **[Expressjs](https://expressjs.com/)** exposing their API's directly to the developer. This provides freedom and brings to the developer a tool that is well known and easy to use.
+The framework provides a level of abstraction on top of common HTTP server framework **[Express.js](https://expressjs.com/)** exposing their API's directly to the developer. This provides freedom and brings to the developer a tool that is well known and easy to use.
 
 ## Philosophy
 
