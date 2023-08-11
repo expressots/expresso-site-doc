@@ -47,7 +47,7 @@ ExpressoTS will prevent you to do that as there are no listeners to handle incom
 
 ## Application class
 
-The Application class offers a way of creating and configuring the server, passing **[Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middlewares upon server creation.
+The Application class offers a way of creating and configuring the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middlewares upon server creation.
 
 Application class definition
 

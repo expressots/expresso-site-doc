@@ -4,9 +4,9 @@ sidebar_position: 16
 
 # Renderizacão
 
-**[Expressjs](https://expressjs.com/en/5x/api.html#res.render)** oferece um método `render` para renderizar uma visualização e enviar a sequência HTML renderizada para o cliente.
+**[Express.js](https://expressjs.com/en/5x/api.html#res.render)** oferece um método `render` para renderizar uma visualização e enviar a sequência HTML renderizada para o cliente.
 
-No ExpressoTS, como oferecemos suporte ao Expressjs, também oferecemos suporte à capacidade de renderização oferecida pelo objeto de resposta HTTP.
+No ExpressoTS, como oferecemos suporte ao Express.js, também oferecemos suporte à capacidade de renderização oferecida pelo objeto de resposta HTTP.
 
 O ExpressoTS implementa um suporte básico para mecanismos de renderização na classe `Application`. No momento, o número de mecanismos de renderização suportados é limitado ao Handlebars.
 
