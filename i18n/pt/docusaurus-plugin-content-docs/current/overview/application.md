@@ -47,7 +47,7 @@ O ExpressoTS irá impedir que você faça isso, pois não há ouvintes para lida
 
 ## Classe Aplication
 
-A classe Application oferece uma forma de criar e configurar o servidor, passando **[Expressjs middlewares](https://expressjs.com/en/guide/writing-middleware.html)** ou outro middlewares durante a criação do servidor.
+A classe Application oferece uma forma de criar e configurar o servidor, passando **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** ou outro middlewares durante a criação do servidor.
 
 Definição da classe Aplication
 
