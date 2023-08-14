@@ -49,8 +49,6 @@ const container = appContainer.create([
     AppModule,
 ]);
 
-console.log(appContainer.getContainerOptions());
-
 export { container };
 ```
 

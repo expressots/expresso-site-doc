@@ -10,7 +10,7 @@ O contêiner fornece um local central para gerenciar dependências e criar objet
 
 Aproveitando o InversifyJS, criamos um wrapper para reduzir a complexidade sobre como os controladores, casos de uso e provedores são injetados no contêiner de aplicativos. O wrapper é chamado de `AppContainer` e é responsável por registrar todos os módulos da aplicação no contêiner.
 
-## Creating the container
+## Criando o container
 
 Ao criar o contêiner da aplicação, é possível definir o escopo padrão do contêiner e também configurar para ignorar a verificação da classe base. O escopo padrão é `RequestScope`, o que significa que todas as dependências serão criadas uma vez por solicitação. Esse é o escopo comum para a maioria das aplicações web usadas em outros frameworks, como Spring Boot ou .NET Core.
 
@@ -49,12 +49,10 @@ const container = appContainer.create([
     AppModule,
 ]);
 
-console.log(appContainer.getContainerOptions());
-
 export { container };
 ```
 
-## Defining the container scope
+## Definindo o escopo do container
 
 Como mencionado acima, se o `defaultScope` não for fornecido, o padrão é definido como RequestScope. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como uma opção no construtor do contêiner. Isso permite flexibilidade na configuração do contêiner, de modo que ele possa ser personalizado para atender às necessidades específicas da aplicação.
 
@@ -76,7 +74,7 @@ const container = appContainer.create(
 Se você não passar o `defaultScope` o escopo padrão será definido como `RequestScope`.
 :::
 
-## Registering modules
+## Registrando modulos
 
 A classe `AppContainer` tem um método `create` que recebe um array de módulos e retorna o contêiner com todos os módulos registrados. O contêiner aqui criado é o mesmo contêiner usado pela classe `Application` para inicializar o servidor.
 
