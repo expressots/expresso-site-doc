@@ -12,21 +12,51 @@ Aproveitando o InversifyJS, criamos um wrapper para reduzir a complexidade sobre
 
 ## Creating the container
 
-Ao criar o container da aplicação é possível definir o escopo padrão do container. O escopo padrão é `RequestScope`, o que significa que todas as dependências serão criadas uma vez por solicitação. Esse é o escopo comum para a maioria dos aplicativos da Web usados em outras estruturas, como Spring Boot ou .NET Core.
+Ao criar o contêiner da aplicação, é possível definir o escopo padrão do contêiner e também configurar para ignorar a verificação da classe base. O escopo padrão é `RequestScope`, o que significa que todas as dependências serão criadas uma vez por solicitação. Esse é o escopo comum para a maioria das aplicações web usadas em outros frameworks, como Spring Boot ou .NET Core.
+
+Aqui está a definição das opções de interface:
+
+```typescript
+interface ContainerOptions {
+  /**
+   * O escopo padrão para as ligações no contêiner.
+   * Pode ser definido como Request (padrão), Singleton ou Transient.
+   */
+  defaultScope?: interfaces.BindingScope;
+
+  /**
+   * Permite ignorar as verificações da classe base ao trabalhar com classes derivadas.
+   */
+  skipBaseClassChecks?: boolean;
+}
+```
 
 Aqui está um exemplo de como criar um container:
 
 ```typescript
+// Adicionando opções ao contêiner
+const appContainer = new AppContainer({
+    defaultScope: BindingScopeEnum.Singleton,
+    skipBaseClassChecks: true,
+});
+
+// Criando um contêiner sem opções
 const appContainer = new AppContainer();
 
+// Criando um gerenciador de módulos de contêiner
 const container = appContainer.create([
-    // Registrar todos os módulos
+    // Adicione seus módulos aqui
+    AppModule,
 ]);
+
+console.log(appContainer.getContainerOptions());
+
+export { container };
 ```
 
 ## Defining the container scope
 
-Conforme mencionado acima, se o `defaultScope` não for fornecido, o padrão será definido como RequestScope. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como um segundo argumento para a injeção do módulo. O BindingScopeEnum é uma enumeração que contém os seguintes valores:
+Como mencionado acima, se o `defaultScope` não for fornecido, o padrão é definido como RequestScope. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como uma opção no construtor do contêiner. Isso permite flexibilidade na configuração do contêiner, de modo que ele possa ser personalizado para atender às necessidades específicas da aplicação.
 
 - `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
 - `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
@@ -38,13 +68,12 @@ const appContainer = new AppContainer();
 const container = appContainer.create(
     [
         // Registrar todos os módulos
-    ],
-    BindingScopeEnum.Singleton,
+    ]   
 );
 ```
 
 :::tip
-Se você não passar o `defaultScope` como um segundo argumento, o escopo padrão será definido como `RequestScope`.
+Se você não passar o `defaultScope` o escopo padrão será definido como `RequestScope`.
 :::
 
 ## Registering modules

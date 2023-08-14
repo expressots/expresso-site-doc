@@ -12,21 +12,51 @@ Taking advantage of InversifyJS we created a wrapper to reduce complexity on how
 
 ## Creating the container
 
-Upon creating the application container it is possible to define the default scope of the container. The default scope is `RequestScope` which means that all the dependencies will be created once per request. This is the common scope for most web applications used in other frameworks such as Spring Boot or .NET Core as well.
+Upon creating the application container it is possible to define the default scope of the container as well as to set to skip base class check. The default scope is `RequestScope` which means that all the dependencies will be created once per request. This is the common scope for most web applications used in other frameworks such as Spring Boot or .NET Core as well.
+
+Here is the interface options definition:
+
+```typescript
+interface ContainerOptions {
+  /**
+   * The default scope for bindings in the container.
+   * It can be set to Request (default), Singleton, or Transient.
+   */
+  defaultScope?: interfaces.BindingScope;
+
+  /**
+   * Allows skipping of base class checks when working with derived classes.
+   */
+  skipBaseClassChecks?: boolean;
+}
+```
 
 Here is an example on how to create a container:
 
 ```typescript
+// Adding options to the container
+const appContainer = new AppContainer({
+    defaultScope: BindingScopeEnum.Singleton,
+    skipBaseClassChecks: true,
+});
+
+// Creating a container without options
 const appContainer = new AppContainer();
 
+// Creating a container module manager
 const container = appContainer.create([
-    // Register all the modules
+    // Add your modules here
+    AppModule,
 ]);
+
+console.log(appContainer.getContainerOptions());
+
+export { container };
 ```
 
 ## Defining the container scope
 
-As mentioned above, if the `defaultScope` is not provided, the default is set to RequestScope. However, it is possible to change the default scope by passing the `defaultScope` as a second argument to the module injection. The BindingScopeEnum is an enum that contains the following values:
+As mentioned above, if the `defaultScope` is not provided, the default is set to RequestScope. However, it is possible to change the default scope by passing the `defaultScope` as a an option in the container constructor. The BindingScopeEnum is an enum that contains the following values:
 
 - `BindingScopeEnum.Singleton` - The dependency will be created once and will be shared across all requests.
 - `BindingScopeEnum.Request` - The dependency will be created once per request.
@@ -38,13 +68,12 @@ const appContainer = new AppContainer();
 const container = appContainer.create(
     [
         // Add your modules here
-    ],
-    BindingScopeEnum.Singleton,
+    ]
 );
 ```
 
 :::tip
-If you don't pass the `defaultScope` as a second argument, the default scope is set to `RequestScope`.
+If you don't pass the `defaultScope` the default scope is set to `RequestScope`.
 :::
 
 ## Registering modules
