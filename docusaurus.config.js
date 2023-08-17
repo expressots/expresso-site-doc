@@ -5,7 +5,7 @@ const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const axios = require('axios');
 
-let currentVersion = '1.5.1';
+let currentVersion = '1.7.0';
 axios.default.get('https://api.github.com/repos/expressots/expressots/releases')
   .then(response => {
     const latestRelease = response.data[0];
@@ -25,7 +25,7 @@ const config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://www.expresso-ts.com', //'https://expressots.github.io/',
+  url: 'https://doc.expresso-ts.com', //'https://expressots.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -81,8 +81,16 @@ const config = {
       }],
       colorMode: {
         defaultMode: 'light',
-        disableSwitch: true,
+        disableSwitch: false,
         respectPrefersColorScheme: false,
+      },
+      algolia: {
+        apiKey: "dbc1e8899aa815b7cfdf66b7d4627e74",
+        indexName: "expresso-ts",
+        contextualSearch: true,
+        insights: true,
+        placeholder: "Search the docs (Press / to focus)",
+        appId: "3UANWN5EUQ",
       },
       navbar: {
         title: 'Expresso TS',

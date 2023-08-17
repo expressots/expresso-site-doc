@@ -4,9 +4,9 @@ sidebar_position: 16
 
 # Render
 
-**[Expressjs](https://expressjs.com/en/5x/api.html#res.render)** offers a `render` method to render a view and send the rendered HTML string to the client.
+**[Express.js](https://expressjs.com/en/5x/api.html#res.render)** offers a `render` method to render a view and send the rendered HTML string to the client.
 
-In ExpressoTS as we do support Expressjs, we also support the `render` capability offered by the HTTP response object.
+In ExpressoTS as we do support Express.js, we also support the `render` capability offered by the HTTP response object.
 
 ExpressoTS implements a basic support for render engines in the `Application` class. At the moment the number of renders supported is limited to Handlebars.
 

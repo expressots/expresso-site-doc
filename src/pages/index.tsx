@@ -12,7 +12,7 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
+    <header className={clsx('hero hero--primary customHeroBanner', styles.heroBanner)}>
       <div className="container">
         <h1 className="hero__title"><img height="180px" width="auto" src={BannerImage} alt="Expresso TS Banner" /></h1>
         <p className="hero__subtitle">{translate({message: "tagline"})}</p>

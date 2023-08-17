@@ -361,7 +361,7 @@ Uma vez que a aplicação está em execução, você pode acessá-la navegando p
 
 ## Resumo
 
-ExpressoTS é um framework versátil que não está vinculado a nenhuma plataforma ou tecnologia específica. Aproveitando bibliotecas populares do Node.js como InversifyJS e ExpressJS, ele é projetado para ser leve, modular, personalizável e fácil de usar. Os desenvolvedores podem expandir as capacidades do framework criando novos provedores que podem ser incorporados em suas aplicações.
+ExpressoTS é um framework versátil que não está vinculado a nenhuma plataforma ou tecnologia específica. Aproveitando bibliotecas populares do Node.js como InversifyJS e Express.js, ele é projetado para ser leve, modular, personalizável e fácil de usar. Os desenvolvedores podem expandir as capacidades do framework criando novos provedores que podem ser incorporados em suas aplicações.
 
 Atualmente, estamos trabalhando na construção da RoadMap do projeto e planejamos adicionar suporte para outros populares frameworks HTTP do Node.js, como o Fastify e o Koa, à plataforma. Além disso, à medida que avançamos para o futuro, pretendemos eliminar algumas das dependências que atualmente fazem parte do núcleo do framework, como IoC e decoradores.
 
