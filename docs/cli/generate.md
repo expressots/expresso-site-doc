@@ -52,6 +52,7 @@ Current available resources:
 | dto        | d     |
 | provider   | p     |
 | service    | s     |
+| entity     | e     |
 
 ## Example of usage
 

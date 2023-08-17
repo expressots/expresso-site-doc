@@ -52,6 +52,7 @@ Recursos atualmente disponíveis para serem gerados:
 | dto         | d      |
 | provider    | p      |
 | service     | s      |
+| entity      | e      |
 
 ## Exemplo de uso
 
