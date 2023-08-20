@@ -2,7 +2,7 @@
 sidebar_position: 0
 ---
 
-# Hello, Developer! 👋
+# Hello, Dev
 
 Thank you for embarking on this journey with us to create an ambitious and exciting developer experience that is continuously improving. 🎉🎉🎉
 

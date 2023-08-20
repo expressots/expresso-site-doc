@@ -49,6 +49,8 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          lastVersion: "1.7.0",
+          includeCurrentVersion: false,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -108,6 +110,10 @@ const config = {
             type: 'localeDropdown',
             label: 'Language',
             position: 'right',
+          },
+          {
+            type: 'docsVersionDropdown',
+            position: 'left',
           },
         ],
       },
