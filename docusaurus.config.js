@@ -49,7 +49,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          lastVersion: "1.7.0",
+          lastVersion: "2.0.0",
           includeCurrentVersion: false,
         },
         theme: {
