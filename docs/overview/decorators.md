@@ -62,7 +62,7 @@ Here is a list of all parameter decorators available in ExpressoTS, along with t
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a sponsor on **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
 - Follow the **[organization](https://github.com/expressots)** on GitHub and Star тнР the project
 - Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
 - Join our **[Discord](https://discord.com/invite/PyPJfGK)**
