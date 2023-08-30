@@ -4,8 +4,8 @@ sidebar_position: 0
 
 # Introduction
 
-ExpressoTS is a TypeScript lightweight framework for building scalable, readable and maintainable server-side applications.
-The framework provides a level of abstraction on top of common HTTP server framework **[Express.js](https://expressjs.com/)** exposing their API's directly to the developer. This provides freedom and brings to the developer a tool that is well known and easy to use.
+ExpressoTS is a lightweight framework for building scalable, readable and maintainable server-side applications in TypeScript.
+The framework provides a level of abstraction on top of a common HTTP server framework **[Express.js](https://expressjs.com/)**, exposing their API's directly to the developer. This provides freedom and brings to the developer a tool that is well known and easy to use.
 
 ## Philosophy
 
@@ -13,7 +13,7 @@ ExpressoTS is a developer-friendly framework designed to streamline the process 
 
 Gone are the days of tedious setup tasks such as configuring logging systems, handling authentication, and connecting to databases. With ExpressoTS, developers can focus on what really matters - writing code. The framework takes care of the repetitive and time-consuming aspects of development, allowing developers to work more efficiently.
 
-One of the key features of ExpressoTS is its flexible and extensible architecture. The framework provides a robust and powerful **[Dependency Injection](di.md)** system that enables developers to quickly and easily extend its functionality by creating and adding providers with their specific binding scope such as `Transient, Scoped, Singleton`. This allows developers to seamlessly integrate new features throughout the entire application without having to worry about the complexities of integration and coupling.
+One of the key features of ExpressoTS is its flexible and extensible architecture. The framework provides a robust **[Dependency Injection](di.md)** system that enables developers to extend its functionality by creating and adding providers with their specific binding scope such as `Transient, Scoped, Singleton`. This allows developers to integrate new features throughout the application without having to worry about the complexities of integration and coupling.
 
 Whether you're building a simple API or a complex enterprise application, ExpressoTS can help you deliver your project on time and on budget. With a comprehensive set of tools and features, ExpressoTS makes it easy to build high-quality, scalable, and maintainable server-side applications.
 
@@ -25,48 +25,48 @@ Before creating a project make sure you have ExpressoTS CLI installed globally o
 npm i -g @expressots/cli
 ```
 
-## Creating a new project
+## Creating a New Project
 
-To create a project using the CLI, simply run the following commands. The CLI will prompt you with a few questions and then create a new project directory with the name you provide, along with the @expressots/core package and a starter project structure.
+To create a project using the CLI, run the following commands. The CLI will prompt you with a few questions and then create a new project directory with the name you provide, along with the @expressots/core package and a starter project structure.
 
 ```bash
 expressots new <project-name>
 ```
 
-Or you can create projects without going through the CLI questions by passing the template name (opinionated or non-opinionated) and the package manager (npm, yarn or pnpm) as arguments.
+Or you can create projects without the CLI questions by passing the template name (`opinionated` or `non-opinionated`) and the package manager (`npm`, `yarn` or `pnpm`) as arguments.
 
 ```bash
 expressots new <project-name> -t <template-name> -p <package-manager>
 ```
 
 :::tip
-ExpressoTS offers two starter project options: opinionated and non-opinionated.
+ExpressoTS offers two starter project templates: `opinionated` and `non-opinionated`.
 
-- Use the non-opinionated starter project when you need flexibility on your project structure.
-- Choose the opinionated starter project for more complex projects with a complete starting point.
+- Use the `non-opinionated` starter project template when you need flexibility on your project structure.
+- Choose the `opinionated` starter project template for more complex projects with a complete starting point.
 :::
 
-### Accessing your project
+### Accessing Your Project
 
 After creating your project you can access it by running the following command:
 
 ```bash
-cd <your-project-option>
+cd <your-project-name>
 ```
 
-### Executing in development mode
+### Running in Development Mode
 
 ```bash
 npm run dev
 ```
 
-### Generating production build
+### Generating a Production Build
 
 ```bash
 npm run build
 ```
 
-### Executing in production mode
+### Running in Production Mode
 
 ```bash
 npm run prod
