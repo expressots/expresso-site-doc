@@ -4,9 +4,9 @@ sidebar_position: 1
 
 # Compression
 
-The npm compression package is a middleware that can compress response bodies for requests that traverse through it, which can help reduce the size of data that's sent over the network, leading to quicker response times and lower bandwidth usage. It uses the zlib library to perform gzip or deflate compression, both of which are widely supported by modern web browsers.
+The npm compression package is a middleware that can compress response bodies for requests that traverse through it. This helps reduce the size of data that's sent over the network, leading to quicker response times and lower bandwidth usage. It uses the zlib library to perform gzip or deflate compression, both of which are widely supported by modern web browsers.
 
-## Compression package
+## Compression Package
 
 - Performance: It can significantly reduce the size of the response body, thereby decreasing the time it takes for a client to download the response and render the content.
 
@@ -16,11 +16,11 @@ The npm compression package is a middleware that can compress response bodies fo
 
 :::caution COMPRESSION OVERHEAD
 This might not be ideal for high traffic websites where server resources are at a premium.
+
+Not all content benefits from compression. Binary files like images and videos are already compressed and trying to compress them further can sometimes increase their size.
 :::
 
-Not all content benefits from compression. Binary files like images and videos are already compressed and trying to compress them further can sometimes even increase their size.
-
-## When to use
+## When to Use
 
 Deciding on when to use compression depends on the use case. If your website serves a lot of textual data (HTML, CSS, JS, JSON, XML etc.), then using the npm compression package can result in significant bandwidth savings and performance benefits. However, if your website is extremely high traffic, the additional computational overhead of compression might start to become a bottleneck.
 
@@ -38,7 +38,7 @@ Install the npm compression middleware.
 npm i compression
 ```
 
-After Installation you can add the middleware to your ExpressoTS app.
+After installation, you can add the middleware to your ExpressoTS app.
 
 ```typescript
 import compression from "compression";
