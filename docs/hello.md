@@ -4,25 +4,24 @@ sidebar_position: 0
 
 # Hello, Dev
 
-Thank you for embarking on this journey with us to create an ambitious and exciting developer experience that is continuously improving. 🎉🎉🎉
+ExpressoTS strives to abstract away the complexities of software development to make it eaiser for you to build your next project. We want to make you more productive and help you focus on what matters the most, your business logic.
 
-ExpressoTS is so simple yet efficient in getting the job done. We want to continue doing that, abstract all the complexities that the software development world brings and make it easy for you to build your next project.
+If you think about it, every programming language feature or framework is built to accelerate the development process, but most fail to deliver good documentation, good developer experience, or to reduce the amount of boilerplate code you have to write. We want to change that.
 
-If you think about it, every programming language feature, framework built, is to accelerate your development process, however we are continuously failing in delivering good documentation, good developer experience plus reducing the amount of boilerplate code you have to write. Everything should simply work!
+> This is our commitment: to make your life easier, and to make you more productive.
 
-This is our commitment, to make your life easier, and to make you more productive.
+As a community-driven project, we want you to be part of this journey with us. Your feedback, ideas, and contributions will help us build a better developer experience for everyone. 
 
-We are very open to feedback, ideas, and contributions. We are a community-driven project, and we want to hear from you.
-
-Thank you again for being part of this journey with us, Happy Coding! 🚀
+Thanks for joining us in this challenge. Happy coding! 🚀
 
 ---
 
-## How to read the doc
+## How to Read this Documentation
 
-- **[links](./overview/intro.md)**: All bold texts are links to other pages of the documentation or external links.
-- `code`: Helps emphasize code snippets and commands, or key technical terms.
+- **[links](./overview/intro.md)**: Bold text denotes a link to other pages of the documentation or external locations.
+- `code`: Emphasized code snippets and commands, or key technical terms.
 - Alerts: Are used to highlight important information.
+  
   :::note Used to express general information
   :::
   :::tip This is a tip
@@ -36,7 +35,7 @@ Thank you again for being part of this journey with us, Happy Coding! 🚀
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 

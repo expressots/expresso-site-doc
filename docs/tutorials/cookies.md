@@ -22,23 +22,23 @@ Cookies can be used to support secure website functions. For example, a cookie c
 
 It's also important to note that there are different types of cookies - session cookies, which expire when the browser session ends, and persistent cookies, which remain on the user's device for a set period of time or until they are explicitly deleted.
 
-:::caution USING COOKIE FOR TRACKING
-Have in mind that the use of cookies, especially for tracking and personalization, has raised privacy concerns, leading to regulations such as GDPR in Europe and CCPA in California that require sites to disclose their cookie usage and obtain user consent.
+:::caution USING COOKIES FOR TRACKING
+Keep in mind that the use of cookies, especially for tracking and personalization, has raised privacy concerns, leading to regulations such as GDPR in Europe and CCPA in California that require sites to disclose their cookie usage and obtain user consent.
 :::
 
-## Cookie-parser package
+## Cookie-Parser Package
 
 - Ease of Use: cookie-parser makes it very easy to read cookie values, which are often used for tracking user sessions, personalization, and managing stateful applications. Without this library, you would have to manually parse the Cookie header and handle the nuances of cookie formatting.
 
 - Signed Cookies: The package also supports signed cookies, which are a way to verify the integrity of cookies (i.e., whether they have been tampered with). This is an important feature for securing sensitive information stored in cookies.
 
-## What to consider when using cookie-parser
+## What to Consider When Using cookie-parser
 
 - Overhead: While it's not a heavy library, using cookie-parser does add a bit of overhead to each request, as it parses all cookies regardless of whether they are used in the route handler.
 
 - Stateful: Cookies inherently make an application stateful. When scaling an application, state can be problematic. Therefore, alternative stateless authentication methods, like tokens, can be preferable in a microservices architecture.
 
-## When to use
+## When to Use
 
 Deciding when to use cookie-parser largely depends on your application's needs. If your web application requires state management and you've chosen to do that via cookies, cookie-parser can make your life easier and your application more secure with signed cookies.
 
@@ -48,7 +48,7 @@ However, if your website has heavy traffic, the overhead might become a concern.
 In case you're dealing with a high traffic website, consider alternatives like sessions stored in a database, JWTs, or tokens stored in HTTP headers. Also, using a load balancer to distribute traffic and session store modules to maintain session data across multiple servers can help to manage high traffic and stateful data.
 :::
 
-Just like before, the best approach often involves combining multiple techniques, tailored to your application's specific needs. Testing and monitoring your application under realistic conditions can help guide your decision-making process.
+The best approach often involves combining multiple techniques, tailored to your application's specific needs. Testing and monitoring your application under realistic conditions can help guide your decision-making process.
 
 ## Use with ExpressoTS
 
