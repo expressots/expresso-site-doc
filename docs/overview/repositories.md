@@ -10,11 +10,11 @@ In ExpressoTS, a repository class typically includes methods such as create, upd
 
 The repository pattern is a design pattern commonly used in software development that provides a way to abstract the data persistence layer of an application. In TypeScript, this pattern can be implemented using classes that represent repositories, which are responsible for retrieving, storing, updating, and deleting data from a data store, such as a database.
 
-We do offer an example of how to implement a repository patterns in the opinionated template. You can find it directly in the **[repository](https://github.com/expressots/expressots/tree/main/templates/opinionated/src/repositories)** folder of the ExpressoTS application.
+We do offer an example of how to implement a repository pattern in the opinionated template. You can find it directly in the **[repository](https://github.com/expressots/expressots/tree/main/templates/opinionated/src/repositories)** folder of the ExpressoTS application.
 
 ## Goal of the repository pattern
 
-The main goal of the repository pattern is to separate the business logic from the data access logic, allowing developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
+The main goal of the repository pattern is to separate business logic from data access logic. This allows developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
 
 ## Benefit of using the repository pattern
 
@@ -24,18 +24,18 @@ By using the repository pattern, we can easily swap out the underlying data stor
 
 - Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
 
-- Separation of concerns: the repository separates the business logic from the data access logic, making the code easier to read, test, and maintain.
+- Separation of concerns: the repository separates business logic from data access logic, making the code easier to read, test, and maintain.
 
 - Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
 
-- Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
+Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
 
 ## Example
 
-We offer an example of Repository pattern implementation in the opinionated template of ExpressoTS.
+We offer an example of a Repository pattern implementation in the opinionated template of ExpressoTS.
 
 :::info
-In ExpressoTS, we implement the repository pattern in a specific folder called **"repositories"**, which is separated from the **"provider"** folder intentionally, even though it could be considered as a type of provider. We did this to give more emphasis to the repository pattern and make it clear to developers that it is an important decoupled that the development of the application could benefit of.
+In ExpressoTS, we implement the repository pattern in a specific folder called **"repositories"**, intentionally separated from the **"provider"** folder. We do this to emphasize the difference in repositories and providers, and how decoupling the two could benefit application development.
 :::
 
 ### Base repository interface
@@ -59,7 +59,7 @@ interface IBaseRepository<T> {
 ```typescript
 @provide(BaseRepository)
 class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
-  private readonly USERDB: T[] = [];
+  private readonly DB: T[] = [];
 
   create(item: T): T | null {
     this.DB.push(item);
