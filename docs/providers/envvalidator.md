@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Environment validator
+# Environment Validator
 
 The environment validator provider is a provider that ExpressoTS offers out-of-the-box. It is used to validate the existence of the `.env` file and its content.
 It helps the developer to avoid runtime errors caused by missing environment variables.
@@ -21,7 +21,7 @@ Inside of the Application class you can find three methods that are called in th
 - `postServerInitialization()` : Configure services that should be executed after the server starts.
 - `serverShutdown()` : Perform actions or cleanup after the server is shutdown.
 
-Environment validator provider is called in the `configureServices()` method preventing the application to start if the `.env` file is missing or if it has missing environment variables.
+Environment validator provider is called in the `configureServices()` method preventing the application from starting if the `.env` file is missing or if it has missing environment variables.
 
 ```typescript
 protected configureServices(): void {
@@ -37,7 +37,7 @@ Environments.get("PORT");
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
