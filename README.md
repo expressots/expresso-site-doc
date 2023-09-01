@@ -67,7 +67,11 @@ Why Contribute to Documentation?
 - **Join a Network**: Get to know a community of like-minded developers.
 - **Improve the Product**: Help us fill in the gaps, correct errors, or make complex topics easier to understand.
 
-Ready to contribute? [Click here for more details...](https://github.com/expressots/expresso-site-doc/blob/main/CONTRIBUTING.md)
+Ready to contribute?
+
+- [Contributing Guidelines](https://github.com/expressots/expresso-site-doc/blob/main/CONTRIBUTING.md)
+- [How to Contribute](https://github.com/expressots/expresso-site-doc/blob/main/CONTRIBUTING_HOWTO.md)
+- [Coding Guidelines](https://github.com/rsaz/TypescriptCodingGuidelines)
 
 ## Support the project
 
