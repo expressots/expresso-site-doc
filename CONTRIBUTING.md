@@ -6,15 +6,44 @@
     <li><a href="#content">Content</a>
       <ul><a href="#code-of-conduct">Code of Conduct</a></ul>
       <ul><a href="#asking-for-support">Asking for Support</a></ul>
+      <ul><a href="#open-issue">Opening an Issue</a></ul>
+      <ul><a href="#report-security">Reporting Security Issues</a></ul>
+      <ul><a href="#bug-report">Bug Reports and Other Issues</a></ul>
+      <ul><a href="#review-doc">Review the documentation</a></ul>
+      <ul><a href="#duplicate-issue">Do not open a duplicate issue</a></ul>
+      <ul><a href="#use-reactions">Prefer using reactions</a></ul>
+      <ul><a href="#use-markdown">Use GitHub-flavored Markdown</a></ul>
+      <ul><a href="#feature-request">Feature Requests</a></ul>
+      <ul><a href="#feature-request-duplicated">Do not open a duplicate feature request</a></ul>
+      <ul><a href="#complete-issue-template">Fully complete the provided issue template</a></ul>
+      <ul><a href="#triage-issue">Triaging Issues</a></ul>
     </li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#support-the-project">Support the project</a></li>
-    <li><a href="#license">License</a></li>
+       <ul><a href="#sub-pr">Submitting Pull Requests</a>
+       <ul><a href="#single-pull-request">Smaller is better</a></ul>
+       <ul><a href="#coordinate-changes">Coordinate bigger changes</a></ul>
+       <ul><a href="#prioritize-understanding">Prioritize understanding over cleverness</a></ul>
+       <ul><a href="#coding-style">Follow existing coding style and conventions</a></ul>
+       <ul><a href="#test-coverage">Include test coverage</a></ul>
+       <ul><a href="#example-project">Update the example project</a></ul>
+       <ul><a href="#add-documentation">Add documentation</a></ul>
+       <ul><a href="#update-changelog">Update the CHANGELOG</a></ul>
+       <ul><a href="#default-branch">Use the repo's default branch</a></ul>
+       <ul><a href="#resolve-conflicts">Resolve any merge conflicts</a></ul>
+       <ul><a href="#address-ci-failures">Promptly address any CI failures</a></ul>
+       <ul><a href="#writing-comments">When writing comments, use properly constructed sentences</a></ul>
+       <ul><a href="#use-spaces">Use spaces, not tabs</a></ul>
+    </li>
+    <li><a href="#writting-commit">Writing Commit Messages</a></li>
+    <li><a href="#code-review">Code Review</a></li>
+    <li><a href="#coding-style">Coding Style</a></li>
+    <li><a href="#cert-ori">Certificate of Origin</a></li>
+    <li><a href="#contributing">You are Here</a></li>
   </ol>
 </details>
 
 <!-- CONTRIBUTION GUIDELINES -->
 # Contributing Guidelines
+
 Pull requests, bug reports, and all other forms of contribution are welcomed and highly encouraged!
 
 > **This guide serves to set clear expectations for everyone involved with the project so that we can improve it together while also creating a welcoming space for everyone to participate. Following these guidelines will help ensure a positive experience for contributors and maintainers.**
@@ -23,7 +52,7 @@ Pull requests, bug reports, and all other forms of contribution are welcomed and
 
 - **Code of Conduct**: Please review our [Code of Conduct](https://github.com/expressots/expresso-site-doc/blob/main/CODE_OF_CONDUCT.md). It is in effect at all times. We expect it to be honored by everyone who contributes to this project. Acting like an asshole will not be tolerated.
 
-- **Asking for Support**: See our [Support Guide](https://github.com/jessesquires/.github/blob/main/SUPPORT.md). In short, GitHub issues are not the appropriate place to debug your specific project, but should be reserved for filing bugs and feature requests.
+- **Asking for Support**: See our [Support Guide](https://github.com/expressots/expresso-site-doc/blob/main/SUPPORT.md). In short, GitHub issues are not the appropriate place to debug your specific project, but should be reserved for filing bugs and feature requests.
 
 - **Opening an Issue**: Before [creating an issue](https://help.github.com/en/github/managing-your-work-on-github/creating-an-issue), check if you are using the latest version of the project. If you are not up-to-date, see if updating fixes your issue first.
 
@@ -158,7 +187,7 @@ By making a contribution to this project, I certify that:
 > 1. The contribution was provided directly to me by some other person who certified (1), (2) or (3) and I have not modified it.
 > 1. I understand and agree that this project and the contribution are public and that a record of the contribution (including all personal information I submit with it, including my sign-off) is maintained indefinitely and may be redistributed consistent with this project or the open source license(s) involved.
 
-## You are here
+## You are Here
 
 If you are reading this, bravo dear user and (hopefully) contributor for making it this far! You are awesome. :100: 
 
