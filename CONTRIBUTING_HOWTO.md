@@ -9,29 +9,43 @@
 
 ## Installation Guide
 
-We are currently using Docusaurus version 2.4.1.
+We are currently using Docusaurus version 2.4.1. For more information about Docusaurus, please visit the [Docusaurus website](https://docusaurus.io/docs)
 
-After forking the repo, you can install the dependencies and run the project in development mode with:
+After forking the repo, you can install the dependencies with the following command:
+
+```bash
+npm install
+```
+
+And run the project in development mode with:
 
 ```bash
 npm start
 ```
 
-## <a name="issue-bug"></a> Report an issue or a bug
+## Report an issue or a bug
 
 If you find a bug in the source code, you can help us by submitting an issue in the **[Issue reporting channel](https://github.com/expressots/expressots/issues)**. Event better, you can submit a **[Pull Request](https://github.com/expressots/expressots/pulls)** with a fix.
 
-## <a name="feature"></a> Request a feature
+## Request a feature
 
 You can request a new feature by submitting an issue in the **[Issue reporting channel](https://github.com/expressots/expressots/issues)**.
 
 If you would like to implement the new feature, please submit an issue describing your proposal first. Thi will allow us to provide feedback, ensure that the feature is aligned with the project goals and that you are not duplicating work.
 
-## <a name="coding"></a> Coding Guidelines
+## Issues and Feature Requests Labels
 
-In development ...
+- **[doc fix]**: A documentation fix
+- **[doc update]**: A documentation update
+- **[feature]**: A new feature
+- **[new doc]**: A new documentation
+- **[translation]**: A new translation
 
-## <a name="pull-request"></a> Submitting your Pull Request
+## Coding Guidelines
+
+Here are the coding guidelines we use for ExpressoTS: [Typescript Coding Guidelines](https://github.com/rsaz/TypescriptCodingGuidelines/blob/main/TypeScriptCodingGuidelines.md)
+
+## Submitting your Pull Request
 
 ### Description
 
