@@ -4,21 +4,21 @@ sidebar_position: 2
 
 # Application
 
-The Application Overview provides a comprehensive demonstration of the main components of an ExpressoTS application. At the heart of an ExpressoTS application lies the Application class, which serves as the foundation for creating and configuring the server. Additionally, the Application class makes use of the application container from Inversify that loads all the modules, including their respective routes [controllers]. This ensures a streamlined and efficient process for handling incoming requests and delivering the appropriate responses.
+The Application Overview provides a comprehensive demonstration of the main components of an ExpressoTS application. At the heart of an ExpressoTS application lies the Application class. It serves as the foundation for creating and configuring the server. Additionally, the Application class makes use of the application container from Inversify that loads all the modules, including their respective routes [controllers]. This ensures a streamlined and efficient process for handling incoming requests and delivering the appropriate responses.
 
 ![Application Overview](./img/app-overview.png)
 
-ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers like **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, or **[Koa](https://koajs.com/)**.
+ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers, including **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, or **[Koa](https://koajs.com/)**.
 
 :::info
-Currently, ExpressoTS only supports Express, as we tested it thoroughly.
+Currently, only Express has been thoroughly tested by the ExpressoTS team.
 :::
 
-The architecture of an ExpressoTS application is around of the **[Inversify's](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
+The architecture of an ExpressoTS application is built around the **[Inversify](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
 
-By leveraging the power of Inversify, ExpressoTS provides a custom Dependency Injection system that is scalable and modular, an architecture that helps to decouple components and improve maintainability. This allows developers to focus on writing clean and maintainable code.
+By leveraging the power of Inversify, ExpressoTS provides a custom Dependency Injection system that is scalable and modular. This creates an architecture that helps to decouple components and improve maintainability, allowing developers to focus on writing clean and maintainable code.
 
-## Application components breakdown
+## Application Components Breakdown
 
 | Component    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -41,15 +41,15 @@ The workflow of an ExpressoTS application is straightforward, as shown in the di
 3. The controller then calls the relevant use-case, which in turn calls the appropriate provider when required. Providers are external components that offer additional functionality to the application.
 
 :::warning Initializing the Application without a controller
-ExpressoTS will prevent you to do that as there are no listeners to handle incoming requests. You will see the following message in the console:
+ExpressoTS will prevent you from initializing the Application without a controller since there are no listeners to handle incoming requests. You will see the following message in the console:
 **_No controllers have been found! Please ensure that you have register at least one Controller._**
 :::
 
-## Application class
+## Application Class
 
-The Application class offers a way of creating and configuring the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middlewares upon server creation.
+The Application class offers a way to create and configure the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middleware upon server creation.
 
-Application class definition
+### Application Class Definition
 
 ```typescript
 class Application {
@@ -84,12 +84,12 @@ class Application {
 ```
 
 :::info
-We also provide an instance of the Application class called **AppInstance**, which only exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
+We also provide an instance of the Application class called **AppInstance**, which exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
 :::
 
-### Create method
+### Create Method
 
-Create method allows developers to pass the container and middlewares to the server. To pass middlewares you don't need to use `app.use()`, just simply pass the middleware and it's configuration as demonstrated below:
+The create method allows developers to pass the container and middlewares to the server. To pass middleware you don't need to use `app.use()`, just pass the middleware and its configuration as demonstrated below:
 
 ```typescript
 async function Bootstrap() {
@@ -103,9 +103,9 @@ async function Bootstrap() {
 }
 ```
 
-### Listen method
+### Listen Method
 
-The listen method starts the server and listens for incoming requests. In the listen method, developers can define not just the port number but also the server environment, which can be either development, staging, or production. As well as the developers can set the application name and version to be displayed in the console when the server starts, as shown in the following example:
+The listen method starts the server and listens for incoming requests. In the listen method, developers can define the port number and server environment, which can be either development, staging, or production. Developers can also set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
 ```typescript
 // App listen method
@@ -119,11 +119,11 @@ app.listen(3000, ServerEnvironment.Development, {
 The name and version of your app can be configured via either the .env file or package.json file. In the opinionated template, we use the package.json file to retrieve the app name and version.
 :::
 
-### Application server environment
+### Application Server Environment
 
-For now this is a working in progress functionality. What it does is simply display the environment in the console when the server starts. The colored console message helps developers to quickly identify the environment the server is running on.
+For now, this functionality is a work-in-progress. Currently, it displays the environment in the console when the server starts. The colored console message helps developers to quickly identify the environment the server is running on.
 
-Here is the enum available of the server environment:
+Here are the enum values available for server environments:
 
 ```typescript
 ServerEnvironment.Development;
@@ -132,12 +132,12 @@ ServerEnvironment.Production;
 ```
 
 :::caution SPOILER ALERT
-The goal with this functionality is to allow developers to load environment variables based on the environment the server is running on. For example, if the server is running on development, load the .env.dev file, if the server is running on staging, load the .env.stg file, and if the server is running on production, load the .env.prod file. Also, we are planning to load environment variables from remote sources such as AWS Parameter Store, AWS Secrets Manager, Azure Key, Vault, etc.
+The goal of this functionality is to allow developers to load environment variables based on the environment the server is running on. For example, if the server is running on development, load the .env.dev file, if the server is running on staging, load the .env.stg file, etc.. We are also planning to load environment variables from remote sources such as AWS Parameter Store, AWS Secrets Manager, Azure Key Vault, etc..
 :::
 
-## Application lifecycle hooks
+## Application Lifecycle Hooks
 
-Another important aspect of the Application class is life cycle hooks. These hooks allow developers to execute code before, after and on the server shutdown. Important to note that in order to take advantage of these hooks, developers must created an App Class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
+Another important aspect of the Application class is lifecycle hooks. These hooks allow developers to execute code before, after and on server shutdown. It is important to note that in order to take advantage of these hooks, developers must create an App class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
 
 ```typescript
     /* Add any service that you want to be initialized before the server starts */
@@ -152,14 +152,15 @@ Another important aspect of the Application class is life cycle hooks. These hoo
      }
 ```
 
-### Hooks execution order
+### Hooks Execution Order
 
 ![Application Lifecycle Hooks](./img/app-life-cycle.png)
 
-## Application scripts
+## Application Scripts
 
-Please see below all the available scripts that you can use to run, build and test your application.
-The command column shows NPM as the package manager, but you can use Yarn or any other package manager of your choice.
+Below are the scripts used to run, build and test your application.
+The command column shows NPM as the package manager, but you can use your package manager of choice.
+
 
 | Script     | Description                                    | Command            |
 | ---------- | ---------------------------------------------- | ------------------ |
@@ -172,19 +173,19 @@ The command column shows NPM as the package manager, but you can use Yarn or any
 | format     | Format the code using prettier.                 | npm run format     |
 | lint       | Lint code using eslint.                         | npm run lint       |
 
-## Running the application
+## Running the Application
 
 ```bash
 npm run dev
 ```
 
-Depending on the environment you are running the application, you will see the following message in the console:
+Depending on which environment you are running the application in, you will see the following message in the console:
 
 `expressots-demo version 1.0.0 is running on port 3000 - Environment: development`
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
