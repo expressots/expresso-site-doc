@@ -4,9 +4,9 @@ sidebar_position: 10
 
 # Decorators
 
-Here is a complete list of all the decorators that are available in ExpressoTS as wel as a brief description of what they do.
+Here is a complete list of all decorators available in ExpressoTS as well as a brief description of what they do.
 
-## Class decorators
+## Class Decorators
 
 Decorators available for your classes.
 
@@ -18,7 +18,7 @@ Decorators available for your classes.
 | @injectable        | Marks a class as available to be injected.                                     |
 | @inject            | Marks a class as available to be injected in the constructor of another class. |
 
-## Controller decorators
+## Controller Decorators
 
 Decorators available for your controllers.
 
@@ -27,7 +27,7 @@ Decorators available for your controllers.
 | @controller | Marks a class as a controller. | @controller("/path", middleware[])                           |
 | @scope      | Binds a controller to a scope. | @scope(BindingScopeEnum.Singleton, or Request, or Transient) |
 
-### HTTP method decorators
+### HTTP Method Decorators
 
 Decorators available for your controller methods.
 
@@ -41,7 +41,7 @@ Decorators available for your controller methods.
 | @httpDelete | Binds a controller method to a DELETE HTTP verb.                   | @httpDelete("/path")         |
 | @httpMethod | Binds a controller method to a specified HTTP verb.                | @httpMethod("verb", "/path") |
 
-### Parameter decorators
+### Parameter Decorators
 
 Here is a list of all parameter decorators available in ExpressoTS, along with their description and usage:
 
@@ -58,7 +58,7 @@ Here is a list of all parameter decorators available in ExpressoTS, along with t
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 

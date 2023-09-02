@@ -4,15 +4,15 @@ sidebar_position: 5
 
 # Controllers
 
-Controllers act as the primary interface between the client and server in ExpressoTS applications. They handle incoming requests, validate payloads against Input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
+Controllers act as the primary interface between the client and server in ExpressoTS applications. They handle incoming requests, validate payloads against an input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
 
-## DTO pattern
+## DTO Pattern
 
 Data Transfer Object (DTO) is a commonly used design pattern that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
 
 Using DTOs can improve application performance and scalability by reducing the data transfer between the client and server and providing more efficient ways to process and handle data within the application.
 
-### DTO example
+### DTO Example
 
 For example, imagine a user registration scenario where name, email, and password are collected, and ID is auto-generated. The user object DTO for Input and Response could have possible formats, as shown below:
 
@@ -63,7 +63,7 @@ class AppController {
 ```
 
 :::info
-In the AppController class above we are using res as any `res:any` but you can definitely use the `res:Response` type from the `express` package as we expose its types. This will allow you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
+In the AppController class above we are using res as any (`res:any`), but the `res:Response` type from the `express` package is also available for use. This allows you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
 :::
 
 ## BaseController Class
@@ -113,9 +113,9 @@ class AppController extends BaseController {
 }
 ```
 
-## Controller scope
+## Controller Scope
 
-The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope. However you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum enum values.
+The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope. However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum enum values.
 
 :::info
 If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
@@ -132,11 +132,11 @@ class CreateUserController extends BaseController { }
 
 The controller above will be scoped as `Singleton` and will be shared across all requests.
 
-## Controller decorators
+## Controller Decorators
 
 HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests. Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
 
-### HTTP methods decorators
+### HTTP Methods Decorators
 
 Here's a list of all available `@httpMethods()` decorators in ExpressoTS, along with their description and usage:
 
@@ -150,7 +150,7 @@ Here's a list of all available `@httpMethods()` decorators in ExpressoTS, along 
 | @httpDelete | Binds a controller method to a DELETE HTTP verb.   | @httpDelete("/path")         |
 | @httpMethod | Binds a controller method to a specified HTTP verb.| @httpMethod("verb", "/path") |
 
-### Parameter decorators
+### Parameter Decorators
 
 Here's a list of all available parameter decorators in ExpressoTS, along with their description and usage:
 
@@ -165,9 +165,9 @@ Here's a list of all available parameter decorators in ExpressoTS, along with th
 | @cookies(cookieName?: string)        | Injects a cookie from the request cookies.              | execute(@cookies('session') session: string)
 | @next()                              | Injects the Express NextFunction object.                | execute(@next() next: NextFunction)
 
-## A MVC approach
+## An MVC Approach
 
-Despite in the opinionated template we recommend one controller and one use case per route, you can definitely use the MVC approach or any other pattern you want. For this we recommend the use of a `non-opinionated` template, in which the developer have freedom to customize his application.
+Despite the fact that the opinionated template recommends one controller and one use case per route, you can use the MVC approach or any other pattern you want. For this we recommend the use of a `non-opinionated` template, in which the developer has the freedom to customize their application.
 
 Here is an example of use MVC approach, which contains a single controller class that handles the request for a product resource:
 
@@ -203,7 +203,7 @@ class ProductController {
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 

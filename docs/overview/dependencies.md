@@ -6,13 +6,13 @@ sidebar_position: 12
 
 The purpose of this section is to list all dependencies used by ExpressoTS and our vision about dependency management.
 
-## Dependency management
+## Dependency Management
 
-We know that having dependencies accelerates the development process, but it also increases the project complexity and the maintenance cost. Also, another aspect that we consider is the security risks that a dependency can bring to the project.
+We know that dependencies accelerate the development process, but it also increases the projects complexity and maintenance cost. Another aspect we consider is the potential security risks that a dependency could bring the project.
 
-Our goal is to keep the number of dependencies as low as possible, trying to use only the ones that are really necessary and not part of our core ExpressoTS framework mechanics. With that in mind we have in the Roadmap some of the dependencies that we would like to replace by our own implementation. More news about that soon.
+Our goal is to keep the number of dependencies as low as possible, using only those that are necessary and not part of our core ExpressoTS framework mechanics. With that in mind, the Roadmap includes some  dependencies that we hope to replace by our own implementation. More information will come on this.
 
-In this meanwhile we will keep watching closely the dependencies, using tools like **[Dependabot](https://dependabot.com/)** to keep them up to date and also using tools like **[Snyk](https://snyk.io/)** to keep an eye of the security risks.
+For now, we will keep a vigilant watch on included dependencies, using tools like **[Dependabot](https://dependabot.com/)** to keep them up to date and also using tools like **[Snyk](https://snyk.io/)** to monitor the security risks.
 
 ## Utilities
 
@@ -27,7 +27,7 @@ In this meanwhile we will keep watching closely the dependencies, using tools li
 - ts-node-dev: Typescript runner
 - tsconfig-paths: Resolve paths from tsconfig.json
 
-## Core packages
+## Core Packages
 
 - express: Http server framework
 - inversify: IoC container
@@ -43,7 +43,7 @@ In this meanwhile we will keep watching closely the dependencies, using tools li
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 

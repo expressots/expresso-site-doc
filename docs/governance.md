@@ -38,13 +38,13 @@ We are moving the project board and roadmap from Jira to GitHub Projects. This w
 
 Meet the team of regular contributors: **[Team](https://expresso-ts.com/team)**
 
-## Want to help?
+## Want to Help?
 
 **[Fix a bug or submit a proposal](https://github.com/expressots/expressots/issues/new/choose)**
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 

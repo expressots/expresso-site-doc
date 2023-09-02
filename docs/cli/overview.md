@@ -7,7 +7,7 @@ sidebar_position: 1
 The ExpressoTS CLI is a command-line interface tool that helps you to `create` ExpressoTS projects and `scaffold` the application resources such as use cases, controllers, dto's, providers and services.
 
 :::info
-We use in this tutorial the `npm` package manager, but you can use your favorite package manager such as `yarn` or `pnpm`.
+We use the `npm` package manager in this tutorial, but you can use your favorite package manager, such as `yarn` or `pnpm`.
 :::
 
 ## Installation
@@ -18,7 +18,7 @@ First install the CLI globally using the command below:
 npm install -g @expressots/cli
 ```
 
-## Basic usage
+## Basic Usage
 
 ```bash
 expressots <command> [options]
@@ -40,7 +40,7 @@ Providers information about your Operational System, Project and CLI version:
 expressots info
 ```
 
-## Create a project
+## Create a Project
 
 There are two options to create a new project, interactively or silently (passing the options as arguments).
 Here is the complete command syntax:
@@ -65,11 +65,11 @@ expressots new <project-name> -p <package-manager> -t <template> -d <directory>
 - **template**: `opinionated` or `non-opinionated`
 - **directory**: `./my-project`
 
-The flag `-d` is optional and it's used to specify the directory where the project will be created. If not specified, the project will be created in the current directory.
+The flag `-d` is optional and is used to specify the directory where the project will be created. If not specified, the project will be created in the current directory.
 
 ---
 
-## Support the project
+## Support the Project
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
