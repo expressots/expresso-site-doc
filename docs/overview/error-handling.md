@@ -4,7 +4,7 @@ sidebar_position: 14
 
 # Error Handling
 
-When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. ExpressoTS providers a simple and easy way to handle errors.
+When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. ExpressoTS provides a simple and easy way to handle errors.
 
 - We use HTTP status codes appropriately: HTTP **[status codes](./status-code.md)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
 
@@ -22,7 +22,7 @@ When it comes to error handling in Node.js TypeScript APIs, there are several be
 
 We developed a standardized error reporting class called `Report` that provides a centralized location for throwing and handling errors, which can simplify error handling throughout the application.
 
-The errorHandler function provides a centralized location for handling errors that occur during request processing. By defining a standard error response format, it helps to ensure consistency in error messages that are returned to clients.
+By defining a standard error response format, it helps to ensure consistency in error messages that are returned to clients.
 
 This approach is best used in applications with a large codebase or complex business logic, where errors may occur frequently and need to be handled consistently across different parts of the application.
 
@@ -32,42 +32,81 @@ Report class is a utility class to manage and throw application-specific errors.
 
 ```typescript
 class Report {
-
-    /**
-     * Error method takes an instance of Error and throws it.
-     * @param error - An instance of Error or a string representing the error message.
-     * @param statusCode - The HTTP status code of the error.
-     * @param service - The service where the error occurred.
-     */
-    public static Error(error: Error | string, statusCode?: number, service?: string): void { }
+  /**
+   * The Error method is responsible for generating a standardized error object,
+   * logging the error, and then throwing it for further handling.
+   * The error thrown is of the custom type AppError, which extends the built-in Error class.
+   *
+   * @param error - An instance of Error or a string that describes the error.
+   * @param statusCode - The HTTP status code associated with the error (default is 500).
+   * @param service - The service name associated with the error. If not specified,
+   *                  it defaults to the name of the calling function.
+   *
+   * @throws An object of the custom type AppError, which includes details about the error.
+   */
+  public Error(
+    error: Error | string,
+    statusCode?: number,
+    service?: string,
+  ): AppError {
 }
 ```
 
-Once you report a known error through the `Report.Error()` method, the error will be handled by the `errorHandler()` middleware and will be returned to the client in the json parsed format.
+Once you report a known error through the `Report.Error()` method, the error will be handled by the `defaultErrorHandler()` middleware and will be returned to the client in the json parsed format.
 
 ### Middleware
 
 This middleware function is used to handle errors that occur during request processing.
 
 ```typescript
-function errorHandler(error: IAppError, req: Request, res: Response, next: NextFunction): void {
-    res.status(error.statusCode || StatusCode.InternalServerError).json({statusCode: error.statusCode, error: error.message});
+/**
+ * errorHandler is a custom Express error-handling middleware function.
+ * It logs the error, sets the status code, and sends a JSON response containing the status code and error message.
+ * @param error - An instance of IAppError containing error details.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param next - The Express next function for passing control to the next middleware function.
+ */
+function defaultErrorHandler(
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  if (error instanceof AppError) {
+    res
+      .status(error.statusCode)
+      .json({ statusCode: error.statusCode, error: error.message });
+  } else {
+    res.status(StatusCode.InternalServerError).json({
+      statusCode: StatusCode.InternalServerError,
+      error: "An unexpected error occurred.",
+    });
+  }
 }
 
-export default errorHandler;
+export default defaultErrorHandler;
 ```
 
 :::info
-function `errorHandler()` is a custom Express error-handling middleware function.
+function `defaultErrorHandler()` is a custom Express error-handling middleware function.
 It logs the error, sets the status code, and sends a JSON response containing the status code and error message.
 :::
 
 ## Example of use
 
 ```typescript
-Report.Error(error, StatusCode.BadRequest, "your-service");
-// Or
-Report.Error("your-error", StatusCode.BadRequest, "your-service");
+class FooClass {
+  constructor(private report: Report) {}
+
+  execute() {
+    try {
+      // do something
+    } catch (error: any) {
+      this.report.Error(error, StatusCode.BadRequest, "your-service");
+    }
+  }
+}
 ```
 
 Use case example:
@@ -75,49 +114,55 @@ Use case example:
 ```typescript
 @provide(CreateUserUseCase)
 class CreateUserUseCase {
-    constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository, private report: Report) {}
 
-    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
-        try {
-            const { name, email } = data;
+  execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+    try {
+      const { name, email } = data;
 
-            const userAlreadyExists = await this.userRepository.findByEmail(email);
+      const userAlreadyExists = await this.userRepository.findByEmail(email);
 
-            if (userAlreadyExists) {
-                Report.Error("User already exists", StatusCode.BadRequest, "create-user-usecase");
-            }
+      if (userAlreadyExists) {
+        this.report.Error(
+          "User already exists",
+          StatusCode.BadRequest,
+          "create-user-usecase"
+        );
+      }
 
-            const user: User | null = this.userRepository.create(new User(name, email));
+      const user: User | null = this.userRepository.create(
+        new User(name, email)
+      );
 
-            let response: ICreateUserResponseDTO;
+      let response: ICreateUserResponseDTO;
 
-            if (user !== null) {
-                response = {
-                    id: user.Id,
-                    name: user.name,
-                    email: user.email,
-                    status: "success",
-                };
-                return response;
-            }
+      if (user !== null) {
+        response = {
+          id: user.Id,
+          name: user.name,
+          email: user.email,
+          status: "success",
+        };
+        return response;
+      }
 
-            return null;
-        } catch (error: any) {
-            throw error;
-        }
+      return null;
+    } catch (error: any) {
+      throw error;
     }
+  }
 }
 ```
 
 ## Error components description
 
-| Object          | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| Report.Error    | Static method to report known errors.                                    |
-| IAppError       | App Error interface that defines error object format.                    |
-| StatusCode      | Http responses code and message.                                         |
-| Error Message   | Error message detail that the developer wants to log.                    |
-| Error Service   | To be used in the log system to indicate where the error was generated.  |
+| Object        | Description                                                             |
+| ------------- | ----------------------------------------------------------------------- |
+| Report.Error  | Method to report known errors.                                          |
+| AppError      | App Error class that defines error object format.                       |
+| StatusCode    | Http responses code and message.                                        |
+| Error Message | Error message detail that the developer wants to log.                   |
+| Error Service | To be used in the log system to indicate where the error was generated. |
 
 ---
 

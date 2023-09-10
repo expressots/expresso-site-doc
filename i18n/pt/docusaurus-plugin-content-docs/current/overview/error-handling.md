@@ -18,56 +18,89 @@ Quando se trata de tratamento de erros nas APIs TypeScript do Node.js, existem v
 
 - Registramos erros: o registro de erros é importante para depuração e monitoramento.
 
-## Nossa solução
+## Nossa Abordagem
 
-Desenvolvemos uma classe de relatório de erros padronizada chamada `Report` que fornece um local centralizado para lançamento e tratamento de erros, o que pode simplificar o tratamento de erros em todo o aplicativo.
+Desenvolvemos uma classe de relatório de erro padronizada chamada Report que oferece um local centralizado para lançar e tratar erros, o que pode simplificar o tratamento de erros em toda a aplicação.
 
-A função errorHandler fornece um local centralizado para manipulação de erros que ocorrem durante o processamento da solicitação. Ao definir um formato de resposta de erro padrão, ele ajuda a garantir a consistência nas mensagens de erro que são retornadas aos clientes.
+Ao definir um formato de resposta de erro padrão, ajuda a garantir consistência nas mensagens de erro retornadas aos clientes.
 
-Essa abordagem é melhor usada em aplicativos com uma grande base de código ou lógica de negócios complexa, onde os erros podem ocorrer com frequência e precisam ser tratados de forma consistente em diferentes partes do aplicativo.
+Esta abordagem é melhor usada em aplicações com um grande código-base ou lógica de negócios complexa, onde erros podem ocorrer com frequência e precisam ser tratados de forma consistente em diferentes partes da aplicação.
 
-### Report error
+### Report Error
 
-A classe de relatório é uma classe de utilitário para gerenciar e lançar erros específicos do aplicativo.
+A classe Report é uma classe de utilitário para gerenciar e lançar erros específicos do aplicativo.
 
 ```typescript
 class Report {
-
-    /**
-     * O método Error pega uma instância de Error e a lança.
-     * @param error - Uma instância de Error ou uma string que representa a mensagem de erro.
-     * @param statusCode - O código de status HTTP do erro.
-     * @param service - O serviço onde ocorreu o erro.
-     */
-    public static Error(error: Error | string, statusCode?: number, service?: string): void { }
+  /**
+   * O método Error pega uma instância de Error e a lança.
+   * @param error - Uma instância de Error ou uma string que representa a mensagem de erro.
+   * @param statusCode - O código de status HTTP do erro.
+   * @param service - O serviço onde ocorreu o erro.
+   */
+  public static Error(
+    error: Error | string,
+    statusCode?: number,
+    service?: string
+  ): void {}
 }
 ```
 
-Depois de relatar um erro conhecido por meio do método `Report.Error()`, o erro será tratado pelo middleware `errorHandler()` e será retornado ao cliente no formato json analisado.
+Depois de relatar um erro conhecido por meio do método `Report.Error()`, o erro será tratado pelo middleware `defaultErrorHandler()` e será retornado ao cliente no formato json analisado.
 
 ### Middleware
 
 Essa função de middleware é usada para manipular erros que ocorrem durante o processamento da solicitação.
 
 ```typescript
-function errorHandler(error: IAppError, req: Request, res: Response, next: NextFunction): void {
-    res.status(error.statusCode || StatusCode.InternalServerError).json({statusCode: error.statusCode, error: error.message});
+/**
+ * errorHandler é uma função de middleware de tratamento de erros personalizada do Express.
+ * Ela registra o erro, define o código de status e envia uma resposta JSON contendo o código de status e a mensagem de erro.
+ * @param error - Uma instância de AppError contendo detalhes do erro.
+ * @param req - O objeto de solicitação do Express.
+ * @param res - O objeto de resposta do Express.
+ * @param next - A função next do Express para passar o controle para a próxima função de middleware.
+ */
+function defaultErrorHandler(
+  error: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  if (error instanceof AppError) {
+    res
+      .status(error.statusCode)
+      .json({ statusCode: error.statusCode, error: error.message });
+  } else {
+    res.status(StatusCode.InternalServerError).json({
+      statusCode: StatusCode.InternalServerError,
+      error: "Ocorreu um erro inesperado.",
+    });
+  }
 }
 
-export default errorHandler;
+export default defaultErrorHandler;
 ```
 
 :::info
-A função `errorHandler()` é uma função de middleware de tratamento de erros Express personalizada.
-Ele registra o erro, define o código de status e envia uma resposta JSON contendo o código de status e a mensagem de erro.
+A função `defaultErrorHandler()` é uma função de middleware de tratamento de erros personalizada do Express.
+Ela registra o erro, define o código de status e envia uma resposta JSON contendo o código de status e a mensagem de erro.
 :::
 
 ## Exemplo de uso
 
 ```typescript
-Report.Error(error, StatusCode.BadRequest, "your-service");
-// Ou
-Report.Error("your-error", StatusCode.BadRequest, "your-service");
+class FooClass {
+  constructor(private report: Report) {}
+
+  execute() {
+    try {
+      // fazer algo
+    } catch (error: any) {
+      this.report.Error(error, StatusCode.BadRequest, "seu-servico");
+    }
+  }
+}
 ```
 
 Use case example:
@@ -75,49 +108,55 @@ Use case example:
 ```typescript
 @provide(CreateUserUseCase)
 class CreateUserUseCase {
-    constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository, private report: Report) {}
 
-    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
-        try {
-            const { name, email } = data;
+  execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+    try {
+      const { name, email } = data;
 
-            const userAlreadyExists = await this.userRepository.findByEmail(email);
+      const userAlreadyExists = await this.userRepository.findByEmail(email);
 
-            if (userAlreadyExists) {
-                Report.Error("User already exists", StatusCode.BadRequest, "create-user-usecase");
-            }
+      if (userAlreadyExists) {
+        this.report.Error(
+          "User already exists",
+          StatusCode.BadRequest,
+          "create-user-usecase"
+        );
+      }
 
-            const user: User | null = this.userRepository.create(new User(name, email));
+      const user: User | null = this.userRepository.create(
+        new User(name, email)
+      );
 
-            let response: ICreateUserResponseDTO;
+      let response: ICreateUserResponseDTO;
 
-            if (user !== null) {
-                response = {
-                    id: user.Id,
-                    name: user.name,
-                    email: user.email,
-                    status: "success",
-                };
-                return response;
-            }
+      if (user !== null) {
+        response = {
+          id: user.Id,
+          name: user.name,
+          email: user.email,
+          status: "success",
+        };
+        return response;
+      }
 
-            return null;
-        } catch (error: any) {
-            throw error;
-        }
+      return null;
+    } catch (error: any) {
+      throw error;
     }
+  }
 }
 ```
 
 ## Descrição dos componentes de tratamento de erro
 
-| Objeto          | Descrição                                                    |
-| --------------- | -------------------------------------------------------------- |
-| Report.Error    | Método estático para reportar erros conhecidos.                |
-| IAppError        | Interface de erro do aplicativo que define o formato do objeto de erro.   |
-| StatusCode      | Código de status HTTP.                                          |
-| Error Message   | Detalhes da mensagem de erro que o desenvolvedor deseja registrar.                                               |
-| Error Service   | Serviço que originou o erro, a ser utilizado no sistema de log. |
+| Objeto        | Descrição                                                            |
+| ------------- | -------------------------------------------------------------------- |
+| Report.Error  | Método estático para reportar erros conhecidos.                      |
+| AppError      | Classe de erro do aplicativo que define o formato do objeto de erro. |
+| StatusCode    | Código de status HTTP.                                               |
+| Error Message | Detalhes da mensagem de erro que o desenvolvedor deseja registrar.   |
+| Error Service | Serviço que originou o erro, a ser utilizado no sistema de log.      |
 
 ---
 
