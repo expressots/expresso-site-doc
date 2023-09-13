@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Environment Validator
@@ -13,7 +13,7 @@ It is only included in the opinionated template or when you create a class that 
 
 You can find it in the `src/providers/application` folder in the opinionated template.
 
-The `application.provider` is the main provider of the application that is responsible to control the **[Application Lifecycle](../overview/application.md#application-lifecycle-hooks)**. 
+The `application.provider` is the main provider of the application that is responsible to control the **[Application Lifecycle](../overview/application.md#application-lifecycle-hooks)**.
 
 Inside of the Application class you can find three methods that are called in the following order:
 
