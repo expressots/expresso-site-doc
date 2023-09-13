@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
 # Validator de ambiente
@@ -13,7 +13,7 @@ Ele está incluso apenas no modelo opinativo ou quando você cria uma classe que
 
 Você pode encontrá-lo na pasta `src/providers/application` no modelo opinativo.
 
-O `application.provider` é o provedor principal do aplicativo responsável por controlar o  **[Application Lifecycle](../overview/application.md#application-lifecycle-hooks)**.
+O `application.provider` é o provedor principal do aplicativo responsável por controlar o **[Application Lifecycle](../overview/application.md#application-lifecycle-hooks)**.
 
 Dentro da classe Application você pode encontrar três métodos que são chamados na seguinte ordem:
 
