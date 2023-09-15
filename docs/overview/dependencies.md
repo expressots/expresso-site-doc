@@ -38,8 +38,8 @@ For now, we will keep a vigilant watch on included dependencies, using tools lik
 
 ## Test
 
-- jest: Testing framework
-- ts-jest: Typescript support for jest
+- vitest: Testing framework
+- vite: Vitest's requirement
 
 ---
 
