@@ -4,21 +4,21 @@ sidebar_position: 1
 
 # Primeiros Passos
 
-Nesta seção, você vai conhecer alguns dos conceitos fundamentais do ExpressoTS. Para se familiarizar com o framework e seus blocos de construção, vamos guiá-lo através do processo de criação de um projeto simples. Isso ajudará você a entender alguns dos conceitos iniciais do framework e começar a trabalhar com o ExpressoTS.
+Nesta seção, você vai mergulhar nos conceitos centrais do ExpressoTS para se familiarizar com o framework e seus componentes básicos.
 
-## ExpressoTS, A ideia 
+## A Tecnologia
 
-Nós acreditamos no poder das linguagens fortemente tipadas, e o **[TypeScript](https://www.typescriptlang.org/)** é essencial quando se trata de estruturar ou construir aplicações em larga escala no **[NodeJS](https://nodejs.org/)**. No exemplo que demonstraremos, utilizaremos principalmente o TypeScript, e aqui estão os motivos pelos quais o TypeScript é benéfico para o seu projeto:
+Acreditamos no poder de linguagens fortemente tipadas, e o **[TypeScript](https://www.typescriptlang.org/)** é essencial quando se trata de estruturar ou construir aplicações em larga escala em **[NodeJS](https://nodejs.org/)**. No exemplo a seguir, usaremos principalmente TypeScript, e aqui estão as razões pelas quais usamos TypeScript:
 
-- Melhora na qualidade do código: A tipagem forte ajuda a capturar erros e bugs no momento da compilação, em vez de em tempo de execução, o que ajuda a melhorar a qualidade geral do código. Isso pode levar a menos falhas e problemas com o código em produção.
+- Melhoria da qualidade do código: Tipagem forte ajuda a pegar erros e bugs em tempo de compilação, ao invés de em tempo de execução, o que ajuda a melhorar a qualidade geral do código. Isso pode levar a menos falhas e problemas com o código em produção.
 
-- Melhor escalabilidade: A tipagem forte pode ajudar a tornar o código mais escalável, permitindo refatoração e manutenção mais fácil. Isso ocorre porque a tipagem forte garante que as mudanças no código sejam consistentes e previsíveis, tornando mais fácil adicionar novos recursos ou modificar os existentes.
+- Melhor escalabilidade: A tipagem forte pode ajudar a tornar o código mais escalável, permitindo refatorações e manutenções mais fáceis. Isso ocorre porque a tipagem forte garante que as alterações no código sejam consistentes e previsíveis, tornando mais fácil adicionar novos recursos ou modificar os existentes.
 
-- Aumento de produtividade: A tipagem forte pode aumentar a produtividade do desenvolvedor, fornecendo uma melhor ferramenta e suporte do editor, como preenchimento automático de código, inferência de tipo e refatoração automática. Isso pode ajudar os desenvolvedores a escreverem código mais rápido e com menos erros.
+- Aumento da produtividade: A tipagem forte pode aumentar a produtividade do desenvolvedor, fornecendo melhores ferramentas e suporte do editor, como conclusão de código, inferência de tipo e refatoração automática. Isso pode ajudar os desenvolvedores a escrever código mais rápido e com menos erros.
 
-- Melhora na colaboração: A tipagem forte pode tornar mais fácil para os desenvolvedores colaborarem, fornecendo uma compreensão compartilhada dos tipos e interfaces usados na base de código. Isso pode ajudar a reduzir mal-entendidos e inconsistências e tornar mais fácil para os desenvolvedores trabalharem juntos na mesma base de código.
+- Melhoria da colaboração: A tipagem forte pode facilitar a colaboração entre desenvolvedores, fornecendo um entendimento compartilhado dos tipos e interfaces usados no código-fonte. Isso pode ajudar a reduzir mal-entendidos e inconsistências e tornar mais fácil para os desenvolvedores trabalharem juntos no mesmo código-fonte.
 
-- Melhoria na documentação: A tipagem forte pode ajudar a tornar o código mais auto-documentado, fornecendo uma descrição clara e concisa dos tipos e interfaces usados no código. Isso pode ajudar a reduzir a necessidade de extensos comentários e documentação, tornando o código mais fácil de entender e manter.
+- Melhor documentação: A tipagem forte pode ajudar a tornar o código auto-documentado, fornecendo uma descrição clara e concisa dos tipos e interfaces usados no código. Isso pode ajudar a reduzir a necessidade de comentários extensos e documentação, tornando o código mais fácil de entender e manter.
 
 ## Pre-requisito
 
@@ -49,9 +49,9 @@ ExpressoTS oferece duas opções de modelos de projetos:
 
 - Opinativo: O modelo opinativo é feito para projetos mais complexos, já que fornece uma estrutura de projeto mais robusta e uma arquitetura em camadas.
 - Não-opinativo: Quer ter a liberdade de construir e estruturar seu projeto como desejar? O modelo não-opinativo oferece uma estrutura simples, com apenas os arquivos necessários para começar.
-:::
+  :::
 
-Depois de criar seu projeto, com o `nome-do-projeto` desejado e dependendo do tipo de projeto selecionado, seu projeto terá uma estrutura de pasta e arquivo diferente. Aqui estão as estruturas específicas de pasta e arquivo para cada tipo de projeto:
+Depois de criar seu projeto, com o `<nome-do-projeto>` desejado e dependendo do tipo de projeto selecionado, seu projeto terá uma estrutura de pasta e arquivo diferente. Aqui estão as estruturas específicas de pasta e arquivo para cada tipo de projeto:
 
 ### Template não-opinativo
 
@@ -67,14 +67,14 @@ nome-do-projeto/
 │   ├── app.usecase.spec.ts
 ```
 
-| Nome do Arquivo       | Descrição
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `app-container.ts`    | O container do Inversify Server é responsável por organizar todos os módulos da aplicação em uma unidade coesa.      |
-| `app.controller.ts`   | Um controller básico com uma rota simples.                                                                           |
-| `app.module.ts`       | Módulo da aplicação.                                                                                                 |
-| `app.usecase.ts`      | Um caso de uso com único método, chamado `execute()`.                                                                |
-| `main.ts`             | O ponto de partida de uma aplicação ExpressoTS.                                                                  |
-| `app.usecase.spec.ts` | Exemplo de test unitário do app.usecase.                                                                         |
+| Nome do Arquivo       | Descrição                                                                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `app-container.ts`    | O container do Inversify Server é responsável por organizar todos os módulos da aplicação em uma unidade coesa. |
+| `app.controller.ts`   | Um controller básico com uma rota simples.                                                                      |
+| `app.module.ts`       | Módulo da aplicação.                                                                                            |
+| `app.usecase.ts`      | Um caso de uso com único método, chamado `execute()`.                                                           |
+| `main.ts`             | O ponto de partida de uma aplicação ExpressoTS.                                                                 |
+| `app.usecase.spec.ts` | Exemplo de test unitário do app.usecase.                                                                        |
 
 ### Template opinativo
 
@@ -121,41 +121,39 @@ nome-do-projeto/
 │   ├── env.ts
 │   ├── main.ts
 ├── test/
-│   ├── ping.usecase.spec.ts
+│   ├── app.usecase.spec.ts
 ```
 
-| Nome do Arquivo       | Descrição
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `entities/`             | Esta pasta contém as definições de classe, ou modelos com seus atributos, propriedades e métodos.                         |
-| `providers/`            | Esta pasta contém a camada responsável por fornecer recursos externos para a aplicação, também conhecida como adaptadores.|
-| `repositories/`         | Pasta adicional contendo um exemplo de implementação do padrão de repositório, comunicação com a camada do banco de dados.|
-| `useCases/`             | A pasta de casos de uso contém a implementação dos casos de uso das operações que podem ser realizadas na aplicação.      |
-| `app.container.ts`      | O container do Inversify Server é responsável por organizar todos os módulos da aplicação em uma unidade coesa.           |
-| `env.ts`               | Este é um recurso de utilidade que mapeia as variáveis .env.                                                              |
-| `main.ts`               | O ponto de entrada principal de uma aplicação ExpressoTS.                                                                 |
-| `ping.usecase.spec.ts`  | Um teste unitário básico para o ping.usecase.                                                                             |
+| Nome do Arquivo       | Descrição                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `entities/`           | Esta pasta contém as definições de classe, ou modelos com seus atributos, propriedades e métodos.                          |
+| `providers/`          | Esta pasta contém a camada responsável por fornecer recursos externos para a aplicação, também conhecida como adaptadores. |
+| `repositories/`       | Pasta adicional contendo um exemplo de implementação do padrão de repositório, comunicação com a camada do banco de dados. |
+| `useCases/`           | A pasta de casos de uso contém a implementação dos casos de uso das operações que podem ser realizadas na aplicação.       |
+| `app.container.ts`    | O container do Inversify Server é responsável por organizar todos os módulos da aplicação em uma unidade coesa.            |
+| `env.ts`              | Este é um recurso de utilidade que mapeia as variáveis .env.                                                               |
+| `main.ts`             | O ponto de entrada principal de uma aplicação ExpressoTS.                                                                  |
+| `app.usecase.spec.ts` | Um teste unitário básico para o app.usecase.                                                                               |
 
 Informações adicionais sobre **[Provedores](./providers.md)**, **[Casos de Uso](./usecase.md)** e o exemplo **[Main](./application.md)** fornecidos no projeto modelo Opinionated.
 
 #### Provedores
 
-Existe 3 provedores:
+Existe 2 provedores:
 
 - application: Esse provedor permite estender a classe Application do @expressots/core, que fornece os **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
 
-- bindingType/singleton: Esse provedor permite ligar uma classe como um singleton. Usamos esse provedor para vincular a classe InMemoryDB como um singleton, para que possamos usar a mesma instância da classe InMemoryDB em toda a aplicação.
-
 - db-in-memory: Esse é um provedor de banco de dados simples em memória que permite armazenar dados em memória. Usamos esse provedor nos casos de uso de usuário para armazenar e recuperar dados de usuário.
 
-:::info
-bindingType and InMemoryDB Os provedores são exemplos fornecidos para ajudá-lo a começar. Você pode removê-los se desejar.
+::info
+InMemoryDB provider is an example supplied to help you prototype endpoints quickly without having to worry about setting up a database. It is not intended to be used in production. You can replace it with your own database provider.
 :::
 
 #### Caso de uso
 
-Os casos de uso no modelo Opinativo são organizados em 3 módulos:
+Os casos de uso no modelo Opinativo são organizados em 2 módulos:
 
-- AppModule, PingModule e UserModule, fornecendo alguns exemplos de utilização dos recursos do ExpressoTS. Para obter mais informações sobre os módulos, consulte a **[Seção de Módulos](./module.md)**.
+- AppModule e UserModule, fornecendo alguns exemplos de uso dos recursos do ExpressoTS. Para mais informações sobre módulos, consulte a **[Seção de Módulos](./module.md)**.
 
 Aqui estão os endpoints em cada módulo:
 
@@ -220,88 +218,38 @@ async function bootstrap() {
 bootstrap();
 ```
 
+## AppExpress ou Middleware
+
+Para inicializar uma aplicação ExpressoTS, existem duas maneiras:
+
 ## Application ou AppInstance
 
 Para inicializar um aplicativo ExpressoTS, existem duas maneiras:
 
-- Usando o AppInstance: que é uma instância da classe Application que fornece os métodos `create()` e `listen()`.
-- Estendendo a classe Application. Ao estender a classe Application, você pode tirar proveito de seus mecanismos integrados para controlar o **[ganchos do ciclo de vida do aplicativo](application.md#application-lifecycle-hooks)**, como injetar e executar serviços antes, depois e durante o desligamento do aplicativo.
+- Template Não-opinativo usando o AppFactory para criar uma instância do adaptador padrão do ExpressoTS, que é o Express.js. O usuário pode passar diretamente um array de middleware para o método AppFactory.create, que será responsável por criar uma aplicação Expressjs com o middleware fornecido. Este método de criação de uma aplicação ExpressoTS expõe a instância da aplicação Expressjs, que pode ser usada para adicionar middleware adicional ou para configurar a aplicação Expressjs.
 
-Application Instance
+- Template Opinativo usando o AppFactory para criar uma aplicação AppExpress. Ao usar a classe App (AppExpress), você pode tirar proveito de seus mecanismos integrados para controlar os ganchos do ciclo de vida da aplicação, como injetar e executar serviços antes, depois e durante o encerramento da aplicação.
 
-```typescript
-import { AppInstance, ServerEnvironment } from "@expressots/core";
-import { container } from "./app-container";
+## O Contêiner
 
-export async function bootstrap() {
-  const app = AppInstance.create(container);
-  app.listen(3000, ServerEnvironment.Development);
-}
+No ExpressoTS, criar um servidor de aplicação para escutar solicitações HTTP de entrada não é suficiente. O framework requer a criação de um contêiner que organiza todos os módulos da aplicação em uma unidade coesa. Normalmente, esse contêiner é criado no arquivo `app.container.ts`. O contêiner é responsável por gerenciar as dependências da aplicação. Leia mais sobre o app.container na seção **[Contêiner da Aplicação](app-container.md)**.
 
-bootstrap();
-```
+### A Aplicação Utiliza o Contêiner
 
-Estendendo a classe Application. Dentro da pasta do provedor, crie uma pasta chamada `application` e crie um novo arquivo chamado `application.provider.ts` e adicione o seguinte código:
+Após a criação do contêiner no arquivo `app.container`, a aplicação pode ser criada passando o contêiner como um parâmetro para o método `AppFactory.create(container)`.
 
-```typescript
-import { Application, Environments, LogLevel, log } from "@expressots/core";
-import { provide } from "inversify-binding-decorators";
+### Injetando Módulos no Contêiner
 
-@provide(App)
-class App extends Application {
-  protected configureServices(): void {
-    Environments.checkAll();
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected postServerInitialization(): void {}
-
-  protected serverShutdown(): void {
-    log(LogLevel.Info, "Server is shutting down", "logger-provider");
-    super.serverShutdown();
-  }
-}
-
-const appInstance = new App();
-
-export { appInstance as App };
-```
-
-Application Bootstrap iniciado pela classe Application estendida
-
-```typescript
-import { App } from "@providers/application/application.provider";
-import { container } from "app-container";
-import { ServerEnvironment } from "@expressots/core";
-
-async function bootstrap() {
-  const app = App.create(container);
-  app.listen(3000, ServerEnvironment.Development);
-}
-
-bootstrap();
-```
-
-## O Container
-
-No ExpressoTS, criar um servidor de aplicativos para ouvir as solicitações HTTP de entrada não é suficiente. O framework exige a criação de um contêiner que organize todos os módulos de aplicativos em uma unidade coesa. Normalmente, esse contêiner é criado no arquivo app-container.ts. Leia mais sobre o `app-container` na seção **[App Container](app-container.md)**.
-
-### A aplicação usa o Container
-
-Após a criação do container no arquivo `app-container`, a aplicação pode ser criada passando o container como parâmetro para o método `AppInstance.create(container)` ou estendendo a classe Application.
-
-### Injetando módulos no Container
-
-Uma vez criado o container, módulos podem ser injetados na aplicação. Esses módulos são os blocos de construção de uma aplicação ExpressoTS e são responsáveis por organizar a lógica de negócio da aplicação em camadas, incluindo controladores e casos de uso.
+Uma vez criado o contêiner, módulos podem ser injetados na aplicação. Esses módulos são os blocos de construção de uma aplicação ExpressoTS e são responsáveis por organizar a lógica de negócio da aplicação em camadas, já que um módulo é um grupo de funcionalidades ou endpoints também chamados de controladores.
 Leia mais sobre os módulos na seção **[Módulos](module.md)**.
 
-### Injetando controladores nos módulos
+### Injetando Controladores nos Módulos
 
-A camada do controlador lida com as solicitações recebidas e retorna as respostas apropriadas; elas são o ponto de entrada do aplicativo para cada terminal. Leia mais sobre os controladores na seção **[Controllers](controller.md)**. Para tornar um controlador funcional, ele deve ser injetado em um módulo. Isso pode ser feito passando o controlador como um parâmetro para o método `CreateModule`.
+A camada de controlador lida com solicitações de entrada e retorna respostas apropriadas, eles são o ponto de entrada da aplicação para cada endpoint. Leia mais sobre os controladores na seção **[Controladores](controller.md)**. Para tornar um controlador funcional, ele deve ser injetado em um módulo. Isso pode ser feito passando o controlador como um parâmetro para o método `CreateModule`.
 
-### Fluxo de aplicação totalmente conectado
+### Fluxo de Aplicação Totalmente Integrado
 
-Após a criação de um módulo, o módulo pode ser adicionado ao contêiner e, após a criação dos controladores, os controladores podem ser injetados no módulo, resultando em um fluxo de aplicativo totalmente conectado. O trecho de código a seguir demonstra esse processo:
+Após criar um módulo, o módulo pode ser adicionado ao contêiner, e após criar controladores, os controladores podem ser injetados no módulo, resultando em um fluxo de aplicação totalmente integrado. O seguinte trecho de código demonstra esse processo:
 
 #### Criação da aplicação
 
@@ -326,7 +274,7 @@ const container = appContainer.create([
 const appModule = CreateModule([
   // Adicione seus controlers aqui
   AppController,
-])
+]);
 ```
 
 :::info
@@ -359,11 +307,37 @@ npm run prod
 Uma vez que a aplicação está em execução, você pode acessá-la navegando para `http://localhost:3000/` no projeto starter sem opinião.
 :::
 
+## Funcionalidades Obsoletas
+
+:::warning Aviso de Obsolescência
+As seguintes funcionalidades são válidas até a versão 1.9.0, pois foram tornadas obsoletas em favor da nova versão do pacote @expressots/core 2.0.0.
+:::
+
+### Opinionated Application Bootstrap (deprecated)
+
+```typescript
+// Using opinionated start project where App extends @expressots/core Application class
+async function bootstrap() {
+  const app = App.create(container);
+  app.listen(3000, ServerEnvironment.Production);
+}
+```
+
+### Non opinionated Application Bootstrap (deprecated)
+
+```typescript
+// Using the non-opinionated starter project where AppInstance is an instance of the Application class from @expressots/core
+async function bootstrap() {
+  const app = AppInstance.create(container);
+  app.listen(3000, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
 ## Resumo
 
 ExpressoTS é um framework versátil que não está vinculado a nenhuma plataforma ou tecnologia específica. Aproveitando bibliotecas populares do Node.js como InversifyJS e Express.js, ele é projetado para ser leve, modular, personalizável e fácil de usar. Os desenvolvedores podem expandir as capacidades do framework criando novos provedores que podem ser incorporados em suas aplicações.
-
-Atualmente, estamos trabalhando na construção da RoadMap do projeto e planejamos adicionar suporte para outros populares frameworks HTTP do Node.js, como o Fastify e o Koa, à plataforma. Além disso, à medida que avançamos para o futuro, pretendemos eliminar algumas das dependências que atualmente fazem parte do núcleo do framework, como IoC e decoradores.
 
 ---
 

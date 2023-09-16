@@ -10,16 +10,15 @@ The purpose of this section is to list all dependencies used by ExpressoTS and o
 
 We know that dependencies accelerate the development process, but it also increases the projects complexity and maintenance cost. Another aspect we consider is the potential security risks that a dependency could bring the project.
 
-Our goal is to keep the number of dependencies as low as possible, using only those that are necessary and not part of our core ExpressoTS framework mechanics. With that in mind, the Roadmap includes some  dependencies that we hope to replace by our own implementation. More information will come on this.
+Our goal is to keep the number of dependencies as low as possible, using only those that are necessary and not part of our core ExpressoTS framework mechanics. With that in mind, the Roadmap includes some dependencies that we hope to replace by our own implementation. More information will come on this.
 
 For now, we will keep a vigilant watch on included dependencies, using tools like **[Dependabot](https://dependabot.com/)** to keep them up to date and also using tools like **[Snyk](https://snyk.io/)** to monitor the security risks.
 
-## Utilities
+## Utilities (Dev Dependencies)
 
 - @commitlint/cli: Lint commit messages
 - @commitLint/config-conventional: Lint commit messages
 - @release-it/conventional-changelog: Generate changelog
-- chalk: Terminal string styling
 - dotenv: Loads environment variables from .env file
 - husky: Git hooks
 - prettier: Code formatter
@@ -31,9 +30,7 @@ For now, we will keep a vigilant watch on included dependencies, using tools lik
 
 - express: Http server framework
 - inversify: IoC container
-- inversify-express-utils: Express integration for inversify
 - inversify-binding-decorators: Decorators for inversify
-- winston: Logging library
 - reflect-metadata: Polyfill for metadata reflection API
 
 ## Test
