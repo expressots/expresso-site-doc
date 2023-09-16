@@ -8,10 +8,10 @@ The Application Overview provides a comprehensive demonstration of the main comp
 
 ![Application Overview](./img/app-overview.png)
 
-ExpressoTS is a web application framework that provides a simple wrapper around popular HTTP servers, including **[Express](https://expressjs.com)**, **[Fastify](https://www.fastify.io/)**, or **[Koa](https://koajs.com/)**.
+ExpressoTS is a web application framework that provides a wrapper around popular HTTP servers, including **[Express](https://expressjs.com)** and **[Fastify](https://www.fastify.io/)**.
 
 :::info
-Currently, only Express has been thoroughly tested by the ExpressoTS team.
+Currently, only Express has been thoroughly tested by the ExpressoTS team. Fastify adapter is a work-in-progress.
 :::
 
 The architecture of an ExpressoTS application is built around the **[Inversify](https://inversify.io/)** IoC container, which is used to identify and inject dependencies into class constructors. This approach allows the IoC container to load all the necessary modules, including their respective routes (controllers). By using use-cases and providers as needed, routers can handle incoming requests.
@@ -26,7 +26,7 @@ By leveraging the power of Inversify, ExpressoTS provides a custom Dependency In
 | Controller   | Component responsible for processing requests and responses based on the URL and HTTP method. It also validates the conformity of the incoming data.                                                                                                                                                                                                                                                                                                       |
 | Use Case     | Component responsible for implementing the logic required to handle requests received from the controller. When the controller receives an HTTP request and validates the incoming data, it triggers the relevant use case, passing along the validated data for processing. The use case performs the necessary operations based on the request and returns the appropriate response to the controller, which then sends the response back to the client. |
 | Provider     | Component responsible for providing external functionality to the application.                                                                                                                                                                                                                                                                                                                                                                             |
-| Repository   | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations.                                                                                                                                                                                                                                                                                                                                  |
+| Repository   | Component responsible for providing layer of communication with the database. Facilitating connection and CRUD operations.                                                                                                                                                                                                                                                                                                                                 |
 
 :::info
 Providers and Repositories are optional components. You can use them if you need to provide extra functionality to your application such as database integration, logging system, authentication, email etc.
@@ -45,14 +45,16 @@ ExpressoTS will prevent you from initializing the Application without a controll
 **_No controllers have been found! Please ensure that you have register at least one Controller._**
 :::
 
-## Application Class
+## AppExpress Class
 
-The Application class offers a way to create and configure the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middleware upon server creation.
+The AppExpress class offers a way to create and configure the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middleware upon server creation.
 
-### Application Class Definition
+To create an ExpressoTS application instance, we use the `AppFactory` class, which is responsible for creating the application instance and initializing the container, modules, and controllers. The `create()` function returns an IApplicationExpress which provides a set of methods to configure the server, including the `listen()` method, which starts the server and listens for incoming requests.
+
+### AppExpress Class Definition
 
 ```typescript
-class Application {
+class AppExpress {
   /**
    * Configure services that should be initialized before the server starts.
    */
@@ -66,34 +68,28 @@ class Application {
   /**
    * Perform actions or cleanup after the server is shutdown.
    */
-  protected serverShutdown(): void {
-    process.exit(0);
-  }
+  protected serverShutdown(): void {}
 
-  public create(
+  public async create(
     container: Container,
-    middlewares: express.RequestHandler[] = []
-  ): Application {}
+    middlewares: Array<express.RequestHandler> = []
+  ): Promise<ApplicationExpress> {}
 
-  public listen(
+  public async listen(
     port: number,
     environment: ServerEnvironment,
     consoleMessage?: IApplicationMessageToConsole
-  ) {}
+  ): Promise<void> {}
 }
 ```
 
-:::info
-We also provide an instance of the Application class called **AppInstance**, which exposes the create and listen methods to the developer. This is beneficial when you need to quickly create a server without having to create a new class that extends the Application class and access its lifecycle methods.
-:::
-
 ### Create Method
 
-The create method allows developers to pass the container and middlewares to the server. To pass middleware you don't need to use `app.use()`, just pass the middleware and its configuration as demonstrated below:
+The create method allows developers to pass the container, middlewares and http server adapters to the server. To pass middleware you don't need to use `app.use()`, just pass the middleware and its configuration as demonstrated below:
 
 ```typescript
 async function Bootstrap() {
-  App.create(container, [
+  await AppFactory.create(container, [
     express.json(),
     express.urlencoded({ extended: true }),
     cors({
@@ -103,9 +99,14 @@ async function Bootstrap() {
 }
 ```
 
+:::info
+Adapters are used to create the server. Currently, Express is the only adapter available. Fastify adapter is a work-in-progress.
+When you create an application instance, you can pass the adapter as the third parameter. If you don't pass the adapter, Express is used by default.
+:::
+
 ### Listen Method
 
-The listen method starts the server and listens for incoming requests. In the listen method, developers can define the port number and server environment, which can be either development, staging, or production. Developers can also set the application name and version to be displayed in the console when the server starts, as shown in the following example:
+The `listen()` method starts the server and listens for incoming requests. In the listen method, developers can define the port number and server environment, which can be either development, staging, or production. Developers can also set the application name and version to be displayed in the console when the server starts, as shown in the following example:
 
 ```typescript
 // App listen method
@@ -121,21 +122,56 @@ The name and version of your app can be configured via either the .env file or p
 
 ### Application Server Environment
 
-For now, this functionality is a work-in-progress. Currently, it displays the environment in the console when the server starts. The colored console message helps developers to quickly identify the environment the server is running on.
+This is an enum that defines the server environment. Currently supported environments are development and production. Upon server initialization, the underlying framework will look for the NODE_ENV environment variable and set the server environment accordingly. If the NODE_ENV environment variable is not set, the server environment will be set to development by default.
+
+Also, in the application provider user can perform conditional logic based on the server environment.
+
+```typescript
+if (this.isDevelopment()) {
+  // your logic here
+}
+```
 
 Here are the enum values available for server environments:
 
 ```typescript
 ServerEnvironment.Development;
-ServerEnvironment.Staging;
 ServerEnvironment.Production;
 ```
 
-:::caution SPOILER ALERT
-The goal of this functionality is to allow developers to load environment variables based on the environment the server is running on. For example, if the server is running on development, load the .env.dev file, if the server is running on staging, load the .env.stg file, etc.. We are also planning to load environment variables from remote sources such as AWS Parameter Store, AWS Secrets Manager, Azure Key Vault, etc..
-:::
+## App Class Provider
 
-## Application Lifecycle Hooks
+The App class provider is the heart of the opinionated template application. It is responsible for initializing the application and provide functionalities to be configured in the server bootstrapping process. You can make use of the built-in middlewares and providers to configure your application.
+
+```typescript
+class App extends AppExpress {
+  private middleware: IMiddleware;
+  private provider: IProvider;
+
+  constructor() {
+    super();
+    this.middleware = container.get<IMiddleware>(Middleware);
+    this.provider = container.get<IProvider>(Provider);
+  }
+
+  protected configureServices(): void {
+    this.middleware.addBodyParser();
+    this.middleware.setErrorHandler();
+  }
+
+  protected postServerInitialization(): void {
+    if (this.isDevelopment()) {
+      this.provider.envValidator.checkAll();
+    }
+  }
+
+  protected serverShutdown(): void {}
+}
+```
+
+The App class provider offers a set of out-of-the-box middlewares and providers that can be used to configure your application. Explore the `IMiddleware` and `IProvider` interfaces to see what is available.
+
+## App Class Lifecycle Hooks
 
 Another important aspect of the Application class is lifecycle hooks. These hooks allow developers to execute code before, after and on server shutdown. It is important to note that in order to take advantage of these hooks, developers must create an App class extending the Application class and override the methods as needed. The following example shows the life cycle hooks available at the moment:
 
@@ -147,9 +183,7 @@ Another important aspect of the Application class is lifecycle hooks. These hook
     protected postServerInitialization(): void { }
 
     /* Add any service that you want to execute after server is shutdown */
-    protected serverShutdown(): void {
-        process.exit(0);
-     }
+    protected serverShutdown(): void { }
 ```
 
 ### Hooks Execution Order
@@ -161,9 +195,8 @@ Another important aspect of the Application class is lifecycle hooks. These hook
 Below are the scripts used to run, build and test your application.
 The command column shows NPM as the package manager, but you can use your package manager of choice.
 
-
-| Script     | Description                                    | Command            |
-| ---------- | ---------------------------------------------- | ------------------ |
+| Script     | Description                                     | Command            |
+| ---------- | ----------------------------------------------- | ------------------ |
 | build      | Build the production bundle in a ./dist folder. | npm run build      |
 | dev        | Runs in development watch mode.                 | npm run dev        |
 | prod       | Runs in production mode based on built bundle.  | npm run prod       |

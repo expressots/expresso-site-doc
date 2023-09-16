@@ -10,19 +10,19 @@ Here is a complete list of all decorators available in ExpressoTS as well as a b
 
 Decorators available for your classes.
 
-| Decorator          | Description                                                                    |
-| ------------------ | ------------------------------------------------------------------------------ |
-| @provide           | Binds a class to a dependency injection container as RequestScope.             |
-| @provideSingleton  | Binds a class to a dependency injection container as Singleton.                |
-| @provideTransient  | Binds a class to a dependency injection container as Transient.                |
-| @injectable        | Marks a class as available to be injected.                                     |
-| @inject            | Marks a class as available to be injected in the constructor of another class. |
+| Decorator         | Description                                                                    |
+| ----------------- | ------------------------------------------------------------------------------ |
+| @provide          | Binds a class to a dependency injection container as RequestScope.             |
+| @provideSingleton | Binds a class to a dependency injection container as Singleton.                |
+| @provideTransient | Binds a class to a dependency injection container as Transient.                |
+| @injectable       | Marks a class as available to be injected.                                     |
+| @inject           | Marks a class as available to be injected in the constructor of another class. |
 
 ## Controller Decorators
 
 Decorators available for your controllers.
 
-| Decorator   | Description                    | Usage example
+| Decorator   | Description                    | Usage example                                                |
 | ----------- | ------------------------------ | ------------------------------------------------------------ |
 | @controller | Marks a class as a controller. | @controller("/path", middleware[])                           |
 | @scope      | Binds a controller to a scope. | @scope(BindingScopeEnum.Singleton, or Request, or Transient) |
@@ -31,30 +31,30 @@ Decorators available for your controllers.
 
 Decorators available for your controller methods.
 
-| Decorator   | Description                                                        | Usage                          |
-| ----------- | ------------------------------------------------------------------ | ---------------------------- |
-| @httpGet    | Binds a controller method to a GET HTTP verb.                      | @httpGet("/path")            |
-| @httpPost   | Binds a controller method to a POST HTTP verb.                     | @httpPost("/path")           |
-| @httpPut    | Binds a controller method to a PUT HTTP verb.                      | @httpPut("/path")            |
-| @httpPatch  | Binds a controller method to a PATCH HTTP verb.                    | @httpPatch("/path")          |
-| @httpHead   | Binds a controller method to a HEAD HTTP verb.                     | @httpHead("/path")           |
-| @httpDelete | Binds a controller method to a DELETE HTTP verb.                   | @httpDelete("/path")         |
-| @httpMethod | Binds a controller method to a specified HTTP verb.                | @httpMethod("verb", "/path") |
+| Decorator | Description                                         | Usage                    |
+| --------- | --------------------------------------------------- | ------------------------ |
+| @Get      | Binds a controller method to a GET HTTP verb.       | @Get("/path")            |
+| @Post     | Binds a controller method to a POST HTTP verb.      | @Post("/path")           |
+| @Put      | Binds a controller method to a PUT HTTP verb.       | @Put("/path")            |
+| @Patch    | Binds a controller method to a PATCH HTTP verb.     | @Patch("/path")          |
+| @Head     | Binds a controller method to a HEAD HTTP verb.      | @Head("/path")           |
+| @Delete   | Binds a controller method to a DELETE HTTP verb.    | @Delete("/path")         |
+| @Method   | Binds a controller method to a specified HTTP verb. | @Method("verb", "/path") |
 
 ### Parameter Decorators
 
 Here is a list of all parameter decorators available in ExpressoTS, along with their description and usage:
 
-| Decorator	                           | Description	                                        | Usage
-| ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| @request()	                         | Injects the Express Request object.	                    | execute(@request() req: Request)
-| @response()	                         | Injects the Express Response object.	                | execute(@response() res: Response)
-| @requestParam(paramName?: string)	   | Injects a parameter from the request URL path.	        | execute(@requestParam('id') id: string)
-| @queryParam(paramName?: string)	     | Injects a parameter from the request URL query string. | execute(@queryParam('searchTerm') searchTerm: string)
-| @requestBody()	                     | Injects the request body payload.	                    | execute(@requestBody() body: MyDTO)
-| @requestHeaders(headerName?: string) | Injects a header from the request headers.            | execute(@requestHeaders('authorization') auth: string)
-| @cookies(cookieName?: string)	       | Injects a cookie from the request cookies.   | execute(@cookies('session') session: string)
-| @next()	                           | Injects the Express NextFunction object.	            | execute(@next() next: NextFunction)
+| Decorator                     | Description                                            | Usage                                            |
+| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| @request()                    | Injects the Express Request object.                    | execute(@request() req: Request)                 |
+| @response()                   | Injects the Express Response object.                   | execute(@response() res: Response)               |
+| @param(paramName?: string)    | Injects a parameter from the request URL path.         | execute(@param('id') id: string)                 |
+| @query(paramName?: string)    | Injects a parameter from the request URL query string. | execute(@query('searchTerm') searchTerm: string) |
+| @body()                       | Injects the request body payload.                      | execute(@body() body: MyDTO)                     |
+| @headers(headerName?: string) | Injects a header from the request headers.             | execute(@headers('authorization') auth: string)  |
+| @cookies(cookieName?: string) | Injects a cookie from the request cookies.             | execute(@cookies('session') session: string)     |
+| @next()                       | Injects the Express NextFunction object.               | execute(@next() next: NextFunction)              |
 
 ---
 

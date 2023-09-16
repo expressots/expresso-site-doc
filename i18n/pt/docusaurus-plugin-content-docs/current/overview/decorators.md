@@ -10,51 +10,51 @@ Aqui está uma lista completa de todos os decoradores que estão disponíveis no
 
 Decoradores disponíveis para suas classes.
 
-| Decoradores | Descrição                                                                       |
-| ----------- | ------------------------------------------------------------------------------- |
-| @provide    | Vincula a classe ao container de injeção de dependência.                        |
-| @provideSingleton  | Vincula a classe ao contêiner de injeção de dependência como Singleton.                |
-| @provideTransient  | Vincula a classe ao contêiner de injeção de dependência como Transient.                |
-| @injectable | Marca a classe como disponível para ser injetada.                               |
-| @inject     | Marca a classe como disponível para ser injetada no construtor de outra classe. |
+| Decoradores       | Descrição                                                                       |
+| ----------------- | ------------------------------------------------------------------------------- |
+| @provide          | Vincula a classe ao container de injeção de dependência.                        |
+| @provideSingleton | Vincula a classe ao contêiner de injeção de dependência como Singleton.         |
+| @provideTransient | Vincula a classe ao contêiner de injeção de dependência como Transient.         |
+| @injectable       | Marca a classe como disponível para ser injetada.                               |
+| @inject           | Marca a classe como disponível para ser injetada no construtor de outra classe. |
 
 ## Decoradores do controlador
 
 Decoradores disponíveis para seus controladores.
 
-| Decoradores   | Descrição                    | Exemplo de Uso
-| ----------- | ------------------------------ | ------------------------------------------------------------ |
+| Decoradores | Descrição                                  | Exemplo de Uso                                               |
+| ----------- | ------------------------------------------ | ------------------------------------------------------------ |
 | @controller | Marca a classe como controlador injetável. | @controller("/path", middleware[])                           |
-| @scope      | Vincula um controlador a um escopo. | @scope(BindingScopeEnum.Singleton, ou Request, ou Transient) |
+| @scope      | Vincula um controlador a um escopo.        | @scope(BindingScopeEnum.Singleton, ou Request, ou Transient) |
 
 ### Decoradores de métodos HTTP
 
 Decoradores disponíveis para seus métodos de controlador.
 
-| Decorador   | Descrição                                                          | Uso                          |
-| ----------- | ------------------------------------------------------------------ | ---------------------------- |
-| @httpGet    | Vincula um método de controlador a um verbo HTTP GET.              | @httpGet("/path")            |
-| @httpPost   | Vincula um método de controlador a um verbo HTTP POST.             | @httpPost("/path")           |
-| @httpPut    | Vincula um método de controlador a um verbo HTTP PUT.              | @httpPut("/path")            |
-| @httpPatch  | Vincula um método de controlador a um verbo HTTP PATCH.            | @httpPatch("/path")          |
-| @httpHead   | Vincula um método de controlador a um verbo HTTP HEAD.             | @httpHead("/path")           |
-| @httpDelete | Vincula um método de controlador a um verbo HTTP DELETE.           | @httpDelete("/path")         |
-| @httpMethod | Vincula um método de controlador a um verbo HTTP especificado.     | @httpMethod("verb", "/path") |
+| Decorador | Descrição                                                      | Uso                      |
+| --------- | -------------------------------------------------------------- | ------------------------ |
+| @Get      | Vincula um método de controlador a um verbo HTTP GET.          | @Get("/path")            |
+| @Post     | Vincula um método de controlador a um verbo HTTP POST.         | @Post("/path")           |
+| @Put      | Vincula um método de controlador a um verbo HTTP PUT.          | @Put("/path")            |
+| @Patch    | Vincula um método de controlador a um verbo HTTP PATCH.        | @Patch("/path")          |
+| @Head     | Vincula um método de controlador a um verbo HTTP HEAD.         | @Head("/path")           |
+| @Delete   | Vincula um método de controlador a um verbo HTTP DELETE.       | @Delete("/path")         |
+| @Method   | Vincula um método de controlador a um verbo HTTP especificado. | @Method("verb", "/path") |
 
 ### Decoradores de parâmetros
 
 Aqui está uma lista de todos os decoradores de parâmetros disponíveis no ExpressoTS, juntamente com sua descrição e uso:
 
-| Decorador	                           | Descrição	                                        | Uso
-| ------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| @request()	                         | Injeta objeto Express Request.	                    | execute(@request() req: Request)
-| @response()	                         | Injeta objeto Express Response.	                | execute(@response() res: Response)
-| @requestParam(paramName?: string)	   | Injeta um parâmetro da URL da solicitação.	        | execute(@requestParam('id') id: string)
-| @queryParam(paramName?: string)	     | Injeta um parâmetro da string de consulta da URL da solicitação. | execute(@queryParam('searchTerm') searchTerm: string)
-| @requestBody()	                     | Injeta a carga útil do corpo da solicitação.	                    | execute(@requestBody() body: MyDTO)
-| @requestHeaders(headerName?: string) | Injeta um cabeçalho dos cabeçalhos da solicitação.            | execute(@requestHeaders('authorization') auth: string)
-| @cookies(cookieName?: string)	       | Injeta um cookie dos cookies da solicitação.   | execute(@cookies('session') session: string)
-| @next()	                           | Injeta o objeto NextFunction do Express.	            | execute(@next() next: NextFunction)
+| Decorador                     | Descrição                                                        | Uso                                              |
+| ----------------------------- | ---------------------------------------------------------------- | ------------------------------------------------ |
+| @request()                    | Injeta objeto Express Request.                                   | execute(@request() req: Request)                 |
+| @response()                   | Injeta objeto Express Response.                                  | execute(@response() res: Response)               |
+| @param(paramName?: string)    | Injeta um parâmetro da URL da solicitação.                       | execute(@param('id') id: string)                 |
+| @query(paramName?: string)    | Injeta um parâmetro da string de consulta da URL da solicitação. | execute(@query('searchTerm') searchTerm: string) |
+| @body()                       | Injeta a carga útil do corpo da solicitação.                     | execute(@body() body: MyDTO)                     |
+| @headers(headerName?: string) | Injeta um cabeçalho dos cabeçalhos da solicitação.               | execute(@headers('authorization') auth: string)  |
+| @cookies(cookieName?: string) | Injeta um cookie dos cookies da solicitação.                     | execute(@cookies('session') session: string)     |
+| @next()                       | Injeta o objeto NextFunction do Express.                         | execute(@next() next: NextFunction)              |
 
 ---
 
