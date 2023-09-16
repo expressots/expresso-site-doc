@@ -14,12 +14,11 @@ Nosso objetivo é manter o número de dependências o mais baixo possível, tent
 
 Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando ferramentas como o **[Dependabot](https://dependabot.com/)** para mantê-las atualizadas e também utilizando ferramentas como o **[Snyk](https://snyk.io/)** para ficar de olho nos riscos de segurança.
 
-## Pacotes Utilitários
+## Pacotes Utilitários (Dependencias de Desenvolvimento)
 
 - @commitlint/cli: Lint mensagens de commit
 - @commitLint/config-conventional: Lint mensagens de commit
 - @release-it/conventional-changelog: Gera changelog
-- chalk: Estilo para terminal
 - dotenv: Carregar variáveis de ambiente
 - husky: Git hooks
 - prettier: Formatador de códigos
@@ -31,15 +30,13 @@ Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando
 
 - express: Servidor Http
 - inversify: IoC container
-- inversify-express-utils: Integração do inversify para o Express
 - inversify-binding-decorators: Decoradores do inversify
-- winston: Lib de log
 - reflect-metadata: Polyfill para metadados e reflexão
 
 ## Teste
 
-- jest: Framework de teste
-- ts-jest: Suporte para typescript no jest
+- vitest: Framework de teste
+- vite: Vitest's requerimento
 
 ---
 
