@@ -1,10 +1,33 @@
 ---
-sidebar_position: 7
+sidebar_position: 4
 ---
 
-# Roadmap
+# Use Cases
 
-Coming soon...
+Uses cases are the implementation of the business logic of your application. For more information about use cases, see [Use Cases](../overview/usecase.md).
+
+```typescript
+@provide(YourUseCase)
+export class YourUseUseCase {
+  execute() {
+    return "Hello ExpressoTS!";
+  }
+}
+```
+
+## Injecting Dependencies into Use Cases Constructor
+
+```typescript
+@provide(YourUseCase)
+export class YourUseUseCase {
+  constructor(private yourProvider: YourProvider) {}
+
+  execute() {
+    this.yourProvider.doSomething();
+    return "Hello ExpressoTS!";
+  }
+}
+```
 
 ---
 
