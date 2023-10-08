@@ -1,10 +1,34 @@
 ---
-sidebar_position: 7
+sidebar_position: 5
 ---
 
-# Roadmap
+# Entities
 
-Coming soon...
+Entities are the core of your application. They are the representation of your business objects. For more information about entities, see [Entities](../overview/entities.md).
+
+```typescript
+@provide(User)
+export class User {
+  id: string;
+  name: string;
+  email: string;
+
+  constructor() {
+    this.id = randomUUID();
+  }
+}
+```
+
+:::caution
+Don't pass primitive types as parameters to the constructor of your entities. The Dependency Injection Container will not be able to resolve them.
+
+```typescript
+constructor(name: string) {
+    this.name = name;
+}
+```
+
+:::
 
 ---
 

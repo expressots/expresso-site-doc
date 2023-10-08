@@ -10,7 +10,7 @@ If you think about it, every programming language feature or framework is built 
 
 > This is our commitment: to make your life easier, and to make you more productive.
 
-As a community-driven project, we want you to be part of this journey with us. Your feedback, ideas, and contributions will help us build a better developer experience for everyone. 
+As a community-driven project, we want you to be part of this journey with us. Your feedback, ideas, and contributions will help us build a better developer experience for everyone.
 
 Thanks for joining us in this challenge. Happy coding! 🚀
 
@@ -21,7 +21,7 @@ Thanks for joining us in this challenge. Happy coding! 🚀
 - **[links](./overview/intro.md)**: Bold text denotes a link to other pages of the documentation or external locations.
 - `code`: Emphasized code snippets and commands, or key technical terms.
 - Alerts: Are used to highlight important information.
-  
+
   :::note Used to express general information
   :::
   :::tip This is a tip
