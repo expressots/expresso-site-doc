@@ -8,7 +8,9 @@ In this section, you will delve into the core concepts of ExpressoTS to familiar
 
 ## The technology
 
-We believe in the power of strongly typed languages, and **[TypeScript](https://www.typescriptlang.org/)** is essential when it comes to structuring or building large-scale applications in **[NodeJS](https://nodejs.org/)**. In the following example we will mostly use TypeScript, and here are the reasons why we use TypeScript:
+We believe in the power of strongly typed languages, and **[TypeScript](https://www.typescriptlang.org/)** is essential when it comes to structuring or building large-scale applications in **[NodeJS](https://nodejs.org/)**. In the following example we will mostly use TypeScript.
+
+## Why TypeScript?
 
 - Improved code quality: Strong typing helps to catch errors and bugs at compile time, rather than at runtime, which helps to improve the overall quality of the code. This can lead to fewer crashes and issues with the code in production.
 
@@ -199,7 +201,25 @@ To bootstrap an ExpressoTS application, there are two ways:
 
 - Non-opinionated template using the AppFactory to creates an instance of the default ExpressoTS adapter which is the Express.js. User can directly pass an array of middleware to the `AppFactory.create` method, which will be responsible for creating an Expressjs application with the provided middleware. This method of creating an ExpressoTS application exposes the Expressjs application instance, which can be used to add additional middleware or to configure the Expressjs application.
 
+```typescript
+async function bootstrap() {
+  const app = await AppFactory.create(container, [cors(), helmet()]);
+  await app.listen(3000, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
 - Opinionated template using the AppFactory to create an AppExpress application. By using the App (AppExpress) class, you can take advantage of its built-in mechanisms for controlling the **[application life cycle hooks](application.md#application-lifecycle-hooks)**, such as injecting and executing services before, after, and during application shutdown.
+
+```typescript
+async function bootstrap() {
+  const app = await AppFactory.create(container, App);
+  await app.listen(3000, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
 
 ## The container
 
@@ -207,28 +227,16 @@ In ExpressoTS, creating an application server to listen to inbound HTTP requests
 
 ### Application uses the container
 
-After the container is created in the `app.container` file, the application can be created by passing the container as a parameter to the `AppFactory.create(container)` method.
+After the container is created in the `app.container` file, the application can be created by passing the container as a parameter to the `AppFactory.create` method:
+
+```typescript
+AppFactory.create(container);
+```
 
 ### Injecting modules in the container
 
 Once the container is created, modules can be injected into the application. These modules are the building blocks of an ExpressoTS application and are responsible for organizing the application's business logic into layers, as a module is a group of functionalities or endpoints also called `controllers`.
 Read more about the modules in the **[Modules](module.md)** section.
-
-### Injecting controllers in the modules
-
-The controller layer handles incoming requests and returns appropriate responses, they are the entry point of the application for each endpoint. Read more about the controllers in the **[Controllers](controller.md)** section. In order to make a controller functional, it must be injected into a module. This can be done by passing the controller as a parameter to the `CreateModule` method.
-
-### Fully hooked-up application flow
-
-After creating a module, the module can be added in the container, and after creating controllers, controllers can be injected into the module, resulting in a fully hooked-up application flow. The following code snippet demonstrates this process:
-
-#### Application creation
-
-```typescript
-const app = await AppFactory.create(container);
-```
-
-#### Module injection
 
 ```typescript
 const appContainer = new AppContainer();
@@ -239,14 +247,20 @@ const container: Container = appContainer.create([
 ]);
 ```
 
-#### Controller injection
+### Injecting controllers in the modules
+
+The controller layer handles incoming requests and returns appropriate responses, they are the entry point of the application for each endpoint. Read more about the controllers in the **[Controllers](controller.md)** section. In order to make a controller functional, it must be injected into a module. This can be done by passing the controller as a parameter to any module. As an example, the following code snippet demonstrates how to inject a controller into AppModule:
 
 ```typescript
-const appModule: ContainerModule = CreateModule([
+const AppModule: ContainerModule = CreateModule([
   // Add your controllers here
   AppController,
 ]);
 ```
+
+### Fully hooked-up application flow
+
+After creating a module, the module can be added in the container, and after creating controllers, controllers can be injected into the module, resulting in a fully hooked-up application flow.
 
 :::info
 It is worth noting that a project created with the ExpressoTS CLI comes with an initial project structure that promotes adherence to a specific convention set by the framework. This ensures that each module has its own dedicated directory, helping developers maintain consistency throughout their codebase.
@@ -277,34 +291,6 @@ npm run prod
 :::tip
 Once the application is up and running, you can access it by navigating to `http://localhost:3000/`.
 :::
-
-## Deprecated features
-
-:::warning Deprecation warning
-The following features are valid until version `1.9.0` as they were deprecated in favor of the new `@expressots/core` package version `2.0.0`.
-:::
-
-### Opinionated Application Bootstrap (deprecated)
-
-```typescript
-// Using opinionated start project where App extends @expressots/core Application class
-async function bootstrap() {
-  const app = App.create(container);
-  app.listen(3000, ServerEnvironment.Production);
-}
-```
-
-### Non opinionated Application Bootstrap (deprecated)
-
-```typescript
-// Using the non-opinionated starter project where AppInstance is an instance of the Application class from @expressots/core
-async function bootstrap() {
-  const app = AppInstance.create(container);
-  app.listen(3000, ServerEnvironment.Development);
-}
-
-bootstrap();
-```
 
 ## Note
 

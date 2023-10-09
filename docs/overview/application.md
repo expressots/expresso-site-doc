@@ -49,7 +49,7 @@ ExpressoTS will prevent you from initializing the Application without a controll
 
 The AppExpress class offers a way to create and configure the server, passing **[Express.js middlewares](https://expressjs.com/en/guide/writing-middleware.html)** or other middleware upon server creation.
 
-To create an ExpressoTS application instance, we use the `AppFactory` class, which is responsible for creating the application instance and initializing the container, modules, and controllers. The `create()` function returns an IApplicationExpress which provides a set of methods to configure the server, including the `listen()` method, which starts the server and listens for incoming requests.
+To create an ExpressoTS application instance, we use the `AppFactory` class, which is responsible for creating the application instance and initializing the container, modules, and controllers. The `create()` function returns an IApplicationExpress which provides a set of methods to configure the server, including the `listen()` method, which starts the server and listens for incoming requests and `setEngine()`.
 
 ### AppExpress Class Definition
 
@@ -70,16 +70,17 @@ class AppExpress {
    */
   protected serverShutdown(): void {}
 
-  public async create(
-    container: Container,
-    middlewares: Array<express.RequestHandler> = []
-  ): Promise<ApplicationExpress> {}
+  public async create() {}
 
-  public async listen(
-    port: number,
-    environment: ServerEnvironment,
-    consoleMessage?: IApplicationMessageToConsole
-  ): Promise<void> {}
+  public async listen() {}
+}
+```
+
+Also, in the application provider that inherits from AppExpress user can perform conditional logic based on the server environment mechanic provided `isDevelopment()`.
+
+```typescript
+if (this.isDevelopment()) {
+  // your logic here
 }
 ```
 
@@ -120,28 +121,22 @@ app.listen(3000, ServerEnvironment.Development, {
 The name and version of your app can be configured via either the .env file or package.json file. In the opinionated template, we use the package.json file to retrieve the app name and version.
 :::
 
-### Application Server Environment
+### Server Environment Enum
 
-This is an enum that defines the server environment. Currently supported environments are development and production. Upon server initialization, the underlying framework will look for the NODE_ENV environment variable and set the server environment accordingly. If the NODE_ENV environment variable is not set, the server environment will be set to development by default.
-
-Also, in the application provider user can perform conditional logic based on the server environment.
-
-```typescript
-if (this.isDevelopment()) {
-  // your logic here
-}
-```
+This is an enum that defines the server environment. Currently supported environments are `development` and `production`. Upon server initialization, the underlying framework will look for the NODE_ENV environment variable and set the server environment accordingly. If the NODE_ENV environment variable is not set, the server environment will be set to development by default.
 
 Here are the enum values available for server environments:
 
 ```typescript
-ServerEnvironment.Development;
-ServerEnvironment.Production;
+{
+  ServerEnvironment.Development;
+  ServerEnvironment.Production;
+}
 ```
 
 ## App Class Provider
 
-The App class provider is the heart of the opinionated template application. It is responsible for initializing the application and provide functionalities to be configured in the server bootstrapping process. You can make use of the built-in middlewares and providers to configure your application.
+The App class provider is the heart of the `opinionated template` application. It is responsible for initializing the application and provide functionalities to be configured in the server bootstrapping process. You can make use of the built-in middlewares and providers to configure your application.
 
 ```typescript
 class App extends AppExpress {
@@ -169,7 +164,37 @@ class App extends AppExpress {
 }
 ```
 
-The App class provider offers a set of out-of-the-box middlewares and providers that can be used to configure your application. Explore the `IMiddleware` and `IProvider` interfaces to see what is available.
+The App class provider offers a set of out-of-the-box middlewares and providers that can be used to configure your application. Here is a list of the available middlewares and providers:
+
+### Middlewares
+
+Here are some of the middlewares available:
+
+| Middleware Name  | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| addBodyParser    | Add body parser middleware to the application.    |
+| addCompression   | Add compression middleware to the application.    |
+| addCors          | Add cors middleware to the application.           |
+| addHelmet        | Add helmet middleware to the application.         |
+| addCookieParser  | Add cookie parser middleware to the application.  |
+| addCookieSession | Add cookie session middleware to the application. |
+| addSession       | Add session middleware to the application.        |
+| addServerStatic  | Add static middleware to the application.         |
+| addRateLimit     | Add rate limit middleware to the application.     |
+| addMorgan        | Add morgan middleware to the application.         |
+| addPassport      | Add passport middleware to the application.       |
+| setMulter        | Add multer middleware to the application.         |
+| addServeFavicon  | Add serve favicon middleware to the application.  |
+| setErrorHandler  | Add error handler middleware to the application.  |
+
+### Providers
+
+Here are some of the providers available:
+
+| Provider Name | Description                         |
+| ------------- | ----------------------------------- |
+| envValidator  | Validate the environment variables. |
+| logger        | Add logger to the application.      |
 
 ## App Class Lifecycle Hooks
 
