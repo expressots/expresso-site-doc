@@ -45,23 +45,24 @@ Nós fornecemos duas estruturas diferentes para estruturar os recursos:
 
 Recursos atualmente disponíveis para serem gerados:
 
-| Forma longa | curta  |
-| ----------- | ------ |
-| usecase     | u      |
-| controller  | c      |
-| dto         | d      |
-| provider    | p      |
-| service     | s      |
+| Forma longa | curta |
+| ----------- | ----- |
+| usecase     | u     |
+| controller  | c     |
+| dto         | d     |
+| provider    | p     |
+| service     | s     |
+| entity      | e     |
 
 ## Exemplo de uso
 
-| Comando                       | Resultado esperado  
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| expressots g u user/find      | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find      |
-| expressots g c user/find      | Controlador para ser criado na pasta `useCases` dentro de user/find                         |
-| expressots g d user/find      | DTO a ser criado na pasta `useCases` dentro de user/find                                  |
-| expressots g p email/email    | Provedor a ser criado na pasta `providers` dentro de user/find                            |
-| expressots g s user/find      | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find             |
+| Comando                    | Resultado esperado                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| expressots g u user/find   | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find |
+| expressots g c user/find   | Controlador para ser criado na pasta `useCases` dentro de user/find                    |
+| expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
+| expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
+| expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
 
 Todos os recursos podem ser criados usando a estrutura `pasta/subpasta/recurso.`
 
@@ -85,9 +86,9 @@ Aqui está o arquivo de configuração atual com todas as opções disponíveis:
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-    sourceRoot: "src",
-    scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: false,
+  sourceRoot: "src",
+  scaffoldPattern: Pattern.KEBAB_CASE,
+  opinionated: false,
 };
 
 export default config;
