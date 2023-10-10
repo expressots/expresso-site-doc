@@ -57,10 +57,61 @@ export class YourUseUseCase {
 
 There are 4 methods available:
 
-- info: Logs an informational message.
-- warn: Logs a warning message.
-- error: Logs an error message.
-- msg: Logs a message.
+- **info**: Logs an informational message.
+- **warn**: Logs a warning message.
+- **error**: Logs an error message.
+- **msg**: Logs a message.
+
+## Setting the Route Global Prefix
+
+You can set a global prefix for all routes in your application. This is useful when you want to version your APIs.
+
+### Non Opinionated Template
+
+You can set the global prefix in the `bootstrap` method of your application.
+
+```typescript
+async function bootstrap() {
+  const app = await AppFactory.create(container, []);
+
+  app.setGlobalRoutePrefix("/api");
+
+  await app.listen(3000, ServerEnvironment.Development);
+}
+```
+
+### Opinionated Template
+
+You can set the global prefix in the `configureServices` method of your application.
+
+```typescript
+@provide(App)
+class App extends AppExpress {
+  private middleware: IMiddleware;
+  private provider: IProvider;
+
+  constructor() {
+    super();
+    this.middleware = container.get<IMiddleware>(Middleware);
+    this.provider = container.get<IProvider>(Provider);
+  }
+
+  protected configureServices(): void {
+    this.setGlobalRoutePrefix("/v1");
+
+    this.middleware.addBodyParser();
+    this.middleware.setErrorHandler();
+  }
+
+  protected postServerInitialization(): void {
+    if (this.isDevelopment()) {
+      this.provider.envValidator.checkAll();
+    }
+  }
+
+  protected serverShutdown(): void {}
+}
+```
 
 ---
 
