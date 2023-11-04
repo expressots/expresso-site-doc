@@ -2,7 +2,7 @@
 // Note: type annotations allow type checking and IDEs autocompletion
 
 const lightCodeTheme = require("prism-react-renderer/themes/github");
-const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+const darkCodeTheme = require("prism-react-renderer/themes/vsDark");
 
 const { default: axios } = require("axios");
 
@@ -52,6 +52,9 @@ module.exports = async () => {
         ({
           docs: {
             sidebarPath: require.resolve("./sidebars.js"),
+            remarkPlugins: [
+              [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
+            ],
           },
           theme: {
             customCss: require.resolve("./src/css/custom.css"),
@@ -176,11 +179,19 @@ module.exports = async () => {
           darkTheme: darkCodeTheme,
         },
       }),
+    themes: ["@docusaurus/theme-mermaid"],
+    // In order for Mermaid code blocks in Markdown to work,
+    // you also need to enable the Remark plugin with this option
+    markdown: {
+      mermaid: true,
+    },
   };
 
   // Fetch the content asynchronously using Axios
   try {
-    const response = await axios.get("https://api.github.com/repos/expressots/expressots/releases");
+    const response = await axios.get(
+      "https://api.github.com/repos/expressots/expressots/releases",
+    );
     const latestRelease = response.data[0];
     const version = latestRelease.tag_name;
 

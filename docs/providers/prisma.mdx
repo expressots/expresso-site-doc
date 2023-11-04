@@ -1,0 +1,606 @@
+---
+sidebar_position: 4
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Prisma Provider
+
+The ExpressoTS Prisma Provider encapsulates the robust [Prisma](https://www.prisma.io/) ORM (Object-Relational Mapper) within the ExpressoTS framework, crafting a seamless interface for data operations. Prisma facilitates a sturdy, type-safe, and streamlined access to your database, ensuring that the data interactions within your applications are precise and efficient. Its robust query engine vastly simplifies database access and mitigates common bugs associated with data retrieval and manipulation.
+
+## How To Install
+
+Harnessing the capabilities of Prisma within your ExpressoTS framework is streamlined with the help of the [ExpressoTS CLI](https://github.com/expressots/expressots-cli). The CLI provides a dedicated helper to simplify the setup of Prisma, ensuring a hassle-free integration.
+
+```bash title="terminal"
+expressots add prisma
+
+- Type the prisma client version (default=latest): (latest)
+- Type the schema name (default=schema): (schema)
+- Where do you want to save your prisma schema (default=./): (.)
+- Select your database:
+  CockroachDB
+  Microsoft SQL Server
+  MongoDB
+  MySQL
+> PostgreSQL
+  SQLite
+- Do you want to install the latest recommended database driver for PostgreSQL? (Y/n)
+- Do you want to add BaseRepository Pattern in this project? this will replace the existing BaseRepository and BaseRepositoryInterface if it exists. (Y/n)
+```
+
+By following these prompts, ExpressoTS ensures a seamless installation and configuration of Prisma, tailored to your project’s needs.
+
+### Config Update
+
+Post installation, a new set of configurations pertaining to the Prisma provider are now available for you to fine-tune. These include schemaName, schemaPath, entitiesPath, and entityNamePattern. Customize these settings to align with your project’s architecture and naming conventions.
+
+```ts title="expressots.config.ts"
+import { ExpressoConfig, Pattern } from "@expressots/core";
+
+const config: ExpressoConfig = {
+  sourceRoot: "src",
+  scaffoldPattern: Pattern.KEBAB_CASE,
+  opinionated: true,
+  providers: {
+    // highlight-start
+    prisma: {
+      schemaName: "schema",
+      schemaPath: "./prisma",
+      entitiesPath: "entities",
+      entityNamePattern: "entity",
+    },
+    // highlight-end
+  },
+};
+
+export default config;
+```
+
+## Base Repository Extension
+
+During the setup process, you will be prompted to extend your existing base repository or create a new one if none exists. This includes both the interface and implementation, allowing for a standardized way to interact with your database entities.
+
+<Tabs>
+
+  <TabItem label="Interface" value="interface">
+
+```ts title="./src/repositories/base-repository.interface.ts"
+import { Prisma, PrismaClient } from "@prisma/client";
+import {
+  CreateInput,
+  ModelsOf,
+  DeleteWhere,
+  Select,
+  PrismaAction,
+} from "@expressots/prisma";
+
+interface IBaseRepository<ModelName extends ModelsOf<PrismaClient>> {
+  // highlight-start
+  aggregate: (args: PrismaAction<ModelName, "aggregate">) => Promise<any>;
+  count: (args: PrismaAction<ModelName, "count">) => Promise<number>;
+  // highlight-end
+  create: (
+    data:
+      | CreateInput<ModelName>["data"]
+      | {
+          data: CreateInput<ModelName>["data"];
+          select?: Select<ModelName, "create">["select"];
+        },
+  ) => Promise<ModelName | never>;
+  // ...
+}
+```
+
+  </TabItem>
+
+  <TabItem label="Implementation" value="implementation">
+
+```ts title="./src/repositories/base-repository.ts"
+import { PrismaClient, Prisma } from "@prisma/client";
+import {
+  CreateInput,
+  ModelsOf,
+  DeleteWhere,
+  Select,
+  PrismaAction,
+} from "@expressots/prisma";
+import { provide } from "inversify-binding-decorators";
+import { IBaseRepository } from "./base-repository.interface";
+
+@provide(BaseRepository)
+class BaseRepository<ModelName extends ModelsOf<PrismaClient>>
+  implements IBaseRepository<ModelName>
+{
+  protected prismaModel: any;
+  protected prismaClient: PrismaClient;
+  constructor(modelName: keyof PrismaClient) {
+    this.prismaClient = new PrismaClient();
+    this.prismaModel = this.prismaClient[modelName];
+  }
+
+  // highlight-start
+  async aggregate(args: PrismaAction<ModelName, "aggregate">): Promise<any> {
+    return await this.prismaModel.aggregate(args);
+  }
+  // highlight-end
+
+  // highlight-start
+  async count(args: PrismaAction<ModelName, "count">): Promise<number> {
+    return await this.prismaModel.count(args);
+  }
+  // highlight-end
+```
+
+  </TabItem>
+
+</Tabs>
+
+## Utilizing ExpressoTS Prisma Decorators
+
+We designed decorators to make it easier to use Prisma with ExpressoTS. You can use the decorators with Entities, enums and types to generate the Prisma schema automatically.
+
+### Decorators
+
+| Decorator       | Description                                    | Options                                                               |
+| --------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| @prismaModel    | Decorate a class as a Prisma model             | map                                                                   |
+| @prismaField    | Decorate a property with specific db attribute | attr, isId, isOptional, type, isUnique, prismaDefault, mapField, name |
+| @prismaRelation | Decorate a property as a Prisma relation       | relation, name, model, refs, fields, onDelete, onUpdate, isRequired   |
+| @prismaIndex    | Decorate a property as a Prisma index          | name, fields, map, type                                               |
+
+### PrismaModel Decorator
+
+The @prismaModel() decorator is instrumental in designating a class as a Prisma model, which in turn triggers the automatic generation of the corresponding Prisma schema.
+
+Options:
+
+- `map`:  The map option is available to map the class name to a different name in the Prisma schema, granting you the flexibility to adhere to naming conventions or requirements. For an in-depth understanding of the map option, refer to the Prisma documentation.
+
+Let’s illustrate this with an example drawn from the Opinionated template. Initially, the entity is structured as follows:
+
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+
+```mermaid
+classDiagram
+class User {
+    +id: string
+    +name: string
+    +email: string
+    +constructor()
+}
+```
+
+</div>
+
+<div style={{ flex: 1 }}>
+
+```ts title="./src/entities/user.entity.ts"
+import { provide } from "inversify-binding-decorators";
+import { randomUUID } from "node:crypto";
+import { IEntity } from "./base.entity";
+
+// highlight-start
+@provide(User)
+export class User implements IEntity {
+  id: string;
+  name!: string;
+  email!: string;
+
+  constructor() {
+    this.id = randomUUID();
+  }
+}
+// highlight-end
+```
+
+</div>
+
+</div>
+
+The sole addition needed to begin is the `@prismaModel()` decorator to the class:
+
+<Tabs>
+
+<TabItem label="Entity" value="entity">
+
+```ts title="./src/entities/user.entity.ts"
+import { provide } from "inversify-binding-decorators";
+import { randomUUID } from "node:crypto";
+import { IEntity } from "./base.entity";
+// highlight-start
+import { prismaModel } from "@expressots/prisma";
+// highlight-end
+
+@provide(User)
+// highlight-start
+@prismaModel({ map: "user" })
+// highlight-end
+export class User implements IEntity {
+  id: string;
+  name!: string;
+  email!: string;
+
+  constructor() {
+    this.id = randomUUID();
+  }
+}
+```
+
+</TabItem>
+
+
+<TabItem label="Terminal" value="terminal">
+
+```bash title="Terminal"
+npm run prisma
+```
+
+</TabItem>
+
+<TabItem label="Prisma Schema" value="prisma-schema">
+
+```typescript title="./prisma/schema.prisma"
+model User {
+
+  @@map("users")
+}
+```
+
+</TabItem>
+</Tabs>
+
+---
+
+Upon executing this, you might encounter an error message as shown below. This is anticipated behavior as Prisma mandates at least one unique criterion per model and we have not provided any through the decorators.
+
+```ansii
+error: Error validating model "User": Each model must have at least one unique criteria that has only required fields. Either mark a single field with `@id`, `@unique` or add a multi field criterion with `@@id([])` or `@@unique([])` to the model.
+  -->  schema.prisma:13
+   |
+12 |
+13 | model User {
+14 |
+15 |   @@map("users")
+16 | }
+   |
+```
+
+:::note
+In order to generate the Prisma model `@prismaModel()` decorator must be used. All entities must be decorated with `@prismaModel()`.
+:::
+
+### PrismaField Decorator
+
+The `@prismaField()` decorator is used to decorate a property with specific prisma attributes available in the [Prisma documentation](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#model-fields).
+
+Options:
+
+- `attr`: You can use the `attr` option to add specific attributes to the field per database. For more information about the `attr` option, please check the [Prisma documentation](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#model-fields).
+
+
+<Tabs>
+
+<TabItem label="Entity" value="entity">
+
+```ts title="./src/entities/user.entity.ts"
+import { provide } from "inversify-binding-decorators";
+import { randomUUID } from "node:crypto";
+import { IEntity } from "./base.entity";
+import { prismaModel, prismaField, db } from "@expressots/prisma";
+
+@provide(User)
+@prismaModel({ map: "users" })
+export class User implements IEntity {
+  @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
+  id: string;
+
+  @prismaField({ attr: db.Postgres.Char(36) })
+  name!: string;
+
+  @prismaField({ attr: db.Postgres.Char(36) })
+  email!: string;
+
+  constructor() {
+    this.id = randomUUID();
+  }
+}
+```
+
+</TabItem>
+
+<TabItem label="Terminal" value="terminal">
+
+```bash title="Terminal"
+npm run prisma
+```
+
+</TabItem>
+
+
+<TabItem label="Prisma Schema" value="prisma-schema">
+
+```typescript title="./prisma/schema.prisma"
+model User {
+  // highlight-start
+  id    String @id @unique @db.Uuid
+  name  String @db.Char(36)
+  email String @db.Char(36)
+  // highlight-end
+
+  @@map("user")
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note
+`db` is a namespace that contains all the available attributes per database.
+:::
+
+### PrismaRelation Decorator
+
+The `@prismaRelation()` decorator is a powerful feature that streamlines the creation of relationships between Prisma models. It simplifies the process by allowing the definition of relations from the perspective of the model where the relationship is most logically initiated. This means that instead of defining a foreign key in a child model, you can declare the relationship in the parent model, which can be more intuitive, especially when dealing with one-to-many (1-M) relationships.
+
+Options for `@prismaRelation()` include:
+
+- `model`: Specifies the related Prisma model.
+- `relation`: Defines the type of relationship, such as one-to-many, one-to-one, etc.
+- `refs`: An array that denotes the field(s) that the relationship is referencing.
+- `fields`: Specifies the field(s) on the model that are used for the relation.
+- `onDelete` and `onUpdate`: Define the referential actions on delete and update operations.
+- `isRequired`: Determines if the related field is required.
+
+Now, let's apply this to a specific example for better understanding.
+
+#### Example: User-Post Relationship
+
+<div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+
+<div style={{ display: "flex", width: "50%" }}>
+
+```mermaid
+classDiagram
+  class User {
+    +String id
+    +String name
+    +String email
+    +Array~Post~ posts
+  }
+  class Post {
+    +String id
+  }
+
+  User "1" --> "*" Post : has many
+```
+
+</div>
+
+<div>
+
+Consider a blogging platform where a user can author multiple posts. We want to define a one-to-many relationship from the `User` to `Post` models. From an application development perspective, it's more natural to express that a user "has many" posts than to say a post "belongs to" a user. With the `@prismaRelation()` decorator, we can directly declare this relationship on the `User` model.
+
+</div>
+
+</div>
+
+Here's how we can use the `@prismaRelation()` decorator in context:
+
+<Tabs>
+
+<TabItem label="User Entity" value="user-entity">
+
+```ts title="./src/entities/user.entity.ts"
+import { provide } from "inversify-binding-decorators";
+import { randomUUID } from "node:crypto";
+import { IEntity } from "./base.entity";
+import {
+  prismaModel,
+  prismaField,
+  // highlight-start
+  prismaRelation,
+  Relation,
+  // highlight-end
+  db,
+} from "@expressots/prisma";
+import { Post } from "./post.entity";
+
+@provide(User)
+@prismaModel({ map: "user" })
+export class User implements IEntity {
+  @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
+  id: string;
+
+  @prismaField({ attr: db.Postgres.Char(36) })
+  name!: string;
+
+  @prismaField({ attr: db.Postgres.Char(36) })
+  email!: string;
+
+  // highlight-start
+  // Define the one-to-many relationship to Post.
+  @prismaField({ type: Post })
+  @prismaRelation({
+    model: "Post",
+    relation: Relation.OneToMany,
+    refs: ["id"],
+  })
+  posts: Post[]; // This is where the User-Post relationship is expressed.
+  // highlight-end
+
+  constructor() {
+    this.id = randomUUID();
+  }
+}
+```
+
+</TabItem>
+
+<TabItem label="Post Entity" value="post-entity">
+
+```ts title="./src/entities/post.entity.ts"
+import { provide } from "inversify-binding-decorators";
+import { prismaModel, prismaField } from "@expressots/prisma";
+import { randomUUID } from "node:crypto";
+
+@prismaModel({ map: "posts" })
+@provide(Post)
+export class Post {
+    @prismaField({ isId: true })
+    id: string;
+
+    // highlight-next-line
+    // No need to explicitly define the foreign key field here; it's handled by the provider. 🥳
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+</TabItem>
+
+<TabItem label="Terminal" value="terminal">
+
+```bash title="Terminal"
+npm run prisma
+```
+
+</TabItem>
+
+
+<TabItem label="Prisma Schema" value="prisma-schema">
+
+```typescript title="./prisma/schema.prisma"
+model User {
+  id    String @id @unique @db.Uuid
+  name  String @db.Char(36)
+  email String @db.Char(36)
+  // highlight-next-line
+  posts Post[]
+
+  @@map("user")
+}
+
+model Post {
+  id     String  @id @unique @db.Uuid
+  // highlight-start
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @unique
+  // highlight-end
+
+  @@map("posts")
+}
+```
+
+</TabItem>
+</Tabs>
+
+In this example, the `User` model uses the `@prismaRelation()` decorator to declare its connection to multiple `Post` instances. Prisma will automatically handle the creation of the corresponding foreign key on the `Post` model, making the relationship both explicit and implicitly managed, thus reducing the potential for error and confusion.
+
+:::note
+The `@prismaRelation()` decorator's declarative syntax aligns closely with how developers conceptualize relationships in the application, providing a bridge between the object model and the underlying database schema.
+:::
+
+### PrismaIndex Decorator
+
+The `@prismaIndex()` decorator is essential for optimizing database queries by defining indexes on specific fields of a Prisma model. Indexes are special lookup tables that the database search engine can use to speed up data retrieval. Properly indexing a database can drastically improve the performance of an application.
+
+When you apply the `@prismaIndex()` decorator to a model, you provide Prisma with the information needed to create an index in the underlying database. The decorator takes an object with several options:
+
+- `name`: Specifies a name for the index, allowing for easier reference and management.
+- `fields`: Defines an array of fields to be included in the index. These are the model properties you expect to query frequently.
+- `type`: Dictates the type of index to be used, influencing how the database organizes and retrieves the data.
+
+#### Index Types
+
+The `IndexType` enum offers a selection of index types suitable for different kinds of data and query patterns:
+
+- `Brin`: Block Range Indexes are suitable for large tables in which certain columns have a linear correlation with their physical location on disk.
+- `Btree`: Balanced Tree indexes are the most common and are excellent for general use. They support equality and range queries efficiently.
+- `Gist`: Generalized Search Tree indexes support complex types like geometric data and can handle multidimensional data.
+- `Gin`: Generalized Inverted Indexes are optimized for indexing composite values where each indexed item can contain multiple component values.
+- `Hash`: Hash indexes provide fast retrieval for equality searches but do not support range queries.
+- `Spgist`: Space-partitioned Generalized Search Tree indexes are good for data that does not fit well into a B-tree structure, such as telephone numbers or IP addresses.
+
+Each index type comes with its own performance characteristics and is optimized for specific kinds of queries and data patterns. Choosing the right index type is crucial for the performance of read operations and, consequently, the overall application performance.
+
+#### Example Usage
+
+Below is an example of how to use the `@prismaIndex()` decorator to define a hash index on the `email` field of a `User` model, which would speed up queries that search for users by their email addresses:
+
+<Tabs>
+
+<TabItem label="Entity" value="entity">
+
+```ts title="./src/entities/user.entity.ts"
+import {
+  prismaModel,
+  prismaField,
+  prismaRelation,
+  // highlight-next-line
+  prismaIndex,
+  Relation,
+  // highlight-next-line
+  IndexType,
+  db,
+} from "@expressots/prisma";
+
+@provide(User)
+@prismaModel({ map: "user" })
+// highlight-next-line
+@prismaIndex({ name: "emailIndex", fields: ["email"], type: IndexType.Hash })
+export class User implements IEntity {
+  // ...
+
+  // highlight-next-line
+  @prismaField({ attr: db.Postgres.Char(36), isUnique: true })
+  email!: string;
+}
+```
+
+</TabItem>
+
+<TabItem label="Terminal" value="terminal">
+
+```bash title="Terminal"
+npm run prisma
+```
+
+</TabItem>
+
+<TabItem label="Prisma Schema" value="prisma-schema">
+
+```prisma title="./prisma/schema.prisma"
+model User {
+  email String @db.Char(36)
+
+  @@unique([id, email])
+  @@index([email], name: "emailIndex", type: Hash)
+  @@map("user")
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::note
+Indexes are crucial for optimizing your database, but they should be used judiciously as they can affect write performance and consume additional storage.
+:::
+
+---
+
+## Support the Project
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
+
+- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+- Share the project with your friends and colleagues
