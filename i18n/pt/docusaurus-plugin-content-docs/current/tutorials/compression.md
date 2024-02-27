@@ -6,14 +6,101 @@ sidebar_position: 1
 
 O pacote npm compression é um middleware que pode comprimir corpos de resposta para solicitações que passam por ele, o que pode ajudar a reduzir o tamanho dos dados que são enviados pela rede, levando a tempos de resposta mais rápidos e uso menor de largura de banda. Ele usa a biblioteca zlib para realizar a compressão gzip ou deflate, ambos amplamente suportados pelos navegadores da web modernos.
 
+## Como usar Compression no ExpressoTS
+
+Instale o middleware de compressão npm.
+
+```bash
+npm i compression
+npm i -D @types/compression
+```
+
+### Adicione o Middleware Globalmente
+
+**Modelo não opinativo**: adicione o middleware de compressão no método `create` da classe `AppFactory`.
+
+```typescript
+import compression from "compression";
+
+async function bootstrap() {
+    const app = await AppFactory.create(container, [compression()]);
+    await app.listen(3001, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
+**Modelo opinativo**: configure o middleware de compressão na classe `App` do provedor. No modelo opinativo, middlewares comuns do `expressjs` são oferecidos por padrão para uso. Explore as opções na propriedade `this.middleware`.
+
+```typescript
+@provide(App)
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: IProvider;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get<IProvider>(Provider);
+    }
+
+    protected configureServices(): void {
+        this.middleware.addCompression();
+    }
+
+    protected postServerInitialization(): void {
+        if (this.isDevelopment()) {
+            this.provider.envValidator.checkAll();
+        }
+    }
+
+    protected serverShutdown(): void {}
+}
+```
+
+Um exemplo usando compressão com filtros, selecionando solicitações que contêm payloads de carga útil maiores que 100 \* 1024 bytes:
+
+```typescript
+async function bootstrap() {
+    const app = await AppFactory.create(container, [
+        compression({
+            level: 6,
+            threshold: 100 * 1024,
+            filter: (req, res) => {
+                if (req.headers["x-no-compression"]) {
+                    return false;
+                }
+                return compression.filter(req, res);
+            },
+        }),
+    ]);
+    await app.listen(3001, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
+### Adicione o Middleware a Rotas Específicas
+
+O código a seguir adiciona o middleware de compressão a rotas específicas validos em ambos os modelos opinativo e não opinativo.
+
+```typescript
+@Get("/", compression())
+execute(){};
+```
+
+:::tip
+Para mais informações sobre o pacote de compressão npm, por favor visite o **[pacote compression do npm](https://www.npmjs.com/package/compression)**.
+:::
+
 ## Pacote de compressão
 
-- Desempenho: Pode reduzir significativamente o tamanho do corpo da resposta, diminuindo assim o tempo que um cliente leva para baixar a resposta e renderizar o conteúdo.
+-   Desempenho: Pode reduzir significativamente o tamanho do corpo da resposta, diminuindo assim o tempo que um cliente leva para baixar a resposta e renderizar o conteúdo.
 
-- Eficiência: Ajuda na redução do consumo de largura de banda, o que é especialmente útil se o seu servidor estiver enviando grandes quantidades de dados ou se você tiver largura de banda limitada.
-Contras do pacote npm Compression:
+-   Eficiência: Ajuda na redução do consumo de largura de banda, o que é especialmente útil se o seu servidor estiver enviando grandes quantidades de dados ou se você tiver largura de banda limitada.
+    Contras do pacote npm Compression:
 
-- Sobrecarga: Embora a compressão reduza o tamanho do corpo da resposta, ela adiciona alguma sobrecarga computacional do lado do servidor, pois o servidor deve comprimir o corpo da resposta antes de enviá-lo.
+-   Sobrecarga: Embora a compressão reduza o tamanho do corpo da resposta, ela adiciona alguma sobrecarga computacional do lado do servidor, pois o servidor deve comprimir o corpo da resposta antes de enviá-lo.
 
 :::caution SOBRECARGA DA COMPRESSÃO
 Isso pode não ser ideal para sites de alto tráfego onde os recursos do servidor estão em alta demanda.
@@ -31,53 +118,15 @@ As abordagens modernas podem envolver uma combinação de técnicas - servir ati
 
 Lembre-se, essas abordagens não são mutuamente exclusivas. Muitas vezes, a melhor abordagem é usar uma combinação dessas técnicas com base nos requisitos específicos do seu aplicativo. Testar e monitorar seu aplicativo sob cargas de trabalho realistas pode ajudá-lo a tomar a melhor decisão.
 
-## Usar com ExpressoTS
-
-Instale o middleware de compressão npm.
-
-```bash
-npm i compression
-```
-
-Após a instalação, você pode adicionar o middleware ao seu aplicativo ExpressoTS.
-
-```typescript
-import compression from "compression";
-
-// Adicione no método de criação do aplicativo no array de middleware
-AppInstance.create(container, [compression()]);
-```
-
-Aqui está outro exemplo: usando compressão com filtros, filtrando solicitações que contêm corpos de carga útil maiores que 100 * 1024 bytes:
-
-```typescript
-AppInstance.create(container, [
-        compression({
-            level: 6,
-            threshold: 100 * 1024,
-            filter: (req, res) => {
-                if (req.headers["x-no-compression"]) {
-                    return false;
-                }
-                return compression.filter(req, res);
-            },
-        }),
-    ]);
-```
-
-:::tip
-Para mais informações sobre o pacote de compressão npm, por favor visite o **[pacote compression do npm](https://www.npmjs.com/package/compression)**.
-:::
-
 ---
 
 ## Apoie o projeto
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas
