@@ -12,15 +12,15 @@ We believe in the power of strongly typed languages, and **[TypeScript](https://
 
 ## Why TypeScript?
 
-- Improved code quality: Strong typing helps to catch errors and bugs at compile time, rather than at runtime, which helps to improve the overall quality of the code. This can lead to fewer crashes and issues with the code in production.
+-   Improved code quality: Strong typing helps to catch errors and bugs at compile time, rather than at runtime, which helps to improve the overall quality of the code. This can lead to fewer crashes and issues with the code in production.
 
-- Better scalability: Strong typing can help make code more scalable by allowing for easier refactoring and maintenance. This is because strong typing ensures that changes to the code are consistent and predictable, making it easier to add new features or modify existing ones.
+-   Better scalability: Strong typing can help make code more scalable by allowing for easier refactoring and maintenance. This is because strong typing ensures that changes to the code are consistent and predictable, making it easier to add new features or modify existing ones.
 
-- Increased productivity: Strong typing can increase developer productivity by providing better tooling and editor support, such as code completion, type inference, and automatic refactoring. This can help developers write code faster and with fewer errors.
+-   Increased productivity: Strong typing can increase developer productivity by providing better tooling and editor support, such as code completion, type inference, and automatic refactoring. This can help developers write code faster and with fewer errors.
 
-- Improved collaboration: Strong typing can make it easier for developers to collaborate by providing a shared understanding of the types and interfaces used in the codebase. This can help reduce misunderstandings and inconsistencies and make it easier for developers to work together on the same codebase.
+-   Improved collaboration: Strong typing can make it easier for developers to collaborate by providing a shared understanding of the types and interfaces used in the codebase. This can help reduce misunderstandings and inconsistencies and make it easier for developers to work together on the same codebase.
 
-- Better documentation: Strong typing can help make code more self-documenting by providing a clear and concise description of the types and interfaces used in the code. This can help reduce the need for extensive comments and documentation, making the code easier to understand and maintain.
+-   Better documentation: Strong typing can help make code more self-documenting by providing a clear and concise description of the types and interfaces used in the code. This can help reduce the need for extensive comments and documentation, making the code easier to understand and maintain.
 
 ## Pre-requisites
 
@@ -49,8 +49,8 @@ expressots new <project-name> -t <template-name> -p <package-manager>
 :::tip
 ExpressoTS offers two options for project templates:
 
-- Non-opinionated: Want to have the liberty to build and structure your project as you wish? Non opinionated template offers a very small footprint, with only the necessary files to get you started.
-- Opinionated: Opinionated template is made for more complex projects, as it provides a more layered architecture.
+-   Non-opinionated: Want to have the liberty to build and structure your project as you wish? Non opinionated template offers a very small footprint, with only the necessary files to get you started.
+-   Opinionated: Opinionated template is made for more complex projects, as it provides a more layered architecture.
 
 :::
 
@@ -92,8 +92,6 @@ project-name/
 │   ├── providers/
 │   │   └── application/
 │   │       └── application.provider.ts
-│   │   └── db-in-memory/
-│   │       └── db-in-memory.provider.ts
 │   ├── repositories/
 │   │   └── user/
 │   │       └── user-repository.ts
@@ -146,9 +144,9 @@ Below you can find some extra information about **[Providers](./providers.md)**,
 
 Contain 2 providers:
 
-- application: This provider is a class that extend from the Application class from @expressots/core that provides the application **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
+-   application: This provider is a class that extend from the Application class from @expressots/core that provides the application **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
 
-- db-in-memory: This is a simple in-memory database provider that allows you to store data in memory. We use this provider in the User use cases to store and retrieve user data.
+-   db-in-memory: This is a simple in-memory database provider that allows you to store data in memory. We use this provider in the User use cases to store and retrieve user data.
 
 :::info
 InMemoryDB provider is an example supplied to help you prototype endpoints quickly without having to worry about setting up a database. It is not intended to be used in production. You can replace it with your own database provider.
@@ -158,16 +156,16 @@ InMemoryDB provider is an example supplied to help you prototype endpoints quick
 
 The use cases in the Opinionated template are organized in 2 modules:
 
-- AppModule and UserModule, providing some examples of usage of the ExpressoTS resources. For more information about modules, please check the **[Modules Section](./module.md)**.
+-   AppModule and UserModule, providing some examples of usage of the ExpressoTS resources. For more information about modules, please check the **[Modules Section](./module.md)**.
 
 Here are the endpoints in each module:
 
-- [AppModule]/app.controller: returns `Hello from ExpressoTS App`
-- [UserModule]/user-create.controller: creates a new user in the in-memory database
-- [UserModule]/user-delete.controller: delete a user by `id` in the in-memory database
-- [UserModule]/user-find.controller: return one user from the in-memory database
-- [UserModule]/user-findall.controller: returns all users from the in-memory database
-- [UserModule]/user-update.controller: update a user info from the in-memory database
+-   [AppModule]/app.controller: returns `Hello from ExpressoTS App`
+-   [UserModule]/user-create.controller: creates a new user in the in-memory database
+-   [UserModule]/user-delete.controller: delete a user by `id` in the in-memory database
+-   [UserModule]/user-find.controller: return one user from the in-memory database
+-   [UserModule]/user-findall.controller: returns all users from the in-memory database
+-   [UserModule]/user-update.controller: update a user info from the in-memory database
 
 #### Main
 
@@ -177,8 +175,8 @@ The `main.ts` includes an async function that will bootstrap the ExpressoTS appl
 
 ```typescript
 async function bootstrap() {
-  const app = await AppFactory.create(container, App);
-  await app.listen(3000, ServerEnvironment.Development);
+    const app = await AppFactory.create(container, App);
+    await app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -188,8 +186,8 @@ bootstrap();
 
 ```typescript
 async function bootstrap() {
-  const app = await AppFactory.create(container, []);
-  await app.listen(3000, ServerEnvironment.Development);
+    const app = await AppFactory.create(container, []);
+    await app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -199,23 +197,23 @@ bootstrap();
 
 To bootstrap an ExpressoTS application, there are two ways:
 
-- Non-opinionated template using the AppFactory to creates an instance of the default ExpressoTS adapter which is the Express.js. User can directly pass an array of middleware to the `AppFactory.create` method, which will be responsible for creating an Expressjs application with the provided middleware. This method of creating an ExpressoTS application exposes the Expressjs application instance, which can be used to add additional middleware or to configure the Expressjs application.
+-   Non-opinionated template using the AppFactory to creates an instance of the default ExpressoTS adapter which is the Express.js. User can directly pass an array of middleware to the `AppFactory.create` method, which will be responsible for creating an Expressjs application with the provided middleware. This method of creating an ExpressoTS application exposes the Expressjs application instance, which can be used to add additional middleware or to configure the Expressjs application.
 
 ```typescript
 async function bootstrap() {
-  const app = await AppFactory.create(container, [cors(), helmet()]);
-  await app.listen(3000, ServerEnvironment.Development);
+    const app = await AppFactory.create(container, [cors(), helmet()]);
+    await app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
 ```
 
-- Opinionated template using the AppFactory to create an AppExpress application. By using the App (AppExpress) class, you can take advantage of its built-in mechanisms for controlling the **[application life cycle hooks](application.md#application-lifecycle-hooks)**, such as injecting and executing services before, after, and during application shutdown.
+-   Opinionated template using the AppFactory to create an AppExpress application. By using the App (AppExpress) class, you can take advantage of its built-in mechanisms for controlling the **[application life cycle hooks](application.md#application-lifecycle-hooks)**, such as injecting and executing services before, after, and during application shutdown.
 
 ```typescript
 async function bootstrap() {
-  const app = await AppFactory.create(container, App);
-  await app.listen(3000, ServerEnvironment.Development);
+    const app = await AppFactory.create(container, App);
+    await app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -242,8 +240,8 @@ Read more about the modules in the **[Modules](module.md)** section.
 const appContainer = new AppContainer();
 
 const container: Container = appContainer.create([
-  // Add your modules here
-  AppModule,
+    // Add your modules here
+    AppModule,
 ]);
 ```
 
@@ -253,8 +251,8 @@ The controller layer handles incoming requests and returns appropriate responses
 
 ```typescript
 const AppModule: ContainerModule = CreateModule([
-  // Add your controllers here
-  AppController,
+    // Add your controllers here
+    AppController,
 ]);
 ```
 
@@ -302,9 +300,9 @@ ExpressoTS is a versatile framework that is not bound to any specific platform o
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues

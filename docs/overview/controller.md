@@ -45,26 +45,21 @@ As a result, DTOs help to segregate and filter the data being sent to the client
 
 ## Controller Class
 
-The controller class in ExpressoTS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Inversify Express Utils package](https://github.com/inversify/inversify-express-utils).
+The controller class in ExpressoTS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Decorator section](./decorators.md).
 
-Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[@httpMethods()](./decorators.md)** decorators. Additionally, you can also annotate the parameters of the `execute()` method.
+Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[http methods](./decorators.md#http-method-decorators)** decorators. Additionally, you can also annotate the parameters of the `execute()` method.
 
 Here is an example of a simple ExpressoTS controller class:
 
 ```typescript
 @controller("/")
 class AppController {
-  
-  @httpGet("/")
-  execute(@response() res: any) {
-    return res.send("Hello from ExpressoTS!");
-  }
+    @Get("/")
+    execute(@response() res: Response) {
+        return res.send("Hello from ExpressoTS!");
+    }
 }
 ```
-
-:::info
-In the AppController class above we are using res as any (`res:any`), but the `res:Response` type from the `express` package is also available for use. This allows you to make use of all the methods that the **[Response](https://expressjs.com/en/4x/api.html#res)** type offers.
-:::
 
 ## BaseController Class
 
@@ -84,9 +79,9 @@ The signature of the `callUseCase` method:
 callUseCase(useCase: any, res: any, successStatusCode: number);
 ```
 
-- `useCase`: The use case that will be called. This use case is injected in the controller constructor.
-- `res`: The response object from the express request.
-- `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the **[Http Status Code](./status-code.md)** type for more information.
+-   `useCase`: The use case that will be called. This use case is injected in the controller constructor.
+-   `res`: The response object from the express request.
+-   `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully. Please see the **[Http Status Code](./status-code.md)** type for more information.
 
 The default response:
 
@@ -99,17 +94,14 @@ A more complete example of a controller class inheriting from the **BaseControll
 ```typescript
 @controller("/")
 class AppController extends BaseController {
-  constructor(private appUseCase: AppUseCase) {
-    super("app-controller");
-  }
+    constructor(private appUseCase: AppUseCase) {
+        super("app-controller");
+    }
 
-  @httpGet("/")
-  execute(@response() res: any): IAppResponseDTO {
-    return this.callUseCase(this.appUseCase.execute(),
-      res,
-      StatusCode.OK
-    );
-  }
+    @httpGet("/")
+    execute(@response() res: any): IAppResponseDTO {
+        return this.callUseCase(this.appUseCase.execute(), res, StatusCode.OK);
+    }
 }
 ```
 
@@ -127,7 +119,7 @@ Here is an example of usage:
 ```typescript
 @scope(BindingScopeEnum.Singleton)
 @controller("/")
-class CreateUserController extends BaseController { }
+class CreateUserController extends BaseController {}
 ```
 
 The controller above will be scoped as `Singleton` and will be shared across all requests.
@@ -174,30 +166,30 @@ Here is an example of use MVC approach, which contains a single controller class
 ```typescript
 @controller("/product")
 class ProductController {
-  @httpPost("/")
-  create(@response() res: any) {
-    return res.status(201).json({ message: "Product created" });
-  }
+    @httpPost("/")
+    create(@response() res: any) {
+        return res.status(201).json({ message: "Product created" });
+    }
 
-  @httpGet("/")
-  list(@response() res: any) {
-    return res.status(200).json({ message: "Product listed" });
-  }
+    @httpGet("/")
+    list(@response() res: any) {
+        return res.status(200).json({ message: "Product listed" });
+    }
 
-  @httpGet("/:id")
-  get(@response() res: any) {
-    return res.status(200).json({ message: "Product get" });
-  }
+    @httpGet("/:id")
+    get(@response() res: any) {
+        return res.status(200).json({ message: "Product get" });
+    }
 
-  @httpPatch("/:id")
-  update(@response() res: any) {
-    return res.status(200).json({ message: "Product updated" });
-  }
+    @httpPatch("/:id")
+    update(@response() res: any) {
+        return res.status(200).json({ message: "Product updated" });
+    }
 
-  @httpDelete("/:id")
-  delete(@response() res: any) {
-    return res.status(200).json({ message: "Product deleted" });
-  }
+    @httpDelete("/:id")
+    delete(@response() res: any) {
+        return res.status(200).json({ message: "Product deleted" });
+    }
 }
 ```
 
@@ -207,9 +199,9 @@ class ProductController {
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues
