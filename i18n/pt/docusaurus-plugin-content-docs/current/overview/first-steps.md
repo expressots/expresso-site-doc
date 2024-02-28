@@ -10,15 +10,15 @@ Nesta seção, você vai mergulhar nos conceitos centrais do ExpressoTS para se 
 
 Acreditamos no poder de linguagens fortemente tipadas, e o **[TypeScript](https://www.typescriptlang.org/)** é essencial quando se trata de estruturar ou construir aplicações em larga escala em **[NodeJS](https://nodejs.org/)**. No exemplo a seguir, usaremos principalmente TypeScript, e aqui estão as razões pelas quais usamos TypeScript:
 
-- Melhoria da qualidade do código: Tipagem forte ajuda a pegar erros e bugs em tempo de compilação, ao invés de em tempo de execução, o que ajuda a melhorar a qualidade geral do código. Isso pode levar a menos falhas e problemas com o código em produção.
+-   Melhoria da qualidade do código: Tipagem forte ajuda a pegar erros e bugs em tempo de compilação, ao invés de em tempo de execução, o que ajuda a melhorar a qualidade geral do código. Isso pode levar a menos falhas e problemas com o código em produção.
 
-- Melhor escalabilidade: A tipagem forte pode ajudar a tornar o código mais escalável, permitindo refatorações e manutenções mais fáceis. Isso ocorre porque a tipagem forte garante que as alterações no código sejam consistentes e previsíveis, tornando mais fácil adicionar novos recursos ou modificar os existentes.
+-   Melhor escalabilidade: A tipagem forte pode ajudar a tornar o código mais escalável, permitindo refatorações e manutenções mais fáceis. Isso ocorre porque a tipagem forte garante que as alterações no código sejam consistentes e previsíveis, tornando mais fácil adicionar novos recursos ou modificar os existentes.
 
-- Aumento da produtividade: A tipagem forte pode aumentar a produtividade do desenvolvedor, fornecendo melhores ferramentas e suporte do editor, como conclusão de código, inferência de tipo e refatoração automática. Isso pode ajudar os desenvolvedores a escrever código mais rápido e com menos erros.
+-   Aumento da produtividade: A tipagem forte pode aumentar a produtividade do desenvolvedor, fornecendo melhores ferramentas e suporte do editor, como conclusão de código, inferência de tipo e refatoração automática. Isso pode ajudar os desenvolvedores a escrever código mais rápido e com menos erros.
 
-- Melhoria da colaboração: A tipagem forte pode facilitar a colaboração entre desenvolvedores, fornecendo um entendimento compartilhado dos tipos e interfaces usados no código-fonte. Isso pode ajudar a reduzir mal-entendidos e inconsistências e tornar mais fácil para os desenvolvedores trabalharem juntos no mesmo código-fonte.
+-   Melhoria da colaboração: A tipagem forte pode facilitar a colaboração entre desenvolvedores, fornecendo um entendimento compartilhado dos tipos e interfaces usados no código-fonte. Isso pode ajudar a reduzir mal-entendidos e inconsistências e tornar mais fácil para os desenvolvedores trabalharem juntos no mesmo código-fonte.
 
-- Melhor documentação: A tipagem forte pode ajudar a tornar o código auto-documentado, fornecendo uma descrição clara e concisa dos tipos e interfaces usados no código. Isso pode ajudar a reduzir a necessidade de comentários extensos e documentação, tornando o código mais fácil de entender e manter.
+-   Melhor documentação: A tipagem forte pode ajudar a tornar o código auto-documentado, fornecendo uma descrição clara e concisa dos tipos e interfaces usados no código. Isso pode ajudar a reduzir a necessidade de comentários extensos e documentação, tornando o código mais fácil de entender e manter.
 
 ## Pre-requisito
 
@@ -47,9 +47,9 @@ expressots new <nome-do-projeto> -t <template> -p <gerenciado-de-pacotes>
 :::tip
 ExpressoTS oferece duas opções de modelos de projetos:
 
-- Opinativo: O modelo opinativo é feito para projetos mais complexos, já que fornece uma estrutura de projeto mais robusta e uma arquitetura em camadas.
-- Não-opinativo: Quer ter a liberdade de construir e estruturar seu projeto como desejar? O modelo não-opinativo oferece uma estrutura simples, com apenas os arquivos necessários para começar.
-  :::
+-   Opinativo: O modelo opinativo é feito para projetos mais complexos, já que fornece uma estrutura de projeto mais robusta e uma arquitetura em camadas.
+-   Não-opinativo: Quer ter a liberdade de construir e estruturar seu projeto como desejar? O modelo não-opinativo oferece uma estrutura simples, com apenas os arquivos necessários para começar.
+    :::
 
 Depois de criar seu projeto, com o `<nome-do-projeto>` desejado e dependendo do tipo de projeto selecionado, seu projeto terá uma estrutura de pasta e arquivo diferente. Aqui estão as estruturas específicas de pasta e arquivo para cada tipo de projeto:
 
@@ -81,7 +81,7 @@ nome-do-projeto/
 No modelo de projeto de opinião, fornecemos um exemplo CRUD completo para uma entidade de usuário, com todas as camadas e arquivos necessários para você começar.
 
 ```tree
-nome-do-projeto/
+project-name/
 ├── src/
 │   ├── entities/
 │   │   └── base.entity.ts
@@ -89,10 +89,6 @@ nome-do-projeto/
 │   ├── providers/
 │   │   └── application/
 │   │       └── application.provider.ts
-│   │   └── bindingType/
-│   │       └── singleton.provider.ts
-│   │   └── db-in-memory/
-│   │       └── db-in-memory.provider.ts
 │   ├── repositories/
 │   │   └── user/
 │   │       └── user-repository.ts
@@ -102,22 +98,26 @@ nome-do-projeto/
 │   │   └── app/
 │   │       └── app.controller.ts
 │   │       └── app.module.ts
-│   │   └── ping/
-│   │       └── ping.controller.ts
-│   │       └── ping.dto.ts
-│   │       └── ping.module.ts
-│   │       └── ping.usecase.ts
+│   │       └── app.usecase.ts
 │   │   └── user/
 │   │       └── create/
-│   │           └── create-user.controller.ts
-│   │           └── create-user.dto.ts
-│   │           └── create-user.usecase.ts
+│   │           └── user-create.controller.ts
+│   │           └── user-create.dto.ts
+│   │           └── user-create.usecase.ts
+|   │       └── delete/
+│   │           └── user-delete.controller.ts
+│   │           └── user-delete.dto.ts
+│   │           └── user-delete.usecase.ts
+│   │       └── find/
+│   │           └── user-find.controller.ts
+│   │           └── user-find.dto.ts
+│   │           └── user-find.usecase.ts
 │   │       └── findall/
-│   │           └── findall-user.controller.ts
-│   │           └── findall-user.dto.ts
-│   │           └── findall-user.usecase.ts
+│   │           └── user-findall.controller.ts
+│   │           └── user-findall.dto.ts
+│   │           └── user-findall.usecase.ts
 │   │       └── user.module.ts
-│   ├── app-container.ts
+│   ├── app.container.ts
 │   ├── env.ts
 │   ├── main.ts
 ├── test/
@@ -141,9 +141,9 @@ Informações adicionais sobre **[Provedores](./providers.md)**, **[Casos de Uso
 
 Existe 2 provedores:
 
-- application: Esse provedor permite estender a classe Application do @expressots/core, que fornece os **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
+-   application: Esse provedor permite estender a classe Application do @expressots/core, que fornece os **[Life Cycle Hooks](application.md#lifecycle-hooks)**.
 
-- db-in-memory: Esse é um provedor de banco de dados simples em memória que permite armazenar dados em memória. Usamos esse provedor nos casos de uso de usuário para armazenar e recuperar dados de usuário.
+-   db-in-memory: Esse é um provedor de banco de dados simples em memória que permite armazenar dados em memória. Usamos esse provedor nos casos de uso de usuário para armazenar e recuperar dados de usuário.
 
 ::info
 InMemoryDB provider is an example supplied to help you prototype endpoints quickly without having to worry about setting up a database. It is not intended to be used in production. You can replace it with your own database provider.
@@ -153,16 +153,16 @@ InMemoryDB provider is an example supplied to help you prototype endpoints quick
 
 Os casos de uso no modelo Opinativo são organizados em 2 módulos:
 
-- AppModule e UserModule, fornecendo alguns exemplos de uso dos recursos do ExpressoTS. Para mais informações sobre módulos, consulte a **[Seção de Módulos](./module.md)**.
+-   AppModule e UserModule, fornecendo alguns exemplos de uso dos recursos do ExpressoTS. Para mais informações sobre módulos, consulte a **[Seção de Módulos](./module.md)**.
 
 Aqui estão os endpoints em cada módulo:
 
-- [AppModule]/app.controller: retorna `Hello from ExpressoTS App`
-- [UserModule]/user-create.controller: cria um novo usuário no banco de dados na memória
-- [UserModule]/user-delete.controller: excluir um usuário por `id` no banco de dados na memória
-- [UserModule]/user-find.controller: retornar um usuário do banco de dados na memória
-- [UserModule]/user-findall.controller: retorna todos os usuários do banco de dados na memória
-- [UserModule]/user-update.controller: atualizar as informações de um usuário do banco de dados na memória
+-   [AppModule]/app.controller: retorna `Hello from ExpressoTS App`
+-   [UserModule]/user-create.controller: cria um novo usuário no banco de dados na memória
+-   [UserModule]/user-delete.controller: excluir um usuário por `id` no banco de dados na memória
+-   [UserModule]/user-find.controller: retornar um usuário do banco de dados na memória
+-   [UserModule]/user-findall.controller: retorna todos os usuários do banco de dados na memória
+-   [UserModule]/user-update.controller: atualizar as informações de um usuário do banco de dados na memória
 
 #### Main
 
@@ -173,8 +173,8 @@ O arquivo `main.ts` inclui uma função assíncrona que inicializa a aplicação
 ```typescript
 // Usando o projeto de início opinativo onde o App estende a classe Application do @expressots/core
 async function bootstrap() {
-  const app = App.create(container);
-  app.listen(3000, ServerEnvironment.Production);
+    const app = App.create(container);
+    app.listen(3000, ServerEnvironment.Production);
 }
 ```
 
@@ -183,24 +183,20 @@ async function bootstrap() {
 ```typescript
 // Usando o projeto inicial opinativo em que App estende a classe Application de @expressots/core
 async function bootstrap() {
-  const app = App.create(container);
-  app.listen(3000, ServerEnvironment.Production, {
-    appName: ENV.Application.APP_NAME,
-    appVersion: ENV.Application.APP_VERSION,
-  });
+    const app = App.create(container);
+    app.listen(3000, ServerEnvironment.Production, {
+        appName: ENV.Application.APP_NAME,
+        appVersion: ENV.Application.APP_VERSION,
+    });
 }
 
 // Ou de .env
 async function bootstrap() {
-  const app = App.create(container);
-  app.listen(
-    ENV.Application.PORT,
-    ServerEnvironment[ENV.Application.ENVIRONMENT],
-    {
-      appName: ENV.Application.APP_NAME,
-      appVersion: ENV.Application.APP_VERSION,
-    }
-  );
+    const app = App.create(container);
+    app.listen(ENV.Application.PORT, ServerEnvironment[ENV.Application.ENVIRONMENT], {
+        appName: ENV.Application.APP_NAME,
+        appVersion: ENV.Application.APP_VERSION,
+    });
 }
 
 bootstrap();
@@ -211,8 +207,8 @@ bootstrap();
 ```typescript
 // Usando o projeto inicial não opinativo em que AppInstance é uma instância da classe Application de @expressots/core
 async function bootstrap() {
-  const app = AppInstance.create(container);
-  app.listen(3000, ServerEnvironment.Development);
+    const app = AppInstance.create(container);
+    app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -226,9 +222,9 @@ Para inicializar uma aplicação ExpressoTS, existem duas maneiras:
 
 Para inicializar um aplicativo ExpressoTS, existem duas maneiras:
 
-- Template Não-opinativo usando o AppFactory para criar uma instância do adaptador padrão do ExpressoTS, que é o Express.js. O usuário pode passar diretamente um array de middleware para o método AppFactory.create, que será responsável por criar uma aplicação Expressjs com o middleware fornecido. Este método de criação de uma aplicação ExpressoTS expõe a instância da aplicação Expressjs, que pode ser usada para adicionar middleware adicional ou para configurar a aplicação Expressjs.
+-   Template Não-opinativo usando o AppFactory para criar uma instância do adaptador padrão do ExpressoTS, que é o Express.js. O usuário pode passar diretamente um array de middleware para o método AppFactory.create, que será responsável por criar uma aplicação Expressjs com o middleware fornecido. Este método de criação de uma aplicação ExpressoTS expõe a instância da aplicação Expressjs, que pode ser usada para adicionar middleware adicional ou para configurar a aplicação Expressjs.
 
-- Template Opinativo usando o AppFactory para criar uma aplicação AppExpress. Ao usar a classe App (AppExpress), você pode tirar proveito de seus mecanismos integrados para controlar os ganchos do ciclo de vida da aplicação, como injetar e executar serviços antes, depois e durante o encerramento da aplicação.
+-   Template Opinativo usando o AppFactory para criar uma aplicação AppExpress. Ao usar a classe App (AppExpress), você pode tirar proveito de seus mecanismos integrados para controlar os ganchos do ciclo de vida da aplicação, como injetar e executar serviços antes, depois e durante o encerramento da aplicação.
 
 ## O Contêiner
 
@@ -263,8 +259,8 @@ const app = AppInstance.create(container);
 const appContainer = new AppContainer();
 
 const container = appContainer.create([
-  // Adicione seus módulos aqui
-  AppModule,
+    // Adicione seus módulos aqui
+    AppModule,
 ]);
 ```
 
@@ -272,8 +268,8 @@ const container = appContainer.create([
 
 ```typescript
 const appModule = CreateModule([
-  // Adicione seus controlers aqui
-  AppController,
+    // Adicione seus controlers aqui
+    AppController,
 ]);
 ```
 
@@ -318,8 +314,8 @@ As seguintes funcionalidades são válidas até a versão 1.9.0, pois foram torn
 ```typescript
 // Using opinionated start project where App extends @expressots/core Application class
 async function bootstrap() {
-  const app = App.create(container);
-  app.listen(3000, ServerEnvironment.Production);
+    const app = App.create(container);
+    app.listen(3000, ServerEnvironment.Production);
 }
 ```
 
@@ -328,8 +324,8 @@ async function bootstrap() {
 ```typescript
 // Using the non-opinionated starter project where AppInstance is an instance of the Application class from @expressots/core
 async function bootstrap() {
-  const app = AppInstance.create(container);
-  app.listen(3000, ServerEnvironment.Development);
+    const app = AppInstance.create(container);
+    app.listen(3000, ServerEnvironment.Development);
 }
 
 bootstrap();
@@ -345,9 +341,9 @@ ExpressoTS é um framework versátil que não está vinculado a nenhuma platafor
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas
