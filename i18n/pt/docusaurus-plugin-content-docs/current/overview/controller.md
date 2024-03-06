@@ -6,64 +6,73 @@ sidebar_position: 5
 
 Os Controladores atuam como a principal interface entre o cliente e o servidor em aplicações Node.js. Eles lidam com as requisições recebidas, validam os dados conforme o DTO de entrada, e retornam as respostas no formato DTO. Em essência, os controllers atuam como a ponte entre os clientes e as camadas de serviço, também conhecidas como casos de uso.
 
-## Padrão DTO
+**Exemplo de Controler Padrão MVC**
 
-O Data Transfer Object (DTO) é um padrão de design comumente usado em aplicações Node.js que padroniza os formatos de dados para a comunicação entre diferentes camadas da aplicação, incluindo cliente-servidor ou módulos de servidor. O DTO serve como uma interface para a troca de dados, garantindo estruturas claras e padronizadas para os dados de entrada e saída. Ao separar a lógica de negócios da lógica de comunicação, ajuda a reduzir a complexidade da aplicação e desacoplar diferentes camadas.
+![Controler Padrão MVC](./img/controller-mvc.png)
 
-O uso de DTOs pode melhorar o desempenho e a escalabilidade da aplicação, reduzindo a transferência de dados entre o cliente e o servidor e fornecendo maneiras mais eficientes de processar e manipular dados dentro da aplicação.
+**Exemplo de Controler Padrão de Responsabilidade Única**
 
-### Exemplo de DTO
+![Controler Padrão de Responsabilidade Única](./img/controller-single-resp.png)
 
-Por exemplo, imagine um cenário de registro de usuário em que são coletados nome, e-mail e senha, e o ID é gerado automaticamente. O objeto DTO de usuário para entrada e resposta pode ter possíveis formatos, como mostrado abaixo:
+Para criar um controlador básico, criamos uma classe e usamos o decorador `@controller()` para definir a rota do controlador. Em seguida, criamos um método e usamos os decoradores `http Methods` para definir a rota e o método HTTP para o método.
 
-```typescript
-// UserCreateInputDTO
-interface UserCreateInputDTO {
-  name: string;
-  email: string;
-  password: string;
-}
+## Classe Controler
 
-// UserCreateResponseDTO
-interface UserCreateResponseDTO {
-  id: string;
-  name: string;
-  status: string;
-}
+### Padrão MVC
 
-// Payload json formato
-{
-  "name": string,
-  "email": string,
-  "password": string
-}
-```
-
-Ter dois formatos diferentes de DTO é essencial nesse caso, porque ao registrar um usuário, não queremos retornar a senha para o cliente por motivos de segurança. Portanto, criamos um DTO diferente para a resposta, adicionando um campo complementar chamado status, onde é enviada uma mensagem ao cliente, indicando que o usuário foi criado com sucesso.
-
-Como resultado, os DTOs ajudam a segregar e filtrar os dados enviados ao cliente, reduzindo a quantidade de dados processados pela aplicação.
-
-## Classe Controller
-
-A classe controller no ExpressoTS representa o endpoint que você deseja criar para a sua aplicação. Você pode definir a rota e o método HTTP para o controller usando o decorador `@controller()` do [Decorator section](./decorators.md).
-
-Cada classe de controlador contém um único método chamado `execute()` que manipula a solicitação e envia a resposta. Este método é anotado **[http methods()](./decorators.md#decoradores-de-métodos-http)** com decorador do mesmo pacote Inversify. Adicionalmente os parâmetros do método `execute()` pode também ser anotados.
-
-Aqui está um exemplo de uma classe de controlador ExpressoTS:
+Múltiplas rotas em um único controlador.
 
 ```typescript
-@controller("/")
-class AppController {
-    @httpGet("/")
-    execute(@response() res: any) {
-        return res.send("Hello from ExpressoTS!");
+@controller("/user")
+export class UserController {
+    @Post("/")
+    create(@response() res: Response) {
+        return res.send("User created");
+    }
+
+    @Get("/")
+    getUser(@response() res: Response) {
+        return res.send("User listed");
     }
 }
 ```
 
-:::info
-Na classe AppController acima, estamos usando res como qualquer `res:any`, mas você pode definitivamente usar o tipo `res:Response` do pacote express, pois expomos seus tipos. Isso permitirá que você use todos os métodos que a classe **[Response](https://expressjs.com/en/4x/api.html#res)** oferece.  
+### Padrão de Responsabilidade Única
+
+Um controlador, um método de execução e um caso de uso.
+
+```typescript
+@controller("/user/create")
+export class UserCreateController {
+    @Post("/")
+    execute(@response() res: Response) {
+        return res.send("User created");
+    }
+}
+```
+
+:::tip
+Tanto os decoradores `@controller()` quanto `http methods` funcionam em combinação para definir a rota e os middlewares a serem usados no endpoint.
 :::
+
+## Escopo do controller
+
+O escopo padrão de um controlador é `Request`, pois é herdado do `AppContainer` e do escopo de classe padrão `Module`. No entanto, você pode substituir o escopo de um controlador usando o decorador `@scope()`. Este decorador aceita os mesmos valores de enumeração BindingScopeEnum.
+
+:::info
+Se você definir o escopo do módulo, não poderá substituí-lo em um controlador específico usando o decorador `@scope`.
+O decorador `@scope` só pode ser usado em controladores específicos se o escopo do módulo não estiver definido.
+:::
+
+Aqui está um exemplo de uso:
+
+```typescript
+@scope(BindingScopeEnum.Singleton)
+@controller("/")
+class CreateUserController extends BaseController {}
+```
+
+O controlador acima terá o escopo de `Singleton` e será compartilhado entre todas as solicitações.
 
 ## Classe BaseController
 
@@ -109,25 +118,6 @@ class AppController extends BaseController {
 }
 ```
 
-## Escopo do controller
-
-O escopo padrão de um controlador é `Request`, pois é herdado do `AppContainer` e do escopo de classe padrão `Module`. No entanto, você pode substituir o escopo de um controlador usando o decorador `@scope()`. Este decorador aceita os mesmos valores de enumeração BindingScopeEnum.
-
-:::info
-Se você definir o escopo do módulo, não poderá substituí-lo em um controlador específico usando o decorador `@scope`.
-O decorador `@scope` só pode ser usado em controladores específicos se o escopo do módulo não estiver definido.
-:::
-
-Aqui está um exemplo de uso:
-
-```typescript
-@scope(BindingScopeEnum.Singleton)
-@controller("/")
-class CreateUserController extends BaseController {}
-```
-
-O controlador acima terá o escopo de `Singleton` e será compartilhado entre todas as solicitações.
-
 ## Decoradores do controlador
 
 Os decoradores de métodos HTTP e parâmetros são um conjunto de anotações usadas em aplicações ExpressoTS para definir o roteamento e o tratamento de solicitações HTTP. O uso desses decoradores pode simplificar o roteamento e o tratamento de solicitações HTTP em aplicações Node.js e tornar o código mais legível e fácil de manter.
@@ -161,41 +151,42 @@ Aqui está uma lista de todos os decoradores de parâmetros disponíveis no Expr
 | @cookies(cookieName?: string)        | Injeta um cookie dos cookies da solicitação.                     | execute(@cookies('session') session: string)           |
 | @next()                              | Injeta o objeto NextFunction do Express.                         | execute(@next() next: NextFunction)                    |
 
-## Uma abordagem MVC
+## Padrão DTO
 
-Apesar de no modelo opinativo recomendarmos um controlador e um caso de uso por rota, você pode definitivamente usar a abordagem MVC ou qualquer outro padrão que desejar. Para isso recomendamos a utilização de um template `não opinativo`, no qual o desenvolvedor tem liberdade para customizar sua aplicação.
+O Data Transfer Object (DTO) é um padrão de design comumente usado em aplicações Node.js que padroniza os formatos de dados para a comunicação entre diferentes camadas da aplicação, incluindo cliente-servidor ou módulos de servidor. O DTO serve como uma interface para a troca de dados, garantindo estruturas claras e padronizadas para os dados de entrada e saída. Ao separar a lógica de negócios da lógica de comunicação, ajuda a reduzir a complexidade da aplicação e desacoplar diferentes camadas.
 
-Aqui está um exemplo de uso da abordagem MVC, que contém uma única classe controladora que manipula a solicitação de um recurso de produto:
+O uso de DTOs pode melhorar o desempenho e a escalabilidade da aplicação, reduzindo a transferência de dados entre o cliente e o servidor e fornecendo maneiras mais eficientes de processar e manipular dados dentro da aplicação.
+
+### Exemplo de DTO
+
+Por exemplo, imagine um cenário de registro de usuário em que são coletados nome, e-mail e senha, e o ID é gerado automaticamente. O objeto DTO de usuário para entrada e resposta pode ter possíveis formatos, como mostrado abaixo:
 
 ```typescript
-@controller("/product")
-class ProductController {
-    @httpPost("/")
-    create(@response() res: any) {
-        return res.status(201).json({ message: "Product created" });
-    }
+// UserCreateInputDTO
+interface UserCreateInputDTO {
+  name: string;
+  email: string;
+  password: string;
+}
 
-    @httpGet("/")
-    list(@response() res: any) {
-        return res.status(200).json({ message: "Product listed" });
-    }
+// UserCreateResponseDTO
+interface UserCreateResponseDTO {
+  id: string;
+  name: string;
+  status: string;
+}
 
-    @httpGet("/:id")
-    get(@response() res: any) {
-        return res.status(200).json({ message: "Product get" });
-    }
-
-    @httpPatch("/:id")
-    update(@response() res: any) {
-        return res.status(200).json({ message: "Product updated" });
-    }
-
-    @httpDelete("/:id")
-    delete(@response() res: any) {
-        return res.status(200).json({ message: "Product deleted" });
-    }
+// Payload json formato
+{
+  "name": string,
+  "email": string,
+  "password": string
 }
 ```
+
+Ter dois formatos diferentes de DTO é essencial nesse caso, porque ao registrar um usuário, não queremos retornar a senha para o cliente por motivos de segurança. Portanto, criamos um DTO diferente para a resposta, adicionando um campo complementar chamado status, onde é enviada uma mensagem ao cliente, indicando que o usuário foi criado com sucesso.
+
+Como resultado, os DTOs ajudam a segregar e filtrar os dados enviados ao cliente, reduzindo a quantidade de dados processados pela aplicação.
 
 ---
 

@@ -6,60 +6,73 @@ sidebar_position: 5
 
 Controllers act as the primary interface between the client and server in ExpressoTS applications. They handle incoming requests, validate payloads against an input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
 
-## DTO Pattern
+**Controller MVC Pattern Example**
 
-Data Transfer Object (DTO) is a commonly used design pattern that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
+![Controller MVC Pattern](./img/controller-mvc.png)
 
-Using DTOs can improve application performance and scalability by reducing the data transfer between the client and server and providing more efficient ways to process and handle data within the application.
+**Controller Single Responsibility Pattern Example**
 
-### DTO Example
+![Controller Single Responsibility Pattern](./img/controller-single-resp.png)
 
-For example, imagine a user registration scenario where name, email, and password are collected, and ID is auto-generated. The user object DTO for Input and Response could have possible formats, as shown below:
-
-```typescript
-// UserCreateInputDTO
-interface UserCreateInputDTO {
-  name: string;
-  email: string;
-  password: string;
-}
-
-// UserCreateResponseDTO
-interface UserCreateResponseDTO {
-  id: string;
-  name: string;
-  status: string;
-}
-
-// Payload json format
-{
-  "name": string,
-  "email": string,
-  "password": string
-}
-```
-
-Having two different DTO formats is essential in this case because while registering a user, we don't want to return the password to the client due to security concerns. Therefore, we created a different DTO for the response, adding a complementary field called status, where a message is typically sent to the client, indicating that the user was created successfully.
-
-As a result, DTOs help to segregate and filter the data being sent to the client, reducing the amount of data processed by the application.
+In order to create a basic controller we create a class and use the `@controller()` decorator to define the route for the controller. Then we create a method and use the `http Methods` decorators to define the route and HTTP method for the method.
 
 ## Controller Class
 
-The controller class in ExpressoTS represents the endpoint that you want to create for your application. You can define the route and HTTP method for the controller by using the `@controller()` decorator from the [Decorator section](./decorators.md).
+### MVC Pattern
 
-Each controller class contains a single method called `execute()` that handles the request and sends the response. This method is annotated with the **[http methods](./decorators.md#http-method-decorators)** decorators. Additionally, you can also annotate the parameters of the `execute()` method.
-
-Here is an example of a simple ExpressoTS controller class:
+Multiple routes in a single controller.
 
 ```typescript
-@controller("/")
-class AppController {
+@controller("/user")
+export class UserController {
+    @Post("/")
+    create(@response() res: Response) {
+        return res.send("User created");
+    }
+
     @Get("/")
-    execute(@response() res: Response) {
-        return res.send("Hello from ExpressoTS!");
+    getUser(@response() res: Response) {
+        return res.send("User listed");
     }
 }
 ```
+
+### Single Responsibility Pattern
+
+One controller, one execution method, and one use case.
+
+```typescript
+@controller("/user/create")
+export class UserCreateController {
+    @Post("/")
+    execute(@response() res: Response) {
+        return res.send("User created");
+    }
+}
+```
+
+:::tip
+Both, the `@controller()` and `http methods` decorators works in combination to define the route and middlewares to be used in the endpoint.
+:::
+
+## Controller Scope
+
+The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope. However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum enum values.
+
+:::info
+If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
+The `@scope` decorator can only be used in specific controllers if the module scope is not defined.
+:::
+
+Here is an example of usage:
+
+```typescript
+@scope(BindingScopeEnum.Singleton)
+@controller("/")
+class CreateUserController extends BaseController {}
+```
+
+The controller above will be scoped as `Singleton` and will be shared across all requests.
 
 ## BaseController Class
 
@@ -105,25 +118,6 @@ class AppController extends BaseController {
 }
 ```
 
-## Controller Scope
-
-The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope. However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum enum values.
-
-:::info
-If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
-The `@scope` decorator can only be used in specific controllers if the module scope is not defined.
-:::
-
-Here is an example of usage:
-
-```typescript
-@scope(BindingScopeEnum.Singleton)
-@controller("/")
-class CreateUserController extends BaseController {}
-```
-
-The controller above will be scoped as `Singleton` and will be shared across all requests.
-
 ## Controller Decorators
 
 HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing and request handling for HTTP requests. Using the decorators listed below can simplify the routing and handling of HTTP requests in ExpressoTS applications, and make the code more readable and maintainable.
@@ -157,41 +151,42 @@ Here's a list of all available parameter decorators in ExpressoTS, along with th
 | @cookies(cookieName?: string) | Injects a cookie from the request cookies.             | execute(@cookies('session') session: string)     |
 | @next()                       | Injects the Express NextFunction object.               | execute(@next() next: NextFunction)              |
 
-## An MVC Approach
+## DTO Pattern
 
-Despite the fact that the opinionated template recommends one controller and one use case per route, you can use the MVC approach or any other pattern you want. For this we recommend the use of a `non-opinionated` template, in which the developer has the freedom to customize their application.
+Data Transfer Object (DTO) is a commonly used design pattern that standardizes data formats for communication between different application layers, including client-server or server modules. DTO serves as an interface for data exchange, ensuring clear and standardized structures for input and output data. By separating business logic from communication logic, it helps to reduce application complexity and decouple different layers.
 
-Here is an example of use MVC approach, which contains a single controller class that handles the request for a product resource:
+Using DTOs can improve application performance and scalability by reducing the data transfer between the client and server and providing more efficient ways to process and handle data within the application.
+
+### DTO Example
+
+For example, imagine a user registration scenario where name, email, and password are collected, and ID is auto-generated. The user object DTO for Input and Response could have possible formats, as shown below:
 
 ```typescript
-@controller("/product")
-class ProductController {
-    @httpPost("/")
-    create(@response() res: any) {
-        return res.status(201).json({ message: "Product created" });
-    }
+// UserCreateInputDTO
+interface UserCreateInputDTO {
+  name: string;
+  email: string;
+  password: string;
+}
 
-    @httpGet("/")
-    list(@response() res: any) {
-        return res.status(200).json({ message: "Product listed" });
-    }
+// UserCreateResponseDTO
+interface UserCreateResponseDTO {
+  id: string;
+  name: string;
+  status: string;
+}
 
-    @httpGet("/:id")
-    get(@response() res: any) {
-        return res.status(200).json({ message: "Product get" });
-    }
-
-    @httpPatch("/:id")
-    update(@response() res: any) {
-        return res.status(200).json({ message: "Product updated" });
-    }
-
-    @httpDelete("/:id")
-    delete(@response() res: any) {
-        return res.status(200).json({ message: "Product deleted" });
-    }
+// Payload json format
+{
+  "name": string,
+  "email": string,
+  "password": string
 }
 ```
+
+Having two different DTO formats is essential in this case because while registering a user, we don't want to return the password to the client due to security concerns. Therefore, we created a different DTO for the response, adding a complementary field called status, where a message is typically sent to the client, indicating that the user was created successfully.
+
+As a result, DTOs help to segregate and filter the data being sent to the client, reducing the amount of data processed by the application.
 
 ---
 
