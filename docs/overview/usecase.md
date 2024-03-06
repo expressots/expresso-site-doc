@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Use Cases
@@ -35,16 +35,15 @@ Here is a simple implementation of the use case:
 ```typescript
 @provide(LoginUserUseCase)
 class LoginUserUseCase {
+    execute(payload: ILoginUserRequestDTO): boolean {
+        const { email, password } = payload;
 
-  execute(payload: ILoginUserRequestDTO): boolean {
-    const { email, password } = payload;
-    
-    if (isAuthenticated(email, password)) {
-      return true;
+        if (isAuthenticated(email, password)) {
+            return true;
+        }
+
+        return false;
     }
-    
-    return false;
-  }
 }
 
 export { LoginUserUseCase };
@@ -64,16 +63,12 @@ Here is an example of a use case with constructor injection:
 
 ```typescript
 class ExampleUseCase {
-  
-  constructor(
-    private yourInjection1: Injection1, 
-    private yourInjection2: Injection2
-  ) {}  
-  
-  execute() {
-    this.yourInjection1.foo();
-    this.yourInjection2.bar();
-  }
+    constructor(private yourInjection1: Injection1, private yourInjection2: Injection2) {}
+
+    execute() {
+        this.yourInjection1.foo();
+        this.yourInjection2.bar();
+    }
 }
 ```
 
@@ -87,9 +82,9 @@ It is important to adhere to the principle of single responsibility when impleme
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues

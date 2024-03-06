@@ -1,22 +1,22 @@
 ---
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Gerenciamento de Error
 
 Quando se trata de tratamento de erros nas APIs TypeScript do Node.js, existem várias práticas recomendadas e abordagens que você pode seguir. O ExpressoTS fornece uma maneira simples e fácil de lidar com erros.
 
-- Usamos códigos de status HTTP apropriadamente: HTTP **[códigos de status](./status-code.md)** são usados para indicar o status de uma resposta. É importante utilizá-los adequadamente em sua API para indicar o sucesso ou falha de uma operação.
+-   Usamos códigos de status HTTP apropriadamente: HTTP **[códigos de status](./status-code.md)** são usados para indicar o status de uma resposta. É importante utilizá-los adequadamente em sua API para indicar o sucesso ou falha de uma operação.
 
-- Usamos um formato de erro consistente: defina um formato de erro consistente em sua API para que os consumidores possam entender e lidar facilmente com os erros.
+-   Usamos um formato de erro consistente: defina um formato de erro consistente em sua API para que os consumidores possam entender e lidar facilmente com os erros.
 
-- Lidamos com erros em middleware: as funções de middleware são uma ótima maneira de lidar com erros em um local centralizado.
+-   Lidamos com erros em middleware: as funções de middleware são uma ótima maneira de lidar com erros em um local centralizado.
 
-- Usamos blocos try-catch: Use blocos try-catch para lidar com erros síncronos em seu código. Se ocorrer um erro no bloco try, o bloco catch pode lidar com isso. Certifique-se de lançar o erro para que ele possa ser tratado por nosso middleware de tratamento de erros.
+-   Usamos blocos try-catch: Use blocos try-catch para lidar com erros síncronos em seu código. Se ocorrer um erro no bloco try, o bloco catch pode lidar com isso. Certifique-se de lançar o erro para que ele possa ser tratado por nosso middleware de tratamento de erros.
 
-- Usamos tratamento de erro async/await: ao usar async/await, você pode usar blocos try-catch para lidar com erros síncronos em seu código. No entanto, você também precisa lidar com quaisquer erros assíncronos que possam ocorrer.
+-   Usamos tratamento de erro async/await: ao usar async/await, você pode usar blocos try-catch para lidar com erros síncronos em seu código. No entanto, você também precisa lidar com quaisquer erros assíncronos que possam ocorrer.
 
-- Registramos erros: o registro de erros é importante para depuração e monitoramento.
+-   Registramos erros: o registro de erros é importante para depuração e monitoramento.
 
 ## Nossa Abordagem
 
@@ -32,17 +32,13 @@ A classe Report é uma classe de utilitário para gerenciar e lançar erros espe
 
 ```typescript
 class Report {
-  /**
-   * O método Error pega uma instância de Error e a lança.
-   * @param error - Uma instância de Error ou uma string que representa a mensagem de erro.
-   * @param statusCode - O código de status HTTP do erro.
-   * @param service - O serviço onde ocorreu o erro.
-   */
-  public static Error(
-    error: Error | string,
-    statusCode?: number,
-    service?: string
-  ): void {}
+    /**
+     * O método Error pega uma instância de Error e a lança.
+     * @param error - Uma instância de Error ou uma string que representa a mensagem de erro.
+     * @param statusCode - O código de status HTTP do erro.
+     * @param service - O serviço onde ocorreu o erro.
+     */
+    public static Error(error: Error | string, statusCode?: number, service?: string): void {}
 }
 ```
 
@@ -61,22 +57,15 @@ Essa função de middleware é usada para manipular erros que ocorrem durante o 
  * @param res - O objeto de resposta do Express.
  * @param next - A função next do Express para passar o controle para a próxima função de middleware.
  */
-function defaultErrorHandler(
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
-  if (error instanceof AppError) {
-    res
-      .status(error.statusCode)
-      .json({ statusCode: error.statusCode, error: error.message });
-  } else {
-    res.status(StatusCode.InternalServerError).json({
-      statusCode: StatusCode.InternalServerError,
-      error: "Ocorreu um erro inesperado.",
-    });
-  }
+function defaultErrorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+    if (error instanceof AppError) {
+        res.status(error.statusCode).json({ statusCode: error.statusCode, error: error.message });
+    } else {
+        res.status(StatusCode.InternalServerError).json({
+            statusCode: StatusCode.InternalServerError,
+            error: "Ocorreu um erro inesperado.",
+        });
+    }
 }
 
 export default defaultErrorHandler;
@@ -91,15 +80,15 @@ Ela registra o erro, define o código de status e envia uma resposta JSON conten
 
 ```typescript
 class FooClass {
-  constructor(private report: Report) {}
+    constructor(private report: Report) {}
 
-  execute() {
-    try {
-      // fazer algo
-    } catch (error: any) {
-      this.report.Error(error, StatusCode.BadRequest, "seu-servico");
+    execute() {
+        try {
+            // fazer algo
+        } catch (error: any) {
+            this.report.Error(error, StatusCode.BadRequest, "seu-servico");
+        }
     }
-  }
 }
 ```
 
@@ -108,43 +97,41 @@ Use case example:
 ```typescript
 @provide(CreateUserUseCase)
 class CreateUserUseCase {
-  constructor(private userRepository: UserRepository, private report: Report) {}
+    constructor(private userRepository: UserRepository, private report: Report) {}
 
-  execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
-    try {
-      const { name, email } = data;
+    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+        try {
+            const { name, email } = data;
 
-      const userAlreadyExists = await this.userRepository.findByEmail(email);
+            const userAlreadyExists = await this.userRepository.findByEmail(email);
 
-      if (userAlreadyExists) {
-        this.report.Error(
-          "User already exists",
-          StatusCode.BadRequest,
-          "create-user-usecase"
-        );
-      }
+            if (userAlreadyExists) {
+                this.report.Error(
+                    "User already exists",
+                    StatusCode.BadRequest,
+                    "create-user-usecase"
+                );
+            }
 
-      const user: User | null = this.userRepository.create(
-        new User(name, email)
-      );
+            const user: User | null = this.userRepository.create(new User(name, email));
 
-      let response: ICreateUserResponseDTO;
+            let response: ICreateUserResponseDTO;
 
-      if (user !== null) {
-        response = {
-          id: user.Id,
-          name: user.name,
-          email: user.email,
-          status: "success",
-        };
-        return response;
-      }
+            if (user !== null) {
+                response = {
+                    id: user.Id,
+                    name: user.name,
+                    email: user.email,
+                    status: "success",
+                };
+                return response;
+            }
 
-      return null;
-    } catch (error: any) {
-      throw error;
+            return null;
+        } catch (error: any) {
+            throw error;
+        }
     }
-  }
 }
 ```
 
@@ -164,9 +151,9 @@ class CreateUserUseCase {
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

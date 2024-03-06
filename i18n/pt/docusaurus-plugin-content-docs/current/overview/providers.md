@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 # Provedores
@@ -45,23 +45,21 @@ const enum EmailType {
     CreateUser,
     ChangePassword,
     Login,
-    RecoveryPassword
+    RecoveryPassword,
 }
 
 @provide(MailTrapProvider)
 class MailTrapProvider {
-
     private transporter: Mail;
 
     constructor() {
-
         this.transporter = nodemailer.createTransport({
             host: Env.Mailtrap.HOST,
             port: Env.Mailtrap.PORT,
             auth: {
                 user: Env.Mailtrap.USERNAME,
-                pass: Env.Mailtrap.PASSWORD
-            }
+                pass: Env.Mailtrap.PASSWORD,
+            },
         });
     }
 
@@ -69,15 +67,15 @@ class MailTrapProvider {
         await this.transporter.sendMail({
             to: {
                 name: message.to.name,
-                address: message.to.email
+                address: message.to.email,
             },
             from: {
                 name: message.from.name,
-                address: message.from.email
+                address: message.from.email,
             },
             subject: message.subject,
-            html: message.body
-        })
+            html: message.body,
+        });
     }
 
     sendEmail(emailType: EmailType): Promise<void> {
@@ -94,14 +92,14 @@ class MailTrapProvider {
                 this.MailSender({
                     to: {
                         name: "User",
-                        email: Env.Mailtrap.INBOX_ALIAS
+                        email: Env.Mailtrap.INBOX_ALIAS,
                     },
                     from: {
                         name: "ExpressoTS",
-                        email: "noreply@expresso-ts.com"
+                        email: "noreply@expresso-ts.com",
                     },
                     subject: "Successfully logged in!",
-                    body: "<h1>Welcome to the system!</h1>"
+                    body: "<h1>Welcome to the system!</h1>",
                 });
                 break;
         }
@@ -111,7 +109,7 @@ class MailTrapProvider {
 export { MailTrapProvider, EmailType };
 ```
 
-Nessa implementação, há uma função auxiliar privada e uma única interface pública chamada `sendEmail()`  que será usada no caso de uso. O provedor é injetado no construtor para ser usado pelo caso de uso.
+Nessa implementação, há uma função auxiliar privada e uma única interface pública chamada `sendEmail()` que será usada no caso de uso. O provedor é injetado no construtor para ser usado pelo caso de uso.
 
 ### Consumindo o provedor no caso de uso
 
@@ -120,21 +118,20 @@ Aqui está a implementação do caso de uso fazendo uso do provedor:
 ```typescript
 @provide(LoginUserUseCase)
 class LoginUserUseCase {
+    constructor(private mailTrapProvider?: MailTrapProvider) {}
 
-  constructor(private mailTrapProvider?: MailTrapProvider) { }
-  
-  execute(payload: ILoginUserRequestDTO): boolean {
-    const { email, password } = payload;
-    
-    if (isAuthenticated(email, password)) {
-        return true;
+    execute(payload: ILoginUserRequestDTO): boolean {
+        const { email, password } = payload;
+
+        if (isAuthenticated(email, password)) {
+            return true;
+        }
+
+        // Implementação da lógica do caso de uso
+        mailTrapProvider?.sendEmail(EmailType.Login);
+
+        return false;
     }
-
-     // Implementação da lógica do caso de uso
-     mailTrapProvider?.sendEmail(EmailType.Login);
-    
-    return false;
-  }
 }
 
 export { LoginUserUseCase };
@@ -148,9 +145,9 @@ No caso de uso acima, injetamos o `MailTrapProvider` no construtor fazendo uso d
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

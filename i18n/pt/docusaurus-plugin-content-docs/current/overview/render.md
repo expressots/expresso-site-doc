@@ -1,5 +1,5 @@
 ---
-sidebar_position: 16
+sidebar_position: 17
 ---
 
 # Renderizacão
@@ -19,17 +19,17 @@ Atualmente, oferecemos suporte a um número muito limitado de opções para o Ha
 interface IHandlebars {
     /**
      * Especifica o nome da extensão para os templates do Handlebars.
-    */
+     */
     extName: string;
 
     /**
      * Especifica o caminho para o diretório que contém os templates do Handlebars.
-    */
+     */
     viewPath: string;
 
     /**
      * Especifica a função para renderizar os templates do Handlebars.
-    */
+     */
     engine: Engine;
 }
 
@@ -43,7 +43,7 @@ import { AppInstance, IHandlebars, ServerEnvironment } from "@expressots/core";
 
 async function bootstrap() {
     AppInstance.create(container);
-    
+
     // Configurando handlebars como motor de renderização.
     AppInstance.setEngine<IHandlebars>({
         extName: "hbs",
@@ -83,9 +83,9 @@ npm i express-handlebars
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

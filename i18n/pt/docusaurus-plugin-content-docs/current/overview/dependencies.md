@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Dependências
@@ -16,27 +16,27 @@ Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando
 
 ## Pacotes Utilitários (Dependencias de Desenvolvimento)
 
-- @commitlint/cli: Lint mensagens de commit
-- @commitLint/config-conventional: Lint mensagens de commit
-- @release-it/conventional-changelog: Gera changelog
-- dotenv: Carregar variáveis de ambiente
-- husky: Git hooks
-- prettier: Formatador de códigos
-- eslint: Linting code
-- ts-node-dev: Executa arquivos de typescript
-- tsconfig-paths: Resolve caminhos através do tsconfig.json
+-   @commitlint/cli: Lint mensagens de commit
+-   @commitLint/config-conventional: Lint mensagens de commit
+-   @release-it/conventional-changelog: Gera changelog
+-   dotenv: Carregar variáveis de ambiente
+-   husky: Git hooks
+-   prettier: Formatador de códigos
+-   eslint: Linting code
+-   ts-node-dev: Executa arquivos de typescript
+-   tsconfig-paths: Resolve caminhos através do tsconfig.json
 
 ## Pacotes Core
 
-- express: Servidor Http
-- inversify: IoC container
-- inversify-binding-decorators: Decoradores do inversify
-- reflect-metadata: Polyfill para metadados e reflexão
+-   express: Servidor Http
+-   inversify: IoC container
+-   inversify-binding-decorators: Decoradores do inversify
+-   reflect-metadata: Polyfill para metadados e reflexão
 
 ## Teste
 
-- vitest: Framework de teste
-- vite: Vitest's requerimento
+-   vitest: Framework de teste
+-   vite: Vitest's requerimento
 
 ---
 
@@ -44,9 +44,9 @@ Enquanto isso, vamos continuar monitorando de perto as dependências, utilizando
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

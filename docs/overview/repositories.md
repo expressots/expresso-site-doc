@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # Repositories
@@ -20,13 +20,13 @@ The main goal of the repository pattern is to separate business logic from data 
 
 By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes. Here are some of the benefits of using the repository pattern:
 
-- Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
+-   Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
 
-- Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
+-   Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
 
-- Separation of concerns: the repository separates business logic from data access logic, making the code easier to read, test, and maintain.
+-   Separation of concerns: the repository separates business logic from data access logic, making the code easier to read, test, and maintain.
 
-- Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
+-   Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
 
 Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
 
@@ -42,15 +42,15 @@ In ExpressoTS, we implement the repository pattern in a specific folder called *
 
 ```typescript
 interface IEntity {
-  Id: string;
+    Id: string;
 }
 
 interface IBaseRepository<T> {
-  create(item: T): T | null;
-  update(item: T): T | null;
-  delete(id: string): boolean;
-  find(id: string): T | null;
-  findAll(): T[];
+    create(item: T): T | null;
+    update(item: T): T | null;
+    delete(id: string): boolean;
+    find(id: string): T | null;
+    findAll(): T[];
 }
 ```
 
@@ -59,36 +59,36 @@ interface IBaseRepository<T> {
 ```typescript
 @provide(BaseRepository)
 class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
-  private readonly DB: T[] = [];
+    private readonly DB: T[] = [];
 
-  create(item: T): T | null {
-    this.DB.push(item);
-    return item;
-  }
-
-  update(item: T) {
-    this.DB.push(item);
-    return item;
-  }
-
-  delete(id: string): boolean {
-    const index: number = this.DB.findIndex((item) => item.Id === id);
-
-    if (index != -1) {
-      this.DB.splice(index, 1);
-      return true;
+    create(item: T): T | null {
+        this.DB.push(item);
+        return item;
     }
-    return false;
-  }
 
-  find(id: string): T | null {
-    const user = this.DB.find((item) => item.Id === id);
-    return user || null;
-  }
+    update(item: T) {
+        this.DB.push(item);
+        return item;
+    }
 
-  findAll(): T[] {
-    return this.DB;
-  }
+    delete(id: string): boolean {
+        const index: number = this.DB.findIndex((item) => item.Id === id);
+
+        if (index != -1) {
+            this.DB.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    find(id: string): T | null {
+        const user = this.DB.find((item) => item.Id === id);
+        return user || null;
+    }
+
+    findAll(): T[] {
+        return this.DB;
+    }
 }
 ```
 
@@ -97,9 +97,9 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 ```typescript
 @provide(UserRepository)
 class UserRepository extends BaseRepository<User> {
-  constructor() {
-    super();
-  }
+    constructor() {
+        super();
+    }
 }
 ```
 
@@ -109,9 +109,9 @@ class UserRepository extends BaseRepository<User> {
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues

@@ -1,16 +1,16 @@
 ---
-sidebar_position: 13
+sidebar_position: 14
 ---
 
 # Código de Status
 
 O código de status é uma forma de representar o resultado de uma requisição. Essas respostas HTTP indicam se uma solicitação HTTP específica foi concluída com êxito. As respostas são agrupadas em cinco classes:
 
-- Respostas informativas (100-199)
-- Respostas bem-sucedidas (200-299)
-- Mensagens de redirecionamento (300-399)
-- Respostas de erro do cliente (400-499)
-- Respostas de erro do servidor (500-599)
+-   Respostas informativas (100-199)
+-   Respostas bem-sucedidas (200-299)
+-   Mensagens de redirecionamento (300-399)
+-   Respostas de erro do cliente (400-499)
+-   Respostas de erro do servidor (500-599)
 
 Você encontra aqui mais detalhes sobre os códigos de status **[MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)**.
 
@@ -36,12 +36,12 @@ class CreateUserController extends BaseController {
     @httpPost("/")
     execute(
         @requestBody() data: ICreateUserRequestDTO,
-        @response() res: any,
+        @response() res: any
     ): ICreateUserResponseDTO {
         return this.callUseCase(
             this.createUserUseCase.execute(data),
             res,
-            StatusCode.Created, // Status code
+            StatusCode.Created // Status code
         );
     }
 }
@@ -60,17 +60,15 @@ class CreateUserUseCase {
         try {
             const { name, email } = data;
 
-            const user: User | null = this.userRepository.create(
-                new User(name, email),
-            );
+            const user: User | null = this.userRepository.create(new User(name, email));
 
             if (!user) {
                 Report.Error(
                     new AppError(
                         StatusCode.BadRequest, // Status code
                         "User already exists",
-                        "create-user-usecase",
-                    ),
+                        "create-user-usecase"
+                    )
                 );
             }
 
@@ -100,9 +98,9 @@ class CreateUserUseCase {
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

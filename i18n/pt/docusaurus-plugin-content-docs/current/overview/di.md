@@ -1,5 +1,5 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 ---
 
 # Injeção de Dependências
@@ -10,19 +10,19 @@ Dependency Injection (DI) é um padrão de design usado no desenvolvimento de so
 
 Aqui estão alguns dos principais benefícios do uso da injeção de dependência:
 
-- Desacoplamento: DI ajuda a desacoplar os componentes do seu aplicativo. Em vez de os componentes criarem os objetos dos quais dependem, esses objetos são passados (injetados) por uma estrutura ou contêiner de DI. Isso significa que os componentes não precisam saber sobre o funcionamento interno de suas dependências, e as dependências podem ser trocadas sem que o componente saiba ou se importe.
+-   Desacoplamento: DI ajuda a desacoplar os componentes do seu aplicativo. Em vez de os componentes criarem os objetos dos quais dependem, esses objetos são passados (injetados) por uma estrutura ou contêiner de DI. Isso significa que os componentes não precisam saber sobre o funcionamento interno de suas dependências, e as dependências podem ser trocadas sem que o componente saiba ou se importe.
 
-- Testabilidade: DI facilita o teste de unidade. Como as dependências são injetadas, você pode facilmente fornecer objetos fictícios durante o teste. Isso permite que cada unidade de código seja testada isoladamente, com controle total sobre suas dependências.
+-   Testabilidade: DI facilita o teste de unidade. Como as dependências são injetadas, você pode facilmente fornecer objetos fictícios durante o teste. Isso permite que cada unidade de código seja testada isoladamente, com controle total sobre suas dependências.
 
-- Código reutilizável: com DI, suas classes são normalmente projetadas para funcionar com interfaces em vez de classes concretas. Isso significa que você pode reutilizar a mesma classe em diferentes contextos, com diferentes dependências injetadas.
+-   Código reutilizável: com DI, suas classes são normalmente projetadas para funcionar com interfaces em vez de classes concretas. Isso significa que você pode reutilizar a mesma classe em diferentes contextos, com diferentes dependências injetadas.
 
-- Manutenção mais fácil e maior eficiência: centralizando a criação de objetos e reduzindo a quantidade de instanciação de classe codificada, a manutenção se torna mais fácil. Quando uma classe muda, normalmente você só precisa atualizar o código em um lugar.
+-   Manutenção mais fácil e maior eficiência: centralizando a criação de objetos e reduzindo a quantidade de instanciação de classe codificada, a manutenção se torna mais fácil. Quando uma classe muda, normalmente você só precisa atualizar o código em um lugar.
 
-- Configurabilidade: Você pode configurar sua estrutura de aplicação externamente, normalmente através de XML ou arquivos similares. Isso significa que você pode modificar a estrutura e as dependências de seus componentes sem precisar modificar o próprio código.
+-   Configurabilidade: Você pode configurar sua estrutura de aplicação externamente, normalmente através de XML ou arquivos similares. Isso significa que você pode modificar a estrutura e as dependências de seus componentes sem precisar modificar o próprio código.
 
-- Ciclos de vida e escopo: gerencie o ciclo de vida de objetos injetados e controle seu escopo (por exemplo, escopo singleton, escopo de solicitação).
+-   Ciclos de vida e escopo: gerencie o ciclo de vida de objetos injetados e controle seu escopo (por exemplo, escopo singleton, escopo de solicitação).
 
-- Gerenciamento de simultaneidade: os contêineres podem lidar automaticamente com tempos de vida de serviço em um ambiente simultâneo, o que pode ser uma tarefa complexa para lidar corretamente sem essa ferramenta.
+-   Gerenciamento de simultaneidade: os contêineres podem lidar automaticamente com tempos de vida de serviço em um ambiente simultâneo, o que pode ser uma tarefa complexa para lidar corretamente sem essa ferramenta.
 
 Em conclusão, DI é uma técnica que facilita o acoplamento fraco, maior capacidade de teste e código mais flexível e de fácil manutenção.
 
@@ -36,26 +36,26 @@ Aqui está como o ExpressoTS implementa DI:
 
 Aqui está uma análise dos componentes DI usados no ExpressoTS:
 
-| Componentes   | Descrição                                            |
-| ------------ | ------------------------------------------------------------------------------------------------- |
-| Container    | O container DI do aplicativo ExpressoTS.                                                   |
-| Module       | Um módulo de contêiner é normalmente usado para agrupar controladores relacionados e suas dependências. |
-| Controller   | Interface primária entre o cliente e o servidor. Responsável por lidar com as solicitações recebidas.          |
-| Classes      | Qualquer outra classe que faça parte do ecossistema ExpressoTS, por exemplo, fornecedores, entidades, ajudantes, etc.  |
+| Componentes | Descrição                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| Container   | O container DI do aplicativo ExpressoTS.                                                                              |
+| Module      | Um módulo de contêiner é normalmente usado para agrupar controladores relacionados e suas dependências.               |
+| Controller  | Interface primária entre o cliente e o servidor. Responsável por lidar com as solicitações recebidas.                 |
+| Classes     | Qualquer outra classe que faça parte do ecossistema ExpressoTS, por exemplo, fornecedores, entidades, ajudantes, etc. |
 
 ### Resumo
 
-- O contêiner tem seu escopo padrão que pode ser substituído pelo módulo. O escopo padrão é o escopo `Request`.
-- Definir um escopo para um módulo força todos os controladores desse módulo a terem o mesmo escopo.
-- Não definir um escopo para um módulo permite que os controladores tenham seu próprio escopo usando o decorador `@scope()`.
-- Todas as outras classes cadastradas como provedores, entidades, helpers podem ter seu escopo específico baseado no decorador utilizado.
-- Decoradores:
+-   O contêiner tem seu escopo padrão que pode ser substituído pelo módulo. O escopo padrão é o escopo `Request`.
+-   Definir um escopo para um módulo força todos os controladores desse módulo a terem o mesmo escopo.
+-   Não definir um escopo para um módulo permite que os controladores tenham seu próprio escopo usando o decorador `@scope()`.
+-   Todas as outras classes cadastradas como provedores, entidades, helpers podem ter seu escopo específico baseado no decorador utilizado.
+-   Decoradores:
 
-| Decoradores          | Descrição                                                                    |
-| ------------------ | ------------------------------------------------------------------------------ |
-| @provide           | Vincula uma classe a um contêiner de injeção de dependência como RequestScope.             |
-| @provideSingleton  | Vincula uma classe a um contêiner de injeção de dependência como Singleton.                |
-| @provideTransient  | Vincula uma classe a um contêiner de injeção de dependência como Transient.                |
+| Decoradores       | Descrição                                                                      |
+| ----------------- | ------------------------------------------------------------------------------ |
+| @provide          | Vincula uma classe a um contêiner de injeção de dependência como RequestScope. |
+| @provideSingleton | Vincula uma classe a um contêiner de injeção de dependência como Singleton.    |
+| @provideTransient | Vincula uma classe a um contêiner de injeção de dependência como Transient.    |
 
 ### Container
 
@@ -85,30 +85,30 @@ Exemplo de uso:
 
 ```typescript
 @provide(MyRequest)
-class MyRequest { }
+class MyRequest {}
 ```
 
 #### Singleton
 
 ```typescript
 @provideSingleton(MySingleton)
-class MySingleton { }
+class MySingleton {}
 ```
 
 #### Transient
 
 ```typescript
 @provideTransient(MyTransient)
-class MyTransient { }
+class MyTransient {}
 ```
 
 :::tip
 Para definir as ligações de escopo, o enum BindingScopeEnum pode ser usado.
 :::
 
-- `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
-- `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
-- `BindingScopeEnum.Transient` - A dependência será criada toda vez que for solicitada.
+-   `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
+-   `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
+-   `BindingScopeEnum.Transient` - A dependência será criada toda vez que for solicitada.
 
 ---
 
@@ -116,9 +116,9 @@ Para definir as ligações de escopo, o enum BindingScopeEnum pode ser usado.
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

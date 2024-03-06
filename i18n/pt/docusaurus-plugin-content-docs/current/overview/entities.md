@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Entidades
@@ -15,17 +15,17 @@ Um exemplo simples de uma entidade User e suas propriedades:
 ```typescript
 @provide(User)
 class User {
-  private id: string;
-  public name: string;
-  public email: string;
+    private id: string;
+    public name: string;
+    public email: string;
 
-  constructor() {
-    this.id = uuidv4();
-  }
+    constructor() {
+        this.id = uuidv4();
+    }
 
-  get Id(): string {
-    return this.id;
-  }
+    get Id(): string {
+        return this.id;
+    }
 }
 ```
 
@@ -50,8 +50,7 @@ Se sua entidade tiver dependências, você pode injetá-las usando o decorador `
 ```typescript
 @provide(User)
 class User {
-    
-  constructor(@inject("logger") private logger: Logger) {}
+    constructor(@inject("logger") private logger: Logger) {}
 }
 ```
 
@@ -62,10 +61,10 @@ Evite marcar construtores com parâmetros primitivos como injetáveis. Isso ocor
 ```typescript
 @provide(User)
 class User {
-  name: string;
-  constructor(name: string) {
-    this.name = name;
-  }
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
 }
 ```
 
@@ -77,11 +76,11 @@ Em muitos sistemas de injeção de dependência (DI), incluindo InversifyJS, o c
 
 Aqui estão algumas das razões pelas quais construtores com parâmetros primitivos podem ser problemáticos em DI:
 
-- Ambigüidade: Se uma classe tiver um construtor que requer tipos primitivos, o contêiner DI não saberá quais valores injetar. Por exemplo, se uma classe requer um número em seu construtor, o container DI não sabe o que esse número representa e qual valor ele deve ter.
+-   Ambigüidade: Se uma classe tiver um construtor que requer tipos primitivos, o contêiner DI não saberá quais valores injetar. Por exemplo, se uma classe requer um número em seu construtor, o container DI não sabe o que esse número representa e qual valor ele deve ter.
 
-- Inflexibilidade: Um valor primitivo no construtor implica que o valor é uma parte fixa da classe. No entanto, a DI é frequentemente usada para gerenciar partes intercambiáveis de um aplicativo (por exemplo, diferentes implementações de uma interface).
+-   Inflexibilidade: Um valor primitivo no construtor implica que o valor é uma parte fixa da classe. No entanto, a DI é frequentemente usada para gerenciar partes intercambiáveis de um aplicativo (por exemplo, diferentes implementações de uma interface).
 
-- Não descritivo: valores primitivos geralmente não são descritivos e podem levar a códigos confusos. Por exemplo, um construtor que usa dois parâmetros de string pode levantar questões como: O que essas strings representam? Existem formatos ou restrições específicas nessas strings?
+-   Não descritivo: valores primitivos geralmente não são descritivos e podem levar a códigos confusos. Por exemplo, um construtor que usa dois parâmetros de string pode levantar questões como: O que essas strings representam? Existem formatos ou restrições específicas nessas strings?
 
 ## Injeção adequada de entidade
 
@@ -92,31 +91,30 @@ Aqui está um exemplo de uma fábrica:
 ```typescript
 @provide(User)
 class User implements IEntity {
-  public id: string;
-  public name!: string;
-  public email!: string;
+    public id: string;
+    public name!: string;
+    public email!: string;
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 
 interface IUserFactory {
-  create(name: string, email: string): User;
+    create(name: string, email: string): User;
 }
 
 @provide(UserFactory)
 class UserFactory implements IUserFactory {
-  create(name: string, email: string): User {
-    const user = new User();
-    user.name = name;
-    user.email = email;
-    return user;
-  }
+    create(name: string, email: string): User {
+        const user = new User();
+        user.name = name;
+        user.email = email;
+        return user;
+    }
 }
 
 export { User, UserFactory };
-
 ```
 
 Agora `UserFactory` pode ser facilmente injetado em outras classes.
@@ -129,9 +127,9 @@ Como mencionado acima, existem várias outras abordagens, desde que você perman
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

@@ -1,22 +1,22 @@
 ---
-sidebar_position: 14
+sidebar_position: 15
 ---
 
 # Error Handling
 
 When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. ExpressoTS provides a simple and easy way to handle errors.
 
-- We use HTTP status codes appropriately: HTTP **[status codes](./status-code.md)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
+-   We use HTTP status codes appropriately: HTTP **[status codes](./status-code.md)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
 
-- We use a consistent error format: Define a consistent error format across your API so that consumers can easily understand and handle errors.
+-   We use a consistent error format: Define a consistent error format across your API so that consumers can easily understand and handle errors.
 
-- We handle errors in middleware: Middleware functions are a great way to handle errors in a centralized location.
+-   We handle errors in middleware: Middleware functions are a great way to handle errors in a centralized location.
 
-- We use try-catch blocks: Use try-catch blocks to handle synchronous errors in your code. If an error occurs in the try block, the catch block can handle it. Be sure to throw the error so that it can be handled by our error handling middleware.
+-   We use try-catch blocks: Use try-catch blocks to handle synchronous errors in your code. If an error occurs in the try block, the catch block can handle it. Be sure to throw the error so that it can be handled by our error handling middleware.
 
-- We use async/await error handling: When using async/await, you can use try-catch blocks to handle synchronous errors in your code. However, you also need to handle any asynchronous errors that may occur.
+-   We use async/await error handling: When using async/await, you can use try-catch blocks to handle synchronous errors in your code. However, you also need to handle any asynchronous errors that may occur.
 
-- We log errors: Logging errors is important for debugging and monitoring.
+-   We log errors: Logging errors is important for debugging and monitoring.
 
 ## Our approach
 
@@ -67,22 +67,15 @@ This middleware function is used to handle errors that occur during request proc
  * @param res - The Express response object.
  * @param next - The Express next function for passing control to the next middleware function.
  */
-function defaultErrorHandler(
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
-  if (error instanceof AppError) {
-    res
-      .status(error.statusCode)
-      .json({ statusCode: error.statusCode, error: error.message });
-  } else {
-    res.status(StatusCode.InternalServerError).json({
-      statusCode: StatusCode.InternalServerError,
-      error: "An unexpected error occurred.",
-    });
-  }
+function defaultErrorHandler(error: Error, req: Request, res: Response, next: NextFunction): void {
+    if (error instanceof AppError) {
+        res.status(error.statusCode).json({ statusCode: error.statusCode, error: error.message });
+    } else {
+        res.status(StatusCode.InternalServerError).json({
+            statusCode: StatusCode.InternalServerError,
+            error: "An unexpected error occurred.",
+        });
+    }
 }
 
 export default defaultErrorHandler;
@@ -97,15 +90,15 @@ It logs the error, sets the status code, and sends a JSON response containing th
 
 ```typescript
 class FooClass {
-  constructor(private report: Report) {}
+    constructor(private report: Report) {}
 
-  execute() {
-    try {
-      // do something
-    } catch (error: any) {
-      this.report.Error(error, StatusCode.BadRequest, "your-service");
+    execute() {
+        try {
+            // do something
+        } catch (error: any) {
+            this.report.Error(error, StatusCode.BadRequest, "your-service");
+        }
     }
-  }
 }
 ```
 
@@ -114,43 +107,41 @@ Use case example:
 ```typescript
 @provide(CreateUserUseCase)
 class CreateUserUseCase {
-  constructor(private userRepository: UserRepository, private report: Report) {}
+    constructor(private userRepository: UserRepository, private report: Report) {}
 
-  execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
-    try {
-      const { name, email } = data;
+    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+        try {
+            const { name, email } = data;
 
-      const userAlreadyExists = await this.userRepository.findByEmail(email);
+            const userAlreadyExists = await this.userRepository.findByEmail(email);
 
-      if (userAlreadyExists) {
-        this.report.Error(
-          "User already exists",
-          StatusCode.BadRequest,
-          "create-user-usecase"
-        );
-      }
+            if (userAlreadyExists) {
+                this.report.Error(
+                    "User already exists",
+                    StatusCode.BadRequest,
+                    "create-user-usecase"
+                );
+            }
 
-      const user: User | null = this.userRepository.create(
-        new User(name, email)
-      );
+            const user: User | null = this.userRepository.create(new User(name, email));
 
-      let response: ICreateUserResponseDTO;
+            let response: ICreateUserResponseDTO;
 
-      if (user !== null) {
-        response = {
-          id: user.Id,
-          name: user.name,
-          email: user.email,
-          status: "success",
-        };
-        return response;
-      }
+            if (user !== null) {
+                response = {
+                    id: user.Id,
+                    name: user.name,
+                    email: user.email,
+                    status: "success",
+                };
+                return response;
+            }
 
-      return null;
-    } catch (error: any) {
-      throw error;
+            return null;
+        } catch (error: any) {
+            throw error;
+        }
     }
-  }
 }
 ```
 
@@ -170,9 +161,9 @@ class CreateUserUseCase {
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues

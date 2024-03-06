@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Entities
@@ -15,17 +15,17 @@ Here a simple example of an entity User and it's properties:
 ```typescript
 @provide(User)
 class User {
-  private id: string;
-  public name: string;
-  public email: string;
+    private id: string;
+    public name: string;
+    public email: string;
 
-  constructor() {
-    this.id = uuidv4();
-  }
+    constructor() {
+        this.id = uuidv4();
+    }
 
-  get Id(): string {
-    return this.id;
-  }
+    get Id(): string {
+        return this.id;
+    }
 }
 ```
 
@@ -51,8 +51,7 @@ If your entity has dependencies, you can inject them using the `@inject` decorat
 ```typescript
 @provide(User)
 class User {
-    
-  constructor(@inject("logger") private logger: Logger) {}
+    constructor(@inject("logger") private logger: Logger) {}
 }
 ```
 
@@ -63,10 +62,10 @@ Avoid marking constructors with primitive parameters as injectable. This is beca
 ```typescript
 @provide(User)
 class User {
-  name: string;
-  constructor(name: string) {
-    this.name = name;
-  }
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
 }
 ```
 
@@ -78,11 +77,11 @@ In many dependency injection (DI) systems, including InversifyJS, the DI contain
 
 Here are some of the reasons why constructors with primitive parameters can be problematic in DI:
 
-- Ambiguity: If a class has a constructor that requires primitive types, the DI container won't know what values to inject. For example, if a class requires a number in its constructor, the DI container doesn't know what this number represents and what value it should have.
+-   Ambiguity: If a class has a constructor that requires primitive types, the DI container won't know what values to inject. For example, if a class requires a number in its constructor, the DI container doesn't know what this number represents and what value it should have.
 
-- Inflexibility: A primitive value in the constructor implies that the value is a fixed part of the class. However, DI is often used to manage interchangeable parts of an application (e.g., different implementations of an interface).
+-   Inflexibility: A primitive value in the constructor implies that the value is a fixed part of the class. However, DI is often used to manage interchangeable parts of an application (e.g., different implementations of an interface).
 
-- Non-descriptive: Primitive values are often non-descriptive and can lead to confusing code. For example, a constructor that takes two string parameters might raise questions like: What do these strings represent? Are there any specific formats or constraints on these strings?
+-   Non-descriptive: Primitive values are often non-descriptive and can lead to confusing code. For example, a constructor that takes two string parameters might raise questions like: What do these strings represent? Are there any specific formats or constraints on these strings?
 
 ## Entity proper injection
 
@@ -93,31 +92,30 @@ Here is an example of a factory:
 ```typescript
 @provide(User)
 class User implements IEntity {
-  public id: string;
-  public name!: string;
-  public email!: string;
+    public id: string;
+    public name!: string;
+    public email!: string;
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 
 interface IUserFactory {
-  create(name: string, email: string): User;
+    create(name: string, email: string): User;
 }
 
 @provide(UserFactory)
 class UserFactory implements IUserFactory {
-  create(name: string, email: string): User {
-    const user = new User();
-    user.name = name;
-    user.email = email;
-    return user;
-  }
+    create(name: string, email: string): User {
+        const user = new User();
+        user.name = name;
+        user.email = email;
+        return user;
+    }
 }
 
 export { User, UserFactory };
-
 ```
 
 Now `UserFactory` can be easily injected into other classes.
@@ -130,9 +128,9 @@ As mentioned above, there are several other approaches, as long as you remain st
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues

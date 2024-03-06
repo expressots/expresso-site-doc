@@ -1,10 +1,10 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 # Casos de Uso
 
-Do ponto de vista da UML, os casos de uso fornecem uma maneira de modelar as interações entre usuários, outros sistemas e um aplicativo de software. Um caso de uso descreve um cenário específico ou fluxo de eventos entre os atores e o sistema, levando a um determinado resultado. 
+Do ponto de vista da UML, os casos de uso fornecem uma maneira de modelar as interações entre usuários, outros sistemas e um aplicativo de software. Um caso de uso descreve um cenário específico ou fluxo de eventos entre os atores e o sistema, levando a um determinado resultado.
 
 No contexto do ExpressoTS, os casos de uso servem para representar a lógica de negócios da aplicação, permitindo uma clara separação entre o controlador e a execução da solicitação.
 
@@ -35,16 +35,15 @@ Aqui está nossa implementação simples do caso de uso no ExpressoTS:
 ```typescript
 @provide(LoginUserUseCase)
 class LoginUserUseCase {
+    execute(payload: ILoginUserRequestDTO): boolean {
+        const { email, password } = payload;
 
-  execute(payload: ILoginUserRequestDTO): boolean {
-    const { email, password } = payload;
-    
-    if (isAuthenticated(email, password)) {
-      return true;
+        if (isAuthenticated(email, password)) {
+            return true;
+        }
+
+        return false;
     }
-    
-    return false;
-  }
 }
 
 export { LoginUserUseCase };
@@ -64,16 +63,12 @@ Aqui está um exemplo de um caso de uso com injeção de construtor:
 
 ```typescript
 class ExampleUseCase {
-  
-  constructor(
-    private yourInjection1: Injection1, 
-    private yourInjection2: Injection2
-  ) {}  
-  
-  execute() {
-    this.yourInjection1.foo();
-    this.yourInjection2.bar();
-  }
+    constructor(private yourInjection1: Injection1, private yourInjection2: Injection2) {}
+
+    execute() {
+        this.yourInjection1.foo();
+        this.yourInjection2.bar();
+    }
 }
 ```
 
@@ -87,9 +82,9 @@ class ExampleUseCase {
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

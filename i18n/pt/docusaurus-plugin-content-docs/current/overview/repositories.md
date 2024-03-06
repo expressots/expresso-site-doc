@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 # Repositórios
@@ -20,37 +20,37 @@ O objetivo principal do padrão repository é separar a lógica de negócio da l
 
 Ao usar o padrão de repositório, podemos trocar facilmente o mecanismo de armazenamento de dados subjacente sem afetar o restante do aplicativo. Por exemplo, podemos mudar de um banco de dados relacional para um banco de dados NoSQL ou até mesmo um mecanismo de armazenamento completamente diferente, como uma API da Web, com alterações mínimas no restante do código do aplicativo. Além disso, o padrão de repositório pode facilitar o teste do aplicativo, pois podemos usar repositórios fictícios para simular o armazenamento de dados para fins de teste. Aqui estão alguns dos benefícios de usar o padrão de repositório:
 
-- Centralização da lógica de acesso a dados: toda a lógica de acesso a dados é contida dentro do repositório, tornando mais fácil manter e alterar a implementação do armazenamento de dados sem afetar o resto da aplicação.
+-   Centralização da lógica de acesso a dados: toda a lógica de acesso a dados é contida dentro do repositório, tornando mais fácil manter e alterar a implementação do armazenamento de dados sem afetar o resto da aplicação.
 
-- Abstração dos detalhes do armazenamento de dados: o repositório fornece uma camada de abstração que oculta os detalhes de como os dados são armazenados e acessados, permitindo que a aplicação trabalhe com dados de uma forma mais abstrata e consistente.
+-   Abstração dos detalhes do armazenamento de dados: o repositório fornece uma camada de abstração que oculta os detalhes de como os dados são armazenados e acessados, permitindo que a aplicação trabalhe com dados de uma forma mais abstrata e consistente.
 
-- Separação de preocupações: o repositório separa a lógica de negócios da lógica de acesso a dados, tornando o código mais fácil de ler, testar e manter.
+-   Separação de preocupações: o repositório separa a lógica de negócios da lógica de acesso a dados, tornando o código mais fácil de ler, testar e manter.
 
-- Melhoria na testabilidade: o repositório pode ser facilmente simulado ou substituído em testes de unidade, permitindo testar com mais profundidade a lógica de negócios sem precisar se conectar a um armazenamento de dados real.
+-   Melhoria na testabilidade: o repositório pode ser facilmente simulado ou substituído em testes de unidade, permitindo testar com mais profundidade a lógica de negócios sem precisar se conectar a um armazenamento de dados real.
 
-- Em geral, o padrão repository é uma ferramenta poderosa que pode ajudar os desenvolvedores a construir aplicativos TypeScript escaláveis e fáceis de manter que estão mais focados nos requisitos de negócios e menos nos detalhes de implementação técnica.
+-   Em geral, o padrão repository é uma ferramenta poderosa que pode ajudar os desenvolvedores a construir aplicativos TypeScript escaláveis e fáceis de manter que estão mais focados nos requisitos de negócios e menos nos detalhes de implementação técnica.
 
 ## Exemplo
 
 Oferecemos um exemplo de implementação do padrão Repository no template opinativo do ExpressoTS.
 
 :::info
-No ExpressoTS, implementamos o padrão repository em uma pasta específica chamada  **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
+No ExpressoTS, implementamos o padrão repository em uma pasta específica chamada **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
 :::
 
 ### Interface do base repositório
 
 ```typescript
 interface IEntity {
-  Id: string;
+    Id: string;
 }
 
 interface IBaseRepository<T> {
-  create(item: T): T | null;
-  update(item: T): T | null;
-  delete(id: string): boolean;
-  find(id: string): T | null;
-  findAll(): T[];
+    create(item: T): T | null;
+    update(item: T): T | null;
+    delete(id: string): boolean;
+    find(id: string): T | null;
+    findAll(): T[];
 }
 ```
 
@@ -59,36 +59,36 @@ interface IBaseRepository<T> {
 ```typescript
 @provide(BaseRepository)
 class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
-  private readonly USERDB: T[] = [];
+    private readonly USERDB: T[] = [];
 
-  create(item: T): T | null {
-    this.DB.push(item);
-    return item;
-  }
-
-  update(item: T) {
-    this.DB.push(item);
-    return item;
-  }
-
-  delete(id: string): boolean {
-    const index: number = this.DB.findIndex((item) => item.Id === id);
-
-    if (index != -1) {
-      this.DB.splice(index, 1);
-      return true;
+    create(item: T): T | null {
+        this.DB.push(item);
+        return item;
     }
-    return false;
-  }
 
-  find(id: string): T | null {
-    const user = this.DB.find((item) => item.Id === id);
-    return user || null;
-  }
+    update(item: T) {
+        this.DB.push(item);
+        return item;
+    }
 
-  findAll(): T[] {
-    return this.DB;
-  }
+    delete(id: string): boolean {
+        const index: number = this.DB.findIndex((item) => item.Id === id);
+
+        if (index != -1) {
+            this.DB.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    find(id: string): T | null {
+        const user = this.DB.find((item) => item.Id === id);
+        return user || null;
+    }
+
+    findAll(): T[] {
+        return this.DB;
+    }
 }
 ```
 
@@ -97,9 +97,9 @@ class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
 ```typescript
 @provide(UserRepository)
 class UserRepository extends BaseRepository<User> {
-  constructor() {
-    super();
-  }
+    constructor() {
+        super();
+    }
 }
 ```
 
@@ -109,9 +109,9 @@ class UserRepository extends BaseRepository<User> {
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas
