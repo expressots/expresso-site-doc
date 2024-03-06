@@ -26,20 +26,20 @@ expressots g <recurso> <estrutura>
 
 Nós fornecemos duas estruturas diferentes para estruturar os recursos:
 
-- **[entidade-ação]**: `expressots generate service user-create`
-  Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `user-create.[recurso].ts`
+-   **[entidade-ação]**: `expressots generate service user-create`
+    Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `user-create.[recurso].ts`
 
-- **[pasta/subpasta/recurso]**: `expressots generate service user/create`
-  Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `create.[recurso].ts`
+-   **[pasta/subpasta/recurso]**: `expressots generate service user/create`
+    Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `create.[recurso].ts`
 
-  Se você adicionar `/` no final da estrutura, o CLI criará o recurso dentro da pasta. Exemplo: `expressots generate service user/create/`
-  Estrutura: `user/create/` e o arquivo: `create.[recurso].ts`
+    Se você adicionar `/` no final da estrutura, o CLI criará o recurso dentro da pasta. Exemplo: `expressots generate service user/create/`
+    Estrutura: `user/create/` e o arquivo: `create.[recurso].ts`
 
 ### Pasta raiz do recurso
 
-- A pasta raiz de todos os recursos é a `src`. Isso pode ser alterado no arquivo `expressots.config.ts`.
-- No modo opinativo, a pasta raiz é o `src` e os recursos montados com `service, usecase, dto, controller` são criados dentro do `useCases`.
-- As entidades são criadas dentro do `entities`, e provedores dentro do `providers`.
+-   A pasta raiz de todos os recursos é a `src`. Isso pode ser alterado no arquivo `expressots.config.ts`.
+-   No modo opinativo, a pasta raiz é o `src` e os recursos montados com `service, usecase, dto, controller` são criados dentro do `useCases`.
+-   As entidades são criadas dentro do `entities`, e provedores dentro do `providers`.
 
 ## Tipos de recursos
 
@@ -53,6 +53,7 @@ Recursos atualmente disponíveis para serem gerados:
 | provider    | p     |
 | service     | s     |
 | entity      | e     |
+| middleware  | m     |
 
 ## Exemplo de uso
 
@@ -63,6 +64,8 @@ Recursos atualmente disponíveis para serem gerados:
 | expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
 | expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
 | expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
+| expressots g e user        | Entidade a ser criada na pasta `entities` com esta estrutura de pasta: user            |
+| expressots g m auth        | Middleware a ser criado na pasta `middlewares` com esta estrutura de pasta: auth       |
 
 Todos os recursos podem ser criados usando a estrutura `pasta/subpasta/recurso.`
 
@@ -86,17 +89,17 @@ Aqui está o arquivo de configuração atual com todas as opções disponíveis:
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-  sourceRoot: "src",
-  scaffoldPattern: Pattern.KEBAB_CASE,
-  opinionated: false,
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: false,
 };
 
 export default config;
 ```
 
-- **sourceRoot**: a pasta raiz que será usada pelo CLI para criar os recursos. Padrão: `src`
-- **scaffoldPattern**: o padrão que será usado para criar os recursos. Padrão: `Pattern.KEBAB_CASE`. Exemplo: `user-create`
-- **opinionated**: se for verdadeiro, o CLI criará os recursos usando a estrutura de pasta com opinião.
+-   **sourceRoot**: a pasta raiz que será usada pelo CLI para criar os recursos. Padrão: `src`
+-   **scaffoldPattern**: o padrão que será usado para criar os recursos. Padrão: `Pattern.KEBAB_CASE`. Exemplo: `user-create`
+-   **opinionated**: se for verdadeiro, o CLI criará os recursos usando a estrutura de pasta com opinião.
 
 ## Recomendações
 
@@ -108,9 +111,9 @@ Tente utilizar o maior número possível de formas de criação de recursos disp
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

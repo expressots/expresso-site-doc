@@ -26,20 +26,20 @@ expressots g <resource> <structure>
 
 We provide two different structures to scaffold the resources:
 
-- **[entity-action]**: `expressots generate service user-create`
-  This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts`
+-   **[entity-action]**: `expressots generate service user-create`
+    This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts`
 
-- **[folder/subfolder/resource]**: `expressots generate service user/create`
-  This will create this folder structure: `/user/create` and the file: `create.[resource].ts`
+-   **[folder/subfolder/resource]**: `expressots generate service user/create`
+    This will create this folder structure: `/user/create` and the file: `create.[resource].ts`
 
-  If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots generate service user/create/`
-  Structure: `user/create/` and the file: `create.[resource].ts`
+    If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots generate service user/create/`
+    Structure: `user/create/` and the file: `create.[resource].ts`
 
 ### Resource Root Folder
 
-- The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
-- In the opinionated mode, the root folder is the `src` folder and the resources scaffolded with `service, usecase, dto, controller` are created inside of the `useCases` folder.
-- Entities are created inside of the `entities` folder, and providers inside of the `providers` folder.
+-   The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
+-   In the opinionated mode, the root folder is the `src` folder and the resources scaffolded with `service, usecase, dto, controller` are created inside of the `useCases` folder.
+-   Entities are created inside of the `entities` folder, and providers inside of the `providers` folder.
 
 ## Resource Types
 
@@ -53,6 +53,7 @@ Current available resources:
 | provider   | p     |
 | service    | s     |
 | entity     | e     |
+| middleware | m     |
 
 ## Usage Example
 
@@ -63,6 +64,8 @@ Current available resources:
 | expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                           |
 | expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                     |
 | expressots g s user/find   | Service creates usecase, controller and DTO and add them in the desired folder user/find |
+| expressots g e user        | Entity to be created in the folder `entities` with this folder structure: user           |
+| expressots g m auth        | Middleware to be created in the folder `middlewares` with this folder structure: auth    |
 
 All resources can be created using the structure `folder/subfolder/resource`.
 
@@ -86,17 +89,17 @@ Here is the current configuration file with all the available options:
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-  sourceRoot: "src",
-  scaffoldPattern: Pattern.KEBAB_CASE,
-  opinionated: false,
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: false,
 };
 
 export default config;
 ```
 
-- **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
-- **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
-- **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
+-   **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
+-   **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
+-   **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
 
 ## Recommendations
 
@@ -108,9 +111,9 @@ Try to use as many different forms of creating resources as possible. This will 
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues
