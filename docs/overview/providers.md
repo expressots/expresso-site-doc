@@ -140,6 +140,15 @@ export { LoginUserUseCase };
 
 In the Use Case above we injected MailTrapProvider in the constructor making use of the ExpressoTS container. In the execute() method of the Use Case we are calling the `sendEmail()` method of the provider to send an email to the user in case of a non successful login.
 
+## Providers available in ExpressoTS
+
+Here are some of the providers available:
+
+| Provider Name | Description                         |
+| ------------- | ----------------------------------- |
+| envValidator  | Validate the environment variables. |
+| logger        | Add logger to the application.      |
+
 ---
 
 ## Support the project

@@ -44,6 +44,27 @@ export class App extends AppExpress {
 If you add a middleware that is not installed as dependency, the application will throw a warning message and continue to run.
 :::
 
+### List of Middlewares Available
+
+Expressjs middlewares supported by ExpressoTS:
+
+| Middleware Name  | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| addBodyParser    | Add body parser middleware to the application.    |
+| addCompression   | Add compression middleware to the application.    |
+| addCors          | Add cors middleware to the application.           |
+| addHelmet        | Add helmet middleware to the application.         |
+| addCookieParser  | Add cookie parser middleware to the application.  |
+| addCookieSession | Add cookie session middleware to the application. |
+| addSession       | Add session middleware to the application.        |
+| addServerStatic  | Add static middleware to the application.         |
+| addRateLimit     | Add rate limit middleware to the application.     |
+| addMorgan        | Add morgan middleware to the application.         |
+| addPassport      | Add passport middleware to the application.       |
+| setMulter        | Add multer middleware to the application.         |
+| addServeFavicon  | Add serve favicon middleware to the application.  |
+| setErrorHandler  | Add error handler middleware to the application.  |
+
 ### Global Middleware
 
 Middlewares can be added globally using the `App` class through the `this.middleware` property, using the out-of-the-box middleware list provided by Express Team:
