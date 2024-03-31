@@ -4,47 +4,29 @@ sidebar_position: 9
 
 # Repositórios
 
-No ExpressoTS, uma classe de repositório geralmente inclui métodos como create, update, find, findOne e delete, que correspondem a operações comuns de CRUD (Create, Read, Update, Delete) no armazenamento de dados. Esses métodos podem ser implementados usando uma biblioteca de banco de dados ou uma ferramenta de ORM (Object-Relational Mapping) como o **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
 
-## O padrão de repositório
+O padrão de repositório no ExpressoTS fornece uma camada de abstração para o acesso a dados, encapsulando operações CRUD (Criar, Ler, Atualizar, Deletar) dentro de classes de repositório. Esses repositórios atuam como intermediários entre a lógica de negócios e as camadas de mapeamento de dados, utilizando ORMs como **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/) ou [Sequelize](https://sequelize.org/),** para interagir com o banco de dados.
 
-O padrão repository é um padrão de design comumente usado no desenvolvimento de software que fornece uma maneira de abstrair a camada de persistência de dados de uma aplicação. Em TypeScript, esse padrão pode ser implementado usando classes que representam repositórios, que são responsáveis por recuperar, armazenar, atualizar e excluir dados de uma fonte de dados, como um banco de dados.
+## Entendendo o padrão de repositório
 
-Nós oferecemos um exemplo de como implementar o padrão de repositório no modelo de projeto do ExpressoTS. Você pode encontrá-lo diretamente no [templates](https://github.com/expressots/expressots/tree/main/templates), pasta template do ExpressoTS.
+Um padrão de repositório é uma estratégia de design que abstrai a persistência de dados, permitindo que a lógica de negócios seja agnóstica em relação à tecnologia ou ao esquema do banco de dados subjacente. O ExpressoTS utiliza esse padrão para facilitar a manutenibilidade e escalabilidade.
 
-## Objetivo do padrão de repositório
+## Objetivos e benefícios
 
-O objetivo principal do padrão repository é separar a lógica de negócio da lógica de acesso aos dados, permitindo que os desenvolvedores escrevam código mais focado nos requisitos de negócio da aplicação, em vez dos detalhes técnicos de como os dados são armazenados e acessados.
+O principal objetivo do padrão de repositório é separar a lógica de negócios da lógica de acesso a dados. Isso permite que os desenvolvedores escrevam código mais focado nos requisitos de negócios da aplicação, em vez dos detalhes técnicos de como os dados são armazenados e acessados.
 
-## Benefícios de usar o padrão de repositório
+-   **Separação de Preocupações**: Desacopla a lógica de negócios da lógica de acesso a dados, permitindo que os desenvolvedores se concentrem nas regras de negócio sem se preocupar com operações de banco de dados.
+-   **Manutenibilidade**: Centraliza a lógica de acesso a dados dentro dos repositórios, simplificando a manutenção e atualizações das implementações de armazenamento de dados.
+-   **Abstração**: Esconde as complexidades da camada de dados do resto da aplicação, fornecendo uma interface simplificada e consistente para operações de dados.
+-   **Testabilidade**: Facilita os testes ao permitir o uso de repositórios falsos ou bancos de dados em memória para simular a persistência de dados.
 
-Ao usar o padrão de repositório, podemos trocar facilmente o mecanismo de armazenamento de dados subjacente sem afetar o restante do aplicativo. Por exemplo, podemos mudar de um banco de dados relacional para um banco de dados NoSQL ou até mesmo um mecanismo de armazenamento completamente diferente, como uma API da Web, com alterações mínimas no restante do código do aplicativo. Além disso, o padrão de repositório pode facilitar o teste do aplicativo, pois podemos usar repositórios fictícios para simular o armazenamento de dados para fins de teste. Aqui estão alguns dos benefícios de usar o padrão de repositório:
+## Exemplo de implementação do padrão de repositório
 
--   Centralização da lógica de acesso a dados: toda a lógica de acesso a dados é contida dentro do repositório, tornando mais fácil manter e alterar a implementação do armazenamento de dados sem afetar o resto da aplicação.
-
--   Abstração dos detalhes do armazenamento de dados: o repositório fornece uma camada de abstração que oculta os detalhes de como os dados são armazenados e acessados, permitindo que a aplicação trabalhe com dados de uma forma mais abstrata e consistente.
-
--   Separação de preocupações: o repositório separa a lógica de negócios da lógica de acesso a dados, tornando o código mais fácil de ler, testar e manter.
-
--   Melhoria na testabilidade: o repositório pode ser facilmente simulado ou substituído em testes de unidade, permitindo testar com mais profundidade a lógica de negócios sem precisar se conectar a um armazenamento de dados real.
-
--   Em geral, o padrão repository é uma ferramenta poderosa que pode ajudar os desenvolvedores a construir aplicativos TypeScript escaláveis e fáceis de manter que estão mais focados nos requisitos de negócios e menos nos detalhes de implementação técnica.
-
-## Exemplo
-
-Oferecemos um exemplo de implementação do padrão Repository no template opinativo do ExpressoTS.
-
-:::info
-No ExpressoTS, implementamos o padrão repository em uma pasta específica chamada **"repositories"**, que é separada da pasta **"provider"** intencionalmente, embora possa ser considerada como um tipo de provider. Fizemos isso para dar mais ênfase ao padrão repository e deixar claro para os desenvolvedores que ele é um desacoplamento importante que o desenvolvimento da aplicação pode se beneficiar.
-:::
+No seguinte exemplo, criaremos uma implementação simples do padrão de repositório usando TypeScript. Definiremos uma interface de repositório base e uma classe, bem como uma classe de repositório concreta para uma entidade User.
 
 ### Interface do base repositório
 
 ```typescript
-interface IEntity {
-    Id: string;
-}
-
 interface IBaseRepository<T> {
     create(item: T): T | null;
     update(item: T): T | null;
@@ -58,50 +40,26 @@ interface IBaseRepository<T> {
 
 ```typescript
 @provide(BaseRepository)
-class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
-    private readonly USERDB: T[] = [];
-
-    create(item: T): T | null {
-        this.DB.push(item);
-        return item;
-    }
-
-    update(item: T) {
-        this.DB.push(item);
-        return item;
-    }
-
-    delete(id: string): boolean {
-        const index: number = this.DB.findIndex((item) => item.Id === id);
-
-        if (index != -1) {
-            this.DB.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-
-    find(id: string): T | null {
-        const user = this.DB.find((item) => item.Id === id);
-        return user || null;
-    }
-
-    findAll(): T[] {
-        return this.DB;
-    }
+class BaseRepository<T> implements IBaseRepository<T> {
+    // Implemente os métodos de interface aqui
 }
 ```
 
-### User repository
+### Classe de repositório específica
 
 ```typescript
 @provide(UserRepository)
-class UserRepository extends BaseRepository<User> {
-    constructor() {
-        super();
-    }
-}
+class UserRepository extends BaseRepository<User> {}
 ```
+O exemplo acima demonstra a simplicidade de criar um repositório base que pode ser estendido para entidades específicas como `User`.
+
+## Repositórios vs provedores
+
+Enquanto os repositórios focam na interação com dados, os provedores no ExpressoTS tipicamente oferecem funcionalidades como validação de ambiente ou logging. Manter repositórios e provedores distintos garante uma separação clara e adere ao princípio da responsabilidade única.
+
+:::info
+No ExpressoTS, os repositórios são armazenados dentro de uma pasta dedicada "repositories", distinguindo-os da pasta "providers". Essa escolha estrutural enfatiza seus papéis distintos e facilita uma base de código modular.
+:::
 
 ---
 

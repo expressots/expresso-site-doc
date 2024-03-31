@@ -126,15 +126,15 @@ Os decoradores de métodos HTTP e parâmetros são um conjunto de anotações us
 
 Aqui está uma lista de todos os decoradores `@httpMethods()` disponíveis no ExpressoTS, juntamente com sua descrição e uso:
 
-| Decorador   | Descrição                                                      | Uso                          |
-| ----------- | -------------------------------------------------------------- | ---------------------------- |
-| @httpGet    | Vincula um método de controlador a um verbo HTTP GET.          | @httpGet("/path")            |
-| @httpPost   | Vincula um método de controlador a um verbo HTTP POST.         | @httpPost("/path")           |
-| @httpPut    | Vincula um método de controlador a um verbo HTTP PUT.          | @httpPut("/path")            |
-| @httpPatch  | Vincula um método de controlador a um verbo HTTP PATCH.        | @httpPatch("/path")          |
-| @httpHead   | Vincula um método de controlador a um verbo HTTP HEAD.         | @httpHead("/path")           |
-| @httpDelete | Vincula um método de controlador a um verbo HTTP DELETE.       | @httpDelete("/path")         |
-| @httpMethod | Vincula um método de controlador a um verbo HTTP especificado. | @httpMethod("verb", "/path") |
+| Decorador   | Descrição                                                      | Uso                      |
+| ----------- | -------------------------------------------------------------- | ------------------------ |
+| @Get        | Vincula um método de controlador a um verbo HTTP GET.          | @Get("/path")            |
+| @Post       | Vincula um método de controlador a um verbo HTTP POST.         | @Post("/path")           |
+| @Put        | Vincula um método de controlador a um verbo HTTP PUT.          | @Put("/path")            |
+| @Patch      | Vincula um método de controlador a um verbo HTTP PATCH.        | @Patch("/path")          |
+| @Head       | Vincula um método de controlador a um verbo HTTP HEAD.         | @Head("/path")           |
+| @Delete     | Vincula um método de controlador a um verbo HTTP DELETE.       | @Delete("/path")         |
+| @Method     | Vincula um método de controlador a um verbo HTTP especificado. | @Method("verb", "/path") |
 
 ### Decoradores de parâmetros
 

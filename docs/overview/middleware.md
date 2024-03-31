@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Middleware
 
-Middleware functions are pivotal in the request-response cycle of an ExpressoTS application, providing the capability to execute code, modify request and response objects, end the request-response cycle, or call the next middleware in the stack. It's essential to call next() to avoid request timeouts unless your middleware concludes the cycle.
+Middleware functions are pivotal in the request-response cycle of an ExpressoTS application, providing the capability to execute code, modify request and response objects, end the request-response cycle, or call the next middleware in the stack. It's essential to call `next()` to avoid request timeouts unless your middleware concludes the cycle.
 
 ExpressoTS seamlessly integrates with Express middleware, enabling the use of its extensive ecosystem to enhance your application.
 
@@ -73,7 +73,7 @@ protected configureServices(): void {
 
 ## Using `addMiddleware` method
 
-For any other middleware, or a custom middleware, you can add it using the `this.middleware.addMiddleware()` method. Using the `addMiddleware` method, you can add any middleware from NPM Registry, custom Expressjs middleware or a custom ExpressoTS middleware.
+For any other middleware, or a custom middleware, you can add it using the `this.middleware.addMiddleware()` method. Using the `addMiddleware` method, you can add any middleware from NPM Registry, custom Expressjs middleware or a custom middleware.
 
 NPM Registry middleware:
 
@@ -113,7 +113,7 @@ this.middleware.addMiddleware(new CustomMiddleware());
 
 ## Route Middleware
 
-Middlewares can be added per route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom ExpressoTS middleware.
+Middlewares can be added per route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom middleware.
 
 ```typescript
 this.middleware.addMiddleware({ path: "/api", middlewares: [] });

@@ -12,7 +12,7 @@ We appreciate your support in this endeavor. Let's code efficiently together. ðŸ
 
 ## Navigating the Documentation
 
-This documentation is organized into distinct sections, each focusing on a specific aspect of ExpressoTS. Utilize the sidebar on the left to navigate through the content:
+This documentation is organized into distinct sections, each focusing on a specific aspect of ExpressoTS. Use the sidebar on the left to navigate through the content:
 
 -   **Overview**: Provides general information about ExpressoTS, including project resources, concepts, objectives, and initial setup instructions.
 -   **Code By Example**: Offers practical examples to demonstrate the application of ExpressoTS resources.

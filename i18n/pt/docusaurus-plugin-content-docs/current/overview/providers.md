@@ -4,37 +4,46 @@ sidebar_position: 8
 
 # Provedores
 
-Do ponto de vista da arquitetura limpa, os `Providers` são responsáveis por fornecer dados e/ou mecanismos para componentes de nível superior no sistema, como casos de uso ou apresentadores, e podem abstrair os detalhes de como os dados/mecanismos são realmente recuperados, armazenados ou executados. Essa abstração permite que o sistema mude facilmente entre diferentes fontes/provedores de dados sem afetar os componentes de nível superior.
+No ExpressoTS, provedores servem como melhorias modulares para uma aplicação, encapsulando funcionalidades específicas, como serviços de email, mecanismos de autenticação ou conexões de banco de dados. Essa encapsulação é essencial para preservar uma arquitetura fracamente acoplada, permitindo a troca ou atualização dessas funcionalidades sem afetar o sistema geral.
 
-Os provedores podem ser implementados como classes ou funções, e normalmente fazem uso de componentes de infraestrutura, como bancos de dados, serviços da web ou sistemas de arquivos para realmente recuperar ou armazenar dados e executar outras tarefas. O objetivo de um provedor é encapsular todos os detalhes desses componentes de nível inferior e apresentar uma interface simples e de alto nível para o resto do sistema.
+## O papel dos provedores
 
-## Objetivo do provedor
+Provedores encapsulam as operações de componentes de infraestrutura, como bancos de dados, serviços web e sistemas de arquivos, apresentando uma interface unificada para a aplicação. Essa configuração não apenas simplifica a base de código, mas também melhora sua testabilidade, manutenibilidade e escalabilidade.
 
-O objetivo de um Provedor é encapsular todos os detalhes dos componentes "substituíveis" e apresentar uma interface simples e de alto nível para o resto do sistema.
+### Vantagens chave
 
-No contexto da injeção de dependência, os provedores são usados para desacoplar a criação e configuração de objetos de seu uso, o que permite testes mais fáceis, manutenção e escalabilidade do código. Ao usar provedores para gerenciar dependências, os desenvolvedores podem evitar o acoplamento estreito de componentes e, em vez disso, focar no design de alto nível do sistema.
-
-Em geral, os provedores são um aspecto importante do código limpo porque ajudam a promover o desacoplamento, a manutenibilidade e a flexibilidade em sistemas de software.
+-   Promover o desacoplamento entre as camadas da aplicação.
+-   Simplificar o processo de teste ao desacoplar a lógica de implementações específicas.
+-   Melhorar a manutenibilidade e flexibilidade do código, suportando trocas fáceis de serviços subjacentes.
 
 :::info
-O ExpressoTS utiliza providers para estender a capacidade da aplicação fornecendo funcionalidades adicionais.
+O ExpressoTS utiliza provedores para aumentar as capacidades da aplicação, facilitando funcionalidades como envio de emails, armazenamento de dados e mais, sem vincular a lógica da aplicação a implementações específicas.
 :::
 
-## Exemplo
+## Implementando um provedor: Um exemplo de serviço de email
 
-Vamos pegar o exemplo fornecido na seção **[Use Case](usecase.md#example)**.
+Considere uma aplicação que precisa enviar emails sob várias circunstâncias, como registro de usuário ou recuperação de senha. Implementando um provedor de email, o ExpressoTS pode enviar emails sem interagir diretamente com o serviço de envio de emails na lógica de negócios.
 
-Neste cenário, o usuário está tentando fazer login no sistema, e de acordo com a especificação, o usuário pode tentar inserir suas credenciais três vezes antes que o sistema bloqueie sua conta. Se a conta do usuário estiver bloqueada, o sistema envia um e-mail para notificar o usuário.
+### Configurando o provedor
 
-A funcionalidade de e-mail é fornecida por um provider, que é usado pelo use case para enviar o e-mail para o usuário. Esse provider é injetado no construtor do use case, permitindo que o desenvolvedor aproveite as interfaces públicas do provider.
+Primeiro, execute o comando CLI para criar um novo provedor no seu projeto ExpressoTS:
 
-Um dos benefícios imediatos do uso de providers é que eles facilitam testes mais fáceis, pois o código está desacoplado dos casos de uso, e um componente pode ser facilmente substituído por outro componente que implemente a mesma interface.
+```bash
+expressots g p mailtrap
+```
+O CLI adicionará o sufixo `Provider` ao nome do provedor, criando um novo arquivo no diretório `providers`. Esse arquivo conterá a classe do provedor, que você pode personalizar de acordo com as necessidades da sua aplicação.
 
-### Implementação do Provedor
+Aqui está o arquivo padrão do provedor gerado pelo CLI:
 
-Aqui está um exemplo de implementação de um provedor em ExpressoTS para envio de e-mails:
+```typescript
+import { provide } from "inversify-binding-decorators";
 
-Nós estamos usando **[Mailtrap](https://mailtrap.io/)** como nosso provedor de email e a lib nodemailer para enviar emails.
+@provide(MailTrapProvider)
+class MailTrapProvider {}
+```
+
+### Implementando o provedor
+
 
 ```typescript
 import nodemailer from "nodemailer";
@@ -109,11 +118,11 @@ class MailTrapProvider {
 export { MailTrapProvider, EmailType };
 ```
 
-Nessa implementação, há uma função auxiliar privada e uma única interface pública chamada `sendEmail()` que será usada no caso de uso. O provedor é injetado no construtor para ser usado pelo caso de uso.
+Este `MailTrapProvider` abstrai a complexidade de configurar e usar o nodemailer para operações de email, fornecendo um método simples sendEmail para enviar diferentes tipos de emails.
 
-### Consumindo o provedor no caso de uso
+### Consumindo o provedor em um caso de uso
 
-Aqui está a implementação do caso de uso fazendo uso do provedor:
+Aqui está a implementação do caso de uso fazendo uso do provedor mailtrap:
 
 ```typescript
 @provide(LoginUserUseCase)
@@ -127,7 +136,7 @@ class LoginUserUseCase {
             return true;
         }
 
-        // Implementação da lógica do caso de uso
+        // Implementation of the use case logic
         mailTrapProvider?.sendEmail(EmailType.Login);
 
         return false;
@@ -137,7 +146,114 @@ class LoginUserUseCase {
 export { LoginUserUseCase };
 ```
 
-No caso de uso acima, injetamos o `MailTrapProvider` no construtor fazendo uso do container ioC. No método `execute()` do caso de uso, estamos chamando o método `sendEmail()` do provedor para enviar um e-mail para o usuário em caso de login sem sucesso.
+Neste caso de uso, o `MailTrapProvider` é injetado através do construtor, aproveitando a injeção de dependência do ExpressoTS. Isso desacopla o processo de envio de email da lógica de autenticação, ilustrando o papel do provedor em manter um código limpo e manutenível.
+
+## Provedores disponíveis no ExpressoTS
+
+O ExpressoTS oferece provedores integrados para funcionalidades comuns, estendendo ainda mais as capacidades da aplicação:
+
+| Nome do Provedor | Descrição                        |
+| ---------------- | -------------------------------- |
+| envValidator     | Valida as variáveis de ambiente. |
+| logger           | Adiciona logger à aplicação.     |
+
+Provedores são essenciais para construir aplicações escaláveis, manuteníveis com o ExpressoTS, enfatizando uma arquitetura limpa e separação de preocupações.
+
+## Registro automático com decoradores fluentes
+
+O ExpressoTS facilita o registro de provedores em seu sistema de injeção de dependência por meio do uso de decoradores fluentes:
+
+-   @provide
+-   @provideSingleton
+-   @provideTransient
+
+Esses decoradores garantem que os provedores sejam automaticamente registrados, simplificando sua integração e reduzindo o código repetitivo.
+
+## Criando e registrando um provedor externo
+
+O ExpressoTS incentiva a extensibilidade por meio do uso de provedores externos. Desenvolvedores podem criar pacotes reutilizáveis, seguindo o padrão de design de plugin, para introduzir novas funcionalidades em uma aplicação ExpressoTS. Isso é particularmente útil para recursos que precisam ser compartilhados entre vários projetos ou para integrar serviços de terceiros.
+
+### Criando um provedor externo
+
+Um provedor externo deve ser um pacote CommonJS implementando a interface IProvider:
+
+```typescript
+import { IProvider } from "expressots";
+
+@injectable()
+class Logger implements IProvider {
+    log(message: string): void {
+        console.log(message);
+    }
+}
+```
+
+Interface `IProvider`:
+
+```typescript
+export interface IProvider {
+    name: string;
+    version: string;
+    author: string;
+    repo: string;
+}
+```
+
+Uma vez que o pacote é desenvolvido e publicado no registro npm, ele pode ser facilmente integrado em qualquer aplicação ExpressoTS.
+
+### Registrando provedores em tempo de execução
+
+Provedores são registrados na classe `App` de uma aplicação ExpressoTS usando o `ProviderManager`. O decorador `@injectable` do InversifyJS torna o provedor disponível para registro e resolução dentro do sistema de injeção de dependência do aplicativo.
+
+```typescript
+@provide(App)
+export class App extends AppExpress {
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void {
+        // Registrando provedores core e externos
+        this.provider.register(Logger);
+    }
+
+    protected postServerInitialization(): void {}
+
+    protected serverShutdown(): void {}
+}
+```
+
+:::info
+Por padrão, o registro do provedor vincula o provedor como escopo de solicitação. Para alterar o escopo, use o `BindingScopeEnum`.
+:::
+
+Exemplo de registro de um provedor como singleton:
+
+```typescript
+this.provider.register(Logger, BindingScopeEnum.Singleton);
+```
+
+Este processo concede flexibilidade para melhorar a aplicação em tempo de execução integrando provedores adicionais, permitindo a escala dinâmica e extensão das capacidades da aplicação.
+
+## Visualizando o padrão de design de plugin
+
+O diagrama ilustra o padrão de design de plugin do ExpressoTS, demonstrando como os provedores externos são integrados de maneira transparente à aplicação cliente através do Gerenciador de Provedores. Ele destaca o processo de registrar novos provedores e seus respectivos escopos de ciclo de vida, que podem ser singleton, request ou scoped.
+
+![Plugin Design Pattern](./img/plugin-pattern.png)
+
+## Recomendações para usar provedores externos
+
+Ao desenvolver provedores externos para o ExpressoTS, considere as seguintes melhores práticas:
+
+-   **Implementação de Interface**: Garanta que os provedores externos estejam em conformidade com a interface IProvider para consistência.
+-   **Gerenciamento de Ciclo de Vida**: Escolha o escopo apropriado para o provedor com base em seu padrão de uso pretendido.
+-   **Testes**: Teste os provedores minuciosamente de forma isolada antes de integrá-los à aplicação principal.
+-   **Documentação**: Forneça instruções de uso detalhadas e opções de configuração para o provedor externo.
+
+Ao aderir a essas práticas, os desenvolvedores podem garantir que seus provedores externos sejam robustos, mantíveis e facilmente integrados a qualquer aplicação ExpressoTS.
 
 ---
 
