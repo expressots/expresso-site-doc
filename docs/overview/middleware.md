@@ -4,21 +4,36 @@ sidebar_position: 5
 
 # Middleware
 
-Middleware is a function that has access to the request object (req), the response object (res), and the next middleware function in the application’s request-response cycle. The next middleware function is commonly denoted by a variable named next.
+Middleware functions are pivotal in the request-response cycle of an ExpressoTS application, providing the capability to execute code, modify request and response objects, end the request-response cycle, or call the next middleware in the stack. It's essential to call next() to avoid request timeouts unless your middleware concludes the cycle.
 
-Middleware can:
-
--   Run code.
--   Modify request and response objects.
--   Conclude the request-response process.
--   Proceed to the next middleware in the sequence.
--   Ensure to invoke next() if the middleware does not close the request-response loop to avoid stalling the request.
+ExpressoTS seamlessly integrates with Express middleware, enabling the use of its extensive ecosystem to enhance your application.
 
 :::info
-ExpressoTS fully supports [Express](https://expressjs.com/) middleware.
+ExpressoTS fully supports [Express](https://expressjs.com/en/resources/middleware.html) middleware.
 :::
 
-## Adding Middleware
+## List of middlewares available
+
+Expressjs middlewares supported by ExpressoTS:
+
+| Middleware Name  | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| addBodyParser    | Add body parser middleware to the application.    |
+| addCompression   | Add compression middleware to the application.    |
+| addCors          | Add cors middleware to the application.           |
+| addHelmet        | Add helmet middleware to the application.         |
+| addCookieParser  | Add cookie parser middleware to the application.  |
+| addCookieSession | Add cookie session middleware to the application. |
+| addSession       | Add session middleware to the application.        |
+| addServerStatic  | Add static middleware to the application.         |
+| addRateLimit     | Add rate limit middleware to the application.     |
+| addMorgan        | Add morgan middleware to the application.         |
+| addPassport      | Add passport middleware to the application.       |
+| setMulter        | Add multer middleware to the application.         |
+| addServeFavicon  | Add serve favicon middleware to the application.  |
+| setErrorHandler  | Add error handler middleware to the application.  |
+
+## Adding middleware
 
 ExpressoTS application supports adding middleware globally to the application as well as per route. It offers all the [middleware supported by Express Team](https://expressjs.com/en/resources/middleware.html) out-of-the-box through the use of `this.middleware` property.
 
@@ -44,7 +59,7 @@ export class App extends AppExpress {
 If you add a middleware that is not installed as dependency, the application will throw a warning message and continue to run.
 :::
 
-### Global Middleware
+## Adding global middleware
 
 Middlewares can be added globally using the `App` class through the `this.middleware` property, using the out-of-the-box middleware list provided by Express Team:
 
@@ -56,6 +71,8 @@ protected configureServices(): void {
     }
 ```
 
+## Using `addMiddleware` method
+
 For any other middleware, or a custom middleware, you can add it using the `this.middleware.addMiddleware()` method. Using the `addMiddleware` method, you can add any middleware from NPM Registry, custom Expressjs middleware or a custom ExpressoTS middleware.
 
 NPM Registry middleware:
@@ -64,7 +81,7 @@ NPM Registry middleware:
 this.middleware.addMiddleware(cors());
 ```
 
-Custom Expressjs middleware:
+### Creating expressjs middleware
 
 ```typescript
 function myMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -76,6 +93,8 @@ function myMiddleware(req: Request, res: Response, next: NextFunction) {
 ```typescript
 this.middleware.addMiddleware(myMiddleware);
 ```
+
+### Creating expressots middleware
 
 Custom ExpressoTS middleware:
 
@@ -92,7 +111,7 @@ class CustomMiddleware extends ExpressoMiddleware {
 this.middleware.addMiddleware(new CustomMiddleware());
 ```
 
-### Route Middleware
+## Route Middleware
 
 Middlewares can be added per route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom ExpressoTS middleware.
 
@@ -103,6 +122,8 @@ this.middleware.addMiddleware({ path: "/api", middlewares: [] });
 :::info
 Each route can have multiple middlewares.
 :::
+
+### Adding middleware to a specific route
 
 Or you add a middleware to a specific route in the `Controller` class through the `@controller()` and/Or `http Method` decorators.
 
@@ -115,6 +136,8 @@ export class AppController {
     }
 }
 ```
+
+### Adding middleware to all routes in a controller
 
 If you want to apply a middleware to all routes under a specific controller, you can add it to the `@controller()` decorator.
 
@@ -133,7 +156,7 @@ export class AppController {
 }
 ```
 
-## Creating Custom ExpressoTS Middleware
+## Example of custom expressoTS middleware
 
 To create a custom middleware, you need to extend the `ExpressoMiddleware` class and implement the `use` method.
 
@@ -159,14 +182,19 @@ class CustomMiddleware extends ExpressoMiddleware {
 
 Custom middleware allows you to pass parameters to the constructor and use them as options in the `use` method of your middleware.
 
-:::tip
-Use ExpressoTS CLI to scaffold a custom middleware.
+## View all middlewares pipeline
+
+You can view all the middlewares added to the application using the `this.middleware.viewMiddlewarePipeline()` method.
+
+![View Middleware Pipeline](./img/middleware-view.png)
+
+:::tip Use ExpressoTS CLI to scaffold a custom middleware.
 :::
 
 CLI command to scaffold a custom middleware:
 
 ```bash
-expressots g m <<middleware-name>>
+expressots g mi <<middleware-name>>
 ```
 
 ---
