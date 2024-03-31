@@ -45,38 +45,25 @@ We provide two different structures to scaffold the resources:
 
 Current available resources:
 
-| Long form  | short |
-| ---------- | ----- |
-| usecase    | u     |
-| controller | c     |
-| dto        | d     |
-| provider   | p     |
-| service    | s     |
-| entity     | e     |
-| middleware | m     |
-
-## Usage Example
-
-| Command                    | Expected result                                                                          |
-| -------------------------- | ---------------------------------------------------------------------------------------- |
-| expressots g u user/find   | Use case to be created in the folder `useCases` with this folder structure: user/find    |
-| expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                    |
-| expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                           |
-| expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                     |
-| expressots g s user/find   | Service creates usecase, controller and DTO and add them in the desired folder user/find |
-| expressots g e user        | Entity to be created in the folder `entities` with this folder structure: user           |
-| expressots g m auth        | Middleware to be created in the folder `middlewares` with this folder structure: auth    |
+| Long form  | short | Command                    | Expected result                                                                          |
+| ---------- | ----- | -------------------------- | ---------------------------------------------------------------------------------------- |
+| usecase    | u     | expressots g u user/find   | Use case to be created in the folder `useCases` with this folder structure: user/find    |
+| controller | c     | expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                    |
+| dto        | d     | expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                           |
+| provider   | p     | expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                     |
+| service    | s     | expressots g s user/find   | Service creates usecase, controller and DTO and add them in the desired folder user/find |
+| entity     | e     | expressots g e user        | Entity to be created in the folder `entities` with this folder structure: user           |
+| middleware | mi    | expressots g mi auth       | Middleware to be created in the folder `middlewares` with this folder structure: auth    |
+| module     | mo    | expressots g mo user       | Module to be created in the folder where `controllers` and `usecases` are located        |
 
 All resources can be created using the structure `folder/subfolder/resource`.
 
+## Scaffolding using hyphenated names
+
 For services, you can take advantage of creating the use case, controller and DTO at once using the structure `entity_action` or `entity-action`. Example: `expressots g s user-create`.
 
-:::caution
-The `expressots.config.ts` configuration file, located in the project root folder, determines where all resources will be created.
-:::
-
 :::info
-All usecases, controllers and DTOs are being inside of the `useCases` folder. However, this may change in the future.
+The `expressots.config.ts` configuration file, located in the project root folder, determines where all resources will be created.
 :::
 
 ## ExpressoTS Config File
@@ -91,7 +78,16 @@ import { ExpressoConfig, Pattern } from "@expressots/core";
 const config: ExpressoConfig = {
     sourceRoot: "src",
     scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: false,
+    opinionated: true,
+    scaffoldSchematics: {
+        entity: "entity",
+        provider: "provider",
+        module: "module",
+        controller: "controller",
+        dto: "dto",
+        middleware: "middleware",
+        usecase: "useCases",
+    },
 };
 
 export default config;
@@ -100,6 +96,7 @@ export default config;
 -   **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
 -   **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
 -   **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
+-   **scaffoldSchematics**: the folder convention names for each resource. Default: `useCases`, `entities`, `providers`, `middlewares`, `controllers`, `dtos`
 
 ## Recommendations
 

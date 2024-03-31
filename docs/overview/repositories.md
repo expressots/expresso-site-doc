@@ -4,47 +4,28 @@ sidebar_position: 9
 
 # Repositories
 
-In ExpressoTS, a repository class typically includes methods such as create, update, find, findOne, and delete, which correspond to common CRUD (Create, Read, Update, Delete) operations on the data store. These methods can be implemented using a database library or ORM (Object-Relational Mapping) tool such as **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/), [Sequelize](https://sequelize.org/),** etc.
+The repository pattern in ExpressoTS provides an abstraction layer for data access, encapsulating CRUD (Create, Read, Update, Delete) operations within repository classes. These repositories act as intermediaries between the business logic and data mapping layers, using ORMs like **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/) or [Sequelize](https://sequelize.org/)** to interact with the database.
 
-## The repository pattern
+## Understanding the repository pattern
 
-The repository pattern is a design pattern commonly used in software development that provides a way to abstract the data persistence layer of an application. In TypeScript, this pattern can be implemented using classes that represent repositories, which are responsible for retrieving, storing, updating, and deleting data from a data store, such as a database.
+A repository pattern is a design strategy that abstracts data persistence, allowing business logic to be agnostic of the underlying database technology or schema. ExpressoTS utilizes this pattern to facilitate maintainability and scalability.
 
-We do offer an example of how to implement a repository pattern in the opinionated template. You can find it directly in the **[repository](https://github.com/expressots/expressots/tree/main/templates/opinionated/src/repositories)** folder of the ExpressoTS application.
-
-## Goal of the repository pattern
+## Goals and benefits
 
 The main goal of the repository pattern is to separate business logic from data access logic. This allows developers to write code that is more focused on the business requirements of the application, rather than the technical details of how data is stored and accessed.
 
-## Benefit of using the repository pattern
+-   **Separation of Concerns**: It decouples business logic from data access logic, enabling developers to focus on business rules without worrying about database operations.
+-   **Maintainability**: Centralizes data access logic within repositories, simplifying maintenance and updates to data storage implementations.
+-   **Abstraction**: Hides the complexities of the data layer from the rest of the application, providing a simplified and consistent interface for data operations.
+-   **Testability**: Makes testing easier by allowing the use of mock repositories or in-memory databases to simulate data persistence.
 
-By using the repository pattern, we can easily swap out the underlying data storage mechanism without affecting the rest of the application. For example, we can switch from using a relational database to a NoSQL database, or even a completely different storage mechanism like a web API, with minimal changes to the rest of the application code. Additionally, the repository pattern can make it easier to test the application, as we can use mock repositories to simulate data storage for testing purposes. Here are some of the benefits of using the repository pattern:
+## Repository pattern implementation example
 
--   Centralization of data access logic: all data access logic is contained within the repository, making it easier to maintain and change the data store implementation without impacting the rest of the application.
-
--   Abstraction of data store details: the repository provides an abstraction layer that hides the details of how data is stored and accessed, allowing the application to work with data in a more abstract and consistent way.
-
--   Separation of concerns: the repository separates business logic from data access logic, making the code easier to read, test, and maintain.
-
--   Improved testability: the repository can be easily mocked or stubbed in unit tests, allowing for more thorough testing of the business logic without needing to connect to a real data store.
-
-Overall, the repository pattern is a powerful tool that can help developers build scalable and maintainable TypeScript applications that are more focused on business requirements and less on technical implementation details.
-
-## Example
-
-We offer an example of a Repository pattern implementation in the opinionated template of ExpressoTS.
-
-:::info
-In ExpressoTS, we implement the repository pattern in a specific folder called **"repositories"**, intentionally separated from the **"provider"** folder. We do this to emphasize the difference in repositories and providers, and how decoupling the two could benefit application development.
-:::
+In the following example, we will create a simple repository pattern implementation using TypeScript. We will define a base repository interface and class, as well as a concrete repository class for a `User` entity.
 
 ### Base repository interface
 
 ```typescript
-interface IEntity {
-    Id: string;
-}
-
 interface IBaseRepository<T> {
     create(item: T): T | null;
     update(item: T): T | null;
@@ -58,50 +39,27 @@ interface IBaseRepository<T> {
 
 ```typescript
 @provide(BaseRepository)
-class BaseRepository<T extends IEntity> implements IBaseRepository<T> {
-    private readonly DB: T[] = [];
-
-    create(item: T): T | null {
-        this.DB.push(item);
-        return item;
-    }
-
-    update(item: T) {
-        this.DB.push(item);
-        return item;
-    }
-
-    delete(id: string): boolean {
-        const index: number = this.DB.findIndex((item) => item.Id === id);
-
-        if (index != -1) {
-            this.DB.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-
-    find(id: string): T | null {
-        const user = this.DB.find((item) => item.Id === id);
-        return user || null;
-    }
-
-    findAll(): T[] {
-        return this.DB;
-    }
+class BaseRepository<T> implements IBaseRepository<T> {
+    // Implement the interface methods here
 }
 ```
 
-### User repository
+### Specific repository class
 
 ```typescript
 @provide(UserRepository)
-class UserRepository extends BaseRepository<User> {
-    constructor() {
-        super();
-    }
-}
+class UserRepository extends BaseRepository<User> {}
 ```
+
+The above example demonstrates the simplicity of creating a base repository that can be extended for specific entities like `User`.
+
+## Repositories vs providers
+
+While repositories focus on data interaction, providers in ExpressoTS typically offer functionalities such as environment validation or logging. Keeping repositories and providers distinct ensures clean separation and adheres to the single responsibility principle.
+
+:::info
+In ExpressoTS, repositories are housed within a dedicated "repositories" folder, distinguishing them from the "providers" folder. This structural choice emphasizes their distinct roles and facilitates a modular codebase.
+:::
 
 ---
 
