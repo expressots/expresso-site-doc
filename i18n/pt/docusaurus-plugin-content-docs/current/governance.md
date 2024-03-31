@@ -8,23 +8,7 @@ ExpressoTS é construído pela sua comunidade. Nós acolhemos e apreciamos contr
 
 ## Time Principal
 
-Atualmente, temos uma pequena equipe principal de colaboradores constantes. Estamos procurando expandir esta equipe para incluir mais pessoas da comunidade com uma ampla gama de habilidades e interesses.
-
-Atualmente, essa equipe está supervisionando os seguintes itens:
-
-- Documentação
-- Site
-- Gerenciamento da Comunidade
-- Presença nas Redes Sociais
-- Suporte Técnico
-- ExpressoTS Core, CLI e Providers
-- Pacotes Extra do ExpressoTS
-- Recursos do ExpressoTS e Inovacões
-- Problemas e Pull Requests do Expresso
-- DevOps
-- CI/CD
-- Testes
-- Roadmap
+Atualmente, temos uma pequena equipe principal de contribuidores constantes. Estamos procurando expandir esta equipe para incluir mais pessoas da comunidade com uma ampla gama de habilidades e interesses.
 
 ## Tomada de Decisão
 
@@ -33,8 +17,6 @@ Cada decisão importante no ExpressoTS começa com uma proposta. As propostas po
 :::caution ALERTA DE SPOILER
 Estamos migrando o quadro do projeto e o roteiro de Jira para GitHub Projects. Isso nos permitirá ter um processo mais aberto e transparente, bem como permitir que a comunidade participe de maneira mais ativa no projeto.
 :::
-
-**[Corrija um bug ou envie uma proposta](https://github.com/expressots/expressots/issues/new/choose)**
 
 ## Time
 
