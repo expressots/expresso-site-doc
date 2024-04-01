@@ -39,7 +39,6 @@ O ExpressoTS impedirá que você inicialize a Aplicação sem um controlador, j�
 
 A classe AppExpress oferece uma maneira de criar e configurar o servidor, passando **[middlewares do Express.js](https://expressjs.com/en/guide/writing-middleware.html)**, registrando provedores externos e configurando o ambiente do servidor. A classe AppExpress fornece três hooks de ciclo de vida que permitem aos desenvolvedores executar código antes, depois e durante o desligamento do servidor. A seguir, está a estrutura da classe AppExpress:
 
-
 ```typescript
 export class App extends AppExpress {
     private middleware: IMiddleware;
@@ -82,6 +81,7 @@ async function bootstrap() {
     await app.listen(3000, ServerEnvironment.Development);
 }
 ```
+
 :::info
 O framework atualmente suporta o Express como seu adaptador principal, com Fastify e outros possíveis servidores internos em desenvolvimento.
 :::
