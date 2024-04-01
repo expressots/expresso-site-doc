@@ -2,9 +2,32 @@
 sidebar_position: 4
 ---
 
-# Prisma provedor
+# Casos de Uso
 
-Em breve...
+Casos de uso são a implementação da lógica de negócios da sua aplicação. Para mais informações sobre casos de uso, veja [Casos de Uso](../overview/usecase.md).
+
+```typescript
+@provide(YourUseCase)
+export class YourUseUseCase {
+  execute() {
+    return "Hello ExpressoTS!";
+  }
+}
+```
+
+## Injetando Dependências no Construtor de Casos de Uso
+
+```typescript
+@provide(YourUseCase)
+export class YourUseUseCase {
+  constructor(private yourProvider: YourProvider) {}
+
+  execute() {
+    this.yourProvider.doSomething();
+    return "Hello ExpressoTS!";
+  }
+}
+```
 
 ---
 

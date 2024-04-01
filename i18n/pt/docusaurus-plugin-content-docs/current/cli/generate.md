@@ -43,40 +43,27 @@ Nós fornecemos duas estruturas diferentes para estruturar os recursos:
 
 ## Tipos de recursos
 
-Recursos atualmente disponíveis para serem gerados:
+Recursos disponíveis atualmente:
 
-| Forma longa | curta |
-| ----------- | ----- |
-| usecase     | u     |
-| controller  | c     |
-| dto         | d     |
-| provider    | p     |
-| service     | s     |
-| entity      | e     |
-| middleware  | m     |
-
-## Exemplo de uso
-
-| Comando                    | Resultado esperado                                                                     |
-| -------------------------- | -------------------------------------------------------------------------------------- |
-| expressots g u user/find   | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find |
-| expressots g c user/find   | Controlador para ser criado na pasta `useCases` dentro de user/find                    |
-| expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
-| expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
-| expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
-| expressots g e user        | Entidade a ser criada na pasta `entities` com esta estrutura de pasta: user            |
-| expressots g m auth        | Middleware a ser criado na pasta `middlewares` com esta estrutura de pasta: auth       |
+| Forma longa | Abreviação | Comando                    | Resultado esperado                                                                     |
+| -----------| --- | --------------- | -------------------------------------------------------------------------------------- |
+| useCase | u | expressots g u user/find   | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find |
+| controller | c | expressots g c user/find   | Controlador para ser criado na pasta `useCases` dentro de user/find                    |
+| dto | d | expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
+| provider | p | expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
+| service | s | expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
+| entity | e | expressots g e user        | Entidade a ser criada na pasta `entities` com esta estrutura de pasta: user            |
+| middleware | mi | expressots g m auth        | Middleware a ser criado na pasta `middlewares` com esta estrutura de pasta: auth       |
+| module	| mo	| expressots g mo user	| Módulo a ser criado na pasta onde `controllers` e `usecases` estão localizados |
 
 Todos os recursos podem ser criados usando a estrutura `pasta/subpasta/recurso.`
 
-Para serviços, você também pode aproveitar para criar o caso de uso, o controlador e o DTO de uma só vez usando a estrutura `entidade_ação` ou `entidade-ação`. Exemplo: `expressots g s user-create.`
+## Gerando recursos com hífen nos nomes
 
-:::caution
-O que determina onde os recursos serão criados é o arquivo de configuração `expressots.config.ts`, localizado na pasta raiz do projeto.
-:::
+Para serviços, você pode aproveitar para criar o caso de uso, controlador e DTO de uma vez usando a estrutura `entidade_acao ` ou `entidade-acao `. Exemplo: `expressots g s user-create`.
 
 :::info
-Todos os casos de uso, controladores e DTOs estão sendo criados dentro da pasta `useCases`. Isso não está definido em pedra e pode mudar em breve.
+O arquivo de configuração `expressots.config.ts`, localizado na pasta raiz do projeto, determina onde todos os recursos serão criados.
 :::
 
 ## ExpressoTS arquivo de configuração
@@ -91,7 +78,16 @@ import { ExpressoConfig, Pattern } from "@expressots/core";
 const config: ExpressoConfig = {
     sourceRoot: "src",
     scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: false,
+    opinionated: true,
+    scaffoldSchematics: {
+        entity: "entity",
+        provider: "provider",
+        module: "module",
+        controller: "controller",
+        dto: "dto",
+        middleware: "middleware",
+        usecase: "useCases",
+    },
 };
 
 export default config;
@@ -100,10 +96,11 @@ export default config;
 -   **sourceRoot**: a pasta raiz que será usada pelo CLI para criar os recursos. Padrão: `src`
 -   **scaffoldPattern**: o padrão que será usado para criar os recursos. Padrão: `Pattern.KEBAB_CASE`. Exemplo: `user-create`
 -   **opinionated**: se for verdadeiro, o CLI criará os recursos usando a estrutura de pasta com opinião.
+-   **scaffoldSchematics**: os nomes de convenção de pastas para cada recurso. Padrão: `useCases`, `entities`, `providers`, `middlewares`, `controllers`, `dtos`
 
 ## Recomendações
 
-Tente utilizar o maior número possível de formas de criação de recursos disponíveis. Isso irá ajudá-lo a entender como a CLI funciona e como utilizá-la em seu benefício. Além disso, isso nos ajudará a melhorar a CLI e torná-la mais robusta.
+Tente usar o máximo de formas diferentes de criar recursos possível. Isso ajudará você a entender como o CLI funciona e como usá-lo a seu favor. Também nos ajuda a melhorar o CLI para torná-lo mais robusto.
 
 ---
 

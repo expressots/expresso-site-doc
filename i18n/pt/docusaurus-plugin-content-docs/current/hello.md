@@ -2,47 +2,54 @@
 sidebar_position: 0
 ---
 
-# Olá, Dev
+# Bem-vindo ao ExpressoTS!
 
-Obrigado por embarcar nesta jornada conosco para criar uma experiência de desenvolvedor ambiciosa e emocionante que está melhorando continuamente. 🎉🎉🎉
+ExpressoTS é projetado para simplificar o processo de desenvolvimento de software, permitindo que os desenvolvedores se concentrem na lógica de negócios principal, abstraindo complexidades técnicas. Nosso objetivo é aumentar sua produtividade por meio de uma estrutura que não apenas acelera o desenvolvimento, mas também oferece documentação abrangente e uma experiência de desenvolvedor superior, minimizando a necessidade de código genérico e repetitivo.
 
-O ExpressoTS é tão simples, mas eficiente para fazer o trabalho. Queremos continuar fazendo isso, abstrair todas as complexidades que o mundo do desenvolvimento de software traz e facilitar a construção do seu próximo projeto.
+Nosso compromisso é duplo: simplificar seu trabalho de desenvolvimento e aumentar sua produtividade. À medida que embarcamos nesta jornada, convidamos você a se juntar ao nosso projeto impulsionado pela comunidade. Suas percepções, feedback e contribuições são inestimáveis na criação de uma experiência de desenvolvedor ótima para todos.
 
-Se você pensar sobre isso, cada recurso de linguagem de programação, estrutura construída, é para acelerar seu processo de desenvolvimento, no entanto, estamos continuamente falhando em fornecer boa documentação, boa experiência do desenvolvedor, além de reduzir a quantidade de código clichê que você precisa escrever. Tudo deve simplesmente funcionar!
-
-Este é o nosso compromisso, facilitar a sua vida e torná-lo mais produtivo.
-
-Estamos muito abertos a comentários, ideias e contribuições. Somos um projeto voltado para a comunidade e queremos ouvir você.
-
-Obrigado novamente por fazer parte desta jornada conosco, Feliz Codificação! 🚀
+Agradecemos seu apoio neste empreendimento. Vamos codificar de forma eficiente juntos. 🐎
 
 ---
 
-## Como ler a documentação
+## Navegando na documentação
 
-- **[links](./overview/intro.md)**: Todos os textos em negrito são links para outras páginas da documentação ou links externos.
-- `código`: Ajuda a enfatizar trechos de código e comandos ou termos técnicos importantes.
-- Alertas: São usados para destacar informações importantes.
-  :::note Usado para expressar informações gerais
-  :::
-  :::tip Esta é uma dica
-  :::
-  :::info Informações extras que não são vitais
-  :::
-  :::caution Usado para indicar spoilers
-  :::
-  :::warning Usado para indicar quando algo pode dar errado
-  :::
+Esta documentação está organizada em seções distintas, cada uma focando em um aspecto específico do ExpressoTS. Utilize a barra lateral à esquerda para navegar pelo conteúdo:
 
----
+-   **Visão geral**: Fornece informações gerais sobre o ExpressoTS, incluindo recursos do projeto, conceitos, objetivos e instruções de configuração inicial.
+-   **Code By Example**: Oferece exemplos práticos para demonstrar a aplicação dos recursos do ExpressoTS.
+-   **CLI**: detalha a interface da linha de comando, incluindo instruções de uso.
+-   **Providers**: Descreve os providers disponíveis e sua utilização.
+-   **Tutorial**: um guia passo a passo abrangente para realizar tarefas específicas no ExpressoTS.
+-   **Roadmap**: descreve a direção futura e os recursos planejados do ExpressoTS.
+-   **Governança**: explica o modelo de governança do ExpressoTS e descreve como contribuir para o projeto.
+
+## Compreendendo os tipos de alerta
+
+Ao longo desta documentação, vários formatos são utilizados para chamar a atenção para diferentes tipos de informação:
+
+-   **Links**: O texto em negrito indica hiperlinks para outras páginas de documentação ou recursos externos.
+-   **Código**: trechos de código, comandos e termos técnicos importantes são destacados.
+-   **Alertas**: Alertas específicos são empregados para enfatizar informações cruciais, utilizando os seguintes marcadores:
+
+:::note Transmite informações gerais ou lembretes.
+:::
+:::tip Fornece sugestões úteis ou práticas recomendadas.
+:::
+:::info Oferece informações adicionais e não críticas.
+:::
+:::caution Alertas para potenciais spoilers ou conteúdo sensível.
+:::
+:::warning Sinaliza possíveis problemas ou riscos que podem impactar o desenvolvimento.
+:::
 
 ## Apoie o projeto
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

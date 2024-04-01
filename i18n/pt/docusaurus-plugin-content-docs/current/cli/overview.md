@@ -40,6 +40,16 @@ Informações dos provedores sobre seu Sistema Operacional, Projeto e versão CL
 expressots info
 ```
 
+### Lista de recursos
+
+Lista todos os recursos disponíveis para scaffolding:
+
+```bash
+expressots resources or r
+```
+
+![Resources](../overview/img/scaffold-resources.png)
+
 ## Criando um projeto ExpressoTS
 
 Há duas opções para criar um novo projeto, interativamente ou silenciosamente (passando as opções como argumentos).

@@ -4,44 +4,49 @@ sidebar_position: 3
 
 # App Container
 
-O ExpressoTS usa **[InversifyJS](https://inversify.io/)** como seu ioC (Inversão de Controle) container, pois é uma ferramenta poderosa para gerenciar injeção de dependência. O Inversify é um container com suporte a tipos que pode ser utilizado para gerenciar a instância e resolução de objetos, bem como o gerenciamento do ciclo de vida deles.
+O ExpressoTS utiliza o **[InversifyJS](https://inversify.io/)** para suas capacidades de contêiner de Inversão de Controle (IoC), fornecendo um sistema robusto para injeção de dependências. Este contêiner consciente de tipos facilita a instanciação de objetos, resolução e gestão de ciclo de vida, possibilitando a criação de dependências complexas com código mínimo.
 
-O contêiner fornece um local central para gerenciar dependências e criar objetos que dependem de outros objetos. Quando uma classe é registrada no contêiner, suas dependências são automaticamente resolvidas e injetadas em seu construtor quando ela é instanciada. Isso permite a criação de gráficos de objetos complexos com um mínimo de código boilerplate.
+O encapsulador AppContainer simplifica a integração, permitindo um registro direto de controladores, casos de uso e provedores dentro da aplicação.
 
-Aproveitando o InversifyJS, criamos um wrapper para reduzir a complexidade sobre como os controladores, casos de uso e provedores são injetados no contêiner de aplicativos. O wrapper é chamado de `AppContainer` e é responsável por registrar todos os módulos da aplicação no contêiner.
+## Configurando o contêiner
 
-## Criando o container
+O contêiner da aplicação pode ser personalizado com escopos padrões para a vinculação de dependências e opções para pular verificações de classes base, aumentando a flexibilidade na gestão de dependências.
 
-Ao criar o contêiner da aplicação, é possível definir o escopo padrão do contêiner e também configurar para ignorar a verificação da classe base. O escopo padrão é `RequestScope`, o que significa que todas as dependências serão criadas uma vez por solicitação. Esse é o escopo comum para a maioria das aplicações web usadas em outros frameworks, como Spring Boot ou .NET Core.
+-   **defaultScope**: O escopo padrão, `RequestScope`, cria uma nova instância de uma dependência para cada solicitação, enquanto `SingletonScope` cria uma única instância compartilhada por todas as solicitações. O `TransientScope` cria uma nova instância cada vez que a dependência é solicitada.
+-   **skipBaseClassChecks**: Quando definido como `true`, o contêiner irá pular as verificações de classes base ao trabalhar com classes derivadas.
+-   **autoBindInjectable**: Quando definido como `true`, o contêiner irá injetar automaticamente classes que não estão explicitamente vinculadas.
 
 Aqui está a definição das opções de interface:
 
 ```typescript
 interface ContainerOptions {
-  /**
-   * O escopo padrão para as ligações no contêiner.
-   * Pode ser definido como Request (padrão), Singleton ou Transient.
-   */
-  defaultScope?: interfaces.BindingScope;
+    /**
+     * O escopo padrão para as ligações no contêiner.
+     * Pode ser definido como Request (padrão), Singleton ou Transient.
+     */
+    defaultScope?: interfaces.BindingScope;
 
-  /**
-   * Permite ignorar as verificações da classe base ao trabalhar com classes derivadas.
-   */
-  skipBaseClassChecks?: boolean;
+    /**
+     * Permite ignorar as verificações da classe base ao trabalhar com classes derivadas.
+     */
+    skipBaseClassChecks?: boolean;
+
+    /**
+     * Permite a injeção automática de classes que não estão explicitamente vinculadas ao contêiner.
+     */
+    autoBindInjectable: false;
 }
 ```
 
-Aqui está um exemplo de como criar um container:
+Criando o container:
 
 ```typescript
 // Adicionando opções ao contêiner
-const appContainer = new AppContainer({
+export const appContainer: AppContainer = new AppContainer({
     defaultScope: BindingScopeEnum.Singleton,
     skipBaseClassChecks: true,
+    autoBindInjectable: false,
 });
-
-// Criando um contêiner sem opções
-const appContainer = new AppContainer();
 
 // Criando um gerenciador de módulos de contêiner
 const container = appContainer.create([
@@ -54,47 +59,38 @@ export { container };
 
 ## Definindo o escopo do container
 
-Como mencionado acima, se o `defaultScope` não for fornecido, o padrão é definido como RequestScope. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como uma opção no construtor do contêiner. Isso permite flexibilidade na configuração do contêiner, de modo que ele possa ser personalizado para atender às necessidades específicas da aplicação.
+Como mencionado acima, se o `defaultScope` não for fornecido, o padrão é definido como `RequestScope`. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como uma opção no construtor do contêiner. O `BindingScopeEnum` contém os seguintes valores:
 
 - `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
 - `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
 - `BindingScopeEnum.Transient` - A dependência será criada toda vez que for solicitada.
 
+## Visualizando as vinculações do contêiner
+
+O contêiner pode ser usado para visualizar todas as vinculações que foram registradas. Isso pode ser útil para fins de depuração ou para entender as dependências que foram registradas.
+
 ```typescript
-const appContainer = new AppContainer();
-
-const container = appContainer.create(
-    [
-        // Registrar todos os módulos
-    ]   
-);
+appContainer.viewContainerBindings();
 ```
-
-:::tip
-Se você não passar o `defaultScope` o escopo padrão será definido como `RequestScope`.
-:::
+![Container Bindings View](./img/container-bindings.png)
 
 ## Registrando modulos
 
-A classe `AppContainer` tem um método `create` que recebe um array de módulos e retorna o contêiner com todos os módulos registrados. O contêiner aqui criado é o mesmo contêiner usado pela classe `Application` para inicializar o servidor.
-
-Depois que o contêiner é criado, os desenvolvedores podem registrar **[modules](./module.md)** no contêiner:
+O `appContainer` facilita o registro de módulos por meio de seu método `create([])`, que aceita um array de módulos. Esta abordagem simplificada reduz a complexidade da configuração e alinha-se com o objetivo do ExpressoTS de simplificar a arquitetura da aplicação:
 
 ```typescript
 // Cria novo container
-const appContainer = new AppContainer();
+const appContainer: AppContainer = new AppContainer();
 
-const container = appContainer.create([
+const container: Container = appContainer.create([
     // Registrar todos os módulos
     UserModule,
     PaymentModule,
-    ProductModule
+    ProductModule,
 ]);
-
-export default container;
 ```
 
-A razão pela qual criamos a classe `AppContainer` é reduzir a complexidade de como o container é criado e fornecer uma maneira de registrar módulos sem muita configuração extra.
+O uso do `appContainer` abstrai as complexidades do uso direto do InversifyJS, proporcionando um caminho direto para integrar e gerenciar módulos dentro das aplicações ExpressoTS.
 
 ---
 

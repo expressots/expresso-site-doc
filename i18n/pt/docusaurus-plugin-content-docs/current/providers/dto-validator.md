@@ -10,10 +10,10 @@ Quando você cria um novo projeto, o provedor Validador de DTO já vem incluído
 
 ## Pré-requisitos
 
-O validador de DTO é baseado nos pacotes class-validator e class-transformer. Utiliza decoradores para validar os DTOs.
+O validador de DTO é baseado nos pacotes [class-validator](https://www.npmjs.com/package/class-validator) e [class-transformer](https://www.npmjs.com/package/class-transformer). Utiliza decoradores para validar os DTOs.
 
 :::tip
-Se você não tiver [class-validator](https://www.npmjs.com/package/class-validator) e [class-transformer](https://www.npmjs.com/package/class-transformer) instalados e tentar usar o validador de DTO, você receberá uma mensagem de aviso no console indicando que você precisa instalar os pacotes.
+Se você não tiver class-validator e class-transformer instalados e tentar usar o validador de DTO, você receberá uma mensagem de aviso no console indicando que você precisa instalar os pacotes.
 :::
 
 Outra coisa importante a mencionar é que o validador de DTO funciona apenas com classes, já que interfaces não existem em tempo de execução. Portanto, se você deseja usar o validador de DTO, você precisa criar uma classe que represente seu DTO em vez da interface atual fornecida pelo ExpressoTS.
