@@ -40,6 +40,7 @@ Decoradores disponíveis para seus métodos de controlador.
 | @Head     | Vincula um método de controlador a um verbo HTTP HEAD.         | @Head("/path")           |
 | @Delete   | Vincula um método de controlador a um verbo HTTP DELETE.       | @Delete("/path")         |
 | @Method   | Vincula um método de controlador a um verbo HTTP especificado. | @Method("verb", "/path") |
+| @Http     | Define o código de status HTTP para a resposta.                | @Http(200)               |
 
 ### Decoradores de parâmetros
 

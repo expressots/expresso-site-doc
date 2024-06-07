@@ -40,6 +40,7 @@ Decorators available for your controller methods.
 | @Head     | Binds a controller method to a HEAD HTTP verb.      | @Head("/path")           |
 | @Delete   | Binds a controller method to a DELETE HTTP verb.    | @Delete("/path")         |
 | @Method   | Binds a controller method to a specified HTTP verb. | @Method("verb", "/path") |
+| @Http     | Sets the HTTP status code for the response.         | @Http(200)               |
 
 ### Parameter Decorators
 
