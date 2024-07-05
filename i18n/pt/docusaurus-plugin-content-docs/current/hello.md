@@ -40,7 +40,7 @@ Ao longo desta documentação, vários formatos são utilizados para chamar a at
 :::
 :::caution Alertas para potenciais spoilers ou conteúdo sensível.
 :::
-:::warning Sinaliza possíveis problemas ou riscos que podem impactar o desenvolvimento.
+:::danger Sinaliza possíveis problemas ou riscos que podem impactar o desenvolvimento.
 :::
 
 ## Apoie o projeto
