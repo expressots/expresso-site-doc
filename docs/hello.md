@@ -38,7 +38,7 @@ Throughout this documentation, various formats are used to draw attention to dif
 :::
 :::caution Alerts to potential spoilers or sensitive content.
 :::
-:::warning Signals potential issues or risks that could impact development.
+:::danger Signals potential issues or risks that could impact development.
 :::
 
 ---

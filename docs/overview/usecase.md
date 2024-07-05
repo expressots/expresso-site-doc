@@ -10,7 +10,7 @@ In the context of ExpressoTS, use cases represent the business logic of the appl
 
 ## We recommend
 
-Despite you can use any design pattern you want such as **[MVC](controller.md#a-mvc-approach)**, in the ExpressoTS opinionated template we reinforce the use of the **[Clean architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)** and **[SOLID principles](https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898)**. We believe that this approach will help you to build a more maintainable and scalable application.
+Despite you can use any design pattern you want such as **[MVC](./controller.md#mvc-pattern)**, in the ExpressoTS opinionated template we reinforce the use of the **[Clean architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)** and **[SOLID principles](https://medium.com/backticks-tildes/the-s-o-l-i-d-principles-in-pictures-b34ce2f1e898)**. We believe that this approach will help you to build a more maintainable and scalable application.
 
 It is best practice to have one use case per controller, with the controller being responsible for calling the corresponding use case that will implement the business logic of the request. The request payload, also known as request DTO in ExpressoTS, contains the information required to execute the use case.
 
