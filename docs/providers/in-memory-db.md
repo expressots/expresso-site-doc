@@ -4,9 +4,11 @@ sidebar_position: 3
 
 # In Memory DB
 
-In Memory DB is a provider that uses a simple in memory database to store data. It is a class injected in the ExpressoTS dependency injection system as a singleton.
+In Memory DB is a provider that uses a simple in memory database to store data. It is a class that can be registered in the ExpressoTS dependency injection system as a singleton.
 
-This class manages tables, represented by key-value pairs, where the key is the table name and the value is an array of entities.
+```ts
+this.provider.register(InMemoryDB, "Singleton");
+```
 
 The InMemoryDB class provides a simple and efficient way to simulate a database entirely in-memory, which can be particularly useful for testing and rapid development where a full-fledged database might be overkill.
 
@@ -24,104 +26,133 @@ Here is an image showing the output in the console of the InMemoryDB when we cre
 The DB inspector is enabled by default. As soon as you create a new entity and extend the BaseRepository class, the InMemoryDB will print the table to the console.
 :::
 
-## Class Definition
+## How to Use InMemoryDB
 
-Detail explanation of InMemoryDB class definition.
+To use the InMemoryDB class, you need to import it from the `expressots` package and register it as a singleton in the dependency injection system. Here is an example of how to do this in a service class:
+
+### Register InMemoryDB
 
 ```typescript
-@provideSingleton(InMemoryDB)
-class InMemoryDB {
-  private tables: Record<string, IEntity[]> = {};
-  // Method definitions ...
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void {
+        this.provider.register(InMemoryDB, "Singleton");
+    }
+
+    protected postServerInitialization(): void {}
+
+    protected serverShutdown(): void {}
 }
 ```
 
-This decorator indicates that the InMemoryDB class is a Singleton within the dependency injection system.
+When registering the InMemoryDB class, you can specify the scope as `string` or using the `BindingScopeEnum`.
+
+### Define your Entity
 
 ```typescript
-@provideSingleton(InMemoryDB)
+@provide(UserEntity)
+export class UserEntity {
+    id: string;
+    name: string;
+    email: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
 ```
 
-Class Properties tables is a private property that holds the in-memory tables. Each table is a key-value pair where the key is the table name, and the value is an array of entities (IEntity[]).
+### Create a Repository
 
-```typescript
-private tables: Record<string, IEntity[]> = {};
-```
-
-## Class Methods
-
-InMemoryDB class provides the following methods:
-
-### Get Table Method
-
-```typescript
-getTable(tableName: string): IEntity[]
-```
-
-Parameters
-
-- tableName (string): The name of the table to retrieve.
-- Returns: IEntity[]: An array of entities stored in the specified table.
-- Description: Retrieves a table by its name from the in-memory database. If the table doesn't exist, it initializes an empty table.
-
-### Show Tables Method
-
-```typescript
-showTables(): void
-```
-
-Description: Prints a list of all existing tables in the in-memory database to the standard output. If no tables exist, it outputs "No tables exist."
-
-### Print Table Method
-
-```typescript
-printTable(tableName: string): void
-```
-
-Parameters
-
-- tableName (string): The name of the table whose records should be printed.
-- Description: Prints all records in a specific table to the console using console.table. If the table doesn't exist or is empty, it notifies the user through standard output.
-
-:::info
-In the opinionated template the InMemoryDB is already implemented in the BaseRepository class. You don't need to use it directly.
-:::
-
-## How to Extend BaseRepository
-
-Here is a code snippet that shows how to extend the BaseRepository class to implement a custom repository.
+The repository is a class that extends the BaseRepository class and is used to manage entities of a specific type. The repository class is part of the dependency injection system and is marked by the @provide decorator.
 
 ```typescript
 @provide(UserRepository)
-class UserRepository extends BaseRepository<User> {
-  constructor() {
-    super("users");
-  }
+export class UserRepository extends BaseRepository<UserEntity> {
+    constructor() {
+        super("users");
+    }
 }
 ```
 
-The UserRepository class is a specialized repository tailored for managing User entities. It extends the generic BaseRepository class and sets its table name to "users" upon construction. This class is part of the dependency injection system and is marked by the @provide decorator.
+In the class above, we are creating a repository for the `UserEntity` class. The repository is initialized with the table name `users` in the constructor.
 
-Any custom methods can be added to the UserRepository class. For example, the following code snippet shows how to implement a findByEmail method that searches for a user by email.
+You can also define custom methods for the user repository.
 
 ```typescript
 @provide(UserRepository)
-class UserRepository extends BaseRepository<User> {
-  constructor() {
-    super("users");
-  }
+class UserRepository extends BaseRepository<UserEntity> {
+    constructor() {
+        super("users");
+    }
 
-  // Custom method implemented for the UserRepository only
-  findByEmail(email: string): User | null {
-    const user = this.table.find((item) => item.email === email);
-    return user || null;
-  }
+    // Custom method implemented for the UserRepository only
+    findByEmail(email: string): User | null {
+        const user = this.table.find((item) => item.email === email);
+        return user || null;
+    }
 }
 ```
 
-:::caution SPOILER ALERT
-In the future, we plan to extend the repository pattern to support various databases, all easily scaffoldable through our CLI
-:::
+### Use the Repository
+
+You can inject the repository in the constructor or via property injection.
+
+Property Injection:
+
+```typescript
+@provide(UserCreateUseCase)
+export class UserCreateUseCase {
+    @inject(UserRepository)
+    private userRepo: UserRepository;
+
+    @inject(UserEntity)
+    private userEntity: UserEntity;
+
+    execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
+        this.userEntity.name = payload.name;
+        this.userEntity.email = payload.email;
+
+        this.userRepo.create(this.userEntity);
+
+        return {
+            id: this.userEntity.id,
+            name: this.userEntity.name,
+            email: this.userEntity.email,
+        };
+    }
+}
+```
+
+Constructor Injection:
+
+```typescript
+@provide(UserCreateUseCase)
+export class UserCreateUseCase {
+    constructor(private userEntity: UserEntity, private userRepo: UserRepository) {}
+
+    execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
+        this.userEntity.name = payload.name;
+        this.userEntity.email = payload.email;
+
+        this.userRepo.create(this.userEntity);
+
+        return {
+            id: this.userEntity.id,
+            name: this.userEntity.name,
+            email: this.userEntity.email,
+        };
+    }
+}
+```
 
 ---
 
@@ -129,9 +160,9 @@ In the future, we plan to extend the repository pattern to support various datab
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
 
-- Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
-- Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
-- Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Join our **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Share the project with your friends and colleagues
+-   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
+-   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
+-   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Share the project with your friends and colleagues
