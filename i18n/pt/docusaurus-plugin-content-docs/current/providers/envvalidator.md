@@ -13,13 +13,13 @@ Ele está incluso apenas no modelo opinativo ou quando você cria uma classe que
 
 Você pode encontrá-lo na pasta `src/providers/application` no modelo opinativo.
 
-O `application.provider` é o provedor principal do aplicativo responsável por controlar o **[Application Lifecycle](../overview/application.md#application-lifecycle-hooks)**.
+O `application.provider` é o provedor principal do aplicativo responsável por controlar o **[Application Lifecycle](../overview/application.md#hooks-de-ciclo-de-vida-da-aplicação)**.
 
 Dentro da classe Application você pode encontrar três métodos que são chamados na seguinte ordem:
 
-- `configureServices()` : Configura serviços que devem ser inicializados antes do início do servidor.
-- `postServerInitialization()` : Configura serviços que devem ser executados após o início do servidor.
-- `serverShutdown()` : Realiza ações ou limpezas após o desligamento do servidor.
+-   `configureServices()` : Configura serviços que devem ser inicializados antes do início do servidor.
+-   `postServerInitialization()` : Configura serviços que devem ser executados após o início do servidor.
+-   `serverShutdown()` : Realiza ações ou limpezas após o desligamento do servidor.
 
 O provedor de validação de ambiente é chamado no método `configureServices()`, prevenindo que o aplicativo inicie se o arquivo `.env` estiver faltando ou se tiver variáveis de ambiente ausentes.
 
@@ -41,9 +41,9 @@ Environments.get("PORT");
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

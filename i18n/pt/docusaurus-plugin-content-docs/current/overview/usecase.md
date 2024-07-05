@@ -10,7 +10,7 @@ No contexto do ExpressoTS, os casos de uso servem para representar a lógica de 
 
 ## Nós recomendamos
 
-Apesar de você poder usar qualquer padrão de design que desejar como **[MVC](controller.md#a-mvc-approach)**, no template opinativo do ExpressoTS reforçamos o uso da **[Arquitetura Limpa](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)** e **[princípios SOLID](https://medium.com/backticks-tildes/the-s-o-l-i-d-princípios-em-imagens-b34ce2f1e898)**. Acreditamos que essa abordagem ajudará você a criar um aplicativo mais sustentável e escalável.
+Apesar de você poder usar qualquer padrão de design que desejar como **[MVC](./controller.md#padrão-mvc)**, no template opinativo do ExpressoTS reforçamos o uso da **[Arquitetura Limpa](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)** e **[princípios SOLID](https://medium.com/backticks-tildes/the-s-o-l-i-d-princípios-em-imagens-b34ce2f1e898)**. Acreditamos que essa abordagem ajudará você a criar um aplicativo mais sustentável e escalável.
 
 É uma prática recomendada ter um caso de uso por controlador, sendo o controlador responsável por chamar o caso de uso correspondente que irá implementar a lógica de negócios da solicitação. A carga útil da solicitação, também conhecida como DTO de solicitação no ExpressoTS, contém as informações necessárias para executar o caso de uso.
 

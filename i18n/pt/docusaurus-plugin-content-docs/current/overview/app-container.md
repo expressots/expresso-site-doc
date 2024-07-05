@@ -61,9 +61,9 @@ export { container };
 
 Como mencionado acima, se o `defaultScope` não for fornecido, o padrão é definido como `RequestScope`. No entanto, é possível alterar o escopo padrão passando o `defaultScope` como uma opção no construtor do contêiner. O `BindingScopeEnum` contém os seguintes valores:
 
-- `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
-- `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
-- `BindingScopeEnum.Transient` - A dependência será criada toda vez que for solicitada.
+-   `BindingScopeEnum.Singleton` - A dependência será criada uma vez e será compartilhada entre todas as solicitações.
+-   `BindingScopeEnum.Request` - A dependência será criada uma vez por solicitação.
+-   `BindingScopeEnum.Transient` - A dependência será criada toda vez que for solicitada.
 
 ## Visualizando as vinculações do contêiner
 
@@ -72,6 +72,7 @@ O contêiner pode ser usado para visualizar todas as vinculações que foram reg
 ```typescript
 appContainer.viewContainerBindings();
 ```
+
 ![Container Bindings View](./img/container-bindings.png)
 
 ## Registrando modulos
@@ -98,9 +99,9 @@ O uso do `appContainer` abstrai as complexidades do uso direto do InversifyJS, p
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas
