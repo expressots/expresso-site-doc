@@ -2,79 +2,189 @@
 sidebar_position: 17
 ---
 
-# Renderizacão
+# Motor de Renderização
 
-**[Express.js](https://expressjs.com/en/5x/api.html#res.render)** oferece um método `render` para renderizar uma visualização e enviar a sequência HTML renderizada para o cliente.
+**[ExpressoTS](https://expresso-ts.com/)** melhora as capacidades do servidor web do Express.js, proporcionando uma experiência simplificada para renderização de views. ExpressoTS suporta vários motores de renderização prontos para uso, incluindo EJS, PUG e Handlebars (HBS). Isso facilita para os desenvolvedores começarem a renderizar views sem necessidade de configuração adicional, pois são fornecidas configurações padrão para cada motor suportado.
 
-No ExpressoTS, como oferecemos suporte ao Express.js, também oferecemos suporte à capacidade de renderização oferecida pelo objeto de resposta HTTP.
+## Motores de Renderização Suportados
 
-O ExpressoTS implementa um suporte básico para mecanismos de renderização na classe `Application`. No momento, o número de mecanismos de renderização suportados é limitado ao Handlebars.
+ExpressoTS suporta os seguintes motores de renderização:
 
-Criamos a interface RenderTemplateOptions para fornecer uma estrutura para as opções de configuração de futuros mecanismos de renderização.
-Atualmente, oferecemos suporte a um número muito limitado de opções para o Handlebars, mas expandiremos isso no futuro, não apenas as opções, mas também o número de mecanismos de renderização suportados.
+-   EJS
+-   PUG
+-   HBS (Handlebars)
 
-## IHandlebars interface example
-
-```typescript
-interface IHandlebars {
-    /**
-     * Especifica o nome da extensão para os templates do Handlebars.
-     */
-    extName: string;
-
-    /**
-     * Especifica o caminho para o diretório que contém os templates do Handlebars.
-     */
-    viewPath: string;
-
-    /**
-     * Especifica a função para renderizar os templates do Handlebars.
-     */
-    engine: Engine;
-}
-
-type RenderTemplateOptions = IHandlebars;
-```
-
-## Como usar
+### Opções de Configuração do Handlebars
 
 ```typescript
-import { AppInstance, IHandlebars, ServerEnvironment } from "@expressots/core";
-
-async function bootstrap() {
-    AppInstance.create(container);
-
-    // Configurando handlebars como motor de renderização.
-    AppInstance.setEngine<IHandlebars>({
-        extName: "hbs",
-        viewPath: path.join(__dirname, "..", "views"),
-        engine: engine({ defaultLayout: "layout", extname: "hbs" }),
-    });
-
-    AppInstance.listen(3000, ServerEnvironment.Development);
-}
-
-bootstrap();
+export type HandlebarsOptions = {
+    viewEngine?: string; // O motor de visualização a ser usado
+    viewsDir?: string; // O caminho para a pasta de views
+    partialsDir?: string; // O caminho para a pasta de partials
+};
 ```
 
-:::tip
-Para que o código acima funcione, você precisa instalar o pacote **[express-handlebars](https://www.npmjs.com/package/express-handlebars)**, além de ter uma estrutura de pastas semelhante à apresentada abaixo.
-:::
+### Opções de configuração padrão do Handlebars
 
-## Estrutura de pastas
+```typescript
+{
+    viewEngine: "hbs",
+    viewsDir: <root>/views,
+    partialsDir: <root>/views/partials,
+}
+```
+
+### Estrutura de Pastas Padrão
+
+Estrutura de pastas padrão para Handlebars:
 
 ```tree
 src
-|--views
-|   |--layouts
-|   |   |--layout.hbs
-|   |--index.hbs
+views
+|--partials
+|   |--partial.hbs
+|--index.hbs
 ```
 
-## Instalando express-handlebars
+Todos os outros motores seguem a mesma estrutura, com exceção da pasta `partials`, que é específica para Handlebars.
 
-```bash
-npm i express-handlebars
+### Exemplo de Arquivo Handlebars
+
+```html
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Exemplo HBS</title>
+    </head>
+    <body>
+        <h1>Olá do HBS</h1>
+        <p>Renderizar partial: {{> partial}}</p>
+    </body>
+</html>
+```
+
+## Outras Opções de Configuração de Motores
+
+### Opções de Configuração do Pug
+
+```typescript
+export type PugOptions = {
+    viewEngine?: string; // O motor de visualização a ser usado
+    viewsDir?: string; // O caminho para a pasta de views
+};
+```
+
+### Opções de configuração padrão do Pug
+
+```typescript
+{
+    viewEngine: "pug",
+    viewsDir: <root>/views,
+}
+```
+
+### Opções de Configuração do EJS
+
+```typescript
+export type EjsOptions = {
+    viewEngine?: string; // O motor de visualização a ser usado
+    viewsDir?: string; // O caminho para a pasta de views
+};
+```
+
+### Opções de configuração padrão do EJS
+
+```typescript
+{
+    viewEngine: "ejs",
+    viewsDir: <root>/views,
+    serverOptions: {
+        cache: true,
+        compileDebug: false,
+        debug: false,
+        delimiter: "%",
+        strict: false,
+    },
+}
+```
+
+## Como Usar
+
+Aqui está como você pode configurar o ExpressoTS para usar um motor de renderização como HBS (handlebars) em sua aplicação:
+
+Na configuração do `app.provider`, você pode definir o motor de renderização:
+
+```typescript
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void {
+        // Definir o motor de renderização como HBS
+        this.setEngine(Engine.HBS);
+
+        this.middleware.setErrorHandler();
+    }
+
+    protected async postServerInitialization(): Promise<void> {
+        if (this.isDevelopment()) {
+            this.provider.get(Env).checkAll();
+        }
+    }
+
+    protected serverShutdown(): void {}
+}
+```
+
+:::note
+Se você deseja passar opções personalizadas para o motor de renderização, você pode fazer isso passando um objeto com as opções desejadas para o método `setEngine`. Por exemplo, para definir o diretório de views para um caminho personalizado, você pode fazer o seguinte:
+
+```typescript
+this.setEngine<HBS>(Engine.HBS, { viewsDir: <<custom-path>> });
+```
+
+:::
+
+### Como Renderizar Views no ExpressoTS
+
+Para renderizar uma view no ExpressoTS, você pode usar o método `render` fornecido pelo objeto `Response`. Aqui está um exemplo de como você pode renderizar uma view no ExpressoTS:
+
+```typescript
+@Get("/")
+root(@response() res: Response) {
+    res.render("index", { date: new Date(), name: "Informação Aleatória" });
+}
+```
+
+No exemplo acima, o método render é chamado no objeto Response, passando o nome da view a ser renderizada e um objeto com os dados a serem passados para a view. O motor de visualização renderizará a view com os dados fornecidos e retornará o HTML renderizado para o cliente.
+
+### Decorador Render
+
+O decorador `@Render` pode ser usado em métodos de controladores para renderizar views usando o motor de visualização especificado. Aqui está um exemplo de como você pode usar o decorador `@Render` para renderizar uma view no ExpressoTS:
+
+#### Renderização passando a view e dados padrão no decorador
+
+```typescript
+@Get("/")
+@Render("index", { date: new Date(), name: "Informação Aleatória" })
+root() {}
+```
+
+#### Renderização passando apenas a view no decorador
+
+```typescript
+@Get("/")
+@Render("index")
+root() {
+    return { date: new Date(), name: "Informação Aleatória" };
+}
 ```
 
 ---

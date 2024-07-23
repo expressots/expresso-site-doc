@@ -2,79 +2,190 @@
 sidebar_position: 17
 ---
 
-# Render
+# Render Engine
 
-**[Express.js](https://expressjs.com/en/5x/api.html#res.render)** offers a `render` method to render a view and send the rendered HTML string to the client.
+**[ExpressoTS](https://expresso-ts.com/)** enhances the web server capabilities of Express.js by providing a streamlined experience for rendering views. ExpressoTS supports various render engines out-of-the-box, including EJS, PUG, and Handlebars (HBS). This makes it easy for developers to start rendering views without needing additional configuration, as default settings are provided for each supported engine.
 
-In ExpressoTS as we do support Express.js, we also support the `render` capability offered by the HTTP response object.
+## Supported Render Engines
 
-ExpressoTS implements a basic support for render engines in the `Application` class. At the moment the number of renders supported is limited to Handlebars.
+ExpressoTS supports the following render engines:
 
-We created the `RenderTemplateOptions` interface to provide a structure for the configuration options of future render engines.
-Currently we just support a very limited number of options for Handlebars, but we will expand this in the future, not just the options but also the number of supported render engines.
+-   EJS
+-   PUG
+-   HBS (Handlebars)
 
-## IHandlebars interface example
+### Handlebars Configuration Options
 
 ```typescript
-interface IHandlebars {
-    /**
-     * Specifies the extension name for the Handlebars templates.
-     */
-    extName: string;
+export type HandlebarsOptions = {
+    viewEngine?: string; // The view engine to be used
+    viewsDir?: string; // The path to the views folder
+    partialsDir?: string; // The path to the partials folder
+};
+```
 
-    /**
-     * Specifies the path to the directory containing the Handlebars templates.
-     */
-    viewPath: string;
+#### Default Handlebars configuration options
 
-    /**
-     * Specifies the function for rendering Handlebars templates.
-     */
-    engine: Engine;
+```typescript
+{
+    viewEngine: "hbs",
+    viewsDir: <root>/views,
+    partialsDir: <root>/views/partials,
 }
+```
 
-type RenderTemplateOptions = IHandlebars;
+### Default Folder structure
+
+Default folder structure for Handlebars:
+
+```tree
+src
+views
+|--partials
+|   |--partial.hbs
+|--index.hbs
+```
+
+All other engines follow the same structure, with the exception of the `partials` folder, which is specific to Handlebars.
+
+### Handlebars File Example
+
+```html
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HBS Example</title>
+    </head>
+    <body>
+        <h1>Hello from HBS</h1>
+        <p>Render partial: {{> partial}}</p>
+    </body>
+</html>
+```
+
+## Other Engine Configuration Options
+
+### Pug Configuration Options
+
+```typescript
+export type PugOptions = {
+    viewEngine?: string;
+    viewsDir?: string;
+};
+```
+
+#### Default Pug configuration options
+
+```typescript
+{
+    viewEngine: "pug",
+    viewsDir: <root>/views,
+}
+```
+
+### EJS Configuration Options
+
+```typescript
+export type EjsOptions = {
+    viewsDir?: string;
+    viewEngine?: string;
+    serverOptions?: EjsOptionsServer;
+};
+```
+
+#### Default EJS configuration options
+
+```typescript
+{
+    viewEngine: "ejs",
+    viewsDir: <root>/views,
+    serverOptions: {
+        cache: true,
+        compileDebug: false,
+        debug: false,
+        delimiter: "%",
+        strict: false,
+    },
+}
 ```
 
 ## How to use
 
+Here's how you can set up ExpressoTS to use a render engine like HBS (handlebars) in your application:
+
+In the `app.provider` configuration provider, you can set the render engine:
+
 ```typescript
-import { AppInstance, IHandlebars, ServerEnvironment } from "@expressots/core";
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
 
-async function bootstrap() {
-    AppInstance.create(container);
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
 
-    // Setting handlebars as the view engine.
-    AppInstance.setEngine<IHandlebars>({
-        extName: "hbs",
-        viewPath: path.join(__dirname, "..", "views"),
-        engine: engine({ defaultLayout: "layout", extname: "hbs" }),
-    });
+    protected configureServices(): void {
+        // Set the render engine to HBS
+        this.setEngine(Engine.HBS);
 
-    AppInstance.listen(3000, ServerEnvironment.Development);
+        this.middleware.setErrorHandler();
+    }
+
+    protected async postServerInitialization(): Promise<void> {
+        if (this.isDevelopment()) {
+            this.provider.get(Env).checkAll();
+        }
+    }
+
+    protected serverShutdown(): void {}
 }
-
-bootstrap();
 ```
 
-:::tip
-For the code above to work, you need to install the **[express-handlebars](https://www.npmjs.com/package/express-handlebars)** package as well as having a folder structure similar to the one below.
+:::note
+If you want to pass custom options to the render engine, you can do so by passing an object with the desired options to the `setEngine` method. For example, to set the views directory to a custom path, you can do the following:
+
+```typescript
+this.setEngine<HBS>(Engine.HBS, { viewsDir: <<custom-path>> });
+```
+
 :::
 
-## Folder structure
+### How To Render Views in ExpressoTS
 
-```tree
-src
-|--views
-|   |--layouts
-|   |   |--layout.hbs
-|   |--index.hbs
+To render a view in ExpressoTS, you can use the `render` method provided by the `Response` object. Here's an example of how you can render a view in ExpressoTS:
+
+```typescript
+@Get("/")
+root(@response() res: Response) {
+    res.render("index", { date: new Date(), name: "Random information" });
+}
 ```
 
-## Installing express-handlebars
+In the example above, the `render` method is called on the `Response` object, passing the name of the view to be rendered and an object with data to be passed to the view. The view engine will render the view with the provided data and return the rendered HTML to the client.
 
-```bash
-npm i express-handlebars
+### Render Decorator
+
+The `@Render` decorator can be used on controller methods to render views using the specified view engine. Here's an example of how you can use the `@Render` decorator to render a view in ExpressoTS:
+
+#### Rendering passing the view and default data in the decorator
+
+```typescript
+@Get("/")
+@Render("index", { date: new Date(), name: "Random information" })
+root() {}
+```
+
+#### Rendering passing only the view in the decorator
+
+```typescript
+@Get("/")
+@Render("index")
+root() {
+    return { date: new Date(), name: "Random information" };
+}
 ```
 
 ---
