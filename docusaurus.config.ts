@@ -3,11 +3,39 @@ import type { Config } from "@docusaurus/types";
 import { themes } from "prism-react-renderer";
 import axios from "axios";
 
-const fetchVersion = async (): Promise<string> => {
+const coreVersion = async (): Promise<string> => {
     try {
         const response = await axios.get(
             "https://api.github.com/repos/expressots/expressots/releases"
         );
+        const latestRelease = response.data[0];
+        return latestRelease.tag_name;
+    } catch (error) {
+        console.error("Error fetching current version from GitHub:", error);
+        return "2.0.0"; // Fallback version
+    }
+};
+
+const adapterVersion = async (): Promise<string> => {
+    try {
+        const response = await axios.get(
+            "https://api.github.com/repos/expressots/adapter-express/releases"
+        );
+
+        const latestRelease = response.data[0];
+        return latestRelease.tag_name;
+    } catch (error) {
+        console.error("Error fetching current version from GitHub:", error);
+        return "2.0.0"; // Fallback version
+    }
+};
+
+const cliVersion = async (): Promise<string> => {
+    try {
+        const response = await axios.get(
+            "https://api.github.com/repos/expressots/expressots-cli/releases"
+        );
+
         const latestRelease = response.data[0];
         return latestRelease.tag_name;
     } catch (error) {
@@ -80,7 +108,6 @@ const config: Config = {
             indexName: "expresso-ts",
             contextualSearch: true,
             insights: true,
-            placeholder: "Search the docs (Press / to focus)",
             appId: "3UANWN5EUQ",
         },
         navbar: {
@@ -175,10 +202,13 @@ const config: Config = {
 };
 
 export default async function asyncConfig(): Promise<Config> {
-    const version = await fetchVersion();
+    const core = await coreVersion();
+    const adapter = await adapterVersion();
+    const cli = await cliVersion();
+
     config.themeConfig.announcementBar = {
         id: "supportus",
-        content: `Current Version: ${version}`,
+        content: `@core v${core} / @adapter-express v${adapter} / @cli v${cli}`,
         backgroundColor: "#111",
         textColor: "#19CE59",
         isCloseable: false,
