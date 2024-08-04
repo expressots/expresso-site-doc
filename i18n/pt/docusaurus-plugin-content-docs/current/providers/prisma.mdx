@@ -2,10 +2,13 @@
 sidebar_position: 4
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # Prisma Provider
+
+:::danger Prisma foi removido e será servido como um pacote separado via [add provider] comando.
+:::
 
 O Provedor Prisma do ExpressoTS encapsula o robusto ORM (Object-Relational Mapper) [Prisma](https://www.prisma.io/) dentro do framework ExpressoTS, criando uma interface transparente para operações de dados. O Prisma facilita um acesso seguro, tipo-seguro e simplificado ao seu banco de dados, garantindo que as interações de dados dentro das suas aplicações sejam precisas e eficientes. Seu potente motor de consulta simplifica significativamente o acesso ao banco de dados e mitiga bugs comuns associados à recuperação e manipulação de dados.
 
@@ -40,25 +43,26 @@ Após a instalação, um novo conjunto de configurações referentes ao provedor
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
-  sourceRoot: "src",
-  scaffoldPattern: Pattern.KEBAB_CASE,
-  opinionated: true,
-  providers: {
-    // highlight-start
-    prisma: {
-      schemaName: "schema",
-      schemaPath: "./prisma",
-      entitiesPath: "entities",
-      entityNamePattern: "entity",
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: true,
+    providers: {
+        // highlight-start
+        prisma: {
+            schemaName: "schema",
+            schemaPath: "./prisma",
+            entitiesPath: "entities",
+            entityNamePattern: "entity",
+        },
+        // highlight-end
     },
-    // highlight-end
-  },
 };
 
 export default config;
 ```
 
 ## Extensão do Repositório Base
+
 Durante o processo de configuração, será solicitado a você estender o seu repositório base existente ou criar um novo, caso nenhum exista. Isso inclui tanto a interface quanto a implementação, permitindo uma maneira padronizada de interagir com suas entidades de banco de dados.
 
 <Tabs>
@@ -67,28 +71,22 @@ Durante o processo de configuração, será solicitado a você estender o seu re
 
 ```ts title="./src/repositories/base-repository.interface.ts"
 import { Prisma, PrismaClient } from "@prisma/client";
-import {
-  CreateInput,
-  ModelsOf,
-  DeleteWhere,
-  Select,
-  PrismaAction,
-} from "@expressots/prisma";
+import { CreateInput, ModelsOf, DeleteWhere, Select, PrismaAction } from "@expressots/prisma";
 
 interface IBaseRepository<ModelName extends ModelsOf<PrismaClient>> {
-  // highlight-start
-  aggregate: (args: PrismaAction<ModelName, "aggregate">) => Promise<any>;
-  count: (args: PrismaAction<ModelName, "count">) => Promise<number>;
-  // highlight-end
-  create: (
-    data:
-      | CreateInput<ModelName>["data"]
-      | {
-          data: CreateInput<ModelName>["data"];
-          select?: Select<ModelName, "create">["select"];
-        },
-  ) => Promise<ModelName | never>;
-  // ...
+    // highlight-start
+    aggregate: (args: PrismaAction<ModelName, "aggregate">) => Promise<any>;
+    count: (args: PrismaAction<ModelName, "count">) => Promise<number>;
+    // highlight-end
+    create: (
+        data:
+            | CreateInput<ModelName>["data"]
+            | {
+                  data: CreateInput<ModelName>["data"];
+                  select?: Select<ModelName, "create">["select"];
+              }
+    ) => Promise<ModelName | never>;
+    // ...
 }
 ```
 
@@ -141,18 +139,21 @@ class BaseRepository<ModelName extends ModelsOf<PrismaClient>>
 Desenvolvemos decoradores para facilitar o uso do Prisma com o ExpressoTS. Você pode usar os decoradores com Entidades, enums e tipos para gerar o esquema Prisma automaticamente.
 
 ### Decoradores
-| Decorador	| Descrição	| Opções | 
-| --- | --- | --- |
-| @prismaModel	| Decora uma classe como um modelo Prisma	| map |
-| @prismaField	| Decora uma propriedade com atributo específico do banco de dados	| attr, isId, isOptional, type, isUnique, prismaDefault, mapField, name |
-| @prismaRelation	| Decora uma propriedade como uma relação Prisma	| relation, name, model, refs, fields, onDelete, onUpdate, isRequired |
-| @prismaIndex |	Decora uma propriedade como um índice Prisma	| name, fields, map, type |
+
+| Decorador       | Descrição                                                        | Opções                                                                |
+| --------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| @prismaModel    | Decora uma classe como um modelo Prisma                          | map                                                                   |
+| @prismaField    | Decora uma propriedade com atributo específico do banco de dados | attr, isId, isOptional, type, isUnique, prismaDefault, mapField, name |
+| @prismaRelation | Decora uma propriedade como uma relação Prisma                   | relation, name, model, refs, fields, onDelete, onUpdate, isRequired   |
+| @prismaIndex    | Decora uma propriedade como um índice Prisma                     | name, fields, map, type                                               |
 
 ### Decorador PrismaModel
+
 O decorador @prismaModel() é essencial para designar uma classe como um modelo Prisma, o que por sua vez desencadeia a geração automática do esquema Prisma correspondente.
 
 Opções:
-- `map`: A opção map está disponível para mapear o nome da classe para um nome diferente no esquema Prisma, garantindo a flexibilidade de aderir às convenções ou requisitos de nomenclatura. Para uma compreensão aprofundada da opção de mapa, consulte a documentação do Prisma.
+
+-   `map`: A opção map está disponível para mapear o nome da classe para um nome diferente no esquema Prisma, garantindo a flexibilidade de aderir às convenções ou requisitos de nomenclatura. Para uma compreensão aprofundada da opção de mapa, consulte a documentação do Prisma.
 
 Vamos ilustrar isso com um exemplo extraído do modelo Opinativo. Inicialmente, a entidade está estruturada da seguinte forma:
 
@@ -182,13 +183,13 @@ import { IEntity } from "./base.entity";
 // highlight-start
 @provide(User)
 export class User implements IEntity {
-  id: string;
-  name!: string;
-  email!: string;
+    id: string;
+    name!: string;
+    email!: string;
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 // highlight-end
 ```
@@ -216,18 +217,17 @@ import { prismaModel } from "@expressots/prisma";
 @prismaModel({ map: "user" })
 // highlight-end
 export class User implements IEntity {
-  id: string;
-  name!: string;
-  email!: string;
+    id: string;
+    name!: string;
+    email!: string;
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 ```
 
 </TabItem>
-
 
 <TabItem label="Terminal" value="terminal">
 
@@ -275,9 +275,7 @@ O decorador `@prismaField()` é usado para decorar uma propriedade com atributos
 
 Opções:
 
-- `attr`: Você pode usar a opção `attr` para adicionar atributos específicos ao campo por banco de dados. Para obter mais informações sobre a opção `attr`, consulte a [documentação do Prisma](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#model-fields).
-
-
+-   `attr`: Você pode usar a opção `attr` para adicionar atributos específicos ao campo por banco de dados. Para obter mais informações sobre a opção `attr`, consulte a [documentação do Prisma](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#model-fields).
 
 <Tabs>
 
@@ -292,18 +290,18 @@ import { prismaModel, prismaField, db } from "@expressots/prisma";
 @provide(User)
 @prismaModel({ map: "users" })
 export class User implements IEntity {
-  @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
-  id: string;
+    @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
+    id: string;
 
-  @prismaField({ attr: db.Postgres.Char(36) })
-  name!: string;
+    @prismaField({ attr: db.Postgres.Char(36) })
+    name!: string;
 
-  @prismaField({ attr: db.Postgres.Char(36) })
-  email!: string;
+    @prismaField({ attr: db.Postgres.Char(36) })
+    email!: string;
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 ```
 
@@ -316,7 +314,6 @@ npm run prisma
 ```
 
 </TabItem>
-
 
 <TabItem label="Prisma Schema" value="prisma-schema">
 
@@ -345,17 +342,16 @@ O decorador `@prismaRelation()` é um recurso poderoso que agiliza a criação d
 
 As opções para `@prismaRelation()` incluem:
 
-- `model`: Especifica o modelo Prisma relacionado.
-- `relação`: Define o tipo de relacionamento, como um para muitos, um para um, etc.
-- `refs`: Uma matriz que denota o(s) campo(s) aos quais o relacionamento está referenciando.
-- `fields`: Especifica o(s) campo(s) no modelo que são usados para a relação.
-- `onDelete` e `onUpdate`: Definem as ações referenciais nas operações de exclusão e atualização.
-- `isRequired`: Determina se o campo relacionado é obrigatório.
+-   `model`: Especifica o modelo Prisma relacionado.
+-   `relação`: Define o tipo de relacionamento, como um para muitos, um para um, etc.
+-   `refs`: Uma matriz que denota o(s) campo(s) aos quais o relacionamento está referenciando.
+-   `fields`: Especifica o(s) campo(s) no modelo que são usados para a relação.
+-   `onDelete` e `onUpdate`: Definem as ações referenciais nas operações de exclusão e atualização.
+-   `isRequired`: Determina se o campo relacionado é obrigatório.
 
 Agora, vamos aplicar isso a um exemplo específico para melhor compreensão.
 
 #### Exemplo: relacionamento User-Post
-
 
 <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem' }}>
 
@@ -397,42 +393,42 @@ import { provide } from "inversify-binding-decorators";
 import { randomUUID } from "node:crypto";
 import { IEntity } from "./base.entity";
 import {
-  prismaModel,
-  prismaField,
-  // highlight-start
-  prismaRelation,
-  Relation,
-  // highlight-end
-  db,
+    prismaModel,
+    prismaField,
+    // highlight-start
+    prismaRelation,
+    Relation,
+    // highlight-end
+    db,
 } from "@expressots/prisma";
 import { Post } from "./post.entity";
 
 @provide(User)
 @prismaModel({ map: "user" })
 export class User implements IEntity {
-  @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
-  id: string;
+    @prismaField({ attr: db.Postgres.Uuid, isUnique: true, isId: true })
+    id: string;
 
-  @prismaField({ attr: db.Postgres.Char(36) })
-  name!: string;
+    @prismaField({ attr: db.Postgres.Char(36) })
+    name!: string;
 
-  @prismaField({ attr: db.Postgres.Char(36) })
-  email!: string;
+    @prismaField({ attr: db.Postgres.Char(36) })
+    email!: string;
 
-  // highlight-start
-  // Define the one-to-many relationship to Post.
-  @prismaField({ type: Post })
-  @prismaRelation({
-    model: "Post",
-    relation: Relation.OneToMany,
-    refs: ["id"],
-  })
-  posts: Post[]; // This is where the User-Post relationship is expressed.
-  // highlight-end
+    // highlight-start
+    // Define the one-to-many relationship to Post.
+    @prismaField({ type: Post })
+    @prismaRelation({
+        model: "Post",
+        relation: Relation.OneToMany,
+        refs: ["id"],
+    })
+    posts: Post[]; // This is where the User-Post relationship is expressed.
+    // highlight-end
 
-  constructor() {
-    this.id = randomUUID();
-  }
+    constructor() {
+        this.id = randomUUID();
+    }
 }
 ```
 
@@ -469,7 +465,6 @@ npm run prisma
 ```
 
 </TabItem>
-
 
 <TabItem label="Prisma Schema" value="prisma-schema">
 
@@ -510,20 +505,20 @@ O decorador `@prismaIndex()` é essencial para otimizar consultas ao banco de da
 
 Ao aplicar o decorador `@prismaIndex()` a um modelo, você fornece ao Prisma as informações necessárias para criar um índice no banco de dados subjacente. O decorador pega um objeto com diversas opções:
 
-- `name`: Especifica um nome para o índice, permitindo fácil referência e gerenciamento.
-- `fields`: Define um array de campos a serem incluídos no índice. Estas são as propriedades do modelo que você espera consultar com frequência.
-- `type`: Dita o tipo de índice a ser utilizado, influenciando como o banco de dados organiza e recupera os dados.
+-   `name`: Especifica um nome para o índice, permitindo fácil referência e gerenciamento.
+-   `fields`: Define um array de campos a serem incluídos no índice. Estas são as propriedades do modelo que você espera consultar com frequência.
+-   `type`: Dita o tipo de índice a ser utilizado, influenciando como o banco de dados organiza e recupera os dados.
 
 #### Tipos de índice
 
 O enum `IndexType` oferece uma seleção de tipos de índice adequados para diferentes tipos de dados e padrões de consulta:
 
-- `Brin`: Índices de intervalo de blocos são adequados para tabelas grandes nas quais certas colunas têm uma correlação linear com sua localização física no disco.
-- `Btree`: Os índices de árvore balanceada são os mais comuns e excelentes para uso geral. Eles suportam consultas de igualdade e intervalo de forma eficiente.
-- `Gist`: índices de árvore de pesquisa generalizada suportam tipos complexos como dados geométricos e podem lidar com dados multidimensionais.
-- `Gin`: Índices invertidos generalizados são otimizados para indexar valores compostos onde cada item indexado pode conter vários valores de componentes.
-- `Hash`: Os índices hash fornecem recuperação rápida para pesquisas de igualdade, mas não suportam consultas de intervalo.
-- `Spgist`: índices de árvore de pesquisa generalizada particionados em espaço são bons para dados que não se ajustam bem a uma estrutura de árvore B, como números de telefone ou endereços IP.
+-   `Brin`: Índices de intervalo de blocos são adequados para tabelas grandes nas quais certas colunas têm uma correlação linear com sua localização física no disco.
+-   `Btree`: Os índices de árvore balanceada são os mais comuns e excelentes para uso geral. Eles suportam consultas de igualdade e intervalo de forma eficiente.
+-   `Gist`: índices de árvore de pesquisa generalizada suportam tipos complexos como dados geométricos e podem lidar com dados multidimensionais.
+-   `Gin`: Índices invertidos generalizados são otimizados para indexar valores compostos onde cada item indexado pode conter vários valores de componentes.
+-   `Hash`: Os índices hash fornecem recuperação rápida para pesquisas de igualdade, mas não suportam consultas de intervalo.
+-   `Spgist`: índices de árvore de pesquisa generalizada particionados em espaço são bons para dados que não se ajustam bem a uma estrutura de árvore B, como números de telefone ou endereços IP.
 
 Cada tipo de índice vem com suas próprias características de desempenho e é otimizado para tipos específicos de consultas e padrões de dados. A escolha do tipo de índice correto é crucial para o desempenho das operações de leitura e, consequentemente, para o desempenho geral da aplicação.
 
@@ -531,22 +526,21 @@ Cada tipo de índice vem com suas próprias características de desempenho e é 
 
 Abaixo está um exemplo de como usar o decorador `@prismaIndex()` para definir um índice hash no campo `email` de um modelo `User`, o que aceleraria consultas que procuram usuários por seus endereços de email:
 
-
 <Tabs>
 
 <TabItem label="Entity" value="entity">
 
 ```ts title="./src/entities/user.entity.ts"
 import {
-  prismaModel,
-  prismaField,
-  prismaRelation,
-  // highlight-next-line
-  prismaIndex,
-  Relation,
-  // highlight-next-line
-  IndexType,
-  db,
+    prismaModel,
+    prismaField,
+    prismaRelation,
+    // highlight-next-line
+    prismaIndex,
+    Relation,
+    // highlight-next-line
+    IndexType,
+    db,
 } from "@expressots/prisma";
 
 @provide(User)
@@ -554,11 +548,11 @@ import {
 // highlight-next-line
 @prismaIndex({ name: "emailIndex", fields: ["email"], type: IndexType.Hash })
 export class User implements IEntity {
-  // ...
+    // ...
 
-  // highlight-next-line
-  @prismaField({ attr: db.Postgres.Char(36), isUnique: true })
-  email!: string;
+    // highlight-next-line
+    @prismaField({ attr: db.Postgres.Char(36), isUnique: true })
+    email!: string;
 }
 ```
 
@@ -597,9 +591,9 @@ Os índices são cruciais para otimizar seu banco de dados, mas devem ser usados
 
 ExpressoTS é um projeto de código aberto licenciado sob o MIT. É um projeto independente com desenvolvimento contínuo possibilitado graças ao seu suporte. Se você deseja ajudar, por favor considere:
 
-- Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
-- Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
-- Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
-- Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
-- Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
-- Compartilhe o projeto com seus amigos e colegas
+-   Se tornar um **[Sponsor no GitHub](https://github.com/sponsors/expressots)**
+-   Siga a **[organização](https://github.com/expressots)** no GitHub e de um Star ⭐ no projeto
+-   Subscreva no nosso canal na Twitch: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
+-   Entre no nosso **[Discord](https://discord.com/invite/PyPJfGK)**
+-   Contribua submetendo **[issues e pull requests](https://github.com/expressots/expressots/issues/new/choose)**
+-   Compartilhe o projeto com seus amigos e colegas

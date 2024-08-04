@@ -4,29 +4,27 @@ sidebar_position: 2
 
 # Gerar recursos
 
-Para proporcionar uma melhor experiência de desenvolvedor, a CLI do ExpressoTS fornece um conjunto de comandos para ajudar a criar os recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços.
-
-Este comando permite que os desenvolvedores estejam à frente da curva, gerando o código boilerplate para a aplicação, para que possam se concentrar na lógica de negócios.
+Para oferecer uma melhor experiência ao desenvolvedor, o CLI do ExpressoTS fornece um conjunto de comandos que ajudam a criar os recursos da aplicação, como casos de uso, controladores, DTOs, provedores e serviços. Isso permite que os desenvolvedores se concentrem na lógica de negócios, gerando automaticamente o código boilerplate.
 
 ## Comandos
 
 O comando para gerar recursos podem ser expressados de duas formas:
 
 ```bash
-expressots generate <recurso> <estrutura>
+expressots generate <recurso> <estrutura> [opções]
 ```
 
 Ou em sua forma curta:
 
 ```bash
-expressots g <recurso> <estrutura>
+expressots g <recurso> <estrutura> [opções]
 ```
 
 ### Estrutura de comando
 
 Nós fornecemos duas estruturas diferentes para estruturar os recursos:
 
--   **[entidade-ação]**: `expressots generate service user-create`
+-   **[abreviada]**: `expressots generate service user-create`
     Isso criará esta estrutura de pastas: `/user/create` e o arquivo: `user-create.[recurso].ts`
 
 -   **[pasta/subpasta/recurso]**: `expressots generate service user/create`
@@ -46,61 +44,31 @@ Nós fornecemos duas estruturas diferentes para estruturar os recursos:
 Recursos disponíveis atualmente:
 
 | Forma longa | Abreviação | Comando                    | Resultado esperado                                                                     |
-| -----------| --- | --------------- | -------------------------------------------------------------------------------------- |
-| useCase | u | expressots g u user/find   | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find |
-| controller | c | expressots g c user/find   | Controlador para ser criado na pasta `useCases` dentro de user/find                    |
-| dto | d | expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
-| provider | p | expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
-| service | s | expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
-| entity | e | expressots g e user        | Entidade a ser criada na pasta `entities` com esta estrutura de pasta: user            |
-| middleware | mi | expressots g m auth        | Middleware a ser criado na pasta `middlewares` com esta estrutura de pasta: auth       |
-| module	| mo	| expressots g mo user	| Módulo a ser criado na pasta onde `controllers` e `usecases` estão localizados |
+| ----------- | ---------- | -------------------------- | -------------------------------------------------------------------------------------- |
+| useCase     | u          | expressots g u user/find   | Caso de uso para ser criado na pasta `useCases` com esta estrutura de pasta: user/find |
+| controller  | c          | expressots g c user/find   | Controlador para ser criado na pasta `useCases` dentro de user/find                    |
+| dto         | d          | expressots g d user/find   | DTO a ser criado na pasta `useCases` dentro de user/find                               |
+| provider    | p          | expressots g p email/email | Provedor a ser criado na pasta `providers` dentro de user/find                         |
+| service     | s          | expressots g s user/find   | Serviço cria caso de uso, controladora e dto e os adiciona na pasta user/find          |
+| entity      | e          | expressots g e user        | Entidade a ser criada na pasta `entities` com esta estrutura de pasta: user            |
+| middleware  | mi         | expressots g m auth        | Middleware a ser criado na pasta `middlewares` com esta estrutura de pasta: auth       |
+| module      | mo         | expressots g mo user       | Módulo a ser criado na pasta onde `controllers` e `usecases` estão localizados         |
 
 Todos os recursos podem ser criados usando a estrutura `pasta/subpasta/recurso.`
 
-## Gerando recursos com hífen nos nomes
+## Gerando recursos com Operação Abreviada
 
-Para serviços, você pode aproveitar para criar o caso de uso, controlador e DTO de uma vez usando a estrutura `entidade_acao ` ou `entidade-acao `. Exemplo: `expressots g s user-create`.
+Para serviços, você pode aproveitar para criar o caso de uso, controlador e DTO de uma vez usando a estrutura `entidade_acao ` ou `entidade-acao `. Exemplo:
 
-:::info
-O arquivo de configuração `expressots.config.ts`, localizado na pasta raiz do projeto, determina onde todos os recursos serão criados.
-:::
-
-## ExpressoTS arquivo de configuração
-
-O arquivo de configuração está localizado na pasta raiz do projeto e é chamado de `expressots.config.ts`. Este arquivo é usado para configurar o CLI e o projeto.
-
-Aqui está o arquivo de configuração atual com todas as opções disponíveis:
-
-```typescript
-import { ExpressoConfig, Pattern } from "@expressots/core";
-
-const config: ExpressoConfig = {
-    sourceRoot: "src",
-    scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: true,
-    scaffoldSchematics: {
-        entity: "entity",
-        provider: "provider",
-        module: "module",
-        controller: "controller",
-        dto: "dto",
-        middleware: "middleware",
-        usecase: "useCases",
-    },
-};
-
-export default config;
+```bash
+expressots g s user-create
 ```
 
--   **sourceRoot**: a pasta raiz que será usada pelo CLI para criar os recursos. Padrão: `src`
--   **scaffoldPattern**: o padrão que será usado para criar os recursos. Padrão: `Pattern.KEBAB_CASE`. Exemplo: `user-create`
--   **opinionated**: se for verdadeiro, o CLI criará os recursos usando a estrutura de pasta com opinião.
--   **scaffoldSchematics**: os nomes de convenção de pastas para cada recurso. Padrão: `useCases`, `entities`, `providers`, `middlewares`, `controllers`, `dtos`
+:::info
+O arquivo de configuração `expressots.config.ts`, localizado na pasta raiz do projeto, determina onde todos os recursos serão criados. Também é possível configurar o padrão de nomenclatura dos recursos e se o CLI deve seguir uma estrutura de pasta com opinião.
+:::
 
-## Recomendações
-
-Tente usar o máximo de formas diferentes de criar recursos possível. Isso ajudará você a entender como o CLI funciona e como usá-lo a seu favor. Também nos ajuda a melhorar o CLI para torná-lo mais robusto.
+Leia mais sobre a [configuração do projeto](/i18n/pt/docusaurus-plugin-content-docs/current/overview/expressots-config.md).
 
 ---
 

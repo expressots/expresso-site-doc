@@ -116,16 +116,16 @@ Um outro aspecto importante da classe Application são os hooks de ciclo de vida
 
 Scripts para construir, executar e testar a aplicação são fornecidos, acomodando diferentes estágios de desenvolvimento e necessidades operacionais, desde o desenvolvimento até a produção.
 
-| Script               | Descrição                                             | Comando            |
-| -------------------- | ----------------------------------------------------- | ------------------ |
-| expressots run build | Constrói o pacote de produção na pasta ./dist.        | npm run build      |
-| expressots run dev   | Executa em modo de desenvolvimento com observação.    | npm run dev        |
-| expressots run prod  | Executa em modo de produção com base no pacote built. | npm run prod       |
-| test                 | Executa os testes localizados na pasta test.          | npm run test       |
-| test:watch           | Executa os testes em modo de observação e interativo. | npm run test:watch |
-| test:cov             | Gera relatorio de cobertura de testes.                | npm run test:cov   |
-| format               | Formatar código usando prettier.                      | npm run format     |
-| lint                 | Lint código usando eslint.                            | npm run lint       |
+| Script           | Descrição                                             | Comando            |
+| ---------------- | ----------------------------------------------------- | ------------------ |
+| expressots build | Constrói o pacote de produção na pasta ./dist.        | npm run build      |
+| expressots dev   | Executa em modo de desenvolvimento com observação.    | npm run dev        |
+| expressots prod  | Executa em modo de produção com base no pacote built. | npm run prod       |
+| test             | Executa os testes localizados na pasta test.          | npm run test       |
+| test:watch       | Executa os testes em modo de observação e interativo. | npm run test:watch |
+| test:cov         | Gera relatorio de cobertura de testes.                | npm run test:cov   |
+| format           | Formatar código usando prettier.                      | npm run format     |
+| lint             | Lint código usando eslint.                            | npm run lint       |
 
 ## Executando a aplicação
 
