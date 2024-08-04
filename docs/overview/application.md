@@ -116,16 +116,16 @@ Another important aspect of the Application class is lifecycle hooks. These hook
 
 Scripts for building, running, and testing the application are provided, accommodating different development stages and operational needs, from development to production.
 
-| Script               | Description                                     | Command            |
-| -------------------- | ----------------------------------------------- | ------------------ |
-| expressots run build | Build the production bundle in a ./dist folder. | npm run build      |
-| expressots run dev   | Runs in development watch mode.                 | npm run dev        |
-| expressots run prod  | Runs in production mode based on built bundle.  | npm run prod       |
-| test                 | Run your tests located in the test folder.      | npm run test       |
-| test:watch           | Run your tests in watch and interactive mode.   | npm run test:watch |
-| test:cov             | Produces test coverage report.                  | npm run test:cov   |
-| format               | Format the code using prettier.                 | npm run format     |
-| lint                 | Lint code using eslint.                         | npm run lint       |
+| Script           | Description                                     | Command            |
+| ---------------- | ----------------------------------------------- | ------------------ |
+| expressots build | Build the production bundle in a ./dist folder. | npm run build      |
+| expressots dev   | Runs in development watch mode.                 | npm run dev        |
+| expressots prod  | Runs in production mode based on built bundle.  | npm run prod       |
+| test             | Run your tests located in the test folder.      | npm run test       |
+| test:watch       | Run your tests in watch and interactive mode.   | npm run test:watch |
+| test:cov         | Produces test coverage report.                  | npm run test:cov   |
+| format           | Format the code using prettier.                 | npm run format     |
+| lint             | Lint code using eslint.                         | npm run lint       |
 
 ## Starting the application
 

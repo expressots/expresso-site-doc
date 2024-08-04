@@ -13,20 +13,20 @@ This command allows developers to stay ahead of the curve by generating the boil
 The generate command can be executed as follows:
 
 ```bash
-expressots generate <resource> <structure>
+expressots generate <resource> <structure> [options]
 ```
 
 Or in its short form:
 
 ```bash
-expressots g <resource> <structure>
+expressots g <resource> <structure> [options]
 ```
 
 ### Command Structure
 
 We provide two different structures to scaffold the resources:
 
--   **[entity-action]**: `expressots generate service user-create`
+-   **[shorthand]**: `expressots generate service user-create`
     This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts`
 
 -   **[folder/subfolder/resource]**: `expressots generate service user/create`
@@ -58,49 +58,19 @@ Current available resources:
 
 All resources can be created using the structure `folder/subfolder/resource`.
 
-## Scaffolding using hyphenated names
+## Scaffolding Using Shorthand Operation
 
-For services, you can take advantage of creating the use case, controller and DTO at once using the structure `entity_action` or `entity-action`. Example: `expressots g s user-create`.
+For services, you can take advantage of creating the use case, controller and DTO at once using the structure `entity_action` or `entity-action`. Example:
 
-:::info
-The `expressots.config.ts` configuration file, located in the project root folder, determines where all resources will be created.
-:::
-
-## ExpressoTS Config File
-
-The configuration file is located in the root folder of the project and it's called `expressots.config.ts`. This file is used to configure the CLI and the project.
-
-Here is the current configuration file with all the available options:
-
-```typescript
-import { ExpressoConfig, Pattern } from "@expressots/core";
-
-const config: ExpressoConfig = {
-    sourceRoot: "src",
-    scaffoldPattern: Pattern.KEBAB_CASE,
-    opinionated: true,
-    scaffoldSchematics: {
-        entity: "entity",
-        provider: "provider",
-        module: "module",
-        controller: "controller",
-        dto: "dto",
-        middleware: "middleware",
-        usecase: "useCases",
-    },
-};
-
-export default config;
+```bash
+expressots g s user-create
 ```
 
--   **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
--   **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
--   **opinionated**: if true, the CLI will create the resources using the opinionated folder structure
--   **scaffoldSchematics**: the folder convention names for each resource. Default: `useCases`, `entities`, `providers`, `middlewares`, `controllers`, `dtos`
+:::info
+The `expressots.config.ts` configuration file, located in the project root folder, determines where all resources will be created. Also determine the resource names for each type of resource.
+:::
 
-## Recommendations
-
-Try to use as many different forms of creating resources as possible. This will help you to understand how the CLI works and how to use it in your favor. It also helps us improve the CLI to make it more robust.
+Read more about the [ExpressoTS Config File](/docs/overview/expressots-config.md).
 
 ---
 
