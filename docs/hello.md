@@ -1,21 +1,20 @@
 ---
 sidebar_position: 0
+title: INTRO
 ---
 
-# Welcome to ExpressoTS
+# ExpressoTS
 
-ExpressoTS is designed to simplify the software development process, enabling developers to concentrate on the core business logic by abstracting technical complexities. Our goal is to enhance your productivity through a framework that not only accelerates development but also offers comprehensive documentation and a superior developer experience, minimizing the necessity for boilerplate code.
+ExpressoTS ( 🐎 ) is designed to simplify the software development process, enabling developers to concentrate on the core business logic by abstracting technical complexities. Our goal is to enhance your productivity through a framework that not only accelerates development but also offers comprehensive documentation and a superior developer experience, minimizing the necessity for building custom solutions from scratch.
 
-Our commitment is twofold: to simplify your development work and to enhance your productivity. As we embark on this journey, we invite you to join our community-driven project. Your insights, feedback, and contributions are invaluable in creating an optimal developer experience for everyone.
-
-We appreciate your support in this endeavor. Let's code efficiently together. 🐎
+Your insights, feedback, and contributions are invaluable in creating an optimal developer experience for everyone.
 
 ## Navigating the Documentation
 
-This documentation is organized into distinct sections, each focusing on a specific aspect of ExpressoTS. Use the sidebar on the left to navigate through the content:
+This documentation is organized into distinct sections, each focusing on a specific aspect of ExpressoTS.
 
--   **Overview**: Provides general information about ExpressoTS, including project resources, concepts, objectives, and initial setup instructions.
--   **Code By Example**: Offers practical examples to demonstrate the application of ExpressoTS resources.
+> **Overview**: Provides guidance on the core concepts and features of ExpressoTS.
+
 -   **CLI**: Details the command-line interface, including usage instructions.
 -   **Providers**: Describes the available providers and their utilization.
 -   **Tutorial**: A comprehensive, step-by-step guide to accomplishing specific tasks within ExpressoTS.

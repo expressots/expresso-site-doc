@@ -186,7 +186,7 @@ Custom middleware allows you to pass parameters to the constructor and use them 
 
 You can view all the middlewares added to the application using the `this.middleware.viewMiddlewarePipeline()` method.
 
-![View Middleware Pipeline](./img/middleware-view.png)
+![View Middleware Pipeline](../core/img/middleware-view.png)
 
 :::tip Use ExpressoTS CLI to scaffold a custom middleware.
 :::

@@ -20,7 +20,7 @@ The table content will be printed to the console every time the repository is us
 
 Here is an image showing the output in the console of the InMemoryDB when we create a new user:
 
-![Application Overview](../overview/img/inMemoryDB.png)
+![Application Overview](../core/img/inMemoryDB.png)
 
 :::info
 The DB inspector is enabled by default. As soon as you create a new entity and extend the BaseRepository class, the InMemoryDB will print the table to the console.

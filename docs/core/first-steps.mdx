@@ -1,0 +1,171 @@
+---
+sidebar_position: 0
+title: First steps
+description: Begin your journey with ExpressoTS!
+---
+
+# First steps
+
+Begin your journey with ExpressoTS! These guides will help you learn and get familiarized with the essential building blocks of ExpressoTS.
+
+## Philosophy
+
+ExpressoTS streamlines server-side development by emphasizing clear and structured code. Ideal
+for both simple APIs and complex systems, ExpressoTS accelerates development and ensures timely, high-quality delivery.
+
+ExpressoTS is a [TypeScript](https://www.typescriptlang.org/) framework fully integrated with the [Node.js](https://nodejs.org/en) and [Expressjs](https://expressjs.com/) ecosystem. While TypeScript is the primary language,
+ExpressoTS is fully compatible with JavaScript, and we plan to support other runtimes soon.
+
+In this tutorial, we’ll use TypeScript for most examples, but feel free to switch to vanilla JavaScript if that suits you better.
+
+## Pre-requisites
+
+Please make sure that [Node.js](https://nodejs.org) `version >=18.0.0` is installed on your operating system.
+
+## Setup
+
+Install the **[ExpressoTS CLI](../cli/overview.md)** globally using NPM to get started with your project setup:
+
+Setting up a new ExpressoTS project is quite simple with **[ExpressoTS CLI](../cli/overview.md)**. First install the CLI globally with `NPM`:
+
+```bash
+npm i -g @expressots/cli
+```
+
+Create a new project by running:
+
+```bash
+expressots new project-name
+```
+
+## Project templates
+
+ExpressoTS provides two project templates to cater to different development needs:
+
+-   Non-opinionated: Provides flexibility in project structure and resource scaffolding, with minimal setup.
+-   Opinionated: Pre-configured for complex projects, enforcing a specific structure and scaffolding pattern.
+
+#### Non-opinionated project structure
+
+```tree
+project-name/
+├── src/
+│   ├── app.container.ts
+│   ├── app.controller.ts
+│   ├── app.module.ts
+│   ├── app.provider.ts
+│   ├── main.ts
+├── test/
+│   ├── app.controller.spec.ts
+```
+
+| File Name                                               | Description                                                        |
+| ------------------------------------------------------- | ------------------------------------------------------------------ |
+| <span class="span-table"> app.container.ts</span>       | Dependency injection container. Organizes the application modules. |
+| <span class="span-table"> app.controller.ts</span>      | A basic controller with a single route.                            |
+| <span class="span-table"> app.module.ts</span>          | Application root module.                                           |
+| <span class="span-table"> app.provider.ts</span>        | Application global configuration file.                             |
+| <span class="span-table"> main.ts</span>                | The main entry point of an ExpressoTS application.                 |
+| <span class="span-table"> app.controller.spec.ts</span> | Unit test for the app.controller.                                  |
+
+#### Opinionated project structure
+
+```tree
+project-name/
+├── src/
+│   ├── providers/
+│   │   └── app/
+│   │       └── app.provider.ts
+│   ├── useCases/
+│   │   └── app/
+│   │       └── app.controller.ts
+│   │       └── app.module.ts
+│   │       └── app.usecase.ts
+│   ├── app.container.ts
+│   ├── env.ts
+│   ├── main.ts
+├── test/
+│   ├── app.usecase.spec.ts
+```
+
+| File Name                                            | Description                                                                                   |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| <span class="span-table"> app.provider.ts</span>     | Application global configuration file.                                                        |
+| <span class="span-table"> providers/\*</span>        | This folder contains the layer responsible to provide externals resources to the application. |
+| <span class="span-table"> useCases/\*</span>         | The use case folder holds the implementation of operations for the application.               |
+| <span class="span-table"> app.container.ts</span>    | Dependency injection container. Organizes the application modules.                            |
+| <span class="span-table"> env.ts</span>              | This is an utility resource that maps .env variables.                                         |
+| <span class="span-table"> main.ts</span>             | The main entry point of an ExpressoTS application.                                            |
+| <span class="span-table"> app.usecase.spec.ts</span> | A basic unit test for the app.usecase.                                                        |
+
+:::info
+Opinionated projects have a different scaffold pattern in addition to the non-opinionated projects. They are pre-configured for complex projects, enforcing
+a specific structure and name convention.
+:::
+
+The main entry point `main.ts` of an ExpressoTS application is where the application is initialized. This file is responsible for bootstrapping
+the application and starting the server.
+
+```typescript
+async function bootstrap() {
+    const app = await AppFactory.create(container, App);
+    await app.listen(3000, ServerEnvironment.Development);
+}
+
+bootstrap();
+```
+
+The `AppFactory` class is responsible for creating the application instance. The `create` method accepts the container and the application class as parameters. The `App`
+class is the application root module, which is responsible for initializing the application and its dependencies.
+
+The `listen` method starts the server on the specified port and environment. You can also pass an object specifying the app's name and version.
+
+:::info
+All application configuration and setup are handled in the `App` class.
+:::
+
+The `AppFactory` was designed to support multiple web servers like Express.js, Fastify, and more. Currently, it only supports Express.js.
+
+## Running the application
+
+With your application set up, you can start your development server, build your application, or run it in production mode.
+
+Development mode
+
+```bash
+✔️ npm run dev
+```
+
+Build the application
+
+```bash
+✔️ npm run build
+```
+
+Production mode
+
+```bash
+✔️ npm run prod
+```
+
+Once the application is up and running, you can access it by navigating to <span class="span-table">http://localhost:3000/</span>.
+You should see <span class="span-table">Hello from ExpressoTS!</span> displayed on the screen.
+
+## Linter and formatter
+
+ExpressoTS uses [ESLint](https://eslint.org/) and [Prettier](https://prettier.io/) to enforce code quality and consistency. You can run the following commands to lint and format your code:
+
+```bash
+✔️ npm run lint
+```
+
+```bash
+✔️ npm run format
+```
+
+---
+
+## Support us
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

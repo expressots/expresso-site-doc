@@ -3,57 +3,74 @@
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
- @import url('https://fonts.googleapis.com/css2?family=PT+Sans&display=swap');
- @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap");
 
- body {
-  font-size: 15px;
-  font-weight: 500;
-  font-family: 'Montserrat', sans-serif;
- }
+body {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Montserrat", sans-serif;
+}
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #111111;
-  --ifm-color-primary-dark: #415171;
-  --ifm-color-primary-darker: #3d4c6b;
-  --ifm-color-primary-darkest: #323f58;
-  --ifm-color-primary-light: #4f638b;
-  --ifm-color-primary-lighter: #536791;
-  --ifm-color-primary-lightest: #5e75a3;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  --ifm-font-weight-semibold: 700;
-  --ifm-font-family-base: 'Montserrat', sans-serif;
+    --ifm-color-primary: #111111;
+    --ifm-color-primary-dark: #415171;
+    --ifm-color-primary-darker: #3d4c6b;
+    --ifm-color-primary-darkest: #323f58;
+    --ifm-color-primary-light: #4f638b;
+    --ifm-color-primary-lighter: #536791;
+    --ifm-color-primary-lightest: #5e75a3;
+    --ifm-code-font-size: 95%;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+    --ifm-font-weight-semibold: 700;
+    --ifm-font-family-base: "Montserrat", sans-serif;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #80F5A8;
-  --ifm-color-primary-dark: #4d8497;
-  --ifm-color-primary-darker: #487d8f;
-  --ifm-color-primary-darkest: #3c6776;
-  --ifm-color-primary-light: #659eb1;
-  --ifm-color-primary-lighter: #6ea3b5;
-  --ifm-color-primary-lightest: #87b3c2;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+[data-theme="dark"] {
+    --ifm-color-primary: #80f5a8;
+    --ifm-color-primary-dark: #4d8497;
+    --ifm-color-primary-darker: #487d8f;
+    --ifm-color-primary-darkest: #3c6776;
+    --ifm-color-primary-light: #659eb1;
+    --ifm-color-primary-lighter: #6ea3b5;
+    --ifm-color-primary-lightest: #87b3c2;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] {
+    background-color: #1f1f22;
+}
+
+[data-theme="dark"] .navbar {
+    background-color: #1b1b1d;
+}
+
+[data-theme="dark"] .menu {
+    background-color: #242427;
+    font-size: 15px;
 }
 
 .navbar {
-  padding: 0 8rem;
-  text-transform: uppercase;
+    padding: 0 8rem;
+    text-transform: uppercase;
 }
 
 .customHeroBanner {
-  background-color: #111111;
+    background-color: #111111;
 }
 
 .customHeroBanner .hero__subtitle {
-  color: #ffffff;
+    color: #ffffff;
 }
 
 @media screen and (max-width: 996px) {
-  .navbar {
-    padding: 0 1.2rem;
-  }
+    .navbar {
+        padding: 0 1.2rem;
+    }
+}
+
+.span-table {
+    color: #80f5a8;
 }

@@ -1,10 +1,12 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
+title: App provider
+description: The App class is the core of an ExpressoTS application.
 ---
 
-# Application
+# Architecture
 
-At the heart of an ExpressoTS application lies the `App` class. It serves as the foundation for creating and configuring the server. Additionally, the App class allows middleware and providers to be configured in the server bootstrapping process. The App class also provides lifecycle hooks that allow developers to execute code before, after, and on server shutdown. This section provides an overview of the ExpressoTS application architecture, its components, and the workflow of an ExpressoTS application.
+The App class is the core of an ExpressoTS application, handling server creation and configuration. It allows you to set up middleware and providers during the bootstrapping process and offers lifecycle hooks to run code before, after, and during server shutdown. This section outlines the ExpressoTS architecture, its components, and the application workflow.
 
 ![Application Overview](./img/app-overview.png)
 

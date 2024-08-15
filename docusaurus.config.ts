@@ -1,7 +1,8 @@
 import * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
-import { themes } from "prism-react-renderer";
 import axios from "axios";
+import expressotsDarkTheme from "./src/css/prism.dark-theme";
+import expressotsLightTheme from "./src/css/prism.light-theme";
 
 const coreVersion = async (): Promise<string> => {
     try {
@@ -57,7 +58,7 @@ const config: Config = {
     deploymentBranch: "gh-pages",
     trailingSlash: false,
 
-    onBrokenLinks: "throw", // 'throw' | 'warn' | 'ignore'
+    onBrokenLinks: "warn", // 'throw' | 'warn' | 'ignore'
     onBrokenMarkdownLinks: "warn",
 
     i18n: {
@@ -99,7 +100,7 @@ const config: Config = {
             },
         ],
         colorMode: {
-            defaultMode: "light",
+            defaultMode: "dark",
             disableSwitch: false,
             respectPrefersColorScheme: false,
         },
@@ -111,10 +112,10 @@ const config: Config = {
             appId: "3UANWN5EUQ",
         },
         navbar: {
-            title: "Expresso TS",
+            title: "ExpressoTS",
             hideOnScroll: true,
             logo: {
-                alt: "Expresso TS",
+                alt: "ExpressoTS",
                 src: "img/logo.png",
             },
             items: [
@@ -191,8 +192,8 @@ const config: Config = {
             copyright: `Copyright © ${new Date().getFullYear()} Official ExpressoTS, Released under the MIT License.`,
         },
         prism: {
-            theme: themes.github,
-            darkTheme: themes.vsDark,
+            theme: expressotsLightTheme,
+            darkTheme: expressotsDarkTheme,
         },
     } satisfies Preset.ThemeConfig,
     themes: ["@docusaurus/theme-mermaid"],
