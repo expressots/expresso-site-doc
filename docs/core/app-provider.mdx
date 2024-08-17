@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: App
+title: App provider
 description: The App class is the core of an ExpressoTS application.
 ---
 
@@ -12,7 +12,7 @@ The `App` class is the core of an ExpressoTS application, handling server creati
 It allows you to set up middleware and providers during the bootstrapping process and offers lifecycle hooks
 to run code before, after, and during server shutdown.
 
-## App Express
+## App express
 
 `AppExpress` is the [Express.js](https://expressjs.com/) platform implementation specifically designed for ExpressoTS.
 It integrates seamlessly with the Express.js ecosystem, providing a robust foundation for building
@@ -86,7 +86,7 @@ protected postServerInitialization(): void { }
 protected serverShutdown(): void { }
 ```
 
-## Hooks Execution Order
+## Hooks execution order
 
 <div style={{ textAlign: "center" }}>
     <img src={imgAppLifecycle} width="700px" height="700px" alt="Lifecycle events" />
