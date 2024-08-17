@@ -4,6 +4,11 @@ sidebar_position: 6
 
 # Controllers
 
+:::warning Initializing the Application without a controller
+ExpressoTS will prevent you from initializing the Application without a controller since there are no listeners to handle incoming requests. You will see the following message in the console:
+**_No controllers have been found! Please ensure that you have register at least one Controller._**
+:::
+
 Controllers act as the primary interface between the client and server in ExpressoTS applications. They handle incoming requests, validate payloads against an input DTO, and emit responses in the DTO pattern. In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
 
 **Controller MVC Pattern Example**

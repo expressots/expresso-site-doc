@@ -4,7 +4,7 @@ import axios from "axios";
 import expressotsDarkTheme from "./src/css/prism.dark-theme";
 import expressotsLightTheme from "./src/css/prism.light-theme";
 
-const coreVersion = async (): Promise<string> => {
+/* const coreVersion = async (): Promise<string> => {
     try {
         const response = await axios.get(
             "https://api.github.com/repos/expressots/expressots/releases"
@@ -43,7 +43,7 @@ const cliVersion = async (): Promise<string> => {
         console.error("Error fetching current version from GitHub:", error);
         return "2.0.0"; // Fallback version
     }
-};
+}; */
 
 const config: Config = {
     title: "Expresso TS",
@@ -202,7 +202,9 @@ const config: Config = {
     },
 };
 
-export default async function asyncConfig(): Promise<Config> {
+export default config;
+
+/* export default async function asyncConfig(): Promise<Config> {
     const core = await coreVersion();
     const adapter = await adapterVersion();
     const cli = await cliVersion();
@@ -216,3 +218,4 @@ export default async function asyncConfig(): Promise<Config> {
     };
     return config;
 }
+ */

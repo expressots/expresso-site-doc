@@ -4,6 +4,9 @@ title: First steps
 description: Begin your journey with ExpressoTS!
 ---
 
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
 # First steps
 
 Begin your journey with ExpressoTS! These guides will help you learn and get familiarized with the essential building blocks of ExpressoTS.
@@ -17,6 +20,23 @@ ExpressoTS is a [TypeScript](https://www.typescriptlang.org/) framework fully in
 ExpressoTS is fully compatible with JavaScript, and we plan to support other runtimes soon.
 
 In this tutorial, we’ll use TypeScript for most examples, but feel free to switch to vanilla JavaScript if that suits you better.
+
+## Architecture
+
+ExpressoTS architecture centers on the **[Inversify](https://inversify.io/)** IoC container,
+which manages dependency injection in class constructors or in properties.
+This setup ensures that all necessary modules, including routes (controllers), are loaded.
+Routers then handle incoming requests using use-cases and providers as required.
+
+Here’s an overview of an ExpressoTS application:
+
+![Application Overview](./img/app-overview.png)
+
+> -   **DTO IN/OUT**: Defines the structure for incoming and outgoing data.
+> -   **Controller**: Manages request processing.
+> -   **Use Case**: Executes specific logic for handling requests.
+> -   **Provider**: Supplies external functionalities like database access.
+> -   **Repository**: Handles direct communication with the database.
 
 ## Pre-requisites
 
@@ -45,6 +65,9 @@ ExpressoTS provides two project templates to cater to different development need
 -   Non-opinionated: Provides flexibility in project structure and resource scaffolding, with minimal setup.
 -   Opinionated: Pre-configured for complex projects, enforcing a specific structure and scaffolding pattern.
 
+<Tabs>
+    <TabItem label="Non Opinionated" value="non-opinionated">
+
 #### Non-opinionated project structure
 
 ```tree
@@ -67,6 +90,10 @@ project-name/
 | <span class="span-table"> app.provider.ts</span>        | Application global configuration file.                             |
 | <span class="span-table"> main.ts</span>                | The main entry point of an ExpressoTS application.                 |
 | <span class="span-table"> app.controller.spec.ts</span> | Unit test for the app.controller.                                  |
+
+    </TabItem>
+
+    <TabItem label="Opinionated" value="opinionated">
 
 #### Opinionated project structure
 
@@ -98,10 +125,15 @@ project-name/
 | <span class="span-table"> main.ts</span>             | The main entry point of an ExpressoTS application.                                            |
 | <span class="span-table"> app.usecase.spec.ts</span> | A basic unit test for the app.usecase.                                                        |
 
+    </TabItem>
+
+</Tabs>
 :::info
 Opinionated projects have a different scaffold pattern in addition to the non-opinionated projects. They are pre-configured for complex projects, enforcing
 a specific structure and name convention.
 :::
+
+## Main
 
 The main entry point `main.ts` of an ExpressoTS application is where the application is initialized. This file is responsible for bootstrapping
 the application and starting the server.
@@ -115,16 +147,15 @@ async function bootstrap() {
 bootstrap();
 ```
 
-The `AppFactory` class is responsible for creating the application instance. The `create` method accepts the container and the application class as parameters. The `App`
-class is the application root module, which is responsible for initializing the application and its dependencies.
+The `AppFactory` class is responsible for creating the application instance. The `AppFactory` was designed to support multiple web servers like Express.js, Fastify, and more. Currently, it only supports Express.js.
 
+The `create` method accepts the container and the application class as parameters.
 The `listen` method starts the server on the specified port and environment. You can also pass an object specifying the app's name and version.
 
-:::info
-All application configuration and setup are handled in the `App` class.
-:::
+The `App` class is the application root module, which is responsible for initializing the application and its dependencies.
+All application configuration and setup are handled in the [App class](./app-provider.md) - (`app.provider.ts`) file.
 
-The `AppFactory` was designed to support multiple web servers like Express.js, Fastify, and more. Currently, it only supports Express.js.
+The `ServerEnvironment` is defined through the enum, with support for `development` and `production` modes.
 
 ## Running the application
 
@@ -165,7 +196,7 @@ ExpressoTS uses [ESLint](https://eslint.org/) and [Prettier](https://prettier.io
 
 ---
 
-## Support us
+## Support us ❤️
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
 If you'd like to help, please read our **[support guide](../support-us.mdx)**.
