@@ -1,49 +1,7 @@
 import * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
-import axios from "axios";
 import expressotsDarkTheme from "./src/css/prism.dark-theme";
 import expressotsLightTheme from "./src/css/prism.light-theme";
-
-/* const coreVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/expressots/releases"
-        );
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-};
-
-const adapterVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/adapter-express/releases"
-        );
-
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-};
-
-const cliVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/expressots-cli/releases"
-        );
-
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-}; */
 
 const config: Config = {
     title: "ExpressoTS",
@@ -142,6 +100,10 @@ const config: Config = {
                     label: "Language",
                     position: "right",
                 },
+                {
+                    type: "search",
+                    position: "left",
+                },
             ],
         },
         stylesheets: [
@@ -203,19 +165,3 @@ const config: Config = {
 };
 
 export default config;
-
-/* export default async function asyncConfig(): Promise<Config> {
-    const core = await coreVersion();
-    const adapter = await adapterVersion();
-    const cli = await cliVersion();
-
-    config.themeConfig.announcementBar = {
-        id: "supportus",
-        content: `@core v${core} / @adapter-express v${adapter} / @cli v${cli}`,
-        backgroundColor: "#111",
-        textColor: "#19CE59",
-        isCloseable: false,
-    };
-    return config;
-}
- */

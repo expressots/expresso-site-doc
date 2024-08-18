@@ -1,34 +1,34 @@
 {
-  "title": {
-    "message": "Expresso TS",
-    "description": "The title in the navbar"
-  },
-  "logo.alt": {
-    "message": "Expresso TS",
-    "description": "The alt text of navbar logo"
-  },
-  "item.label.Documentation": {
-    "message": "Documentation",
-    "description": "Navbar item with label Documentation"
-  },
-  "item.label.Governance": {
-    "message": "Governance",
-    "description": "Navbar item with label Governance"
-  },
-  "item.label.GitHub": {
-    "message": "GitHub",
-    "description": "Navbar item with label GitHub"
-  },
-  "item.label.Language": {
-    "message": "Language",
-    "description": "Navbar item with label Language"
-  },
-  "item.label.English": {
-    "message": "English",
-    "description": "Navbar item with label English"
-  },
-  "item.label.Português": {
-    "message": "Português",
-    "description": "Navbar item with label Português"
-  }
+    "title": {
+        "message": "ExpressoTS",
+        "description": "The title in the navbar"
+    },
+    "logo.alt": {
+        "message": "ExpressoTS",
+        "description": "The alt text of navbar logo"
+    },
+    "item.label.Documentation": {
+        "message": "Documentation",
+        "description": "Navbar item with label Documentation"
+    },
+    "item.label.Governance": {
+        "message": "Governance",
+        "description": "Navbar item with label Governance"
+    },
+    "item.label.GitHub": {
+        "message": "GitHub",
+        "description": "Navbar item with label GitHub"
+    },
+    "item.label.Language": {
+        "message": "Language",
+        "description": "Navbar item with label Language"
+    },
+    "item.label.English": {
+        "message": "English",
+        "description": "Navbar item with label English"
+    },
+    "item.label.Português": {
+        "message": "Português",
+        "description": "Navbar item with label Português"
+    }
 }
