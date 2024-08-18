@@ -1,0 +1,114 @@
+---
+sidebar_position: 5
+title: Use cases
+description: Use cases represents the business logic of the application.
+---
+
+import usecaseIMG from "./img/usecase.png";
+
+# Use cases
+
+From a UML perspective, use cases model interactions between users, systems, and an application, outlining specific scenarios and outcomes.
+In ExpressoTS, use cases encapsulate business logic, clearly separating it from controllers, which handle
+routing and request management. This keeps the core functionality and business rules distinct from request handling.
+
+While you can use any design pattern, such as **[MVC](./controller.mdx#patterns)**, the ExpressoTS opinionated template emphasizes
+the use of a clean architecture. We believe this approach leads to more maintainable and scalable applications.
+
+## Case study
+
+Here is an example of a use case diagram for a project x:
+
+<div style={{ textAlign: "center" }}>
+    <img src={usecaseIMG} alt="Project X Use Case" />
+</div>
+
+In the use case diagram above, the actor represents the user interacting with the system. To execute the Login use case, the user must provide specific information known as the payload or, in the case of ExpressoTS, the request DTO. This information is necessary to trigger the use case and for the system to deliver the desired outcome.
+
+:::info
+It is important to note that the use case should exclusively contain the business logic of the application, with no additional or unrelated functionalities.
+This approach helps to ensure a clear separation of concerns, promoting maintainability, and scalability of the system.
+:::
+
+## Create use case
+
+You can create use cases using the ExpressoTS CLI. To create a new use case, run the following command:
+
+```bash
+expressots g u use-case-name
+```
+
+Here is a simple implementation of the use case:
+
+```typescript title="Login User Use Case"
+@provide(LoginUserUseCase)
+class LoginUserUseCase {
+    execute(payload: ILoginUserRequestDTO): boolean {
+        const { email, password } = payload;
+
+        if (isAuthenticated(email, password)) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+export { LoginUserUseCase };
+```
+
+## Explanation
+
+The implementation of use cases in ExpressoTS follows the best practices of software design, where each use case is responsible for implementing a specific business logic. As shown in the example code snippet, a use case typically contains only one function, called execute, which is responsible for executing the business logic defined in that use case. The use case may also include a response DTO that defines the format of the response for that particular use case.
+
+Also, it is common to use constructors in use cases to inject dependencies such as providers and repositories. This allows for better code modularity and testability.
+
+## Injection
+
+ExpressoTS's **[Dependency Injection](di.md)** system allows you to inject dependencies like providers, repositories, entities,
+or helper classes directly into use cases via constructors or properties. This enhances modularity and makes the code more testable.
+
+See examples below:
+
+## Constructor Injection
+
+```typescript title="Example of constructor injection in a use case"
+@provide(ExampleUseCase)
+class ExampleUseCase {
+    constructor(private email: EmailProvider, private repo: RepositoryProvider) {}
+
+    execute() {
+        this.email.foo();
+        this.repo.bar();
+    }
+}
+```
+
+## Property Injection
+
+```typescript title="Example of property injection in a use case"
+@provide(ExampleUseCase)
+class ExampleUseCase {
+    @inject(EmailProvider)
+    private email: EmailProvider;
+
+    @inject(RepositoryProvider)
+    private repo: RepositoryProvider;
+
+    execute() {
+        this.email.foo();
+        this.repo.bar();
+    }
+}
+```
+
+:::tip
+It is important to adhere to the principle of single responsibility when implementing use cases. Each use case should only handle a specific business logic, and if you find yourself implementing multiple use cases in a single class, it is time to review your implementation to ensure that each use case has a clear and concise responsibility.
+:::
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

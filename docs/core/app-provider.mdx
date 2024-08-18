@@ -75,15 +75,15 @@ code within modules, providers, or controllers as these events happen.
 The diagram below shows the sequence of key lifecycle events, from application startup to when the Node.js process exits.
 
 ```typescript title="Add any service to initialize before the server starts."
-protected configureServices(): void { }
+protected configureServices(): void | Promise<void> { }
 ```
 
 ```typescript title="Add any service to run after the server starts."
-protected postServerInitialization(): void { }
+protected postServerInitialization(): void | Promise<void> { }
 ```
 
 ```typescript title="Add any service to run after the server shuts down."
-protected serverShutdown(): void { }
+protected serverShutdown(): void | Promise<void> { }
 ```
 
 ## Hooks execution order

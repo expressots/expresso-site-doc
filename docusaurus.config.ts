@@ -46,7 +46,7 @@ const cliVersion = async (): Promise<string> => {
 }; */
 
 const config: Config = {
-    title: "Expresso TS",
+    title: "ExpressoTS",
     tagline: "A lightweight, fast and easy to use TypeScript framework",
     favicon: "img/favicon.ico",
 
@@ -121,7 +121,7 @@ const config: Config = {
             items: [
                 {
                     type: "doc",
-                    docId: "hello",
+                    docId: "intro",
                     position: "right",
                     label: "Documentation",
                 },
