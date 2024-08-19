@@ -1,12 +1,20 @@
 ---
-sidebar_position: 17
+sidebar_position: 5
+title: Render engine
+description: How to render views in ExpressoTS.
 ---
 
-# Render Engine
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
-**[ExpressoTS](https://expresso-ts.com/)** enhances the web server capabilities of Express.js by providing a streamlined experience for rendering views. ExpressoTS supports various render engines out-of-the-box, including EJS, PUG, and Handlebars (HBS). This makes it easy for developers to start rendering views without needing additional configuration, as default settings are provided for each supported engine.
+# Render engine
 
-## Supported Render Engines
+ExpressoTS enhances the web server capabilities of Express.js by providing a streamlined experience for rendering views. ExpressoTS supports
+3 render engines out-of-the-box.
+
+This makes it easy for developers to start rendering views without needing additional configuration, as default settings are provided for each supported engine.
+
+## Supported engines
 
 ExpressoTS supports the following render engines:
 
@@ -14,7 +22,11 @@ ExpressoTS supports the following render engines:
 -   PUG
 -   HBS (Handlebars)
 
-### Handlebars Configuration Options
+## Engine options
+
+<Tabs>
+    <TabItem value="handlebars" label="Handlebars">
+#### Configuration options
 
 ```typescript
 export type HandlebarsOptions = {
@@ -24,7 +36,7 @@ export type HandlebarsOptions = {
 };
 ```
 
-#### Default Handlebars configuration options
+#### Default configuration values
 
 ```typescript
 {
@@ -34,9 +46,7 @@ export type HandlebarsOptions = {
 }
 ```
 
-### Default Folder structure
-
-Default folder structure for Handlebars:
+#### Default folder structure
 
 ```tree
 src
@@ -46,9 +56,7 @@ views
 |--index.hbs
 ```
 
-All other engines follow the same structure, with the exception of the `partials` folder, which is specific to Handlebars.
-
-### Handlebars File Example
+#### .hbs file example
 
 ```html
 <html lang="en">
@@ -64,9 +72,10 @@ All other engines follow the same structure, with the exception of the `partials
 </html>
 ```
 
-## Other Engine Configuration Options
+    </TabItem>
+    <TabItem value="pug" label="Pug">
 
-### Pug Configuration Options
+#### Configuration options
 
 ```typescript
 export type PugOptions = {
@@ -75,7 +84,7 @@ export type PugOptions = {
 };
 ```
 
-#### Default Pug configuration options
+#### Default configuration values
 
 ```typescript
 {
@@ -84,7 +93,10 @@ export type PugOptions = {
 }
 ```
 
-### EJS Configuration Options
+    </TabItem>
+    <TabItem value="ejs" label="EJS">
+
+#### Configuration options
 
 ```typescript
 export type EjsOptions = {
@@ -94,7 +106,7 @@ export type EjsOptions = {
 };
 ```
 
-#### Default EJS configuration options
+#### Default configuration values
 
 ```typescript
 {
@@ -110,9 +122,17 @@ export type EjsOptions = {
 }
 ```
 
-## How to use
+    </TabItem>
 
-Here's how you can set up ExpressoTS to use a render engine like HBS (handlebars) in your application:
+</Tabs>
+
+:::note
+All engines follow the same structure, with the exception of the `partials` folder, which is specific to Handlebars.
+:::
+
+## Setup a render engine
+
+Here's how you can set up a render engine like HBS (handlebars) in your application:
 
 In the `app.provider` configuration provider, you can set the render engine:
 
@@ -144,16 +164,13 @@ export class App extends AppExpress {
 }
 ```
 
-:::note
 If you want to pass custom options to the render engine, you can do so by passing an object with the desired options to the `setEngine` method. For example, to set the views directory to a custom path, you can do the following:
 
-```typescript
-this.setEngine<HBS>(Engine.HBS, { viewsDir: <<custom-path>> });
+```typescript title="Custom render engine configuration"
+this.setEngine<HBS>(Engine.HBS, { viewsDir: <<custom-option>> });
 ```
 
-:::
-
-### How To Render Views in ExpressoTS
+## Render views
 
 To render a view in ExpressoTS, you can use the `render` method provided by the `Response` object. Here's an example of how you can render a view in ExpressoTS:
 
@@ -166,21 +183,19 @@ root(@response() res: Response) {
 
 In the example above, the `render` method is called on the `Response` object, passing the name of the view to be rendered and an object with data to be passed to the view. The view engine will render the view with the provided data and return the rendered HTML to the client.
 
-### Render Decorator
+## Render decorator
 
-The `@Render` decorator can be used on controller methods to render views using the specified view engine. Here's an example of how you can use the `@Render` decorator to render a view in ExpressoTS:
+The `@Render` decorator can be used on controller methods to render views using the specified view engine. It's a syntactic sugar that simplifies the process of rendering views in ExpressoTS.
 
-#### Rendering passing the view and default data in the decorator
+Here's an example of how you can use the `@Render` decorator to render a view in ExpressoTS:
 
-```typescript
+```typescript title="Rendering passing the view and default data in the decorator"
 @Get("/")
 @Render("index", { date: new Date(), name: "Random information" })
 root() {}
 ```
 
-#### Rendering passing only the view in the decorator
-
-```typescript
+```typescript title="Rendering passing only the view in the decorator"
 @Get("/")
 @Render("index")
 root() {
@@ -190,13 +205,7 @@ root() {
 
 ---
 
-## Support the project
+## Support us ❤️
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
-
--   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
--   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
--   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
--   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
--   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
--   Share the project with your friends and colleagues
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

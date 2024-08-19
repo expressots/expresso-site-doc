@@ -1,8 +1,10 @@
 ---
-sidebar_position: 14
+sidebar_position: 2
+title: Status code
+description: Status code is a way to represent the result of a request.
 ---
 
-# Status Code
+# Status code
 
 Status code is a way to represent the result of a request. These HTTP responses indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
 
@@ -14,42 +16,60 @@ Status code is a way to represent the result of a request. These HTTP responses 
 
 You can find more details about the status code in the **[MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)**.
 
-:::tip
-The status codes listed below are defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
+:::tip The status codes listed below are defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
 :::
 
-## ExpressoTS status code
+## List of status codes
 
-In ExpressoTS, we have a list of all status codes listed in the MDN that you can use in your application. Here is an example of use:
+ExpressoTS provides a list of status codes that you can use in your application represented by the `StatusCode` enum.
 
-### In a Controller
+## Usage example
 
-```typescript
+Example of how to use the status code in a controller, use case, using `res` object, `@http` decorator etc.
+
+```typescript title="Controller example"
 import { StatusCode } from "@expressots/core";
 
 @controller("/user/create")
 class CreateUserController extends BaseController {
-    constructor(private createUserUseCase: CreateUserUseCase) {
-        super("create-user-controller");
-    }
+    constructor(private createUserUseCase: CreateUserUseCase) {}
 
-    @httpPost("/")
+    @Post("/")
     execute(
-        @requestBody() data: ICreateUserRequestDTO,
-        @response() res: any
+        @body() data: ICreateUserRequestDTO,
+        @response() res: Response
     ): ICreateUserResponseDTO {
-        return this.callUseCase(
-            this.createUserUseCase.execute(data),
-            res,
-            StatusCode.Created // Status code
-        );
+        return this.callUseCase(this.createUserUseCase.execute(data), res, StatusCode.Created);
     }
 }
 ```
 
-### In a Use Case
+```typescript title="Using res object"
+import { StatusCode } from "@expressots/core";
 
-```typescript
+@controller("/")
+class ExampleController {
+    @Get("/")
+    execute(@response() res: Response) {
+        res.status(StatusCode.OK).send("Hello World!");
+    }
+}
+```
+
+```typescript title="Using @http decorator"
+import { StatusCode } from "@expressots/core";
+
+@controller("/")
+class ExampleController {
+    @Get("/")
+    @Http(StatusCode.OK)
+    execute() {
+        return "Hello World!";
+    }
+}
+```
+
+```typescript title="Use case example"
 import { StatusCode } from "@expressots/core";
 
 @provide(CreateUserUseCase)
@@ -88,13 +108,7 @@ class CreateUserUseCase {
 
 ---
 
-## Support the project
+## Support us ❤️
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
-
--   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
--   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
--   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
--   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
--   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
--   Share the project with your friends and colleagues
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

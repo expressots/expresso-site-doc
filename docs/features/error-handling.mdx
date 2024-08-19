@@ -1,0 +1,244 @@
+---
+sidebar_position: 3
+title: Error handling
+description: Error handling in ExpressoTS APIs.
+---
+
+# Error handling
+
+When it comes to error handling in Node.js TypeScript APIs, there are several best practices and approaches you can follow. ExpressoTS provides a simple and easy way to handle errors.
+
+-   We use HTTP status codes appropriately: HTTP **[status codes](./status-code.mdx)** are used to indicate the status of a response. It is important to use them appropriately in your API to indicate the success or failure of an operation.
+
+-   We use a consistent error format: Define a consistent error format across your API so that consumers can easily understand and handle errors.
+
+-   We handle errors in middleware: Middleware functions are a great way to handle errors in a centralized location.
+
+-   We use try-catch blocks: Use try-catch blocks to handle synchronous errors in your code. If an error occurs in the try block, the catch block can handle it. Be sure to throw the error so that it can be handled by our error handling middleware.
+
+-   We use async/await error handling: When using async/await, you can use try-catch blocks to handle synchronous errors in your code. However, you also need to handle any asynchronous errors that may occur.
+
+-   We log errors: Logging errors is important for debugging and monitoring.
+
+## Our approach
+
+We developed a standardized error reporting class called `Report` that provides a centralized location for throwing and handling errors, which can simplify error handling throughout the application.
+By defining a standard error response format, it helps to ensure consistency in error messages that are returned to clients.
+
+## Components
+
+Here are the components that we use to handle errors in ExpressoTS:
+
+| Object        | Description                                                             |
+| ------------- | ----------------------------------------------------------------------- |
+| Report.Error  | Method to report known errors.                                          |
+| AppError      | App Error class that defines error object format.                       |
+| StatusCode    | Http responses code and message.                                        |
+| Error Message | Error message detail that the developer wants to log.                   |
+| Error Service | To be used in the log system to indicate where the error was generated. |
+
+#### Report
+
+Report class is a utility class to manage and throw application-specific errors.
+
+```typescript title="Report class"
+class Report {
+  /**
+   * @param error - An instance of Error or a string that describes the error.
+   * @param statusCode - The HTTP status code associated with the error (default is 500).
+   * @param service - The service name associated with the error.
+   * @throws An object of the custom type AppError, which includes details about the error.
+   */
+  public Error(
+    error: Error | string,
+    statusCode?: number,
+    service?: string,
+  ): AppError {
+}
+```
+
+Once you report a known error through the `Report.Error()` method, the error will be handled by the `defaultErrorHandler()` middleware and will be returned to the client in the json parsed format.
+
+#### Middleware
+
+This middleware function is used to handle errors that occur during request processing.
+
+```typescript title="defaultErrorHandler middleware"
+function defaultErrorHandler(
+    error: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    showStackTrace: boolean = false
+): void {}
+
+export default defaultErrorHandler;
+```
+
+:::info
+function `defaultErrorHandler()` is a custom Express error-handling middleware function.
+It logs the error, sets the status code, and sends a JSON response containing the status code and error message.
+:::
+
+## App provider error handling
+
+When a project is created using the ExpressoTS CLI, the default error handling is already set up in the project structure.
+
+```typescript title="App provider error handling"
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void | Promise<void> {
+        this.middleware.setErrorHandler();
+    }
+
+    protected postServerInitialization(): void | Promise<void> {}
+
+    protected serverShutdown(): void | Promise<void> {}
+}
+```
+
+The `setErrorHandler()` method is used to set up the error handling middleware in the application. It allows ExpressoTS to handle errors in a centralized location as well as to send
+a consistent error response to the client in a JSON format.
+
+You can also pass two optional parameters to the `setErrorHandler()` method:
+
+-   `showStackTrace`: A boolean value that indicates whether to show the stack trace in the error response. The default value is `false`.
+-   `customErrorHandler`: A custom error handler function that can be used to handle errors in a specific way. The default value is defaultErrorHandler.
+
+```typescript title="Using your own error handler"
+this.middleware.setErrorHandler({ errorHandler: myErrorHandler });
+```
+
+```typescript title="Using showStackTrace in the default error handler"
+this.middleware.setErrorHandler({ showStackTrace: true });
+```
+
+:::info
+In the `showStackTrace` example, the error response will include a formated stack trace message. We tried to make stack trace messages more readable and easy to understand.
+:::
+
+## Usage example
+
+```typescript title="Using Report class"
+class FooClass {
+    constructor(private report: Report) {}
+
+    execute() {
+        try {
+            // do something
+        } catch (error: any) {
+            this.report.Error(error, StatusCode.BadRequest, "your-service");
+        }
+    }
+}
+```
+
+Use case example:
+
+```typescript title="Use case example"
+@provide(CreateUserUseCase)
+class CreateUserUseCase {
+    constructor(private userRepository: UserRepository, private report: Report) {}
+
+    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+        try {
+            const { name, email } = data;
+
+            const userAlreadyExists = await this.userRepository.findByEmail(email);
+
+            if (userAlreadyExists) {
+                this.report.Error(
+                    "User already exists",
+                    StatusCode.BadRequest,
+                    "create-user-usecase"
+                );
+            }
+
+            const user: User | null = this.userRepository.create(new User(name, email));
+
+            let response: ICreateUserResponseDTO;
+
+            if (user !== null) {
+                response = {
+                    id: user.Id,
+                    name: user.name,
+                    email: user.email,
+                    status: "success",
+                };
+                return response;
+            }
+
+            return null;
+        } catch (error: any) {
+            throw error;
+        }
+    }
+}
+```
+
+You can also throw the this.report.Error() method directly:
+
+```typescript title="Throw using this.report.Error()"
+@provide(CreateUserUseCase)
+class CreateUserUseCase {
+    constructor(private userRepository: UserRepository, private report: Report) {}
+
+    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
+        const { name, email } = data;
+
+        const userAlreadyExists = await this.userRepository.findByEmail(email);
+
+        if (userAlreadyExists) {
+            throw this.report.Error(
+                "User already exists",
+                StatusCode.BadRequest,
+                "create-user-usecase"
+            );
+        }
+
+        const user: User | null = this.userRepository.create(new User(name, email));
+
+        let response: ICreateUserResponseDTO;
+
+        if (user !== null) {
+            response = {
+                id: user.Id,
+                name: user.name,
+                email: user.email,
+                status: "success",
+            };
+            return response;
+        }
+
+        return null;
+    }
+}
+```
+
+This error will be handled by the `defaultErrorHandler()` middleware and will be returned to the client in the json parsed format via request response as well as logged in the console.
+
+```json title="Error response"
+{
+    "statusCode": 400,
+    "error": "User already exists"
+}
+```
+
+```bash title="Console log"
+[ExpressoTS] 00/00/0000 00:00:00 PM [PID:00000] ERROR [app-controller] This is an error message
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

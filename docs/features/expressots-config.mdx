@@ -1,14 +1,17 @@
 ---
-sidebar_position: 18
+sidebar_position: 6
+title: ExpressoTS config
+description: ExpressoTS configuration file.
 ---
 
-# ExpressoTS Config File
+# Global config file
 
-The ExpressoTS configuration file is located in the root folder of the project and it's called `expressots.config.ts`. This file is used to configure the CLI and the project.
+The ExpressoTS configuration file is located in the root folder of the project and it's called `expressots.config.ts`.
+This file is used to configure the CLI and the project behavior.
 
 Here is the current configuration file with all the available options:
 
-```typescript
+```typescript title="expressots.config.ts"
 import { ExpressoConfig, Pattern } from "@expressots/core";
 
 const config: ExpressoConfig = {
@@ -29,6 +32,8 @@ const config: ExpressoConfig = {
 export default config;
 ```
 
+## Configuration options
+
 -   **sourceRoot**: the root folder that will be used by the CLI to create the resources. Default: `src`
 
 -   **scaffoldPattern**: the pattern that will be used to create the resources. Default: `Pattern.KEBAB_CASE`. Example: `user-create`
@@ -47,17 +52,7 @@ Try to use as many different forms of creating resources as possible. This will 
 
 ---
 
-## Support the Project
+## Support us ❤️
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
-
--   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
--   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
--   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
--   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
--   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
--   Share the project with your friends and colleagues
-
-```
-
-```
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
