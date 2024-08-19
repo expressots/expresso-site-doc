@@ -1,7 +1,10 @@
 ---
 sidebar_position: 8
-title: Dependency injection
+title: Injection
+description: Dependency Injection in ExpressoTS.
 ---
+
+import diImg from "./img/di.png";
 
 # Dependency Injection
 
@@ -29,13 +32,25 @@ In conclusion, DI is a technique that facilitates loose coupling, increased test
 
 ## Architecture
 
-Here is how ExpressoTS implements Dependency Injection in its architecture:
+In the image below, we ensure that each controller is responsible for a single task, which is why
+you see multiple controllers within a module. This architecture showcases the flexibility of the container
+system, enabling developers to define scopes at various levels, including the container, module, and controller.
+Even services like use cases and providers can have their own distinct scopes within the container.
 
-![Application Overview](./img/di.png)
+<div style={{ textAlign: "center" }}>
+    <img src={diImg} alt="Container" />
+</div>
 
-## DI components breakdown
+---
 
-Here is a breakdown of the DI components used in ExpressoTS:
+-   Container have its default scope that can be override by the module. The default scope is `Request` scope.
+-   Defining a scope for a module forces all controllers under that module to have the same scope.
+-   Not defining a scope for a module allow controllers to have their own scope using `@scope()` decorator.
+-   All other registered classes such as providers, entities, helpers can have their specific scope based on the decorator used.
+
+## Components
+
+The DI system in ExpressoTS is composed of the following components:
 
 | Components | Description                                                                                        |
 | ---------- | -------------------------------------------------------------------------------------------------- |
@@ -44,41 +59,15 @@ Here is a breakdown of the DI components used in ExpressoTS:
 | Controller | Primary interface between the client and server. Responsible to handle incoming requests.          |
 | Classes    | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc.  |
 
-### Resume
+## Decorators
 
--   Container have its default scope that can be override by the module. The default scope is `Request` scope.
--   Defining a scope for a module forces all controllers under that module to have the same scope.
--   Not defining a scope for a module allow controllers to have their own scope using `@scope()` decorator.
--   All other registered classes such as providers, entities, helpers can have their specific scope based on the decorator used.
--   Decorators:
+Injection is done through decorators. The following decorators are used to define the scope of a class:
 
-| Decorator         | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| @provide          | Binds a class to a dependency injection container as RequestScope. |
-| @provideSingleton | Binds a class to a dependency injection container as Singleton.    |
-| @provideTransient | Binds a class to a dependency injection container as Transient.    |
-
-### Container
-
-The container is the main component of the DI system. It is responsible for managing the lifecycle of the objects it creates, and for injecting dependencies into those objects.
-
-The default scope of the container is `Request` scope. This means that the container will create a new instance of a class for each request. For more information about **[Containers](app-container.md)** please refer to the app container section.
-
-### Modules
-
-A container module is used to organize related controllers and their dependencies and coherent units. Modules can also have their own specific scope definition. For more information about modules please refer to the **[Modules](module.md)** section.
-
-### Controllers
-
-Controllers are grouped into modules that usually represents a feature of the application. Controllers are always associated with modules. If a module has a specific scope defined, all controllers within that module will be created with the module scope. If the module doesn't have a scope defined, it inherits the scope of the Application container, which is `Request` scope.
-
-In this particular case, individual controllers can have their own scope defined by using `@scope()` decorator. For more information about controllers please refer to the **[Controllers](controller.md)** section.
-
-### Classes
-
-Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helper classes, etc are injected automatically to the Application Container through the decorator `@provide()` in which injects the classes as `Request` by default.
-
-If you want to define a different scope for your class, you can use the `@provideSingleton()` decorator to inject the class as a singleton or `@provideTransient()` to inject the class as transient.
+| Decorator           | Description                                                        |
+| ------------------- | ------------------------------------------------------------------ |
+| @provide()          | Binds a class to a dependency injection container as RequestScope. |
+| @provideSingleton() | Binds a class to a dependency injection container as Singleton.    |
+| @provideTransient() | Binds a class to a dependency injection container as Transient.    |
 
 Example of usage:
 
@@ -103,23 +92,68 @@ class MySingleton {}
 class MyTransient {}
 ```
 
-:::tip
-To define scope bindings the enum BindingScopeEnum can be used.
+## Controller scope
+
+Controllers can have their own scope using the `@scope()` decorator. This decorator can be used to define the scope of a controller.
+
+Example of usage:
+
+```typescript
+@scope("Singleton")
+@controller()
+class MyController {}
+```
+
+:::info
+You can't define a scope for a controller if the module has a scope defined.
 :::
 
--   `BindingScopeEnum.Singleton` - The dependency will be created once and will be shared across all requests.
--   `BindingScopeEnum.Request` - The dependency will be created once per request.
--   `BindingScopeEnum.Transient` - The dependency will be created every time it is requested.
+## Circular dependencies
+
+Circular dependencies occur when two or more modules depend on each other, leading to a potentially infinite loop or other issues during dependency injection.
+
+ExpressoTS circular dependencies can be resolved using the following methods:
+
+<span class="span-table">Lazy Injection: </span> (@inject with LazyServiceIdentifier)
+
+One common approach to handle circular dependencies in ExpressoTS is to use lazy injection. This allows the IoC container to inject a proxy or a function
+that retrieves the dependency only when it's actually needed. This postpones the resolution of the dependency,
+avoiding the immediate circular reference issue.
+
+To implement this, you can use the `LazyServiceIdentifier` utility provided by the framework.
+
+```typescript title="Lazy Injection"
+import { inject, LazyServiceIdentifier } from "inversify";
+
+@provide(ServiceA)
+class ServiceA {
+    constructor(
+        @inject(new LazyServiceIdentifier(() => ServiceB))
+        private serviceB: ServiceB
+    ) {}
+}
+
+@provide(ServiceB)
+class ServiceB {
+    constructor(@inject(ServiceA) private serviceA: ServiceA) {}
+}
+```
+
+In this example, ServiceA and ServiceB depend on each other. By using `LazyServiceIdentifier`, ServiceB
+is injected into ServiceA in a lazy manner, breaking the circular dependency loop.
+
+:::caution Factory Injection is under development.
+:::
+
+<span class="span-table">Factory Injection: </span> Use factory functions to create instances on demand,
+thus avoiding circular dependencies at construction time.
+
+<span class="span-table">Proxies: </span> Employ proxies to delay the resolution of dependencies, giving
+more control over when and how the dependency is resolved.
 
 ---
 
-## Support the project
+## Support us ❤️
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
-
--   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
--   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
--   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
--   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
--   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
--   Share the project with your friends and colleagues
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

@@ -6,6 +6,7 @@ import Layout from "@theme/Layout";
 import HomepageFeatures from "@site/src/components/HomepageFeatures";
 import BannerImage from "@site/static/img/expressoTS-Banner.png";
 import { translate } from "@docusaurus/Translate";
+import { Redirect } from "@docusaurus/router";
 
 import styles from "./index.module.css";
 
@@ -43,6 +44,8 @@ function HomepageHeader() {
 
 export default function Home(): JSX.Element {
     const { siteConfig } = useDocusaurusContext();
+
+    return <Redirect to="/docs/intro" />;
     return (
         <Layout
             title={`${siteConfig.title}`}

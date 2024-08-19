@@ -24,10 +24,10 @@ const config: Config = {
         locales: ["en", "pt"],
         localeConfigs: {
             en: {
-                label: "English",
+                label: "EN",
             },
             pt: {
-                label: "Português",
+                label: "PT",
             },
         },
     },
@@ -79,21 +79,15 @@ const config: Config = {
             items: [
                 {
                     type: "doc",
-                    docId: "intro",
-                    position: "right",
-                    label: "Documentation",
-                },
-                {
-                    type: "doc",
                     docId: "governance",
                     position: "right",
                     label: "Governance",
                 },
                 {
                     href: "https://github.com/expressots/expressots",
-                    label: "GitHub",
                     position: "right",
                     "aria-label": "GitHub repository",
+                    className: "header-github-link",
                 },
                 {
                     type: "localeDropdown",
