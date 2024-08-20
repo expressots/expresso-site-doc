@@ -92,6 +92,48 @@ protected serverShutdown(): void | Promise<void> { }
     <img src={imgAppLifecycle} width="700px" height="700px" alt="Lifecycle events" />
 </div>
 
+## Method isDevelopment
+
+It is a helper method that returns a boolean value indicating whether the application is running in development mode.
+This method is useful for running specific code only in development environments.
+
+```typescript title="Check if the application is running in development mode."
+this.isDevelopment(): boolean
+```
+
+Currently this method is being used in the `postServerInitialization` method to check if the application is running in development mode.
+If it is, the `Env` provider is used to check all environment variables.
+
+```typescript title="Check all environment variables in development mode."
+protected postServerInitialization(): void {
+    if (this.isDevelopment()) {
+        this.provider.get(Env).checkAll();
+    }
+}
+```
+
+## Set global route prefix
+
+You can set a global prefix for all routes in your application. This is useful when you want to version your APIs.
+
+```typescript
+@provide(App)
+class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: IProvider;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get<IProvider>(Provider);
+    }
+
+    protected configureServices(): void {
+        this.setGlobalRoutePrefix("/v1");
+    }
+}
+```
+
 ---
 
 ## Support us ❤️
