@@ -1,5 +1,7 @@
 ---
-sidebar_position: 2
+sidebar_position: 1
+title: Generate
+description: Scaffold ExpressoTS resources using the CLI.
 ---
 
 # Generate
@@ -8,7 +10,7 @@ In order to provide a better developer experience, the ExpressoTS CLI provides a
 
 This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
 
-## Command Syntax
+## Command syntax
 
 The generate command can be executed as follows:
 
@@ -22,26 +24,56 @@ Or in its short form:
 expressots g <resource> <structure> [options]
 ```
 
-### Command Structure
+## Command structure
 
 We provide two different structures to scaffold the resources:
 
--   **[shorthand]**: `expressots generate service user-create`
-    This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts`
+-   **shorthand**:
 
--   **[folder/subfolder/resource]**: `expressots generate service user/create`
-    This will create this folder structure: `/user/create` and the file: `create.[resource].ts`
+```bash title="Create a controller, dto, usecase and module (if not exists)"
+expressots generate service user-create
+```
+
+This will create this folder structure: `/user/create` and the file: `user-create.[resource].ts` inside of the `useCases` folder.
+
+```bash title="Output"
+src
+└── useCases
+    └── user
+        └── create
+            ├── user-create.controller.ts
+            ├── user-create.dto.ts
+            ├── user-create.usecase.ts
+```
+
+-   **folder/subfolder/resource**:
+
+```bash title="Create a controller, dto, usecase and module (if not exists)"
+expressots generate service user/create
+```
+
+This will create this folder structure: `/user/create` and the file: `create.[resource].ts`
+
+```bash title="Output"
+src
+└── useCases
+    └── user
+        └── create
+            ├── create.controller.ts
+            ├── create.dto.ts
+            ├── create.usecase.ts
+```
 
     If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots generate service user/create/`
     Structure: `user/create/` and the file: `create.[resource].ts`
 
-### Resource Root Folder
+## Resource root folder
 
 -   The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
 -   In the opinionated mode, the root folder is the `src` folder and the resources scaffolded with `service, usecase, dto, controller` are created inside of the `useCases` folder.
 -   Entities are created inside of the `entities` folder, and providers inside of the `providers` folder.
 
-## Resource Types
+## Resource types
 
 Current available resources:
 
