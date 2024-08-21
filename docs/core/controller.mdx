@@ -169,7 +169,7 @@ callUseCase(usecase: unknown, res: Response, successStatusCode: number);
 -   `useCase`: The use case that will be called. This use case is injected in the controller constructor.
 -   `res`: The response object from the express request.
 -   `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully.
-    Please see the **[Http status code](../features/status-code.md)** type for more information.
+    Please see the **[Http status code](../features/status-code.mdx)** type for more information.
 
 ```typescript title="Default response format"
 return res.status(successStatusCode).json(dataReturn);
@@ -331,7 +331,7 @@ export class UserController {
 For error handling, ExpressoTS provides a built-in error handler middleware that can be used to catch errors thrown in the application.
 This middleware is automatically added to the application when it is initialized in the `app.provider.ts` file.
 
-Read more about error handling in ExpressoTS in the **[Error Handling](../features/error-handling.md)** section.
+Read more about error handling in ExpressoTS in the **[Error Handling](../features/error-handling.mdx)** section.
 
 :::warning Initializing the Application without a controller
 ExpressoTS will prevent you from initializing the Application without a controller since there are no listeners to handle incoming requests. You will see the following message in the console:
