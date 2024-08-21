@@ -107,7 +107,7 @@ const config: Config = {
                     items: [
                         {
                             label: "Tutorial",
-                            to: "docs/category/tutorials",
+                            to: "docs/category/guides",
                         },
                     ],
                 },
@@ -115,8 +115,16 @@ const config: Config = {
                     title: "Community",
                     items: [
                         {
-                            label: "Twitch TV",
-                            href: "https://www.twitch.tv/richardzampieri",
+                            label: "LinkedIn",
+                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                        },
+                        {
+                            label: "X (Twitter)",
+                            href: "https://twitter.com/expressots",
+                        },
+                        {
+                            label: "Discord",
+                            href: "https://discord.gg/PyPJfGK",
                         },
                     ],
                 },
