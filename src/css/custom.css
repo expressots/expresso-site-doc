@@ -147,6 +147,34 @@ html[data-theme="dark"] {
     background-position: center; /* Center the background image */
 }
 
+/* LinkedIn Icon Navbar */
+.header-linkedin-link {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%23ffffff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.12 19h-3.88v-11.27h3.88v11.27zm-1.94-12.81c-1.24 0-2.25-1.01-2.25-2.25s1.01-2.25 2.25-2.25 2.25 1.01 2.25 2.25-1.01 2.25-2.25 2.25zm14.06 12.81h-3.88v-5.62c0-1.34-.03-3.06-1.86-3.06s-2.15 1.45-2.15 2.96v5.72h-3.88v-11.27h3.73v1.54h.05c.52-0.99 1.79-2.03 3.69-2.03 3.94 0 4.66 2.59 4.66 5.95v6.81z'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.header-linkedin-link:hover {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%2380f5a8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.12 19h-3.88v-11.27h3.88v11.27zm-1.94-12.81c-1.24 0-2.25-1.01-2.25-2.25s1.01-2.25 2.25-2.25 2.25 1.01 2.25 2.25-1.01 2.25-2.25 2.25zm14.06 12.81h-3.88v-5.62c0-1.34-.03-3.06-1.86-3.06s-2.15 1.45-2.15 2.96v5.72h-3.88v-11.27h3.73v1.54h.05c.52-0.99 1.79-2.03 3.69-2.03 3.94 0 4.66 2.59 4.66 5.95v6.81z'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.8;
+}
+
+.header-linkedin-link:before {
+    content: "";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-size: contain;
+    background-position: center;
+}
+
 /* Add uniform spacing between navbar items */
 .navbar__item {
     margin-right: 20px; /* Adjust this value for consistent spacing */

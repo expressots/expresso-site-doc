@@ -82,6 +82,12 @@ const config: Config = {
                     className: "header-github-link",
                 },
                 {
+                    href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                    position: "right",
+                    "aria-label": "LinkedIn profile",
+                    className: "header-linkedin-link",
+                },
+                {
                     type: "search",
                     position: "left",
                 },
