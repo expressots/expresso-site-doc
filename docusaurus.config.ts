@@ -21,15 +21,7 @@ const config: Config = {
 
     i18n: {
         defaultLocale: "en",
-        locales: ["en", "pt"],
-        localeConfigs: {
-            en: {
-                label: "EN",
-            },
-            pt: {
-                label: "PT",
-            },
-        },
+        locales: ["en"],
     },
 
     presets: [
@@ -88,11 +80,6 @@ const config: Config = {
                     position: "right",
                     "aria-label": "GitHub repository",
                     className: "header-github-link",
-                },
-                {
-                    type: "localeDropdown",
-                    label: "Language",
-                    position: "right",
                 },
                 {
                     type: "search",
