@@ -63,7 +63,7 @@ const config: Config = {
         },
         navbar: {
             title: "ExpressoTS",
-            hideOnScroll: true,
+            hideOnScroll: false,
             logo: {
                 alt: "ExpressoTS",
                 src: "img/logo.png",
