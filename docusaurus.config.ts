@@ -1,51 +1,10 @@
 import * as Preset from "@docusaurus/preset-classic";
 import type { Config } from "@docusaurus/types";
-import { themes } from "prism-react-renderer";
-import axios from "axios";
-
-const coreVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/expressots/releases"
-        );
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-};
-
-const adapterVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/adapter-express/releases"
-        );
-
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-};
-
-const cliVersion = async (): Promise<string> => {
-    try {
-        const response = await axios.get(
-            "https://api.github.com/repos/expressots/expressots-cli/releases"
-        );
-
-        const latestRelease = response.data[0];
-        return latestRelease.tag_name;
-    } catch (error) {
-        console.error("Error fetching current version from GitHub:", error);
-        return "2.0.0"; // Fallback version
-    }
-};
+import expressotsDarkTheme from "./src/css/prism.dark-theme";
+import expressotsLightTheme from "./src/css/prism.light-theme";
 
 const config: Config = {
-    title: "Expresso TS",
+    title: "ExpressoTS",
     tagline: "A lightweight, fast and easy to use TypeScript framework",
     favicon: "img/favicon.ico",
 
@@ -57,20 +16,12 @@ const config: Config = {
     deploymentBranch: "gh-pages",
     trailingSlash: false,
 
-    onBrokenLinks: "throw", // 'throw' | 'warn' | 'ignore'
+    onBrokenLinks: "warn", // 'throw' | 'warn' | 'ignore'
     onBrokenMarkdownLinks: "warn",
 
     i18n: {
         defaultLocale: "en",
-        locales: ["en", "pt"],
-        localeConfigs: {
-            en: {
-                label: "English",
-            },
-            pt: {
-                label: "Português",
-            },
-        },
+        locales: ["en"],
     },
 
     presets: [
@@ -99,8 +50,8 @@ const config: Config = {
             },
         ],
         colorMode: {
-            defaultMode: "light",
-            disableSwitch: false,
+            defaultMode: "dark",
+            disableSwitch: true,
             respectPrefersColorScheme: false,
         },
         algolia: {
@@ -111,19 +62,13 @@ const config: Config = {
             appId: "3UANWN5EUQ",
         },
         navbar: {
-            title: "Expresso TS",
-            hideOnScroll: true,
+            title: "ExpressoTS",
+            hideOnScroll: false,
             logo: {
-                alt: "Expresso TS",
+                alt: "ExpressoTS",
                 src: "img/logo.png",
             },
             items: [
-                {
-                    type: "doc",
-                    docId: "hello",
-                    position: "right",
-                    label: "Documentation",
-                },
                 {
                     type: "doc",
                     docId: "governance",
@@ -132,14 +77,19 @@ const config: Config = {
                 },
                 {
                     href: "https://github.com/expressots/expressots",
-                    label: "GitHub",
                     position: "right",
                     "aria-label": "GitHub repository",
+                    className: "header-github-link",
                 },
                 {
-                    type: "localeDropdown",
-                    label: "Language",
+                    href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
                     position: "right",
+                    "aria-label": "LinkedIn profile",
+                    className: "header-linkedin-link",
+                },
+                {
+                    type: "search",
+                    position: "left",
                 },
             ],
         },
@@ -157,7 +107,7 @@ const config: Config = {
                     items: [
                         {
                             label: "Tutorial",
-                            to: "docs/category/tutorials",
+                            to: "docs/category/guides",
                         },
                     ],
                 },
@@ -165,8 +115,16 @@ const config: Config = {
                     title: "Community",
                     items: [
                         {
-                            label: "Twitch TV",
-                            href: "https://www.twitch.tv/richardzampieri",
+                            label: "LinkedIn",
+                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                        },
+                        {
+                            label: "X (Twitter)",
+                            href: "https://twitter.com/expressots",
+                        },
+                        {
+                            label: "Discord",
+                            href: "https://discord.gg/PyPJfGK",
                         },
                     ],
                 },
@@ -191,8 +149,8 @@ const config: Config = {
             copyright: `Copyright © ${new Date().getFullYear()} Official ExpressoTS, Released under the MIT License.`,
         },
         prism: {
-            theme: themes.github,
-            darkTheme: themes.vsDark,
+            theme: expressotsLightTheme,
+            darkTheme: expressotsDarkTheme,
         },
     } satisfies Preset.ThemeConfig,
     themes: ["@docusaurus/theme-mermaid"],
@@ -201,17 +159,4 @@ const config: Config = {
     },
 };
 
-export default async function asyncConfig(): Promise<Config> {
-    const core = await coreVersion();
-    const adapter = await adapterVersion();
-    const cli = await cliVersion();
-
-    config.themeConfig.announcementBar = {
-        id: "supportus",
-        content: `@core v${core} / @adapter-express v${adapter} / @cli v${cli}`,
-        backgroundColor: "#111",
-        textColor: "#19CE59",
-        isCloseable: false,
-    };
-    return config;
-}
+export default config;

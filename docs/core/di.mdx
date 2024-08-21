@@ -1,0 +1,159 @@
+---
+sidebar_position: 8
+title: Injection
+description: Dependency Injection in ExpressoTS.
+---
+
+import diImg from "./img/di.png";
+
+# Dependency Injection
+
+Dependency Injection (DI) is a design pattern used in software development that involves providing an object with the instances of the classes it needs to perform its tasks, rather than having it construct these instances itself. This process of `providing` instances is called `injecting` them, hence the term Dependency Injection.
+
+## Benefits
+
+Here are some of the key benefits of using Dependency Injection:
+
+-   Decoupling: DI helps to decouple the components of your application. Instead of components creating the objects they depend upon, these objects are passed in (injected) by a DI framework or container. This means components don't need to know about the inner workings of their dependencies, and dependencies can be swapped out without the component knowing or caring.
+
+-   Testability: DI makes unit testing easier. Because dependencies are injected, you can easily provide mock objects during testing. This allows each unit of code to be tested in isolation, with full control over its dependencies.
+
+-   Reusable Code: With DI, your classes are typically designed to work with interfaces rather than concrete classes. This means you can reuse the same class in different contexts, with different injected dependencies.
+
+-   Easier Maintenance and Increased Efficiency: By centralizing the creation of objects, and by reducing the amount of hard-coded class instantiation, maintenance becomes easier. When a class changes, you typically only need to update code in one place.
+
+-   Configurability: You can configure your application structure externally, typically through XML or similar files. This means you can modify the structure and dependencies of your components without having to modify the code itself.
+
+-   Lifecycles and Scoping: manage the lifecycle of injected objects, and control their scoping (e.g., singleton scope, request scope).
+
+-   Concurrency Management: containers can automatically handle service lifetimes in a concurrent environment, which can be a complex task to handle correctly without such a tool.
+
+In conclusion, DI is a technique that facilitates loose coupling, increased testability, and more maintainable and flexible code.
+
+## Architecture
+
+In the image below, we ensure that each controller is responsible for a single task, which is why
+you see multiple controllers within a module. This architecture showcases the flexibility of the container
+system, enabling developers to define scopes at various levels, including the container, module, and controller.
+Even services like use cases and providers can have their own distinct scopes within the container.
+
+<div style={{ textAlign: "center" }}>
+    <img src={diImg} alt="Container" />
+</div>
+
+---
+
+-   Container have its default scope that can be override by the module. The default scope is `Request` scope.
+-   Defining a scope for a module forces all controllers under that module to have the same scope.
+-   Not defining a scope for a module allow controllers to have their own scope using `@scope()` decorator.
+-   All other registered classes such as providers, entities, helpers can have their specific scope based on the decorator used.
+
+## Components
+
+The DI system in ExpressoTS is composed of the following components:
+
+| Components | Description                                                                                        |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Container  | The DI container of the ExpressoTS application.                                                    |
+| Module     | A container module is typically used to group related controllers and their dependencies together. |
+| Controller | Primary interface between the client and server. Responsible to handle incoming requests.          |
+| Classes    | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc.  |
+
+## Decorators
+
+Injection is done through decorators. The following decorators are used to define the scope of a class:
+
+| Decorator           | Description                                                        |
+| ------------------- | ------------------------------------------------------------------ |
+| @provide()          | Binds a class to a dependency injection container as RequestScope. |
+| @provideSingleton() | Binds a class to a dependency injection container as Singleton.    |
+| @provideTransient() | Binds a class to a dependency injection container as Transient.    |
+
+Example of usage:
+
+#### Request
+
+```typescript
+@provide(MyRequest)
+class MyRequest {}
+```
+
+#### Singleton
+
+```typescript
+@provideSingleton(MySingleton)
+class MySingleton {}
+```
+
+#### Transient
+
+```typescript
+@provideTransient(MyTransient)
+class MyTransient {}
+```
+
+## Controller scope
+
+Controllers can have their own scope using the `@scope()` decorator. This decorator can be used to define the scope of a controller.
+
+Example of usage:
+
+```typescript
+@scope("Singleton")
+@controller()
+class MyController {}
+```
+
+:::info
+You can't define a scope for a controller if the module has a scope defined.
+:::
+
+## Circular dependencies
+
+Circular dependencies occur when two or more modules depend on each other, leading to a potentially infinite loop or other issues during dependency injection.
+
+ExpressoTS circular dependencies can be resolved using the following methods:
+
+<span class="span-table">Lazy Injection: </span> (@inject with LazyServiceIdentifier)
+
+One common approach to handle circular dependencies in ExpressoTS is to use lazy injection. This allows the IoC container to inject a proxy or a function
+that retrieves the dependency only when it's actually needed. This postpones the resolution of the dependency,
+avoiding the immediate circular reference issue.
+
+To implement this, you can use the `LazyServiceIdentifier` utility provided by the framework.
+
+```typescript title="Lazy Injection"
+import { inject, LazyServiceIdentifier } from "inversify";
+
+@provide(ServiceA)
+class ServiceA {
+    constructor(
+        @inject(new LazyServiceIdentifier(() => ServiceB))
+        private serviceB: ServiceB
+    ) {}
+}
+
+@provide(ServiceB)
+class ServiceB {
+    constructor(@inject(ServiceA) private serviceA: ServiceA) {}
+}
+```
+
+In this example, ServiceA and ServiceB depend on each other. By using `LazyServiceIdentifier`, ServiceB
+is injected into ServiceA in a lazy manner, breaking the circular dependency loop.
+
+:::caution Factory Injection is under development.
+:::
+
+<span class="span-table">Factory Injection: </span> Use factory functions to create instances on demand,
+thus avoiding circular dependencies at construction time.
+
+<span class="span-table">Proxies: </span> Employ proxies to delay the resolution of dependencies, giving
+more control over when and how the dependency is resolved.
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

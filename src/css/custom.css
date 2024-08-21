@@ -3,57 +3,225 @@
  * bundles Infima by default. Infima is a CSS framework designed to
  * work well for content-centric websites.
  */
- @import url('https://fonts.googleapis.com/css2?family=PT+Sans&display=swap');
- @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap");
 
- body {
-  font-size: 15px;
-  font-weight: 500;
-  font-family: 'Montserrat', sans-serif;
- }
+body {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Montserrat", sans-serif;
+}
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #111111;
-  --ifm-color-primary-dark: #415171;
-  --ifm-color-primary-darker: #3d4c6b;
-  --ifm-color-primary-darkest: #323f58;
-  --ifm-color-primary-light: #4f638b;
-  --ifm-color-primary-lighter: #536791;
-  --ifm-color-primary-lightest: #5e75a3;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  --ifm-font-weight-semibold: 700;
-  --ifm-font-family-base: 'Montserrat', sans-serif;
+    --ifm-color-primary: #111111;
+    --ifm-color-primary-dark: #415171;
+    --ifm-color-primary-darker: #3d4c6b;
+    --ifm-color-primary-darkest: #323f58;
+    --ifm-color-primary-light: #4f638b;
+    --ifm-color-primary-lighter: #536791;
+    --ifm-color-primary-lightest: #5e75a3;
+    --ifm-code-font-size: 95%;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+    --ifm-font-weight-semibold: 700;
+    --ifm-font-family-base: "Montserrat", sans-serif;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #80F5A8;
-  --ifm-color-primary-dark: #4d8497;
-  --ifm-color-primary-darker: #487d8f;
-  --ifm-color-primary-darkest: #3c6776;
-  --ifm-color-primary-light: #659eb1;
-  --ifm-color-primary-lighter: #6ea3b5;
-  --ifm-color-primary-lightest: #87b3c2;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+[data-theme="dark"] {
+    --ifm-color-primary: #80f5a8;
+    --ifm-color-primary-dark: #4d8497;
+    --ifm-color-primary-darker: #487d8f;
+    --ifm-color-primary-darkest: #3c6776;
+    --ifm-color-primary-light: #659eb1;
+    --ifm-color-primary-lighter: #6ea3b5;
+    --ifm-color-primary-lightest: #87b3c2;
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] {
+    background-color: #1f1f22;
+}
+
+[data-theme="dark"] .navbar {
+    background-color: #1b1b1d;
+}
+
+[data-theme="dark"] .menu {
+    background-color: #242427;
+    font-size: 15px;
 }
 
 .navbar {
-  padding: 0 8rem;
-  text-transform: uppercase;
+    padding: 0 8rem;
+    text-transform: uppercase;
 }
 
 .customHeroBanner {
-  background-color: #111111;
+    background-color: #111111;
 }
 
 .customHeroBanner .hero__subtitle {
-  color: #ffffff;
+    color: #ffffff;
 }
 
 @media screen and (max-width: 996px) {
-  .navbar {
-    padding: 0 1.2rem;
-  }
+    .navbar {
+        padding: 0 1.2rem;
+    }
+}
+
+.span-table {
+    color: #80f5a8;
+}
+
+/* Algolia search */
+
+[data-theme="light"] .DocSearch {
+    /* --docsearch-primary-color: var(--ifm-color-primary); */
+    /* --docsearch-text-color: var(--ifm-font-color-base); */
+    --docsearch-muted-color: var(--ifm-color-secondary-darkest);
+    --docsearch-container-background: rgba(94, 100, 112, 0.7);
+    /* Modal */
+    --docsearch-modal-background: var(--ifm-color-secondary-lighter);
+    /* Search box */
+    --docsearch-searchbox-background: var(--ifm-color-secondary);
+    --docsearch-searchbox-focus-background: var(--ifm-color-white);
+    /* Hit */
+    --docsearch-hit-color: var(--ifm-font-color-base);
+    --docsearch-hit-active-color: var(--ifm-color-white);
+    --docsearch-hit-background: var(--ifm-color-white);
+    /* Footer */
+    --docsearch-footer-background: var(--ifm-color-white);
+}
+
+[data-theme="dark"] .DocSearch {
+    --docsearch-text-color: #80f5a8;
+    --docsearch-muted-color: #80f5a8;
+    --docsearch-container-background: rgba(47, 55, 69, 0.7);
+    /* Modal */
+    --docsearch-modal-background: var(--ifm-background-color);
+    /* Search box */
+    --docsearch-searchbox-background: var(--ifm-background-color);
+    --docsearch-searchbox-focus-background: var(--ifm-color-black);
+    /* Hit */
+    --docsearch-hit-color: var(--ifm-font-color-base);
+    --docsearch-hit-active-color: rgba(0, 0, 0);
+    --docsearch-hit-background: rgb(54, 61, 56);
+    /* Footer */
+    --docsearch-footer-background: var(--ifm-background-surface-color);
+    --docsearch-key-gradient: linear-gradient(
+        -26.5deg,
+        var(--ifm-color-emphasis-200) 0%,
+        var(--ifm-color-emphasis-100) 100%
+    );
+}
+
+/* GitHub Icon Navbar */
+.header-github-link {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%23ffffff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain; /* Ensure the background fits within the dimensions */
+    background-position: center; /* Center the background image */
+}
+
+/* Hover state */
+.header-github-link:hover {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%2380f5a8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain; /* Ensure the background fits within the dimensions */
+    background-position: center; /* Center the background image */
+    opacity: 0.8;
+}
+
+/* Before state for setting up initial properties */
+.header-github-link:before {
+    content: "";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-size: contain; /* Ensure the background fits within the dimensions */
+    background-position: center; /* Center the background image */
+}
+
+/* LinkedIn Icon Navbar */
+.header-linkedin-link {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%23ffffff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.12 19h-3.88v-11.27h3.88v11.27zm-1.94-12.81c-1.24 0-2.25-1.01-2.25-2.25s1.01-2.25 2.25-2.25 2.25 1.01 2.25 2.25-1.01 2.25-2.25 2.25zm14.06 12.81h-3.88v-5.62c0-1.34-.03-3.06-1.86-3.06s-2.15 1.45-2.15 2.96v5.72h-3.88v-11.27h3.73v1.54h.05c.52-0.99 1.79-2.03 3.69-2.03 3.94 0 4.66 2.59 4.66 5.95v6.81z'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.header-linkedin-link:hover {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%2380f5a8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11.12 19h-3.88v-11.27h3.88v11.27zm-1.94-12.81c-1.24 0-2.25-1.01-2.25-2.25s1.01-2.25 2.25-2.25 2.25 1.01 2.25 2.25-1.01 2.25-2.25 2.25zm14.06 12.81h-3.88v-5.62c0-1.34-.03-3.06-1.86-3.06s-2.15 1.45-2.15 2.96v5.72h-3.88v-11.27h3.73v1.54h.05c.52-0.99 1.79-2.03 3.69-2.03 3.94 0 4.66 2.59 4.66 5.95v6.81z'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.8;
+}
+
+.header-linkedin-link:before {
+    content: "";
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    background-size: contain;
+    background-position: center;
+}
+
+/* Add uniform spacing between navbar items */
+.navbar__item {
+    margin-right: 20px; /* Adjust this value for consistent spacing */
+}
+
+/* Remove extra margin from the last navbar item */
+.navbar__item:last-child {
+    margin-right: 0;
+}
+
+/* Specific adjustments for the GitHub icon */
+.header-github-link {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%23ffffff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+/* Hover state with adjusted color */
+.header-github-link:hover {
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%2380f5a8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+        no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.8;
+}
+
+/* General navbar styles */
+.navbar {
+    padding: 0 8rem;
+    text-transform: uppercase;
+}
+
+/* Adjust navbar item spacing */
+.navbar__item {
+    margin-right: 10px; /* Adjust for consistent spacing */
+}
+
+/* Remove extra margin from the last navbar item */
+.navbar__item:last-child {
+    margin-right: 0;
+}
+
+/* Specific adjustments for the GitHub icon */
+.header-github-link {
+    margin-right: 20px; /* Match with other navbar items */
 }

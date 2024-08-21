@@ -1,0 +1,142 @@
+---
+sidebar_position: 1
+title: App provider
+description: The App class is the core of an ExpressoTS application.
+---
+
+import imgAppLifecycle from "./img/app-life-cycle.png";
+
+# Application
+
+The `App` class is the core of an ExpressoTS application, handling server creation and configuration.
+It allows you to set up middleware and providers during the bootstrapping process and offers lifecycle hooks
+to run code before, after, and during server shutdown.
+
+## App express
+
+`AppExpress` is the [Express.js](https://expressjs.com/) platform implementation specifically designed for ExpressoTS.
+It integrates seamlessly with the Express.js ecosystem, providing a robust foundation for building
+and configuring applications within ExpressoTS.
+
+With full support for Express.js middleware, `AppExpress` enables developers to efficiently manage application setup, execution, and shutdown processes,
+all while leveraging the familiar Express.js environment.
+
+:::info
+The framework currently supports Express as its primary adapter, with Fastify and other possible in house server under development.
+:::
+
+Here is the `App` class extending the `AppExpress` adapter:
+
+```typescript title="app.provider.ts"
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void {
+        this.provider.register(Env);
+
+        this.middleware.addBodyParser();
+        this.middleware.setErrorHandler();
+    }
+
+    protected postServerInitialization(): void {
+        if (this.isDevelopment()) {
+            this.provider.get(Env).checkAll();
+        }
+    }
+
+    protected serverShutdown(): void {}
+}
+```
+
+-   `this.provider`: an object containing a register method that allows developers to register internal
+    or external ExpressoTS-compatible providers. This method registers classes in the ExpressoTS container
+    to be part of the dependency injection system, enabling the use of different scopes such as Transient, Scoped, and Singleton.
+
+-   `this.middleware`: offers a set of out-of-the-box middlewares that can be used to configure your application.
+    See the complete list in the **[Middleware section](../features/middleware.mdx)**
+
+:::tip
+Be sure to explore other functionalities available in the class through `this`, like setGlobalRoutePrefix(), setEngine(), and more.
+:::
+
+## Lifecycle hooks
+
+An ExpressoTS application and its components follow a lifecycle managed by the framework.
+ExpressoTS offers lifecycle hooks that let developers track important events and run specific
+code within modules, providers, or controllers as these events happen.
+
+The diagram below shows the sequence of key lifecycle events, from application startup to when the Node.js process exits.
+
+```typescript title="Add any service to initialize before the server starts."
+protected configureServices(): void | Promise<void> { }
+```
+
+```typescript title="Add any service to run after the server starts."
+protected postServerInitialization(): void | Promise<void> { }
+```
+
+```typescript title="Add any service to run after the server shuts down."
+protected serverShutdown(): void | Promise<void> { }
+```
+
+## Hooks execution order
+
+<div style={{ textAlign: "center" }}>
+    <img src={imgAppLifecycle} width="700px" height="700px" alt="Lifecycle events" />
+</div>
+
+## Method isDevelopment
+
+It is a helper method that returns a boolean value indicating whether the application is running in development mode.
+This method is useful for running specific code only in development environments.
+
+```typescript title="Check if the application is running in development mode."
+this.isDevelopment(): boolean
+```
+
+Currently this method is being used in the `postServerInitialization` method to check if the application is running in development mode.
+If it is, the `Env` provider is used to check all environment variables.
+
+```typescript title="Check all environment variables in development mode."
+protected postServerInitialization(): void {
+    if (this.isDevelopment()) {
+        this.provider.get(Env).checkAll();
+    }
+}
+```
+
+## Set global route prefix
+
+You can set a global prefix for all routes in your application. This is useful when you want to version your APIs.
+
+```typescript
+@provide(App)
+class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: IProvider;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get<IProvider>(Provider);
+    }
+
+    protected configureServices(): void {
+        this.setGlobalRoutePrefix("/v1");
+    }
+}
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
