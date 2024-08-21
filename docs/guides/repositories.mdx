@@ -1,14 +1,12 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
+title: Repositories
+description: Learn how to use repositories in ExpressoTS.
 ---
 
 # Repositories
 
-The repository pattern in ExpressoTS provides an abstraction layer for data access, encapsulating CRUD (Create, Read, Update, Delete) operations within repository classes. These repositories act as intermediaries between the business logic and data mapping layers, using ORMs like **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/) or [Sequelize](https://sequelize.org/)** to interact with the database.
-
-## Understanding the repository pattern
-
-A repository pattern is a design strategy that abstracts data persistence, allowing business logic to be agnostic of the underlying database technology or schema. ExpressoTS utilizes this pattern to facilitate maintainability and scalability.
+The repository pattern provides an abstraction layer for data access, encapsulating CRUD (Create, Read, Update, Delete) operations within repository classes. These repositories act as intermediaries between the business logic and data mapping layers, using ORMs like **[TypeORM](https://typeorm.io/), [Prisma](https://www.prisma.io/) or [Sequelize](https://sequelize.org/)** to interact with the database.
 
 ## Goals and benefits
 
@@ -19,11 +17,11 @@ The main goal of the repository pattern is to separate business logic from data 
 -   **Abstraction**: Hides the complexities of the data layer from the rest of the application, providing a simplified and consistent interface for data operations.
 -   **Testability**: Makes testing easier by allowing the use of mock repositories or in-memory databases to simulate data persistence.
 
-## Repository pattern implementation example
+## Implementation example
 
 In the following example, we will create a simple repository pattern implementation using TypeScript. We will define a base repository interface and class, as well as a concrete repository class for a `User` entity.
 
-### Base repository interface
+## Base repository interface
 
 ```typescript
 interface IBaseRepository<T> {
@@ -35,7 +33,7 @@ interface IBaseRepository<T> {
 }
 ```
 
-### Base repository class
+## Base repository class
 
 ```typescript
 @provide(BaseRepository)
@@ -44,7 +42,7 @@ class BaseRepository<T> implements IBaseRepository<T> {
 }
 ```
 
-### Specific repository class
+## Specific repository class
 
 ```typescript
 @provide(UserRepository)
@@ -57,19 +55,15 @@ The above example demonstrates the simplicity of creating a base repository that
 
 While repositories focus on data interaction, providers in ExpressoTS typically offer functionalities such as environment validation or logging. Keeping repositories and providers distinct ensures clean separation and adheres to the single responsibility principle.
 
-:::info
 In ExpressoTS, repositories are housed within a dedicated "repositories" folder, distinguishing them from the "providers" folder. This structural choice emphasizes their distinct roles and facilitates a modular codebase.
+
+:::info
+This separation happens only in the opinionated template. For the non opinionated template, you can structure your codebase as you see fit.
 :::
 
 ---
 
-## Support the project
+## Support us ❤️
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support. If you'd like to help, please consider:
-
--   Become a **[sponsor on GitHub](https://github.com/sponsors/expressots)**
--   Follow the **[organization](https://github.com/expressots)** on GitHub and Star ⭐ the project
--   Subscribe to the Twitch channel: **[Richard Zampieri](https://www.twitch.tv/richardzampieri)**
--   Join our **[Discord](https://discord.com/invite/PyPJfGK)**
--   Contribute submitting **[issues and pull requests](https://github.com/expressots/expressots/issues/new/choose)**
--   Share the project with your friends and colleagues
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](./support-us.mdx)**.
