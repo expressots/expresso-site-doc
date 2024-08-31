@@ -51,6 +51,22 @@ export class App extends AppExpress {
 
 In the example above, we create a `multer` object with the destination folder for storing the uploaded files. We then use the `file.single("file")` middleware to handle a single file upload with the field name `file`.
 
+Simplest use case of file upload with ExpressoTS.
+
+```typescript title="Simplest use case of file upload"
+@controller("/")
+export class AppController {
+    @Post("/avatar")
+    @FileUpload({ fieldName: "avatar" }, { dest: "uploads/" })
+    execute() {
+        return "File uploaded successfully";
+    }
+}
+```
+
+If Request and Response objects are not included in the method, the `@FileUpload` decorator will automatically inject them into the method providing a standard
+response using `res.send()` method.
+
 ## File upload decorator
 
 You can also use the `@FileUpload` decorator to handle file uploads on specific routes.
@@ -147,10 +163,6 @@ export class AppController {
     }
 }
 ```
-
-:::caution
-Make sure to add `@request()` and `@response()` decorators to the route handler method to access the request and response objects properly.
-:::
 
 Make sure to explore the [multer](https://www.npmjs.com/package/multer) documentation for more options and configurations to handle file uploads in your ExpressoTS application.
 
