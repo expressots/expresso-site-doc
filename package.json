@@ -20,7 +20,7 @@
         "@docusaurus/remark-plugin-npm2yarn": "^3.5.2",
         "@docusaurus/theme-mermaid": "^3.5.2",
         "@mdx-js/react": "3.0.1",
-        "axios": "^1.7.5",
+        "axios": "^1.7.6",
         "clsx": "2.1.1",
         "mermaid": "10.9.1",
         "prism-react-renderer": "2.3.1",
