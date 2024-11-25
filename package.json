@@ -12,6 +12,8 @@
         "serve": "docusaurus serve",
         "write-translations": "docusaurus write-translations",
         "write-heading-ids": "docusaurus write-heading-ids",
+        "version": "npx docusaurus docs:version next_version",
+        "cache": "npx docusaurus cache clear",
         "typecheck": "tsc"
     },
     "dependencies": {
@@ -19,11 +21,11 @@
         "@docusaurus/preset-classic": "^3.5.2",
         "@docusaurus/remark-plugin-npm2yarn": "^3.5.2",
         "@docusaurus/theme-mermaid": "^3.5.2",
-        "@mdx-js/react": "3.0.1",
-        "axios": "^1.7.5",
+        "@mdx-js/react": "3.1.0",
+        "axios": "1.7.8",
         "clsx": "2.1.1",
-        "mermaid": "10.9.1",
-        "prism-react-renderer": "2.3.1",
+        "mermaid": "10.9.2",
+        "prism-react-renderer": "2.4.0",
         "react": "18.3.1",
         "react-dom": "18.3.1"
     },

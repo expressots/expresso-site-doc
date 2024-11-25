@@ -1,0 +1,115 @@
+---
+sidebar_position: 4
+title: Testing
+description: How to test your ExpressoTS APIs.
+---
+
+# Testing
+
+Unit and integration testing are both crucial in application development, each serving a unique purpose:
+
+-   Unit tests: Focus on testing individual pieces of code, like a single function or method, in isolation. Dependencies are mocked to ensure controlled, reliable testing. Unit tests help catch bugs early and ensure that each part of the code works correctly, simplifying debugging later.
+
+-   Integration tests: Test the interaction between different components and external services. Unlike unit tests, they evaluate the application as a whole to ensure all parts work together as expected.
+
+:::tip
+Combining unit tests and integration tests can be beneficial because it allows developers to test both individual units of code and the application as a whole.
+This helps ensure that each piece of code is working correctly on its own and in conjunction with other parts of the application.
+:::
+
+## Our goal
+
+Our goal is to provide a simple and easy way to test your ExpressoTS APIs. We are working on a test library that wraps a modern testing framework to provide a simple and intuitive API for writing unit and integration tests.
+The test library will include:
+
+-   A test runner
+-   Adding the test library of your choice
+-   A test suite
+-   A test case
+-   A test assertion library
+-   A test coverage tool
+-   CLI command to scaffold tests
+
+:::caution Stay tuned for updates on our test library!
+:::
+
+## Testing usage example
+
+We will demonstrate how to test a simple ExpressoTS API using Jest and Supertest. You can use the test library of your choice.
+
+Below we are testing the PingUseCase endpoint return. We are using the **[Jest](https://jestjs.io/)** as the test runner and **[ts-jest](https://www.npmjs.com/package/ts-jest)** as the TypeScript preprocessor.
+
+```typescript title="ping.use-case.spec.ts"
+import { describe, expect, it } from "@jest/globals";
+
+describe("PingUseCase", () => {
+    let pingUseCase: PingUseCase;
+
+    beforeEach(() => {
+        pingUseCase = new PingUseCase();
+    });
+
+    it("should return a valid PingResponseDTO", () => {
+        const start: Date = new Date();
+        const response = pingUseCase.execute(start);
+        const end: Date = new Date(response.end);
+        const ttl = parseFloat(response.ttl.split(" ")[0]);
+
+        expect(response).toHaveProperty("start");
+        expect(response).toHaveProperty("end");
+        expect(response).toHaveProperty("ttl");
+        expect(response).toHaveProperty("message");
+        expect(response.message).toBe("Pong!");
+        expect(start <= end).toBe(true);
+        expect(ttl >= 0).toBe(true);
+    });
+});
+```
+
+## E2E testing with supertest
+
+We have available a method called `getHttpServer` in the `AppExpress` class that returns a proxy to the Express server. This method is useful for testing the application using **[Supertest](https://www.npmjs.com/package/supertest)**.
+
+```typescript title="POST /organization :: Creating a new organization use case"
+import "reflect-metadata";
+
+import { ServerEnvironment } from "@expressots/adapter-express";
+import { AppFactory, StatusCode } from "@expressots/core";
+import { container } from "../src/app.container";
+import { App } from "./../src/app.provider";
+import express from "express";
+import request from "supertest";
+
+const appExpress = express();
+
+describe("api test", () => {
+    let server: express.Application;
+
+    beforeAll(async () => {
+        const appInstance = await AppFactory.create(container, App);
+        await appInstance.listen(3000, ServerEnvironment.Development);
+
+        server = await appInstance.getHttpServer();
+    });
+
+    describe("organization.module", () => {
+        test("POST /organization", async () => {
+            const newOrg = {
+                name: "test org",
+            };
+
+            const response = await request(server).post("/organization").send(newOrg);
+
+            expect(response.status).toBe(StatusCode.Created);
+            expect(response.body).toEqual(newOrg);
+        });
+    });
+});
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

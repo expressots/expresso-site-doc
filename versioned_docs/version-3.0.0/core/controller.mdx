@@ -1,0 +1,346 @@
+---
+sidebar_position: 4
+title: Controllers
+description: Controllers the mediator between the client and server.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Controllers
+
+Controllers act as the primary interface between the client and server.
+They handle incoming requests, validate payloads against an input DTO, and emit responses in the DTO pattern.
+In essence, controllers bridge the communication between clients and service layers, also known as use-cases.
+
+## Create a controller
+
+In order to create a controller use the CLI tool with the following command:
+
+```bash
+expressots g c controller-name
+```
+
+Example of a generated controller:
+
+```bash
+expressots g c product
+```
+
+```typescript title="ProductController.ts"
+import { controller } from "@expressots/adapter-express";
+
+@controller("/")
+export class ProductController {}
+```
+
+## Patterns
+
+As mentioned before, controllers can be created in two different patterns: **SOLID** and **MVC**.
+The choice between these patterns depends on the project's requirements and the developer's preference.
+
+<Tabs>
+    <TabItem label="SOLID" value="solid">
+```ts title="One controller, one execution method, and one use case"
+    @controller("/product/create")
+    export class ProductCreateController {
+        @Post("")
+        exeute() {
+            return "Product created!";
+        }
+    }
+```
+    </TabItem>
+
+    <TabItem label="MVC" value="mvc">
+
+```ts title="Several routes in a single controller"
+@controller("/product")
+export class ProductController {
+    @Post("/")
+    createProduct() {
+        return "Product created!";
+    }
+    @Get("/")
+    readProduct() {
+        return "Product read!";
+    }
+    @Patch("/:id")
+    updateProduct() {
+        return "Product updated!";
+    }
+    @Delete("/:id")
+    deleteProduct() {
+        return "Product deleted!";
+    }
+}
+```
+
+    </TabItem>
+
+</Tabs>
+
+## Routing
+
+Routing in ExpressoTS is handled with decorators. The `@controller()` decorator sets the base route,
+while HTTP method decorators like `@Get()` and `@Post()` define specific routes.
+
+You can also apply middleware at the controller level which affects all methods, while applying it to a method affects only that specific route.
+This approach ensures a clean and structured way to manage routing and middleware in your application.
+
+Example of controller routing concatenation:
+
+```typescript title="BASE_URL/product/create"
+@controller("/product")
+export class ProductController {
+    @Post("/create")
+    createProduct() {
+        return "Product created!";
+    }
+}
+```
+
+Example of middleware usage:
+
+```typescript title="Middleware usage in a controller and in a specific route"
+@controller("/product", authMiddleware)
+export class ProductController {
+    @Post("/create", bodyParsingMiddleware)
+    createProduct() {
+        return "Product created!";
+    }
+}
+```
+
+## Route string patterns
+
+Routes based on string patterns can be defined as well. This feature is useful when you need to define a route with a dynamic parameter.
+
+```typescript title="Route with a dynamic parameter"
+@controller("/ab?cd")
+export class AppController {
+    @Get("")
+    stringPattern(): string {
+        return "Routes to be used in the following paths: /acd or /abcd";
+    }
+}
+```
+
+Read more about route string patterns and all the possibilities [here](https://expressjs.com/en/guide/routing.html#route-paths).
+
+## Scope
+
+The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope.
+However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum values.
+
+:::caution
+If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
+The `@scope` decorator can only be used in specific controllers if the module scope is not defined.
+:::
+
+Here is an example of usage:
+
+Use `BindingScopeEnum.Singleton` or simply a string "Singleton".
+
+```typescript
+@scope("Singleton")
+@controller("/")
+class ProductController {}
+```
+
+The controller above will be scoped as `Singleton` and will be shared across all requests.
+
+## Base controller
+
+In ExpressoTS, we enhance controller classes with a `BaseController` class, which offers two methods—`callUseCase()`
+and `callUseCaseAsync()`—to simplify the interaction between controllers and use cases.
+These methods reinforce the principle of "one use case per controller" by focusing the controller's role
+on invoking the business logic encapsulated within a use case.
+
+:::info
+`BaseController` class is only a syntatic sugar to help developers to call use cases in a more organized way.
+:::
+
+```typescript title="Method signature"
+callUseCase(usecase: unknown, res: Response, successStatusCode: number);
+
+```
+
+-   `useCase`: The use case that will be called. This use case is injected in the controller constructor.
+-   `res`: The response object from the express request.
+-   `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully.
+    Please see the **[Http status code](../features/status-code.mdx)** type for more information.
+
+```typescript title="Default response format"
+return res.status(successStatusCode).json(dataReturn);
+```
+
+```typescript title="Complete example"
+@controller("/")
+class AppController extends BaseController {
+    constructor(private appUseCase: AppUseCase) {}
+
+    @Get("")
+    execute(@response() res: Response) {
+        return this.callUseCase(this.appUseCase.execute(), res, StatusCode.OK);
+    }
+}
+```
+
+## Request object
+
+In order to access the request object, you can use the `@request()` decorator.
+
+```typescript title="Request object example"
+import { controller, Get, request } from "@expressots/adapter-express";
+import { Request } from "express";
+
+@controller("/product")
+export class ProductController {
+    @Get("/")
+    getAllProducts(@request() req: Request) {
+        return "Return all products";
+    }
+}
+```
+
+:::tip
+You can take advantage of the express types to access the request object as they are already imported in the `@expressots/adapter-express` package.
+:::
+
+The request object is just one of the decorators available in ExpressoTS. See more in the below section.
+
+## Controller decorators
+
+HTTP methods and parameters decorators are a set of annotations used in ExpressoTS applications to define the routing
+and request handling for HTTP requests. Using the decorators listed below can simplify the routing and handling of HTTP requests
+in ExpressoTS applications, and make the code more readable and maintainable.
+
+<Tabs>
+    <TabItem label="Parameter Decorators" value="parameter-decorators">
+
+Here's a list of all available parameter decorators in ExpressoTS, along with their description and usage:
+
+| Decorator                     | Description                                            | Usage                                            |
+| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| @request()                    | Injects the Express Request object.                    | execute(@request() req: Request)                 |
+| @response()                   | Injects the Express Response object.                   | execute(@response() res: Response)               |
+| @param(paramName?: string)    | Injects a parameter from the request URL path.         | execute(@param('id') id: string)                 |
+| @query(paramName?: string)    | Injects a parameter from the request URL query string. | execute(@query('searchTerm') searchTerm: string) |
+| @body()                       | Injects the request body payload.                      | execute(@body() body: MyDTO)                     |
+| @headers(headerName?: string) | Injects a header from the request headers.             | execute(@headers('authorization') auth: string)  |
+| @cookies(cookieName?: string) | Injects a cookie from the request cookies.             | execute(@cookies('session') session: string)     |
+| @next()                       | Injects the Express NextFunction object.               | execute(@next() next: NextFunction)              |
+
+    </TabItem>
+
+    <TabItem label="Method Decorators" value="method-decorators">
+
+Here's a list of all available `@httpMethods()` decorators in ExpressoTS, along with their description and usage:
+
+| Decorator | Description                                         | Usage                    |
+| --------- | --------------------------------------------------- | ------------------------ |
+| @Get      | Binds a controller method to a GET HTTP verb.       | @Get("/path")            |
+| @Post     | Binds a controller method to a POST HTTP verb.      | @Post("/path")           |
+| @Put      | Binds a controller method to a PUT HTTP verb.       | @Put("/path")            |
+| @Patch    | Binds a controller method to a PATCH HTTP verb.     | @Patch("/path")          |
+| @Head     | Binds a controller method to a HEAD HTTP verb.      | @Head("/path")           |
+| @Delete   | Binds a controller method to a DELETE HTTP verb.    | @Delete("/path")         |
+| @Method   | Binds a controller method to a specified HTTP verb. | @Method("verb", "/path") |
+
+    </TabItem>
+
+</Tabs>
+
+For a full list of available decorators, please refer to the **[Decorators](../features/decorators.mdx)**.
+
+## Status code
+
+By default, all HTTP response status codes are set to 200, except for the Post method, which defaults to 201.
+
+```typescript title="Using the @Http() decorator"
+import { controller, Get, Http } from "@expressots/adapter-express";
+
+@controller("/")
+export class AppController {
+    @Get("")
+    @Http(204)
+    execute() {
+        return "App is running!";
+    }
+}
+```
+
+:::tip You can import <span class="span-table">StatusCode</span> from `@expressots/core` to use the default status codes.
+:::
+
+Read more about status codes in the **[Status Code](../features/status-code.mdx)** section.
+
+```typescript title="Using the StatusCode to improve the code readability"
+import { StatusCode } from "@expressots/core";
+
+@Http(StatusCode.NoContent)
+```
+
+## Payloads
+
+In a request, payloads refer to the data sent between the client and server, typically in the body of the request. This data is crucial for operations like creating, updating, or querying resources.
+
+The DTO pattern standardizes these payloads for communication between different application layers. By providing clear and consistent data structures for input and output, DTOs separate business logic from data exchange, reducing complexity, improving performance, and enhancing scalability.
+
+For example, imagine a user registration scenario where name, email, and password are collected, and ID is auto-generated. The user object DTO for Input and Response could have possible formats, as shown below:
+
+```typescript title="user-create.dto.ts"
+interface UserCreateRequestDTO {
+    name: string;
+    email: string;
+    password: string;
+}
+
+interface UserCreateResponseDTO {
+    id: string;
+    name: string;
+    message: string;
+}
+```
+
+Having two different DTO formats is essential in this case because while registering a user, we don't want to return the password
+to the client due to security concerns. Therefore, we created a different DTO for the response, adding a complementary field called message,
+where a message is typically sent to the client, indicating that the user was created successfully.
+
+As a result, DTOs help to segregate and filter the data being sent to the client, reducing the amount of data processed by the application.
+
+Using DTOs in ExpressoTS is straightforward. You can use the `@body()` decorator to inject the request body payload into the controller method.
+
+```typescript title="Using the @body() decorator"
+@controller("/user")
+export class UserController {
+    @Post("")
+    register(@body() payload: UserCreateRequestDTO): UserCreateResponseDTO {
+        return {
+            id: "1",
+            name: payload.name,
+            message: "User created successfully",
+        };
+    }
+}
+```
+
+## Error handling
+
+For error handling, ExpressoTS provides a built-in error handler middleware that can be used to catch errors thrown in the application.
+This middleware is automatically added to the application when it is initialized in the `app.provider.ts` file.
+
+Read more about error handling in ExpressoTS in the **[Error Handling](../features/error-handling.mdx)** section.
+
+:::warning Initializing the Application without a controller
+ExpressoTS will prevent you from initializing the Application without a controller since there are no listeners to handle incoming requests. You will see the following message in the console:
+**_No controllers have been found! Please ensure that you have register at least one Controller._**
+:::
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
