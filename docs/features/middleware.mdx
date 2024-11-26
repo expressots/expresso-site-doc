@@ -19,23 +19,16 @@ ExpressoTS integrates smoothly with Express middleware, allowing you to leverage
 
 ExpressoTS application supports adding middleware globally to the application as well as per route. It offers all the middleware supported by [Expressjs](https://expressjs.com/en/resources/middleware.html) team out-of-the-box.
 
-In the `app.provider.ts` file, you can add middleware to the application using the `this.middleware` property. The `this.middleware` property is
+In the `app.ts` file, you can add middleware to the application using the `this.Middleware` property. The `this.Middleware` property is
 an instance of the `Middleware` class, which provides a list of out-of-the-box Expressjs middlewares supported by ExpressoTS.
 
 ```ts title="Adding middleware globally to the application in app.provider.ts"
 @provide(App)
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-    }
-
     protected configureServices(): void {
-        this.middleware.addBodyParser();
-        this.middleware.addCors();
-        this.middleware.addHelmet();
+        this.Middleware.addBodyParser();
+        this.Middleware.addCors();
+        this.Middleware.addHelmet();
     }
 }
 ```
@@ -82,7 +75,7 @@ For any other middleware, or a custom middleware, you can add it using the `this
 NPM Registry middleware:
 
 ```typescript title="Adding NPM Registry cors middleware"
-this.middleware.addMiddleware(cors());
+this.Middleware.addMiddleware(cors());
 ```
 
 Custom Expressjs middleware:
@@ -92,7 +85,7 @@ function myMiddleware(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-this.middleware.addMiddleware(myMiddleware);
+this.Middleware.addMiddleware(myMiddleware);
 ```
 
 Custom ExpressoTS middleware:
@@ -104,13 +97,13 @@ class CustomMiddleware extends ExpressoMiddleware {
     }
 }
 
-this.middleware.addMiddleware(new CustomMiddleware());
+this.Middleware.addMiddleware(new CustomMiddleware());
 ```
 
 You can also add middleware to a specific route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom middleware.
 
 ```typescript title="Adding middleware to a specific route"
-this.middleware.addMiddleware({ path: "/api", middlewares: [] });
+this.Middleware.addMiddleware({ path: "/api", middlewares: [] });
 ```
 
 :::note Each route can have multiple middlewares.

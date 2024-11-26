@@ -150,43 +150,6 @@ class ProductController {}
 
 The controller above will be scoped as `Singleton` and will be shared across all requests.
 
-## Base controller
-
-In ExpressoTS, we enhance controller classes with a `BaseController` class, which offers two methods—`callUseCase()`
-and `callUseCaseAsync()`—to simplify the interaction between controllers and use cases.
-These methods reinforce the principle of "one use case per controller" by focusing the controller's role
-on invoking the business logic encapsulated within a use case.
-
-:::info
-`BaseController` class is only a syntatic sugar to help developers to call use cases in a more organized way.
-:::
-
-```typescript title="Method signature"
-callUseCase(usecase: unknown, res: Response, successStatusCode: number);
-
-```
-
--   `useCase`: The use case that will be called. This use case is injected in the controller constructor.
--   `res`: The response object from the express request.
--   `successStatusCode`: The status code that will be sent to the client if the use case is executed successfully.
-    Please see the **[Http status code](../features/status-code.mdx)** type for more information.
-
-```typescript title="Default response format"
-return res.status(successStatusCode).json(dataReturn);
-```
-
-```typescript title="Complete example"
-@controller("/")
-class AppController extends BaseController {
-    constructor(private appUseCase: AppUseCase) {}
-
-    @Get("")
-    execute(@response() res: Response) {
-        return this.callUseCase(this.appUseCase.execute(), res, StatusCode.OK);
-    }
-}
-```
-
 ## Request object
 
 In order to access the request object, you can use the `@request()` decorator.
@@ -256,20 +219,13 @@ For a full list of available decorators, please refer to the **[Decorators](../f
 
 ## Status code
 
-By default, all HTTP response status codes are set to 200, except for the Post method, which defaults to 201.
+Status Code is an enum that provides a list of HTTP status codes that can be used in the application.
 
-```typescript title="Using the @Http() decorator"
-import { controller, Get, Http } from "@expressots/adapter-express";
+The default status code based on the HTTP method:
 
-@controller("/")
-export class AppController {
-    @Get("")
-    @Http(204)
-    execute() {
-        return "App is running!";
-    }
-}
-```
+- **GET**: 200
+- **POST**: 201
+- **PUT - PATCH - DELETE**: 204
 
 :::tip You can import <span class="span-table">StatusCode</span> from `@expressots/core` to use the default status codes.
 :::
@@ -281,6 +237,24 @@ import { StatusCode } from "@expressots/core";
 
 @Http(StatusCode.NoContent)
 ```
+
+## HTTP decorator
+
+The `@Http()` decorator is used to define the status code of the response. This decorator is useful when you need to return a specific status code for a request.
+
+```typescript title="Using the @Http() decorator"
+import { controller, Get, Http } from "@expressots/adapter-express";
+
+@controller("/")
+export class AppController {
+    @Get("")
+    @Http(200)
+    execute() {
+        return "App is running!";
+    }
+}
+```
+
 
 ## Payloads
 
@@ -329,7 +303,7 @@ export class UserController {
 ## Error handling
 
 For error handling, ExpressoTS provides a built-in error handler middleware that can be used to catch errors thrown in the application.
-This middleware is automatically added to the application when it is initialized in the `app.provider.ts` file.
+This middleware is automatically added to the application when it is initialized in the `app.ts` file.
 
 Read more about error handling in ExpressoTS in the **[Error Handling](../features/error-handling.mdx)** section.
 

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: App provider
+title: App
 description: The App class is the core of an ExpressoTS application.
 ---
 
@@ -21,33 +21,33 @@ and configuring applications within ExpressoTS.
 With full support for Express.js middleware, `AppExpress` enables developers to efficiently manage application setup, execution, and shutdown processes,
 all while leveraging the familiar Express.js environment.
 
-:::info
-The framework currently supports Express as its primary adapter, with Fastify and other possible in house server under development.
-:::
+Here is the `App` class extending the `AppExpress` adapter from the Opinionated template:
 
-Here is the `App` class extending the `AppExpress` adapter:
-
-```typescript title="app.provider.ts"
+```typescript title="app.ts"
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
+    private config: AppContainer = this.configContainer([AppModule]);
 
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
+    protected globalConfiguration(): void | Promise<void> {
+        this.setGlobalRoutePrefix("/v1");
+
+        this.initEnvironment("development", {
+            env: {
+                development: ".env.development",
+                production: ".env.production",
+            },
+        });
     }
 
     protected configureServices(): void {
-        this.provider.register(Env);
+        this.Provider.register(Env);
 
-        this.middleware.addBodyParser();
-        this.middleware.setErrorHandler();
+        this.Middleware.addBodyParser();
+        this.Middleware.setErrorHandler({ showStackTrace: true });
     }
 
-    protected postServerInitialization(): void {
+    protected async postServerInitialization(): Promise<void> {
         if (this.isDevelopment()) {
-            this.provider.get(Env).checkAll();
+            this.Provider.get(Env).checkFile(".env.development");
         }
     }
 
@@ -55,11 +55,11 @@ export class App extends AppExpress {
 }
 ```
 
--   `this.provider`: an object containing a register method that allows developers to register internal
+-   `this.Provider`: an object containing a register method that allows developers to register internal
     or external ExpressoTS-compatible providers. This method registers classes in the ExpressoTS container
     to be part of the dependency injection system, enabling the use of different scopes such as Transient, Scoped, and Singleton.
 
--   `this.middleware`: offers a set of out-of-the-box middlewares that can be used to configure your application.
+-   `this.Middleware`: offers a set of out-of-the-box middlewares that can be used to configure your application.
     See the complete list in the **[Middleware section](../features/middleware.mdx)**
 
 :::tip
@@ -92,6 +92,43 @@ protected serverShutdown(): void | Promise<void> { }
     <img src={imgAppLifecycle} width="700px" height="700px" alt="Lifecycle events" />
 </div>
 
+## Method configContainer
+
+The `configContainer` method is used to configure the application container with the modules that will be used in the application.
+
+```typescript title="Example of configuring the application container."
+private config: AppContainer = this.configContainer([AppModule]);
+```
+
+## Middleware property
+
+The `Middleware` property is an instance of the `MiddlewareManager` class, which provides a set of methods to add middleware to the application.
+
+```typescript title="Example of adding a middleware to the application."
+this.Middleware.addBodyParser();
+```
+
+## Provider property
+
+The `Provider` property is an instance of the `ProviderManager` class, which provides a set of methods to register and get providers in the application.
+
+```typescript title="Example of registering a provider in the application."
+this.Provider.register(Env);
+```
+
+## Method initEnvironment
+
+The `initEnvironment` method is used to set the environment variables for the application.
+
+```typescript title="Example of setting environment variables for the application."
+this.initEnvironment("development", {
+    env: {
+        development: ".env.development",
+        production: ".env.production",
+    },
+});
+```
+
 ## Method isDevelopment
 
 It is a helper method that returns a boolean value indicating whether the application is running in development mode.
@@ -107,31 +144,33 @@ If it is, the `Env` provider is used to check all environment variables.
 ```typescript title="Check all environment variables in development mode."
 protected postServerInitialization(): void {
     if (this.isDevelopment()) {
-        this.provider.get(Env).checkAll();
+        this.Provider.get(Env).checkFile(".env.development");
     }
 }
 ```
 
-## Set global route prefix
+## Method set global route prefix
 
 You can set a global prefix for all routes in your application. This is useful when you want to version your APIs.
 
 ```typescript
-@provide(App)
-class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: IProvider;
+this.setGlobalRoutePrefix("/v1");
+```
 
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get<IProvider>(Provider);
-    }
+## Method get http server
 
-    protected configureServices(): void {
-        this.setGlobalRoutePrefix("/v1");
-    }
-}
+The `getHttpServer` method is used to get the HTTP server instance.
+
+```typescript title="Example of getting the HTTP server instance."
+this.getHttpServer(): http.Server
+```
+
+## Method to set the engine
+
+The `setEngine` method is used to set the engine for the application.
+
+```typescript title="Example of setting the engine for the application."
+this.setEngine(RenderEngine.Engine.EJS);
 ```
 
 ---

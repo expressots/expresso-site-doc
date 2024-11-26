@@ -17,14 +17,13 @@ ExpressoTS streamlines server-side development by emphasizing clear and structur
 for both simple APIs and complex systems, ExpressoTS accelerates development and ensures timely, high-quality delivery.
 
 ExpressoTS is a [TypeScript](https://www.typescriptlang.org/) framework fully integrated with the [Node.js](https://nodejs.org/en) and [Expressjs](https://expressjs.com/) ecosystem. While TypeScript is the primary language,
-ExpressoTS is fully compatible with JavaScript, and we plan to support other runtimes soon.
+ExpressoTS is fully compatible with JavaScript.
 
 In this tutorial, we’ll use TypeScript for most examples, but feel free to switch to vanilla JavaScript if that suits you better.
 
 ## Architecture
 
-ExpressoTS architecture centers on the **[Inversify](https://inversify.io/)** IoC container,
-which manages dependency injection in class constructors or in properties.
+ExpressoTS architecture centers on the IoC container, which manages dependency injection in class constructors or in properties.
 This setup ensures that all necessary modules, including routes (controllers), are loaded.
 Routers then handle incoming requests using use-cases and providers as required.
 
@@ -40,7 +39,7 @@ Here’s an overview of an ExpressoTS application:
 
 ## Pre-requisites
 
-Please make sure that [Node.js](https://nodejs.org) `version >=18.0.0` is installed on your operating system.
+Please make sure that [Node.js](https://nodejs.org) `version >= 20.18.0` is installed on your operating system.
 
 ## Setup
 
@@ -62,8 +61,9 @@ expressots new project-name
 
 ExpressoTS provides two project templates to cater to different development needs:
 
--   Non-opinionated: Provides flexibility in project structure and resource scaffolding, with minimal setup.
--   Opinionated: Pre-configured for complex projects, enforcing a specific structure and scaffolding pattern.
+-   **Non-opinionated**: Provides flexibility in project structure and resource scaffolding, with minimal setup.
+-   **Opinionated**: Pre-configured for complex projects, enforcing a specific structure and scaffolding pattern.
+-   **MicroAPI**: A minimalistic template for building micro api's.
 
 <Tabs>
     <TabItem label="Non Opinionated" value="non-opinionated">
@@ -73,23 +73,19 @@ ExpressoTS provides two project templates to cater to different development need
 ```tree
 project-name/
 ├── src/
-│   ├── app.container.ts
 │   ├── app.controller.ts
-│   ├── app.module.ts
-│   ├── app.provider.ts
+│   ├── app.ts
 │   ├── main.ts
 ├── test/
 │   ├── app.controller.spec.ts
 ```
 
-| File Name                                               | Description                                                        |
-| ------------------------------------------------------- | ------------------------------------------------------------------ |
-| <span class="span-table"> app.container.ts</span>       | Dependency injection container. Organizes the application modules. |
-| <span class="span-table"> app.controller.ts</span>      | A basic controller with a single route.                            |
-| <span class="span-table"> app.module.ts</span>          | Application root module.                                           |
-| <span class="span-table"> app.provider.ts</span>        | Application global configuration file.                             |
-| <span class="span-table"> main.ts</span>                | The main entry point of an ExpressoTS application.                 |
-| <span class="span-table"> app.controller.spec.ts</span> | Unit test for the app.controller.                                  |
+| File Name                                               | Description                                        |
+| ------------------------------------------------------- | -------------------------------------------------- |
+| <span class="span-table"> app.controller.ts</span>      | A basic controller with a single route.            |
+| <span class="span-table"> app.ts</span>                 | Application global configuration file.             |
+| <span class="span-table"> main.ts</span>                | The main entry point of an ExpressoTS application. |
+| <span class="span-table"> app.controller.spec.ts</span> | Unit test for the app.controller.                  |
 
     </TabItem>
 
@@ -100,30 +96,44 @@ project-name/
 ```tree
 project-name/
 ├── src/
-│   ├── providers/
-│   │   └── app/
-│   │       └── app.provider.ts
 │   ├── useCases/
 │   │   └── app/
 │   │       └── app.controller.ts
 │   │       └── app.module.ts
 │   │       └── app.usecase.ts
-│   ├── app.container.ts
+│   ├── app.ts
 │   ├── env.ts
 │   ├── main.ts
 ├── test/
 │   ├── app.usecase.spec.ts
 ```
 
-| File Name                                            | Description                                                                                   |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| <span class="span-table"> app.provider.ts</span>     | Application global configuration file.                                                        |
-| <span class="span-table"> providers/\*</span>        | This folder contains the layer responsible to provide externals resources to the application. |
-| <span class="span-table"> useCases/\*</span>         | The use case folder holds the implementation of operations for the application.               |
-| <span class="span-table"> app.container.ts</span>    | Dependency injection container. Organizes the application modules.                            |
-| <span class="span-table"> env.ts</span>              | This is an utility resource that maps .env variables.                                         |
-| <span class="span-table"> main.ts</span>             | The main entry point of an ExpressoTS application.                                            |
-| <span class="span-table"> app.usecase.spec.ts</span> | A basic unit test for the app.usecase.                                                        |
+| File Name                                            | Description                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------- |
+| <span class="span-table"> useCases/\*</span>         | The use case folder holds the implementation of operations for the application. |
+| <span class="span-table"> app.ts</span>              | Application global configuration file.                                          |
+| <span class="span-table"> env.ts</span>              | This is an utility resource that maps .env variables.                           |
+| <span class="span-table"> main.ts</span>             | The main entry point of an ExpressoTS application.                              |
+| <span class="span-table"> app.usecase.spec.ts</span> | A basic unit test for the app.usecase.                                          |
+
+    </TabItem>
+
+    <TabItem label="Micro API" value="micro">
+
+#### Micro API project structure
+
+```tree
+project-name/
+├── src/
+│   ├── api.ts
+├── test/
+│   ├── api.controller.spec.ts
+```
+
+| File Name                                               | Description                                        |
+| ------------------------------------------------------- | -------------------------------------------------- |
+| <span class="span-table"> api.ts</span>                 | The main entry point of an ExpressoTS application. |
+| <span class="span-table"> api.controller.spec.ts</span> | A basic unit test for the app controller.          |
 
     </TabItem>
 
@@ -133,29 +143,76 @@ Opinionated projects have a different scaffold pattern in addition to the non-op
 a specific structure and name convention.
 :::
 
-## Main
+## Main entry point
 
-The main entry point `main.ts` of an ExpressoTS application is where the application is initialized. This file is responsible for bootstrapping
+The main entry point `main.ts` or `api.ts` of an ExpressoTS application is where the application is initialized. This file is responsible for bootstrapping
 the application and starting the server.
 
-```typescript
-async function bootstrap() {
-    const app = await AppFactory.create(container, App);
-    await app.listen(3000, ServerEnvironment.Development);
-}
+<Tabs>
+    <TabItem label="Non Opinionated" value="non-opinionated">
 
-bootstrap();
+```typescript
+AppFactory.create(App).then((app) => app.listen(3000));
 ```
+
+    </TabItem>
+
+    <TabItem label="Opinionated" value="opinionated">
+
+```typescript
+AppFactory.create(App).then((app) =>
+    app.listen(env.App.Port, {
+        appName: env.App.appName,
+        appVersion: env.App.appVersion,
+    })
+);
+```
+
+        </TabItem>
+
+        <TabItem label="Micro API" value="micro">
+
+    ```typescript
+const microAPI = createMicroAPI();
+microAPI.setGlobalRoutePrefix("/v1");
+
+const app = microAPI.build();
+app.Middleware.addBodyParser();
+
+app.Route.get("/", (req: Request, res: Response) => {
+    res.send("Hello from ExpressoTS!");
+});
+
+app.listen(3001);
+
+    bootstrap();
+    ```
+
+        </TabItem>
+    </Tabs>
 
 The `AppFactory` class is responsible for creating the application instance. The `AppFactory` was designed to support multiple web servers like Express.js, Fastify, and more. Currently, it only supports Express.js.
 
-The `create` method accepts the container and the application class as parameters.
-The `listen` method starts the server on the specified port and environment. You can also pass an object specifying the app's name and version.
+- The `create` method accepts the application class as parameters (`app.ts`).
+- The `listen` method starts the server on the specified port with default environment settings. You can also pass an object specifying the app's name and version.
 
 The `App` class is the application root module, which is responsible for initializing the application and its dependencies.
-All application configuration and setup are handled in the [App class](./app-provider.mdx) - (`app.provider.ts`) file.
+All application configuration and setup are handled in the [App class](./app-provider.mdx) - (`app.ts`) file.
 
-The `ServerEnvironment` is defined through the enum, with support for `development` and `production` modes.
+The application environment is defined by a method called `initEnvironment("development")`. You can also specify the .env file path as a parameter for each environment.
+
+```typescript
+initEnvironment("development", {
+            env: {
+                development: ".env.development",
+                production: ".env.production",
+            },
+});
+```
+
+:::info
+MicroAPI project have the entire application setup in the `api.ts` file. The `createMicroAPI` function is responsible for creating the application instance.
+:::
 
 ## Running the application
 
@@ -180,6 +237,7 @@ Production mode
 ```
 
 Once the application is up and running, you can access it by navigating to <span class="span-table">http://localhost:3000/</span>.
+
 You should see <span class="span-table">Hello from ExpressoTS!</span> displayed on the screen.
 
 ## Linter and formatter
@@ -192,6 +250,14 @@ ExpressoTS uses [ESLint](https://eslint.org/) and [Prettier](https://prettier.io
 
 ```bash
 ✔️ npm run format
+```
+
+## Testing
+
+ExpressoTS uses [Jest](https://jestjs.io/) as the testing framework. You can run the following command to execute your tests:
+
+```bash
+✔️ npm run test
 ```
 
 ---

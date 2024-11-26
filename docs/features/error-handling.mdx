@@ -86,22 +86,9 @@ When a project is created using the ExpressoTS CLI, the default error handling i
 
 ```typescript title="App provider error handling"
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void | Promise<void> {
-        this.middleware.setErrorHandler();
+        this.Middleware.setErrorHandler();
     }
-
-    protected postServerInitialization(): void | Promise<void> {}
-
-    protected serverShutdown(): void | Promise<void> {}
 }
 ```
 
@@ -114,11 +101,11 @@ You can also pass two optional parameters to the `setErrorHandler()` method:
 -   `customErrorHandler`: A custom error handler function that can be used to handle errors in a specific way. The default value is defaultErrorHandler.
 
 ```typescript title="Using your own error handler"
-this.middleware.setErrorHandler({ errorHandler: myErrorHandler });
+this.Middleware.setErrorHandler({ errorHandler: myErrorHandler });
 ```
 
 ```typescript title="Using showStackTrace in the default error handler"
-this.middleware.setErrorHandler({ showStackTrace: true });
+this.Middleware.setErrorHandler({ showStackTrace: true });
 ```
 
 :::info
@@ -135,7 +122,7 @@ class FooClass {
         try {
             // do something
         } catch (error: any) {
-            this.report.Error(error, StatusCode.BadRequest, "your-service");
+            this.report.error(error, StatusCode.BadRequest, "your-service");
         }
     }
 }
@@ -155,7 +142,7 @@ class CreateUserUseCase {
             const userAlreadyExists = await this.userRepository.findByEmail(email);
 
             if (userAlreadyExists) {
-                this.report.Error(
+                throw this.report.error(
                     "User already exists",
                     StatusCode.BadRequest,
                     "create-user-usecase"
@@ -197,7 +184,7 @@ class CreateUserUseCase {
         const userAlreadyExists = await this.userRepository.findByEmail(email);
 
         if (userAlreadyExists) {
-            throw this.report.Error(
+            throw this.report.error(
                 "User already exists",
                 StatusCode.BadRequest,
                 "create-user-usecase"
@@ -231,11 +218,6 @@ This error will be handled by the `defaultErrorHandler()` middleware and will be
     "error": "User already exists"
 }
 ```
-
-```bash title="Console log"
-[ExpressoTS] 00/00/0000 00:00:00 PM [PID:00000] ERROR [app-controller] This is an error message
-```
-
 ---
 
 ## Support us ❤️

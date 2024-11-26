@@ -31,15 +31,15 @@ Example of how to use the status code in a controller, use case, using `res` obj
 import { StatusCode } from "@expressots/core";
 
 @controller("/user/create")
-class CreateUserController extends BaseController {
-    constructor(private createUserUseCase: CreateUserUseCase) {}
+class CreateUserController {
+    constructor(@inject(CreateUserUseCase) private createUserUseCase: CreateUserUseCase) {}
 
     @Post("/")
     execute(
         @body() data: ICreateUserRequestDTO,
         @response() res: Response
-    ): ICreateUserResponseDTO {
-        return this.callUseCase(this.createUserUseCase.execute(data), res, StatusCode.Created);
+    ) {
+        return this.createUserUseCase.execute(data);
     }
 }
 ```

@@ -22,19 +22,19 @@ Once registered, the provider will be available in the application through the D
 
 ## Method checkAll
 
-The `checkAll()` method is used to validate the existence of the `.env` file and its content by checking if all the environment variables are defined.
+The `checkFile()` method is used to validate the existence of the `.env` file and its content by checking if all the environment variables are defined.
 
 You can define from where to call the `checkAll()` method. It can be called in the `postServerInitialization()` method or in any other method that you prefer.
 
 ```ts
     protected postServerInitialization(): void | Promise<void> {
         if (this.isDevelopment()) {
-            this.provider.get(Env).checkAll();
+            this.Provider.get(Env).checkFile(".env.development");
         }
     }
 ```
 
-If the `.env` file is missing or if any environment variable is not defined, the `checkAll()` method will throw an error with a message indicating the missing environment variables.
+If the `.env` file is missing or if any environment variable is not defined, the `checkFile()` method will throw an error with a message indicating the missing environment variables.
 
 ```bash title="PORT environment variable is missing"
 [PID:26759] ERROR [env-validator-provider] Environment variable PORT is not defined.
@@ -45,7 +45,7 @@ If the `.env` file is missing or if any environment variable is not defined, the
 The environment validator provider also has a method called `get()` that returns the value of an environment variable. It is used to get a specific environment variable value passing its name as a parameter.
 
 ```typescript
-this.provider.get(Env).get("PORT");
+this.Provider.get(Env).get("PORT");
 ```
 
 ## Using everywhere
@@ -58,7 +58,7 @@ import { Env } from "@expressots/core";
 
 @controller("/")
 export class AppController {
-    constructor(private env: Env) {}
+    constructor(@inject(Env) private env: Env) {}
 
     @Get("/")
     execute(): string {

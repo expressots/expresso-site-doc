@@ -58,17 +58,8 @@ Add the cookie-parser middleware to your application using the out-of-the-box Ex
 ```typescript
 @provide(App)
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: IProvider;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get<IProvider>(Provider);
-    }
-
     protected configureServices(): void {
-        this.middleware.addCookieParser();
+        this.Middleware.addCookieParser();
     }
 }
 ```
@@ -85,7 +76,7 @@ getCookie(){};
 Let's create a route that set's a cookie with a random UUID as value, that expires in 1 hour and is only accessible via HTTP:
 
 ```typescript
-@httpGet("set-cookie")
+@Get("set-cookie")
 setCookie(@response() res: Response) {
     res.cookie("authToken", randomUUID(), {
         maxAge: 60 * 60 * 1000, // 1 hour
@@ -100,7 +91,7 @@ setCookie(@response() res: Response) {
 Using the `@cookies()` decorator, you can get all cookies from the request and use them in your route:
 
 ```typescript title="Create a route that gets the cookie and returns the value"
-@httpGet("get-cookie")
+@Get("get-cookie")
 getCookie(@cookies() cookieInfo: string, @response() res: Response) {
     return res.send(`Your token: ${cookieInfo["authToken"]}`);
 }

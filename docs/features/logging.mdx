@@ -40,15 +40,6 @@ The logger is already included in the ExpressoTS framework but first you need to
 
 ```typescript
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void | Promise<void> {
         this.provider.register(Logger);
     }
@@ -61,7 +52,7 @@ Once the logger is registered in the container, you can inject it into your serv
 
 ```typescript
 export class YourUseUseCase {
-    constructor(private log: Logger) {}
+    constructor(@inject(Logger) private log: Logger) {}
 
     execute() {
         this.log.info("Testing log message", "your-use-case");

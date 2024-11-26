@@ -1,13 +1,12 @@
 ---
 sidebar_position: 2
-title: App container
+title: Container
 description: The AppContainer simplifies module registration.
 ---
 
-# App container
+# Container
 
-ExpressoTS uses **[InversifyJS](https://inversify.io/)** for dependency injection, making it easy to manage object creation, resolution, and lifecycle.
-The use of `appContainer` abstracts away the intricacies of InversifyJS direct usage, providing a straightforward path to integrating and managing modules within ExpressoTS applications.
+ExpressoTS uses an IoC Container for dependency injection, making it easy to manage object creation, resolution, and lifecycle.
 
 ## Setup
 
@@ -32,24 +31,17 @@ interface ContainerOptions {
 
 ## Creating the container
 
-```typescript title="app.container.ts"
-export const appContainer: AppContainer = new AppContainer({
-    defaultScope: BindingScopeEnum.Singleton,
-    skipBaseClassChecks: true,
-    autoBindInjectable: false,
+```typescript
+private config: AppContainer = this.configContainer([AppModule], {
+        autoBindInjectable: true,
+        defaultScope: "Request",
+        skipBaseClassChecks: true,
 });
-
-const container = appContainer.create([
-    // Add your modules here
-    AppModule,
-]);
-
-export { container };
 ```
 
 ## Modules registration
 
-The `appContainer` facilitates module registration via its `create([])` method, which accepts an array of modules.
+The `Container` facilitates module registration via its `configContainer([])` method, which accepts an array of modules.
 
 Here an example of PaymentModule creation:
 
@@ -58,10 +50,7 @@ export const PaymentModule: ContainerModule = CreateModule([CreatePaymentControl
 ```
 
 ```typescript title="Module registration"
-// Create a new container
-const appContainer: AppContainer = new AppContainer();
-
-const container: Container = appContainer.create([UserModule, PaymentModule]);
+private config: AppContainer = this.configContainer([AppModule, PaymentModule]);
 ```
 
 :::tip
@@ -80,8 +69,8 @@ After creating the container, you have the following options available:
 
 See below image for a visual representation of the container bindings.
 
-```typescript title="app.container.ts"
-appContainer.viewContainerBindings();
+```typescript title="app.ts"
+this.config.viewContainerBindings();
 ```
 
 ![Container Bindings View](./img/container-bindings.png)
