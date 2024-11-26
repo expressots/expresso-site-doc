@@ -33,6 +33,18 @@ const config: Config = {
                     remarkPlugins: [
                         [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
                     ],
+                    lastVersion: "3.0.0",
+                    versions: {
+                        current: {
+                            label: "NEXT",
+                        },
+                        "3.0.0": {
+                            label: "3.0.0",
+                        },
+                        "2.16.2": {
+                            label: "2.16.2",
+                        },
+                    },
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),
@@ -74,6 +86,12 @@ const config: Config = {
                     docId: "governance",
                     position: "right",
                     label: "Governance",
+                },
+                {
+                    type: "docsVersionDropdown",
+                    label: "latest",
+                    position: "right",
+                    dropdownActiveClassDisabled: true,
                 },
                 {
                     href: "https://github.com/expressots/expressots",

@@ -1,0 +1,176 @@
+---
+sidebar_position: 3
+title: File Upload
+description: Learn how to handle file uploads in ExpressoTS.
+---
+
+# File upload
+
+File uploads are a common requirement in web applications, allowing users to upload files like images, videos, documents, etc. to the server.
+In ExpressoTS, you can handle file uploads using the `multer` middleware, which simplifies the process of receiving files from the client.
+
+The `multer` middleware handles the multipart/form-data encoding used for file uploads, parsing the incoming request
+and storing the files in a specified location on the server.
+
+## Install
+
+Install the `multer` middleware using npm.
+
+```bash
+npm i multer && npm i -D @types/multer
+```
+
+With `multer` installed in your project, you can now use it to handle file uploads in your ExpressoTS application via `app provider` or on specific routes.
+
+## Usage example
+
+Here's an example of how to use `multer` in the `app.provider.ts` file to handle file uploads.
+
+```typescript title="Create multer object then use it in the router"
+@provide(App)
+export class App extends AppExpress {
+    private middleware: IMiddleware;
+    private provider: ProviderManager;
+
+    constructor() {
+        super();
+        this.middleware = container.get<IMiddleware>(Middleware);
+        this.provider = container.get(ProviderManager);
+    }
+
+    protected configureServices(): void {
+        const file = this.middleware.setupMulter({ dest: "uploads" });
+
+        this.middleware.addMiddleware({
+            path: "/",
+            middlewares: [file.single("file")],
+        });
+    }
+}
+```
+
+In the example above, we create a `multer` object with the destination folder for storing the uploaded files. We then use the `file.single("file")` middleware to handle a single file upload with the field name `file`.
+
+Simplest use case of file upload with ExpressoTS.
+
+```typescript title="Simplest use case of file upload"
+@controller("/")
+export class AppController {
+    @Post("/avatar")
+    @FileUpload({ fieldName: "avatar" }, { dest: "uploads/" })
+    execute() {
+        return "File uploaded successfully";
+    }
+}
+```
+
+If Request and Response objects are not included in the method, the `@FileUpload` decorator will automatically inject them into the method providing a standard
+response using `res.send()` method.
+
+## File upload decorator
+
+You can also use the `@FileUpload` decorator to handle file uploads on specific routes.
+
+```typescript title="File upload decorator"
+@FileUpload({ fieldName: "file" }, { dest: "uploads/" })
+```
+
+## Single file upload
+
+You can handle single file uploads by specifying the `fieldName` option in the `@FileUpload` decorator.
+
+```typescript title="Single file upload"
+@controller("/")
+export class AppController {
+    @Post("/")
+    @FileUpload({ fieldName: "file" }, { dest: "uploads/" })
+    execute(@request() req: Request, @response() res: Response) {
+        return res.status(200).send("File uploaded successfully");
+    }
+}
+```
+
+In the example above, we use the `@FileUpload` decorator to handle file uploads on the `/` route. The `fieldName` option specifies the field name of the file input, and the `dest` option specifies the destination folder for storing the uploaded files.
+
+## Array of files
+
+You can also handle multiple file uploads by specifying the `maxCount` option in the `@FileUpload` decorator.
+
+```typescript title="Multiple file uploads"
+@controller("/")
+export class AppController {
+    @Post("/")
+    @FileUpload({ fieldName: "files", maxCount: 5 }, { dest: "uploads/" })
+    execute(@request() req: Request, @response() res: Response) {
+        return res.status(200).send("Files uploaded successfully");
+    }
+}
+```
+
+In the example above, we use the `maxCount` option to specify that a maximum of 5 files can be uploaded. The `fieldName` option specifies the field name of the file input, and the `dest` option specifies the destination folder for storing the uploaded files.
+
+## Multiple file fields
+
+You can handle multiple file fields by specifying the `fields` option in the `@FileUpload` decorator.
+
+```typescript title="Multiple file fields"
+@controller("/")
+export class AppController {
+    @Post("/")
+    @FileUpload(
+        [
+            { fieldName: "avatar", maxCount: 1 },
+            { fieldName: "gallery", maxCount: 2 },
+        ],
+        { dest: "fields/" }
+    )
+    execute(@request() req: Request, @response() res: Response) {
+        return res.status(200).send("Files uploaded successfully");
+    }
+}
+```
+
+In the example above, we use an array of objects to specify multiple file fields. Each object contains the `fieldName` and `maxCount` options for the file input fields. The `dest` option specifies the destination folder for storing the uploaded files.
+
+## Any file type
+
+You can allow any file type to be uploaded by specifying the `fileFilter` option in the `@FileUpload` decorator.
+
+```typescript title="Allow any file type"
+@controller("/")
+export class AppController {
+    @Post("/")
+    @FileUpload({ any: true })
+    execute(@request() req: Request, @response() res: Response) {
+        return res.status(200).send("File uploaded successfully");
+    }
+}
+```
+
+In the example above, we use the `any` option to allow any file type to be uploaded. This option bypasses the default file type filter and allows all file types to be uploaded.
+
+## No file type filter
+
+You can disable the file type filter by specifying the `disableFileFilter` option in the `@FileUpload` decorator.
+
+```typescript title="Disable file type filter"
+@controller("/")
+export class AppController {
+    @Post("/")
+    @FileUpload({ none: true })
+    execute(@request() req: Request, @response() res: Response) {
+        return res.status(200).send("No file uploaded, form data received");
+    }
+}
+```
+
+Make sure to explore the [multer](https://www.npmjs.com/package/multer) documentation for more options and configurations to handle file uploads in your ExpressoTS application.
+
+The @FileUpload decorator supports all the options provided by multer.
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
