@@ -37,17 +37,8 @@ To use the `InMemoryDB` class, you need to import it from the `@expressots/core`
 import { InMemoryDB } from "@expressots/core";
 
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void {
-        this.provider.register(InMemoryDB, "Singleton");
+        this.Provider.register(InMemoryDB, "Singleton");
     }
 }
 ```
@@ -119,11 +110,8 @@ You can inject the repository in the constructor or via property injection. Exam
 ```typescript title="Injecting repository via property injection"
 @provide(UserCreateUseCase)
 export class UserCreateUseCase {
-    @inject(UserRepository)
-    private userRepo: UserRepository;
-
-    @inject(UserEntity)
-    private userEntity: UserEntity;
+    @inject(UserRepository) private userRepo: UserRepository;
+    @inject(UserEntity) private userEntity: UserEntity;
 
     execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
         this.userEntity.name = payload.name;
@@ -143,7 +131,10 @@ export class UserCreateUseCase {
 ```typescript title="Injecting repository in the constructor"
 @provide(UserCreateUseCase)
 export class UserCreateUseCase {
-    constructor(private userEntity: UserEntity, private userRepo: UserRepository) {}
+    constructor(
+        @inject(UserEntity) private userEntity: UserEntity,
+        @inject(UserRepository) private userRepo: UserRepository
+    ) {}
 
     execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
         this.userEntity.name = payload.name;

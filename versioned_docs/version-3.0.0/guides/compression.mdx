@@ -51,17 +51,8 @@ Add the compression middleware to your application using the out-of-the-box Expr
 ```typescript
 @provide(App)
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: IProvider;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get<IProvider>(Provider);
-    }
-
     protected configureServices(): void {
-        this.middleware.addCompression();
+        this.Middleware.addCompression();
     }
 }
 ```
@@ -86,17 +77,8 @@ Using compress with filters, filtering requests that contain payload bodies larg
 
 ```typescript
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void | Promise<void> {
-        this.middleware.addCompression({
+        this.Middleware.addCompression({
             level: 6,
             threshold: 100 * 1024,
             filter: (req, res) => {
@@ -116,17 +98,8 @@ Adding the compression middleware to a specific route is also possible via the E
 
 ```ts
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void | Promise<void> {
-        this.middleware.addMiddleware({
+        this.Middleware.addMiddleware({
             path: "/api",
             middlewares: [
                 compression({

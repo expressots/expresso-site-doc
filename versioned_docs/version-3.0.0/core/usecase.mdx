@@ -42,7 +42,7 @@ Here is a simple implementation of the use case:
 
 ```typescript title="Login User Use Case"
 @provide(LoginUserUseCase)
-class LoginUserUseCase {
+export class LoginUserUseCase {
     execute(payload: ILoginUserRequestDTO): boolean {
         const { email, password } = payload;
 
@@ -53,8 +53,6 @@ class LoginUserUseCase {
         return false;
     }
 }
-
-export { LoginUserUseCase };
 ```
 
 ## Explanation
@@ -75,7 +73,10 @@ See examples below:
 ```typescript title="Example of constructor injection in a use case"
 @provide(ExampleUseCase)
 class ExampleUseCase {
-    constructor(private email: EmailProvider, private repo: RepositoryProvider) {}
+    constructor(
+     @inject(EmailProvider) private email: EmailProvider,
+     @inject(RepositoryProvider) private repo: RepositoryProvider
+    ) {}
 
     execute() {
         this.email.foo();
@@ -89,11 +90,8 @@ class ExampleUseCase {
 ```typescript title="Example of property injection in a use case"
 @provide(ExampleUseCase)
 class ExampleUseCase {
-    @inject(EmailProvider)
-    private email: EmailProvider;
-
-    @inject(RepositoryProvider)
-    private repo: RepositoryProvider;
+    @inject(EmailProvider) private email: EmailProvider;
+    @inject(RepositoryProvider) private repo: RepositoryProvider;
 
     execute() {
         this.email.foo();

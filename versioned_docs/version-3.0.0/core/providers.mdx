@@ -130,7 +130,7 @@ Here is the use case implementation making use of the `MailSenderProvider` provi
 ```typescript title=" User sending email if login fails"
 @provide(LoginUserUseCase)
 export class LoginUserUseCase {
-    constructor(private mailSender: MailSenderProvider) {}
+    constructor(@inject(MailSenderProvider) private mailSender: MailSenderProvider) {}
 
     execute(payload: ILoginUserRequestDTO): boolean {
         const { email, password } = payload;
@@ -222,19 +222,7 @@ Once the package is developed and published to the npm registry, it can be easil
 Providers are registered in the `App` class of an ExpressoTS application using the `ProviderManager`.
 
 ```typescript title="Registering external Logger provider in the App class"
-@provide(App)
-export class App extends AppExpress {
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.provider = container.get(ProviderManager);
-    }
-
-    protected configureServices(): void {
-        this.provider.register(Logger);
-    }
-}
+this.Provider.register(Logger);
 ```
 
 :::info
@@ -244,7 +232,7 @@ By default provider registration binds the provider as request-scoped. To change
 Example of registering a provider as a singleton:
 
 ```typescript
-this.provider.register(Logger, "Singleton");
+this.Provider.register(Logger, "Singleton");
 ```
 
 Adding external providers to an ExpressoTS application is a straightforward process that enhances the application's capabilities without bloating the core framework.

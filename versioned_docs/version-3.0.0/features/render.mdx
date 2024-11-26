@@ -138,27 +138,14 @@ In the `app.provider` configuration provider, you can set the render engine:
 
 ```typescript
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void {
         // Set the render engine to HBS
-        this.setEngine(Engine.HBS);
+        this.setEngine(RenderEngine.Engine.HBS,);
 
         this.middleware.setErrorHandler();
     }
 
-    protected async postServerInitialization(): Promise<void> {
-        if (this.isDevelopment()) {
-            this.provider.get(Env).checkAll();
-        }
-    }
+    protected async postServerInitialization(): Promise<void> {}
 
     protected serverShutdown(): void {}
 }
@@ -167,7 +154,7 @@ export class App extends AppExpress {
 If you want to pass custom options to the render engine, you can do so by passing an object with the desired options to the `setEngine` method. For example, to set the views directory to a custom path, you can do the following:
 
 ```typescript title="Custom render engine configuration"
-this.setEngine<HBS>(Engine.HBS, { viewsDir: <<custom-option>> });
+this.setEngine(RenderEngine.Engine.HBS, { viewsDir: <<custom-option>> });
 ```
 
 ## Render views

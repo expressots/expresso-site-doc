@@ -40,8 +40,6 @@ We will demonstrate how to test a simple ExpressoTS API using Jest and Supertest
 Below we are testing the PingUseCase endpoint return. We are using the **[Jest](https://jestjs.io/)** as the test runner and **[ts-jest](https://www.npmjs.com/package/ts-jest)** as the TypeScript preprocessor.
 
 ```typescript title="ping.use-case.spec.ts"
-import { describe, expect, it } from "@jest/globals";
-
 describe("PingUseCase", () => {
     let pingUseCase: PingUseCase;
 
@@ -71,23 +69,16 @@ describe("PingUseCase", () => {
 We have available a method called `getHttpServer` in the `AppExpress` class that returns a proxy to the Express server. This method is useful for testing the application using **[Supertest](https://www.npmjs.com/package/supertest)**.
 
 ```typescript title="POST /organization :: Creating a new organization use case"
-import "reflect-metadata";
-
-import { ServerEnvironment } from "@expressots/adapter-express";
 import { AppFactory, StatusCode } from "@expressots/core";
-import { container } from "../src/app.container";
-import { App } from "./../src/app.provider";
-import express from "express";
+import { App } from "./app";
 import request from "supertest";
-
-const appExpress = express();
 
 describe("api test", () => {
     let server: express.Application;
 
     beforeAll(async () => {
-        const appInstance = await AppFactory.create(container, App);
-        await appInstance.listen(3000, ServerEnvironment.Development);
+        const appInstance = await AppFactory.create(App);
+        await appInstance.listen(3000);
 
         server = await appInstance.getHttpServer();
     });

@@ -29,19 +29,10 @@ Here's an example of how to use `multer` in the `app.provider.ts` file to handle
 ```typescript title="Create multer object then use it in the router"
 @provide(App)
 export class App extends AppExpress {
-    private middleware: IMiddleware;
-    private provider: ProviderManager;
-
-    constructor() {
-        super();
-        this.middleware = container.get<IMiddleware>(Middleware);
-        this.provider = container.get(ProviderManager);
-    }
-
     protected configureServices(): void {
-        const file = this.middleware.setupMulter({ dest: "uploads" });
+        const file = this.Middleware.setupMulter({ dest: "uploads" });
 
-        this.middleware.addMiddleware({
+        this.Middleware.addMiddleware({
             path: "/",
             middlewares: [file.single("file")],
         });

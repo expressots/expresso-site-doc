@@ -123,8 +123,6 @@ avoiding the immediate circular reference issue.
 To implement this, you can use the `LazyServiceIdentifier` utility provided by the framework.
 
 ```typescript title="Lazy Injection"
-import { inject, LazyServiceIdentifier } from "inversify";
-
 @provide(ServiceA)
 class ServiceA {
     constructor(
