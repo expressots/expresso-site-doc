@@ -66,34 +66,36 @@ describe("PingUseCase", () => {
 
 ## E2E testing with supertest
 
-We have available a method called `getHttpServer` in the `AppExpress` class that returns a proxy to the Express server. This method is useful for testing the application using **[Supertest](https://www.npmjs.com/package/supertest)**.
+We have available a method called `getHttpServer()` in the `AppExpress` class that returns a proxy to the Express server. This method is useful for testing the application using **[Supertest](https://www.npmjs.com/package/supertest)**.
 
-```typescript title="POST /organization :: Creating a new organization use case"
+Alonside with this method, we have the `close()` method that closes the server and releases the resources.
+
+```typescript title="GET /v1 test"
 import { AppFactory, StatusCode } from "@expressots/core";
-import { App } from "./app";
+import { IWebServerPublic } from "@expressots/shared";
+
+import express from "express";
 import request from "supertest";
 
-describe("api test", () => {
+import { App } from "../src/app";
+
+describe("App Test", () => {
     let server: express.Application;
+    let appInstance: IWebServerPublic;
 
     beforeAll(async () => {
-        const appInstance = await AppFactory.create(App);
+        appInstance = await AppFactory.create(App);
         await appInstance.listen(3000);
 
         server = await appInstance.getHttpServer();
     });
 
-    describe("organization.module", () => {
-        test("POST /organization", async () => {
-            const newOrg = {
-                name: "test org",
-            };
+    afterAll(async () => {
+        await appInstance.close();
+    });
 
-            const response = await request(server).post("/organization").send(newOrg);
-
-            expect(response.status).toBe(StatusCode.Created);
-            expect(response.body).toEqual(newOrg);
-        });
+    it("returns a valid app response", async () => {
+        return request(server).get("/v1").expect(StatusCode.OK).expect("Hello from ExpressoTS!");
     });
 });
 ```
