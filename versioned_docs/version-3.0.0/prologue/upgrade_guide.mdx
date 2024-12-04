@@ -1,0 +1,604 @@
+---
+sidebar_position: 2
+title: Upgrade guide
+description: Upgrade guide for ExpressoTS.
+---
+
+# Upgrade guide
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+## Upgrade from 2.x to 3.x
+
+This guide will walk you through upgrading your ExpressoTS `2.x` project to version `3.x`.
+
+The latest version introduces several new features, improvements, and breaking changes, so follow the steps carefully to ensure a smooth transition.
+
+## Prerequisites
+
+Before starting the upgrade process, ensure you meet the following prerequisites:
+
+-   **Node.js** version **20** or higher.
+-   An existing project built with **ExpressoTS 2.x**.
+
+## Update the CLI
+
+-   Uninstall the old CLI globally:
+
+```bash
+npm uninstall @expressots/cli -g
+```
+
+-   Install the new CLI globally:
+
+```bash
+npm i @expressots/cli@3.0.0 -g
+```
+
+## Update project dependencies
+
+-   Remove the old ExpressoTS dependencies:
+
+```bash
+npm uninstall @expressots/adapter-express @expressots/core @expressots/cli
+```
+
+-   Install the new ExpressoTS dependencies:
+
+```bash
+npm i @expressots/core@3.0.0 @expressots/adapter-express@3.0.0 @expressots/shared@3.0.0
+&& npm i @expressots/cli@3.0.0 -D
+```
+
+-   Complete list of dependencies to install:
+
+```bash
+"dependencies": {
+        "@expressots/adapter-express": "3.0.0",
+        "@expressots/core": "3.0.0",
+        "@expressots/shared": "3.0.0"
+    },
+"devDependencies": {
+    "@expressots/cli": "3.0.0",
+    "@types/express": "5.0.0",
+    "@types/jest": "29.5.14",
+    "@types/node": "20.12.7",
+    "@typescript-eslint/eslint-plugin": "8.0.0",
+    "@typescript-eslint/parser": "8.0.0",
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-prettier": "5.0.0",
+    "jest": "29.7.0",
+    "prettier": "3.2.5",
+    "supertest": "^7.0.0",
+    "ts-jest": "29.1.2",
+    "tsconfig-paths": "4.2.0",
+    "tsx": "4.19.2",
+    "typescript": "5.1.3"
+}
+```
+
+## Update project structure
+
+### File `expressots.config.ts`
+
+The expressots.config.ts file has been updated in version 3.x. Specifically, the imports for ExpressoConfig and Pattern have moved from @expressots/core to @expressots/shared.
+Additionally, the `entryPoint` property was introduced. For non-opinionated projects, remember to set the opinionated option to false to reflect this configuration.
+
+<Tabs>
+<TabItem label="expressots.config.ts [ 2.x ]" value="old-version">
+
+```ts
+import { ExpressoConfig, Pattern } from "@expressots/core";
+
+const config: ExpressoConfig = {
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: true,
+};
+
+export default config;
+```
+
+</TabItem>
+
+<TabItem label="expressots.config.ts [ 3.x ]" value="new-version">
+
+```ts
+import { ExpressoConfig, Pattern } from "@expressots/shared";
+
+const config: ExpressoConfig = {
+    entryPoint: "main",
+    sourceRoot: "src",
+    scaffoldPattern: Pattern.KEBAB_CASE,
+    opinionated: true,
+};
+
+export default config;
+```
+
+</TabItem>
+
+</Tabs>
+
+### File `main.ts`
+
+The main entry point has been streamlined in version 3.x. You no longer need to pass the container manually, and configuration is now centralized in the `app.ts` file.
+
+<Tabs>
+    <TabItem label="Opinionated" value="opinionated">
+        <Tabs>
+            <TabItem label="main.ts [ 2.x ]" value="old-version">
+
+        ```ts
+        import { AppFactory, ServerEnvironment } from "@expressots/core";
+        import { App } from "@providers/app/app.provider";
+        import { container } from "./app.container";
+
+        async function bootstrap() {
+            const app = await AppFactory.create(container, App);
+            await app.listen(3000, ServerEnvironment.Development);
+        }
+
+        bootstrap();
+        ```
+
+        </TabItem>
+
+            <TabItem label="main.ts [ 3.x ]" value="new-version">
+
+        ```ts
+        import { AppFactory } from "@expressots/core";
+        import { App } from "app";
+        import { env } from "env";
+
+        AppFactory.create(App).then((app) =>
+            app.listen(env.App.Port, {
+                appName: env.App.appName,
+                appVersion: env.App.appVersion,
+            })
+        );
+        ```
+
+        </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem label="Non-Opinionated" value="non-opinionated">
+        <Tabs>
+            <TabItem label="main.ts [ 2.x ]" value="non-old-version">
+            ```ts
+            import { AppFactory, ServerEnvironment } from "@expressots/core";
+            import { container } from "./app.container";
+            import { App } from "./app.provider";
+
+            async function bootstrap() {
+                const app = await AppFactory.create(container, App);
+                await app.listen(3000, ServerEnvironment.Development);
+            }
+
+            bootstrap();
+            ```
+            </TabItem>
+            <TabItem label="main.ts [ 3.x ]" value="non-new-version">
+
+            ```ts
+            import { AppFactory } from "@expressots/core";
+            import { App } from "./app";
+
+            AppFactory.create(App).then((app) => app.listen(3000));
+            ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+
+</Tabs>
+
+### File `env.ts`
+
+Environment management has been simplified and made more dynamic in version 3.x.
+
+<Tabs>
+<TabItem label="env.ts [ 2.x ]" value="old-version">
+
+```ts
+import pkg from "../package.json";
+
+const ENV = {
+    Application: {
+        APP_NAME: pkg.name,
+        APP_VERSION: pkg.version,
+        ENVIRONMENT: process.env.ENVIRONMENT as string,
+        PORT: Number(process.env.PORT),
+    },
+};
+
+export default ENV;
+```
+
+</TabItem>
+
+<TabItem label="env.ts [ 3.x ]" value="new-version">
+
+```ts
+import pkg from "../package.json";
+
+export const env = {
+    App: {
+        appName: pkg.name,
+        appVersion: pkg.version,
+        get Port() {
+            return process.env.PORT || 3000;
+        },
+    },
+};
+```
+
+</TabItem>
+</Tabs>
+
+### Replace `app.provider.ts` with `app.ts`
+
+The `app.provider.ts` file has been replaced by a simplified `app.ts` file in version 3.x. This file now directly integrates modules and middleware setup.
+
+<Tabs>
+    <TabItem label="Opinionated" value="opinionated">
+        <Tabs>
+            <TabItem label="app.provider.ts [ 2.x ]" value="old-version">
+
+            ```ts
+            import { AppExpress } from "@expressots/adapter-express";
+            import { Env, IMiddleware, Middleware, provide, ProviderManager } from "@expressots/core";
+            import { container } from "../../app.container";
+
+            @provide(App)
+            export class App extends AppExpress {
+                private middleware: IMiddleware;
+                private provider: ProviderManager;
+
+                constructor() {
+                    super();
+                    this.middleware = container.get<IMiddleware>(Middleware);
+                    this.provider = container.get(ProviderManager);
+                }
+
+                protected configureServices(): void {
+                    this.provider.register(Env);
+
+                    this.middleware.addBodyParser();
+                    this.middleware.setErrorHandler({ showStackTrace: true });
+                }
+
+                protected postServerInitialization(): void {
+                    if (this.isDevelopment()) {
+                        this.provider.get(Env).checkAll();
+                    }
+                }
+
+                protected serverShutdown(): void {}
+            }
+            ```
+
+            </TabItem>
+            <TabItem label="app.ts [ 3.x ]" value="new-version">
+
+            ```ts
+            import { AppExpress } from "@expressots/adapter-express";
+            import { AppContainer, Env } from "@expressots/core";
+            import { AppModule } from "@useCases/app/app.module";
+
+            export class App extends AppExpress {
+                private config: AppContainer = this.configContainer([AppModule]);
+
+                async globalConfiguration(): Promise<void> {
+                    this.setGlobalRoutePrefix("/v1");
+
+                    this.initEnvironment("development", {
+                        env: {
+                            development: ".env.development",
+                            production: ".env.production",
+                        },
+                    });
+                }
+
+                async configureServices(): Promise<void> {
+                    this.Provider.register(Env);
+
+                    this.Middleware.addBodyParser();
+                    this.Middleware.setErrorHandler({ showStackTrace: true });
+                }
+
+                async postServerInitialization(): Promise<void> {
+                    if (await this.isDevelopment()) {
+                        this.Provider.get(Env).checkFile(".env.development");
+                    }
+                }
+
+                async serverShutdown(): Promise<void> {}
+            }
+            ```
+
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem label="Non-Opinionated" value="non-opinionated">
+        <Tabs>
+            <TabItem label="app.provider.ts [ 2.x ]" value="old-version">
+
+            ```ts
+            import { AppExpress } from "@expressots/adapter-express";
+            import {
+                Env,
+                IMiddleware,
+                Middleware,
+                ProviderManager,
+            } from "@expressots/core";
+            import { container } from "./app.container";
+
+            export class App extends AppExpress {
+                private middleware: IMiddleware;
+                private provider: ProviderManager;
+
+                constructor() {
+                    super();
+                    this.middleware = container.get<IMiddleware>(Middleware);
+                    this.provider = container.get(ProviderManager);
+                }
+
+                protected configureServices(): void | Promise<void> {
+                    this.provider.register(Env);
+
+                    this.middleware.addBodyParser();
+                    this.middleware.setErrorHandler({ showStackTrace: true });
+                }
+
+                protected postServerInitialization(): void | Promise<void> {
+                    if (this.isDevelopment()) {
+                        this.provider.get(Env).checkAll();
+                    }
+                }
+
+                protected serverShutdown(): void | Promise<void> {}
+            }
+
+            ```
+            </TabItem>
+            <TabItem label="app.ts [ 3.x ]" value="new-version">
+
+            ```ts
+            import { AppExpress } from "@expressots/adapter-express";
+            import { AppContainer } from "@expressots/core";
+            import { AppModule } from "./app.module";
+
+            export class App extends AppExpress {
+                private config: AppContainer = this.configContainer([AppModule]);
+
+                async globalConfiguration(): Promise<void> {}
+
+                async configureServices(): Promise<void> {
+                    this.Middleware.addBodyParser();
+                    this.Middleware.setErrorHandler({ showStackTrace: true });
+                }
+
+                async postServerInitialization(): Promise<void> {}
+
+                async serverShutdown(): Promise<void> {}
+            }
+            ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+
+</Tabs>
+
+### Remove `app.container.ts`
+
+In **ExpressoTS 3.x**, the `app.container.ts` file has been deprecated and is no longer needed. Module registration and dependency injection have been streamlined to be defined directly in the `src\app.ts` file. This simplifies the project structure and centralizes application configuration.
+
+This recommendation applies to both opinionated and non-opinionated projects, ensuring consistency and reducing complexity regardless of the project type.
+
+Below is the old implementation using `app.container.ts` for context and the new way to handle modules and environment configuration in src\app.ts.
+
+<Tabs>
+    <TabItem label="Opinionated" value="opinionated">
+        <Tabs>
+            <TabItem label="app.container.ts [ 2.x ]" value="old-version">
+
+    The previous approach required a separate `app.container.ts` file for setting up the application container and registering modules:
+
+    ```ts
+    import { Container } from "inversify";
+    import { AppContainer } from "@expressots/core";
+    import { AppModule } from "@useCases/app/app.module";
+
+    export const appContainer: AppContainer = new AppContainer({
+        autoBindInjectable: false,
+    });
+
+    export const container: Container = appContainer.create([
+        // Add your modules here
+        AppModule,
+    ]);
+    ```
+
+    </TabItem>
+
+            <TabItem label="app.ts [ 3.x ]" value="new-version">
+
+                In **ExpressoTS 3.x**, modules are now directly registered in the `configContainer` method of the App class. This method accepts an array of modules as its parameter, eliminating the need for a separate container file.
+
+                ```typescript
+                import { AppExpress } from "@expressots/adapter-express";
+                import { AppContainer, Env } from "@expressots/core";
+                import { AppModule } from "@useCases/app/app.module";
+
+                export class App extends AppExpress {
+                    // Register application modules
+                    private config: AppContainer = this.configContainer([AppModule]);
+
+                    // Global configurations such as routes and environment
+                    async globalConfiguration(): Promise<void> {
+                        this.setGlobalRoutePrefix("/v1");
+
+                        this.initEnvironment("development", {
+                            env: {
+                                development: ".env.development", // Path to the development environment file
+                                production: ".env.production", // Path to the production environment file
+                            },
+                        });
+                    }
+
+                    // Service-level configurations
+                    async configureServices(): Promise<void> {
+                        // Register environment-related dependencies
+                        this.Provider.register(Env);
+
+                        // Add global middleware configurations
+                        this.Middleware.addBodyParser(); // Parses incoming request bodies
+                        this.Middleware.setErrorHandler({ showStackTrace: true }); // Error handling middleware
+                    }
+
+                    // Post-server startup tasks
+                    async postServerInitialization(): Promise<void> {
+                        if (await this.isDevelopment()) {
+                            // Ensure environment variables are loaded correctly in development
+                            this.Provider.get(Env).checkFile(".env.development");
+                        }
+                    }
+
+                    // Graceful shutdown logic
+                    async serverShutdown(): Promise<void> {
+                        // Add any necessary shutdown procedures here
+                    }
+                }
+                ```
+            </TabItem>
+        </Tabs>
+    </TabItem>
+    <TabItem label="Non-Opinionated" value="non-opinionated">
+        <Tabs>
+            <TabItem label="app.container.ts [ 2.x ]" value="old-version">
+
+        The previous approach required a separate `app.container.ts` file for setting up the application container and registering modules:
+
+        ```ts
+        import { AppContainer } from "@expressots/core";
+        import { AppModule } from "./app.module";
+
+        export const appContainer: AppContainer = new AppContainer({
+            autoBindInjectable: false,
+        });
+
+        export const container = appContainer.create([
+            // Add your modules here
+            AppModule,
+        ]);
+
+        ```
+
+        </TabItem>
+
+            <TabItem label="app.ts [ 3.x ]" value="new-version">
+
+In **ExpressoTS 3.x**, modules are now directly registered in the `configContainer` method of the App class. This method accepts an array of modules as its parameter, eliminating the need for a separate container file.
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { AppContainer } from "@expressots/core";
+import { AppModule } from "./app.module";
+
+export class App extends AppExpress {
+    // Register application modules
+    private config: AppContainer = this.configContainer([AppModule]);
+
+    // Global configurations such as routes and environment
+    async globalConfiguration(): Promise<void> {}
+
+    // Service-level configurations
+    async configureServices(): Promise<void> {
+        this.Middleware.addBodyParser(); // Parses incoming request bodies
+        this.Middleware.setErrorHandler({ showStackTrace: true }); // Error handling middleware
+    }
+
+    // Post-server startup tasks
+    async postServerInitialization(): Promise<void> {}
+
+    // Graceful shutdown logic
+    async serverShutdown(): Promise<void> {}
+}
+```
+
+</TabItem>
+        </Tabs>
+    </TabItem>
+</Tabs>
+
+### Modules registration
+
+Modules are registered using the configContainer method directly in the App class.
+Add modules to the array in the `configContainer` method:
+
+```ts
+private config: AppContainer = this.configContainer([AppModule, AnotherModule]);
+```
+
+Replace AnotherModule with any additional modules you wish to register in your application.
+
+### Environment configuration
+
+The `initEnvironment` method is used to initialize environment-specific configurations. Specify the paths to .env files for different environments (e.g., development and production).
+
+```ts
+this.initEnvironment("development", {
+    env: {
+        development: ".env.development",
+        production: ".env.production",
+    },
+});
+```
+
+Use the `Env` provider to access environment variables defined in your `.env` files. These can be dynamically checked and validated during application initialization.
+
+## Update controllers
+
+In version 3.x, dependency injection now requires the @inject decorator explicitly.
+
+<Tabs>
+<TabItem label="app.controller.ts [ 2.x ]" value="old-version">
+
+```ts
+import { controller, Get } from "@expressots/adapter-express";
+import { AppUseCase } from "./app.usecase";
+
+@controller("/")
+export class AppController {
+    constructor(private appUseCase: AppUseCase) {} // Old change
+
+    @Get("/")
+    execute() {
+        return this.appUseCase.execute();
+    }
+}
+```
+
+</TabItem>
+<TabItem label="app.controller.ts [ 3.x ]" value="new-version">
+
+```ts
+import { controller, Get } from "@expressots/adapter-express";
+import { inject } from "@expressots/core"; // New import
+import { AppUseCase } from "./app.usecase";
+
+@controller("/")
+export class AppController {
+    @inject(AppUseCase) private appUseCase: AppUseCase; // New change
+
+    @Get("/")
+    execute() {
+        return this.appUseCase.execute();
+    }
+}
+```
+
+</TabItem>
+</Tabs>

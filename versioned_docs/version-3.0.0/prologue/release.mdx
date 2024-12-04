@@ -1,0 +1,236 @@
+---
+sidebar_position: 1
+title: Release notes
+description: Release notes for ExpressoTS.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Release notes
+
+For full details on the changes for each release, please refer to the [upgrade guide](./upgrade_guide.mdx).
+
+## Versioning scheme
+
+ExpressoTS follows the [Semantic Versioning](https://semver.org/) scheme. Major versions are reserved for breaking changes, minor versions for new features, and patch versions for bug fixes.
+Major versions are released yearly, we strive to release on Q4 or Q1 of each year. Minor and patch versions are released as needed, usually on by-weekly or monthly basis.
+
+The releases from now on will be done in bundles. This is to make it easier to keep track of the changes and to avoid having to release a new version for every small change.
+The packages part of the bundle will be released at the same time, and the version number will be the same for all of them. This is to avoid any compatibility issues between the packages.
+
+The packages part of the bundle will be:
+
+-   `@expressots/core`
+-   `@expressots/adapter-express`
+-   `@expressots/shared`
+-   `@expressots/templates`
+-   `@expressots/cli`
+
+## Support policy
+
+For all ExpressoTS releases, bug fixes and security patches will be provided for 18 months after the release date. After that period, the release will be considered end-of-life and no further support will be provided except
+for `Enterprise customers` or `individuals` with `valid support contracts`.
+
+| Version | Node.js    | Release              | Bug & Security fixed until | Status |
+| ------- | ---------- | -------------------- | -------------------------- | ------ |
+| 3.0.0   | >= 20.18.0 | December 4th, 2024   | June 4th, 2026             | 🟢     |
+| 2.0.0   | >= 18.10.0 | September 14th, 2023 | March 14th, 2025           | 🟡     |
+
+🟢 Active support 🟡 Bug & Security fixes only 🔴 End-of-life
+
+## ExpressoTS 3.0 🎉
+
+ExpressoTS v3.0.0 is a major milestone in our journey toward providing a faster, more scalable, and developer-friendly Node.js framework.
+With this release, we've implemented significant features, optimizations, and architectural changes to enhance your development experience.
+
+Here's everything you need to know about what's new in ExpressoTS v3.0.0!
+
+### Nodejs version
+
+ExpressoTS v3.0.0 requires Node.js version 20.18.0 or higher.
+
+### Dependencies
+
+We have made significant reductions in the number of dependencies required to run ExpressoTS. This will help you to have a more lightweight and faster application.
+
+-   IOC: We forked and customized the `inversify` library to make it more lightweight and faster for our use case.
+-   Environment: We embedded into the framework our own environment library.
+-   Reflect-metadata: We removed the dependency on the `reflect-metadata` library in the client application and embedded it into the framework.
+-   Introduced @expressots/shared, consolidating common utilities and interfaces for modular development.
+
+Here are the current dependencies:
+
+-   `@expressots/core`
+-   `@expressots/adapter-express`
+-   `@expressots/shared`
+-   `@expressots/cli`
+
+### Testing
+
+-   Migrated from Vitest to Jest, providing more robust testing capabilities.
+-   Added extensive unit tests for core, middleware, providers, repositories, CLI, plugins, and adapters.
+-   Current coverage:
+    -   Core: 92%
+    -   Adapter-Express: 81%
+    -   Shared: 84%
+    -   Incorporated EarlyAI for automated test generation, significantly reducing development effort on the core libraries of ExpressoTS.
+
+### Templates
+
+Added a new template for creating a new ExpressoTS project called `Micro API`.
+This template is designed for quick prototyping and development of small services to enhance Node.js applications scalibity constraints.
+Developers can now create multiple services and deploy them independently to decouple the application and reduce responsibility on a single service.
+
+```ts
+import { createMicroAPI } from "@expressots/adapter-express";
+import { Request, Response } from "express";
+
+const microAPI = createMicroAPI();
+
+const app = microAPI.build();
+
+app.Route.get("/", (req: Request, res: Response) => {
+    res.send("Hello from ExpressoTS Micro API!");
+});
+
+app.listen(3000);
+```
+
+Although Micro API its simple and lightweight, it can leverage the full power of ExpressoTS, including access to the dependency injection system,
+middleware system, and plugins.
+
+### Sreamlined Application Structure
+
+We introduced a new application structure that is more streamlined and easier to understand. The new application structure is itended to provide a leaner, more modern
+approach to building Node.js applications with ExpressoTS.
+
+#### The application main entry point
+
+You no longer need to pass the container manually, and configuration is now centralized in the `app.ts` file.
+The main entry point of the application only exists to bootstrap the application and start the server.
+All applicaiton configuration, lifecycle hooks, and middleware are now centralized in the `app.ts` file.
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+```
+
+-   From the main entry point, you can only access the underlying http server instance for testing purposes.
+-   Also, you can pass `0` as the port number to let the OS choose a random port for you.
+
+#### The application configuration file
+
+The application configuration file is now centralized in the `app.ts` file.
+
+```ts
+import { AppExpress } from "@expressots/adapter-express";
+import { AppContainer, Env } from "@expressots/core";
+import { AppModule } from "@useCases/app/app.module";
+
+export class App extends AppExpress {
+    private config: AppContainer = this.configContainer([AppModule]);
+
+    async globalConfiguration(): Promise<void> {
+        this.setGlobalRoutePrefix("/v1");
+
+        this.initEnvironment("development", {
+            env: {
+                development: ".env.development",
+                production: ".env.production",
+            },
+        });
+    }
+
+    async configureServices(): Promise<void> {
+        this.Provider.register(Env);
+
+        this.Middleware.addBodyParser();
+        this.Middleware.setErrorHandler({ showStackTrace: true });
+    }
+
+    async postServerInitialization(): Promise<void> {
+        if (await this.isDevelopment()) {
+            this.Provider.get(Env).checkFile(".env.development");
+        }
+    }
+
+    async serverShutdown(): Promise<void> {}
+}
+```
+
+The life cycle hooks are now centralized in the `app.ts` file and also make use of node event emitters in transition to a more event-driven architecture.
+
+The general capabilities in the `app.ts` file are:
+
+-   The `globalConfiguration` method is used to set global configurations for the application such as the route prefix and environment configuration.
+-   The `configureServices` method is used to register services, middleware, and providers.
+-   The `postServerInitialization` method is used to run any post-server initialization tasks.
+-   The `serverShutdown` method is used to run any cleanup tasks before the server shuts down.
+
+-   Container: The container is now configured in the `configContainer` method, which takes an array of modules to load. Container was streamlined to provide a more straightforward way to load modules and services. Also,
+    all extra and unnecesaary classes were removed from the container init load to make it more lightweight and faster.
+-   Environment: The system has environment variable support, and you can set the environment file for each environment. The `Env` provider is used to access environment variables and validate the environment file.
+-   Provider registration is now centralized in the `configureServices` method for the plugin system to work correctly and to avoid circular dependencies.
+-   Middleware registration available with all the Express middleware available in the `Middleware` class. You can also add your own middleware.
+-   The error handler middleware is now centralized in the `configureServices` method.
+-   The `isDevelopment` method is used to check if the application is running in development mode.
+-   The `checkFile` method is used to check if the environment file exists and validate variables in the environment file.
+-   The `setGlobalRoutePrefix` method is used to set the global route prefix for the application.
+-   Middleware pipeline can be viewed for better understanding of the middleware order.
+
+#### Render engine support
+
+We added support for rendering engines in ExpressoTS. You can now use any rendering engine with ExpressoTS, such as EJS, Handlebars, or Pug.
+They can be used to render views in your application and are provided as a plugin.
+
+As soon as you try to use a rendering engine, ExpressoTS will automatically detect it and ask you to install the required dependencies.
+
+For more information, please refer to the [render engine documentation](../features/render.mdx).
+
+#### Plugin system
+
+We introduced a new plugin system that allows you to extend the functionality of ExpressoTS by adding custom plugins.
+Plugins can be used to add new features, middleware, services, or providers to the application. For more information,
+please refer to the [plugin system documentation](../core/providers.mdx#create-external-provider).
+
+#### CLI improvements
+
+-   Added support for creating a new ExpressoTS project with the `create` command.
+
+:::note
+Non opinionated scaffolds can be used in the Micro API template.
+:::
+
+-   All commands were refactored and tailored for each individual package manager (npm, yarn and pnpm) to provide a better experience and performance.
+-   ExpressoTS CLI now supports calls from `expressots` and `ex` aliases for better usability.
+-   Added command to add and remove plugins from the application. This allows you to also add and remove any npm package with a better experience.
+
+```bash
+ex add express
+```
+
+-   Scripts in your `package.json` file are now available through `ex scripts` command for a more interactive experience.
+-   Use of `tsx` library for better performance and user experience on running the application as `dev` mode.
+-   `tsc` is used to compile the application in production mode for better performance and user experience.
+
+#### Documentation
+
+-   Added a new section called Prologue, which contains the release notes and upgrade guide.
+-   Added version badges to the documentation to make it easier to identify the version of the documentation.
+-   Simplified the documentation structure to make it easier to navigate and find the information you need.
+
+### Thank you to our contributors
+
+We would like to thank all the contributors who have helped us to make ExpressoTS v3.0.0 a reality. ❤️
+
+-   [Richard Zampieri](https://github.com/rsaz)
+-   [devbr-io](https://github.com/devbr-io)
+-   [Juliano Soares](https://github.com/juliano-soares)
+-   [hayawata3626](https://github.com/hayawata3626)
+-   [LhonRafaat](https://github.com/LhonRafaat)
+-   [projectjimcs](https://github.com/projectjimcs)
+-   [Emmanuel Ferdman](https://github.com/emmanuel-ferdman)
+-   [Pedro Vargas](https://www.linkedin.com/in/pedroavargas/) - Our Product Manager

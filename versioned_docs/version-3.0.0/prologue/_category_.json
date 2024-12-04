@@ -1,0 +1,8 @@
+{
+    "label": "PROLOGUE",
+    "position": 0,
+    "link": {
+        "type": "generated-index",
+        "description": "ExpressoTS Documentation"
+    }
+}

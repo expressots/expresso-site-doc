@@ -23,7 +23,7 @@ function HomepageHeader() {
                     <div>
                         <Link
                             className={clsx("button button--secondary button--lg", styles.button)}
-                            to="/docs/intro"
+                            to="/docs/prologue/intro"
                         >
                             {translate({ message: "homepageDocumentation" })}
                         </Link>
@@ -45,7 +45,7 @@ function HomepageHeader() {
 export default function Home(): JSX.Element {
     const { siteConfig } = useDocusaurusContext();
 
-    return <Redirect to="/docs/intro" />;
+    return <Redirect to="/docs/prologue/intro" />;
     return (
         <Layout
             title={`${siteConfig.title}`}
