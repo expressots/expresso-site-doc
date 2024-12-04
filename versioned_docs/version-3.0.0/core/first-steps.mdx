@@ -105,16 +105,16 @@ project-name/
 │   ├── env.ts
 │   ├── main.ts
 ├── test/
-│   ├── app.usecase.spec.ts
+│   ├── app.controller.spec.ts
 ```
 
-| File Name                                            | Description                                                                     |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------- |
-| <span class="span-table"> useCases/\*</span>         | The use case folder holds the implementation of operations for the application. |
-| <span class="span-table"> app.ts</span>              | Application global configuration file.                                          |
-| <span class="span-table"> env.ts</span>              | This is an utility resource that maps .env variables.                           |
-| <span class="span-table"> main.ts</span>             | The main entry point of an ExpressoTS application.                              |
-| <span class="span-table"> app.usecase.spec.ts</span> | A basic unit test for the app.usecase.                                          |
+| File Name                                               | Description                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| <span class="span-table"> useCases/\*</span>            | The use case folder holds the implementation of operations for the application. |
+| <span class="span-table"> app.ts</span>                 | Application global configuration file.                                          |
+| <span class="span-table"> env.ts</span>                 | This is an utility resource that maps .env variables.                           |
+| <span class="span-table"> main.ts</span>                | The main entry point of an ExpressoTS application.                              |
+| <span class="span-table"> app.controller.spec.ts</span> | A basic unit test using `supertest` for the app.controller.                     |
 
     </TabItem>
 
@@ -127,13 +127,13 @@ project-name/
 ├── src/
 │   ├── api.ts
 ├── test/
-│   ├── api.controller.spec.ts
+│   ├── api.spec.ts
 ```
 
-| File Name                                               | Description                                        |
-| ------------------------------------------------------- | -------------------------------------------------- |
-| <span class="span-table"> api.ts</span>                 | The main entry point of an ExpressoTS application. |
-| <span class="span-table"> api.controller.spec.ts</span> | A basic unit test for the app controller.          |
+| File Name                                    | Description                                        |
+| -------------------------------------------- | -------------------------------------------------- |
+| <span class="span-table"> api.ts</span>      | The main entry point of an ExpressoTS application. |
+| <span class="span-table"> api.spec.ts</span> | A basic unit test for the app controller.          |
 
     </TabItem>
 
@@ -173,6 +173,7 @@ AppFactory.create(App).then((app) =>
         <TabItem label="Micro API" value="micro">
 
     ```typescript
+
 const microAPI = createMicroAPI();
 microAPI.setGlobalRoutePrefix("/v1");
 
@@ -180,7 +181,7 @@ const app = microAPI.build();
 app.Middleware.addBodyParser();
 
 app.Route.get("/", (req: Request, res: Response) => {
-    res.send("Hello from ExpressoTS!");
+res.send("Hello from ExpressoTS!");
 });
 
 app.listen(3001);
@@ -193,8 +194,8 @@ app.listen(3001);
 
 The `AppFactory` class is responsible for creating the application instance. The `AppFactory` was designed to support multiple web servers like Express.js, Fastify, and more. Currently, it only supports Express.js.
 
-- The `create` method accepts the application class as parameters (`app.ts`).
-- The `listen` method starts the server on the specified port with default environment settings. You can also pass an object specifying the app's name and version.
+-   The `create` method accepts the application class as parameters (`app.ts`).
+-   The `listen` method starts the server on the specified port with default environment settings. You can also pass an object specifying the app's name and version.
 
 The `App` class is the application root module, which is responsible for initializing the application and its dependencies.
 All application configuration and setup are handled in the [App class](./app-provider.mdx) - (`app.ts`) file.
@@ -203,10 +204,10 @@ The application environment is defined by a method called `initEnvironment("deve
 
 ```typescript
 initEnvironment("development", {
-            env: {
-                development: ".env.development",
-                production: ".env.production",
-            },
+    env: {
+        development: ".env.development",
+        production: ".env.production",
+    },
 });
 ```
 
