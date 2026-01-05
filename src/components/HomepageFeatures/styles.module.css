@@ -1,11 +1,49 @@
 .features {
   display: flex;
   align-items: center;
-  padding: 2rem 0;
+  padding: 4rem 0;
   width: 100%;
+  background: linear-gradient(180deg, transparent 0%, rgba(128, 245, 168, 0.02) 50%, transparent 100%);
 }
 
 .featureSvg {
   height: 200px;
   width: 200px;
+  transition: all 0.4s ease;
+  filter: drop-shadow(0 4px 10px rgba(128, 245, 168, 0.2));
+}
+
+.featureSvg:hover {
+  transform: translateY(-10px) scale(1.05);
+  filter: drop-shadow(0 8px 20px rgba(128, 245, 168, 0.4));
+}
+
+/* Feature card enhancements */
+.features .col {
+  transition: all 0.3s ease;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.features .col:hover {
+  transform: translateY(-8px);
+  background: rgba(128, 245, 168, 0.05);
+  box-shadow: 0 8px 30px rgba(128, 245, 168, 0.15);
+}
+
+.features h3 {
+  transition: color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.features .col:hover h3 {
+  color: #80f5a8;
+}
+
+.features p {
+  transition: color 0.3s ease;
+}
+
+.features .col:hover p {
+  color: rgba(255, 255, 255, 0.9);
 }

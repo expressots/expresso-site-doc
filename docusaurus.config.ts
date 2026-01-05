@@ -17,7 +17,6 @@ const config: Config = {
     trailingSlash: false,
 
     onBrokenLinks: "ignore", // 'throw' | 'warn' | 'ignore'
-    onBrokenMarkdownLinks: "throw",
 
     i18n: {
         defaultLocale: "en",
@@ -174,6 +173,9 @@ const config: Config = {
     themes: ["@docusaurus/theme-mermaid"],
     markdown: {
         mermaid: true,
+        hooks: {
+            onBrokenMarkdownLinks: "throw",
+        },
     },
 };
 

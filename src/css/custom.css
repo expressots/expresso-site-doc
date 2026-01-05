@@ -4,12 +4,26 @@
  * work well for content-centric websites.
  */
 @import url("https://fonts.googleapis.com/css2?family=PT+Sans&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
 
 body {
     font-size: 16px;
     font-weight: 500;
     font-family: "Montserrat", sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Brand color variables */
+:root {
+    --expressots-brand: #80f5a8;
+    --expressots-brand-dark: #6dd494;
+    --expressots-brand-light: #9ff7c0;
+    --expressots-brand-glow: rgba(128, 245, 168, 0.3);
 }
 
 /* You can override the default Infima variables here. */
@@ -25,44 +39,168 @@ body {
     --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
     --ifm-font-weight-semibold: 700;
     --ifm-font-family-base: "Montserrat", sans-serif;
+    --ifm-transition-fast: 150ms ease;
+    --ifm-transition-slow: 300ms ease;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme="dark"] {
     --ifm-color-primary: #80f5a8;
-    --ifm-color-primary-dark: #4d8497;
-    --ifm-color-primary-darker: #487d8f;
-    --ifm-color-primary-darkest: #3c6776;
-    --ifm-color-primary-light: #659eb1;
-    --ifm-color-primary-lighter: #6ea3b5;
-    --ifm-color-primary-lightest: #87b3c2;
-    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+    --ifm-color-primary-dark: #6dd494;
+    --ifm-color-primary-darker: #5bc082;
+    --ifm-color-primary-darkest: #4a9d6a;
+    --ifm-color-primary-light: #9ff7c0;
+    --ifm-color-primary-lighter: #b3f9d1;
+    --ifm-color-primary-lightest: #c7fbe2;
+    --docusaurus-highlighted-code-line-bg: rgba(128, 245, 168, 0.15);
+    --ifm-link-color: #80f5a8;
+    --ifm-link-hover-color: #9ff7c0;
 }
 
 html[data-theme="dark"] {
     background-color: #1f1f22;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(128, 245, 168, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(128, 245, 168, 0.03) 0px, transparent 50%);
 }
 
 [data-theme="dark"] .navbar {
-    background-color: #1b1b1d;
+    background-color: rgba(27, 27, 29, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(128, 245, 168, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .navbar:hover {
+    border-bottom-color: rgba(128, 245, 168, 0.2);
 }
 
 [data-theme="dark"] .menu {
     background-color: #242427;
     font-size: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .navbar {
     padding: 0 8rem;
     text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.navbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+.navbar__item {
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.navbar__item:last-child {
+    margin-right: 0;
+}
+
+.navbar__item:hover {
+    transform: translateY(-1px);
+}
+
+.navbar__link {
+    transition: color 0.2s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.navbar__link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--expressots-brand), var(--expressots-brand-light));
+    transition: width 0.3s ease;
+}
+
+.navbar__link:hover::after {
+    width: 100%;
+}
+
+.navbar__link--active::after {
+    width: 100%;
+}
+
+/* Navbar search container alignment */
+.navbarSearchContainer_Bca1,
+.navbar__search {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin-right: 1rem;
+}
+
+.navbar__search {
+    align-items: center;
+    display: flex;
+    height: 40px;
 }
 
 .customHeroBanner {
-    background-color: #111111;
+    background: linear-gradient(135deg, #111111 0%, #1a1a1d 50%, #111111 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.customHeroBanner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(128, 245, 168, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(128, 245, 168, 0.08) 0%, transparent 50%);
+    animation: gradientShift 15s ease infinite;
+    pointer-events: none;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
 }
 
 .customHeroBanner .hero__subtitle {
     color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 0.8s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.customHeroBanner .hero__title {
+    animation: fadeInUp 0.6s ease;
 }
 
 @media screen and (max-width: 996px) {
@@ -73,6 +211,15 @@ html[data-theme="dark"] {
 
 .span-table {
     color: #80f5a8;
+    text-shadow: 0 0 10px rgba(128, 245, 168, 0.5);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.span-table:hover {
+    text-shadow: 0 0 20px rgba(128, 245, 168, 0.8);
+    transform: scale(1.05);
+    display: inline-block;
 }
 
 /* Algolia search */
@@ -96,25 +243,33 @@ html[data-theme="dark"] {
 }
 
 [data-theme="dark"] .DocSearch {
-    --docsearch-text-color: #80f5a8;
-    --docsearch-muted-color: #80f5a8;
-    --docsearch-container-background: rgba(47, 55, 69, 0.7);
+    --docsearch-text-color: #ffffff;
+    --docsearch-muted-color: rgba(128, 245, 168, 0.7);
+    --docsearch-container-background: rgba(0, 0, 0, 0.75);
     /* Modal */
-    --docsearch-modal-background: var(--ifm-background-color);
+    --docsearch-modal-background: linear-gradient(135deg, rgba(27, 27, 29, 0.98) 0%, rgba(31, 31, 34, 0.98) 100%);
+    --docsearch-modal-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(128, 245, 168, 0.2);
     /* Search box */
-    --docsearch-searchbox-background: var(--ifm-background-color);
-    --docsearch-searchbox-focus-background: var(--ifm-color-black);
+    --docsearch-searchbox-background: rgba(255, 255, 255, 0.05);
+    --docsearch-searchbox-focus-background: rgba(255, 255, 255, 0.08);
+    --docsearch-searchbox-shadow: 0 0 0 4px rgba(128, 245, 168, 0.15), 0 4px 20px rgba(128, 245, 168, 0.2);
     /* Hit */
-    --docsearch-hit-color: var(--ifm-font-color-base);
-    --docsearch-hit-active-color: rgba(0, 0, 0);
-    --docsearch-hit-background: rgb(54, 61, 56);
+    --docsearch-hit-color: rgba(255, 255, 255, 0.95);
+    --docsearch-hit-active-color: #80f5a8;
+    --docsearch-hit-background: transparent;
+    --docsearch-hit-shadow: 0 4px 12px rgba(128, 245, 168, 0.15);
     /* Footer */
-    --docsearch-footer-background: var(--ifm-background-surface-color);
+    --docsearch-footer-background: rgba(128, 245, 168, 0.02);
+    --docsearch-footer-shadow: none;
+    /* Key */
     --docsearch-key-gradient: linear-gradient(
         -26.5deg,
-        var(--ifm-color-emphasis-200) 0%,
-        var(--ifm-color-emphasis-100) 100%
+        rgba(128, 245, 168, 0.15) 0%,
+        rgba(128, 245, 168, 0.25) 100%
     );
+    --docsearch-key-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    /* Highlight */
+    --docsearch-highlight-color: rgba(128, 245, 168, 0.25);
 }
 
 /* GitHub Icon Navbar */
@@ -175,53 +330,1177 @@ html[data-theme="dark"] {
     background-position: center;
 }
 
-/* Add uniform spacing between navbar items */
-.navbar__item {
-    margin-right: 20px; /* Adjust this value for consistent spacing */
-}
+/* Navbar item spacing - consolidated with main navbar styles above */
 
-/* Remove extra margin from the last navbar item */
-.navbar__item:last-child {
-    margin-right: 0;
-}
-
-/* Specific adjustments for the GitHub icon */
+/* Social icon enhancements */
 .header-github-link {
+    margin-right: 20px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.header-github-link:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.header-linkedin-link {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.header-linkedin-link:hover {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+/* Enhanced buttons */
+.button {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(128, 245, 168, 0.3);
+}
+
+.button--secondary {
+    border: 2px solid transparent;
+    background: linear-gradient(#1f1f22, #1f1f22) padding-box,
+                linear-gradient(135deg, var(--expressots-brand), var(--expressots-brand-light)) border-box;
+}
+
+.button--secondary:hover {
+    border-color: var(--expressots-brand);
+    box-shadow: 0 0 20px rgba(128, 245, 168, 0.4);
+}
+
+/* Enhanced code blocks */
+[data-theme="dark"] .prism-code {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(128, 245, 168, 0.08);
+    background: #1e1e1e !important;
+}
+
+[data-theme="dark"] .prism-code:hover {
+    border-color: rgba(128, 245, 168, 0.15);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Code block container improvements */
+[data-theme="dark"] .theme-code-block {
+    background: #1e1e1e;
+    border-radius: 8px;
+}
+
+[data-theme="dark"] .codeBlockContent_QJqH {
+    background: #1e1e1e;
+}
+
+[data-theme="dark"] .codeBlockLines_e6Vv {
+    color: #e4e4e4 !important;
+}
+
+/* Inline code improvements */
+[data-theme="dark"] code {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(128, 245, 168, 0.15);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+    color: #e4e4e4;
+}
+
+[data-theme="dark"] code:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(128, 245, 168, 0.25);
+}
+
+/* Code block line numbers */
+[data-theme="dark"] .theme-code-block .token-line {
+    color: #e4e4e4;
+}
+
+/* Ensure proper contrast for code syntax */
+[data-theme="dark"] .theme-code-block .token.comment {
+    color: #6a9955 !important;
+}
+
+[data-theme="dark"] .theme-code-block .token.string {
+    color: #ce9178 !important;
+}
+
+[data-theme="dark"] .theme-code-block .token.keyword,
+[data-theme="dark"] .theme-code-block .token.function {
+    color: #569cd6 !important;
+}
+
+[data-theme="dark"] .theme-code-block .token.class-name {
+    color: #4ec9b0 !important;
+}
+
+[data-theme="dark"] .theme-code-block .token.variable {
+    color: #9cdcfe !important;
+}
+
+[data-theme="dark"] .theme-code-block .token.number {
+    color: #b5cea8 !important;
+}
+
+/* Enhanced links */
+[data-theme="dark"] a {
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+[data-theme="dark"] a:hover {
+    text-shadow: 0 0 8px rgba(128, 245, 168, 0.5);
+}
+
+/* Enhanced cards and containers */
+[data-theme="dark"] .card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(128, 245, 168, 0.1);
+    border-radius: 8px;
+}
+
+[data-theme="dark"] .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(128, 245, 168, 0.15);
+    border-color: rgba(128, 245, 168, 0.3);
+}
+
+/* Enhanced sidebar */
+[data-theme="dark"] .theme-doc-sidebar-container {
+    border-right: 1px solid rgba(128, 245, 168, 0.1);
+}
+
+[data-theme="dark"] .menu__link {
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 0;
+}
+
+[data-theme="dark"] .menu__link:hover {
+    background: rgba(128, 245, 168, 0.1);
+    transform: translateX(4px);
+}
+
+[data-theme="dark"] .menu__link--active {
+    background: rgba(128, 245, 168, 0.15);
+    border-left: 3px solid var(--expressots-brand);
+    font-weight: 600;
+}
+
+/* Enhanced table of contents */
+[data-theme="dark"] .table-of-contents__link {
+    transition: all 0.2s ease;
+    border-left: 2px solid transparent;
+    padding-left: 8px;
+}
+
+[data-theme="dark"] .table-of-contents__link:hover {
+    border-left-color: var(--expressots-brand);
+    color: var(--expressots-brand);
+}
+
+[data-theme="dark"] .table-of-contents__link--active {
+    border-left-color: var(--expressots-brand);
+    color: var(--expressots-brand);
+    font-weight: 600;
+}
+
+/* Enhanced alerts/admonitions - Premium Design */
+[data-theme="dark"] .admonition {
+    border-radius: 10px;
+    border-left-width: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    margin: 1.5rem 0;
+    overflow: hidden;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .admonition::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
+}
+
+[data-theme="dark"] .admonition:hover {
+    transform: translateX(6px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .admonition-heading {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+}
+
+[data-theme="dark"] .admonition-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme="dark"] .admonition-content {
+    padding: 0.5rem 0;
+}
+
+[data-theme="dark"] .admonition-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Info Admonition - Dark Grey */
+[data-theme="dark"] .admonition.admonition-info,
+[data-theme="dark"] .admonition--info {
+    background: rgba(60, 60, 65, 0.6);
+    border-left-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-info .admonition-heading,
+[data-theme="dark"] .admonition--info .admonition-heading {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="dark"] .admonition.admonition-info:hover,
+[data-theme="dark"] .admonition--info:hover {
+    background: rgba(70, 70, 75, 0.7);
+    border-left-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+/* Tip Admonition - Dark Green */
+[data-theme="dark"] .admonition.admonition-tip,
+[data-theme="dark"] .admonition--tip,
+[data-theme="dark"] .admonition.admonition-success,
+[data-theme="dark"] .admonition--success {
+    background: rgba(30, 60, 40, 0.6);
+    border-left-color: rgba(128, 245, 168, 0.6);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-tip .admonition-heading,
+[data-theme="dark"] .admonition--tip .admonition-heading,
+[data-theme="dark"] .admonition.admonition-success .admonition-heading,
+[data-theme="dark"] .admonition--success .admonition-heading {
+    color: rgba(128, 245, 168, 0.95);
+}
+
+[data-theme="dark"] .admonition.admonition-tip:hover,
+[data-theme="dark"] .admonition--tip:hover,
+[data-theme="dark"] .admonition.admonition-success:hover,
+[data-theme="dark"] .admonition--success:hover {
+    background: rgba(35, 70, 50, 0.7);
+    border-left-color: rgba(128, 245, 168, 0.8);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(128, 245, 168, 0.15);
+}
+
+/* Note Admonition - Dark Teal/Blue */
+[data-theme="dark"] .admonition.admonition-note,
+[data-theme="dark"] .admonition--note {
+    background: rgba(30, 50, 60, 0.6);
+    border-left-color: rgba(78, 201, 176, 0.6);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-note .admonition-heading,
+[data-theme="dark"] .admonition--note .admonition-heading {
+    color: rgba(78, 201, 176, 0.95);
+}
+
+[data-theme="dark"] .admonition.admonition-note:hover,
+[data-theme="dark"] .admonition--note:hover {
+    background: rgba(35, 60, 70, 0.7);
+    border-left-color: rgba(78, 201, 176, 0.8);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(78, 201, 176, 0.15);
+}
+
+/* Warning Admonition - Dark Yellow/Brown */
+[data-theme="dark"] .admonition.admonition-warning,
+[data-theme="dark"] .admonition--warning,
+[data-theme="dark"] .admonition.admonition-caution,
+[data-theme="dark"] .admonition--caution {
+    background: rgba(60, 50, 30, 0.6);
+    border-left-color: rgba(255, 193, 7, 0.7);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-warning .admonition-heading,
+[data-theme="dark"] .admonition--warning .admonition-heading,
+[data-theme="dark"] .admonition.admonition-caution .admonition-heading,
+[data-theme="dark"] .admonition--caution .admonition-heading {
+    color: rgba(255, 193, 7, 0.95);
+}
+
+[data-theme="dark"] .admonition.admonition-warning:hover,
+[data-theme="dark"] .admonition--warning:hover,
+[data-theme="dark"] .admonition.admonition-caution:hover,
+[data-theme="dark"] .admonition--caution:hover {
+    background: rgba(70, 60, 40, 0.7);
+    border-left-color: rgba(255, 193, 7, 0.9);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 193, 7, 0.2);
+}
+
+/* Danger Admonition - Dark Red */
+[data-theme="dark"] .admonition.admonition-danger,
+[data-theme="dark"] .admonition--danger,
+[data-theme="dark"] .admonition.admonition-error,
+[data-theme="dark"] .admonition--error {
+    background: rgba(60, 30, 30, 0.6);
+    border-left-color: rgba(244, 135, 113, 0.7);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-danger .admonition-heading,
+[data-theme="dark"] .admonition--danger .admonition-heading,
+[data-theme="dark"] .admonition.admonition-error .admonition-heading,
+[data-theme="dark"] .admonition--error .admonition-heading {
+    color: rgba(244, 135, 113, 0.95);
+}
+
+[data-theme="dark"] .admonition.admonition-danger:hover,
+[data-theme="dark"] .admonition--danger:hover,
+[data-theme="dark"] .admonition.admonition-error:hover,
+[data-theme="dark"] .admonition--error:hover {
+    background: rgba(70, 40, 40, 0.7);
+    border-left-color: rgba(244, 135, 113, 0.9);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(244, 135, 113, 0.2);
+}
+
+/* Secondary/Default Admonition */
+[data-theme="dark"] .admonition.admonition-secondary,
+[data-theme="dark"] .admonition--secondary {
+    background: rgba(50, 50, 55, 0.6);
+    border-left-color: rgba(128, 245, 168, 0.4);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-secondary .admonition-heading,
+[data-theme="dark"] .admonition--secondary .admonition-heading {
+    color: rgba(128, 245, 168, 0.9);
+}
+
+[data-theme="dark"] .admonition.admonition-secondary:hover,
+[data-theme="dark"] .admonition--secondary:hover {
+    background: rgba(60, 60, 65, 0.7);
+    border-left-color: rgba(128, 245, 168, 0.6);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(128, 245, 168, 0.1);
+}
+
+/* Enhanced search */
+[data-theme="dark"] .navbar__search {
+    transition: all 0.3s ease;
+    margin-right: 1rem;
+}
+
+[data-theme="dark"] .navbar__search-input {
+    border-radius: 20px;
+    border: 1px solid rgba(128, 245, 168, 0.2);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .navbar__search-input:focus {
+    border-color: var(--expressots-brand);
+    box-shadow: 0 0 15px rgba(128, 245, 168, 0.3);
+}
+
+/* DocSearch Button Premium Styling */
+.DocSearch-Button {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(128, 245, 168, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    font-weight: 500;
+    height: 40px;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    min-width: 200px;
+    max-width: 300px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.DocSearch-Button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(128, 245, 168, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.DocSearch-Button:hover::before {
+    left: 100%;
+}
+
+.DocSearch-Button:hover {
+    background: rgba(128, 245, 168, 0.1);
+    border-color: rgba(128, 245, 168, 0.4);
+    color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(128, 245, 168, 0.2);
+}
+
+.DocSearch-Button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(128, 245, 168, 0.15);
+}
+
+.DocSearch-Button:focus {
+    outline: none;
+    border-color: var(--expressots-brand);
+    box-shadow: 0 0 0 3px rgba(128, 245, 168, 0.2), 0 4px 12px rgba(128, 245, 168, 0.3);
+}
+
+.DocSearch-Button .DocSearch-Button-Placeholder {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease;
+    margin-right: auto;
+    padding-left: 8px;
+}
+
+.DocSearch-Button:hover .DocSearch-Button-Placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.DocSearch-Button .DocSearch-Button-Keys {
+    display: flex;
+    gap: 4px;
+    min-width: auto;
+    align-items: center;
+}
+
+.DocSearch-Button .DocSearch-Button-Key {
+    align-items: center;
+    background: rgba(128, 245, 168, 0.15);
+    border: 1px solid rgba(128, 245, 168, 0.3);
+    border-radius: 4px;
+    color: var(--expressots-brand);
+    display: flex;
+    font-size: 12px;
+    font-weight: 600;
+    height: 22px;
+    justify-content: center;
+    margin: 0;
+    padding: 0 6px;
+    transition: all 0.2s ease;
+    width: auto;
+    min-width: 22px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.DocSearch-Button:hover .DocSearch-Button-Key {
+    background: rgba(128, 245, 168, 0.25);
+    border-color: rgba(128, 245, 168, 0.5);
+    box-shadow: 0 2px 6px rgba(128, 245, 168, 0.3);
+    transform: scale(1.05);
+}
+
+.DocSearch-Button .DocSearch-Search-Icon {
+    color: rgba(128, 245, 168, 0.6);
+    stroke-width: 2;
+    transition: all 0.3s ease;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+.DocSearch-Button:hover .DocSearch-Search-Icon {
+    color: var(--expressots-brand);
+    transform: scale(1.1);
+}
+
+/* DocSearch Modal Premium Enhancements */
+.DocSearch-Container {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.DocSearch-Modal {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(128, 245, 168, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(128, 245, 168, 0.2);
+    background: linear-gradient(135deg, rgba(27, 27, 29, 0.98) 0%, rgba(31, 31, 34, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.DocSearch-Modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(128, 245, 168, 0.5), transparent);
+    pointer-events: none;
+}
+
+/* Search Bar Section - Clean Layout */
+.DocSearch-Modal .DocSearch-SearchBar {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(128, 245, 168, 0.1);
+    background: rgba(128, 245, 168, 0.02);
+}
+
+.DocSearch-Modal .DocSearch-Form {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid rgba(128, 245, 168, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.DocSearch-Modal .DocSearch-Form:focus-within {
+    border-color: var(--expressots-brand);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 3px rgba(128, 245, 168, 0.15);
+}
+
+/* Search Icon - left side */
+.DocSearch-Modal .DocSearch-MagnifierLabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 14px;
+    flex-shrink: 0;
+}
+
+.DocSearch-Modal .DocSearch-MagnifierLabel .DocSearch-Search-Icon {
+    color: rgba(128, 245, 168, 0.5);
+    width: 18px;
+    height: 18px;
+    transition: color 0.3s ease;
+}
+
+.DocSearch-Modal .DocSearch-Form:focus-within .DocSearch-MagnifierLabel .DocSearch-Search-Icon {
+    color: var(--expressots-brand);
+}
+
+/* Input - no border, transparent background */
+.DocSearch-Modal .DocSearch-Input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 0 12px;
+    height: 100%;
+    line-height: normal;
+}
+
+.DocSearch-Modal .DocSearch-Input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 400;
+}
+
+/* Hide the DocSearch-Container if it exists */
+.DocSearch-Modal .DocSearch-Container {
+    display: contents;
+}
+
+/* HIDE DocSearch-Reset - we only want ONE clear button */
+.DocSearch-Modal .DocSearch-Reset {
+    display: none !important;
+}
+
+/* Clear Button Container */
+.DocSearch-Modal .DocSearch-Action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 10px;
+    flex-shrink: 0;
+}
+
+/* Clear Button - Single X icon */
+.DocSearch-Modal .DocSearch-Clear {
+    font-size: 0;
+    color: transparent;
+    background: transparent;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+}
+
+/* X icon using pseudo-elements */
+.DocSearch-Modal .DocSearch-Clear::before,
+.DocSearch-Modal .DocSearch-Clear::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 1px;
+    transition: all 0.2s ease;
+}
+
+.DocSearch-Modal .DocSearch-Clear::before {
+    transform: rotate(45deg);
+}
+
+.DocSearch-Modal .DocSearch-Clear::after {
+    transform: rotate(-45deg);
+}
+
+.DocSearch-Modal .DocSearch-Clear:hover {
+    background: rgba(128, 245, 168, 0.15);
+}
+
+.DocSearch-Modal .DocSearch-Clear:hover::before,
+.DocSearch-Modal .DocSearch-Clear:hover::after {
+    background: var(--expressots-brand);
+}
+
+.DocSearch-Modal .DocSearch-Clear:active {
+    transform: scale(0.9);
+}
+
+/* Loading Indicator - replaces magnifier when loading */
+.DocSearch-Modal .DocSearch-LoadingIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 14px;
+    flex-shrink: 0;
+}
+
+.DocSearch-Modal .DocSearch-LoadingIndicator svg {
+    color: var(--expressots-brand);
+    width: 18px;
+    height: 18px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.DocSearch-Modal .DocSearch-Cancel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    border: 1px solid rgba(128, 245, 168, 0.2);
+    background: rgba(128, 245, 168, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.DocSearch-Modal .DocSearch-Cancel:hover {
+    color: #ffffff;
+    background: rgba(128, 245, 168, 0.15);
+    border-color: rgba(128, 245, 168, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(128, 245, 168, 0.2);
+}
+
+.DocSearch-Modal .DocSearch-Cancel:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(128, 245, 168, 0.15);
+}
+
+/* Search Results Container */
+.DocSearch-Modal .DocSearch-Dropdown {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.DocSearch-Modal .DocSearch-Dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.DocSearch-Modal .DocSearch-Dropdown::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+}
+
+.DocSearch-Modal .DocSearch-Dropdown::-webkit-scrollbar-thumb {
+    background: rgba(128, 245, 168, 0.3);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.DocSearch-Modal .DocSearch-Dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 245, 168, 0.5);
+}
+
+/* Section Headers */
+.DocSearch-Modal .DocSearch-Label {
+    color: rgba(128, 245, 168, 0.8);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px 8px;
+    margin: 0;
+    border-bottom: 1px solid rgba(128, 245, 168, 0.1);
+}
+
+/* Search Hits/Results */
+.DocSearch-Modal .DocSearch-Hit {
+    border-radius: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 4px 0;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.DocSearch-Modal .DocSearch-Hit::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(90deg, rgba(128, 245, 168, 0.2), transparent);
+    transition: width 0.3s ease;
+}
+
+.DocSearch-Modal .DocSearch-Hit:hover::before,
+.DocSearch-Modal .DocSearch-Hit[aria-selected="true"]::before {
+    width: 4px;
+}
+
+.DocSearch-Modal .DocSearch-Hit:hover,
+.DocSearch-Modal .DocSearch-Hit[aria-selected="true"] {
+    background: rgba(128, 245, 168, 0.12);
+    border-color: rgba(128, 245, 168, 0.3);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(128, 245, 168, 0.15);
+}
+
+.DocSearch-Modal .DocSearch-Hit a {
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.DocSearch-Modal .DocSearch-Hit-title {
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+    transition: color 0.2s ease;
+}
+
+.DocSearch-Modal .DocSearch-Hit:hover .DocSearch-Hit-title,
+.DocSearch-Modal .DocSearch-Hit[aria-selected="true"] .DocSearch-Hit-title {
+    color: var(--expressots-brand);
+}
+
+.DocSearch-Modal .DocSearch-Hit-path {
+    color: rgba(128, 245, 168, 0.7);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.DocSearch-Modal .DocSearch-Hit-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.DocSearch-Modal .DocSearch-Hit-icon {
+    color: rgba(128, 245, 168, 0.6);
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.DocSearch-Modal .DocSearch-Hit[aria-selected="true"] .DocSearch-Hit-icon {
+    color: var(--expressots-brand);
+}
+
+/* Highlighted text in search results */
+.DocSearch-Modal .DocSearch-Hit mark {
+    background: rgba(128, 245, 168, 0.25);
+    color: var(--expressots-brand);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+/* Empty State */
+.DocSearch-Modal .DocSearch-NoResults {
+    padding: 40px 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.DocSearch-Modal .DocSearch-NoResults-Prefill-List {
+    margin-top: 20px;
+}
+
+.DocSearch-Modal .DocSearch-NoResults-Prefill-List li {
     display: inline-block;
+    margin: 4px;
+}
+
+.DocSearch-Modal .DocSearch-NoResults-Prefill-List button {
+    color: rgba(128, 245, 168, 0.8);
+    border: 1px solid rgba(128, 245, 168, 0.3);
+    border-radius: 6px;
+    padding: 6px 12px;
+    background: rgba(128, 245, 168, 0.05);
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.DocSearch-Modal .DocSearch-NoResults-Prefill-List button:hover {
+    background: rgba(128, 245, 168, 0.15);
+    border-color: rgba(128, 245, 168, 0.5);
+    color: var(--expressots-brand);
+    transform: translateY(-1px);
+}
+
+/* Footer */
+.DocSearch-Modal .DocSearch-Footer {
+    border-top: 1px solid rgba(128, 245, 168, 0.1);
+    background: rgba(128, 245, 168, 0.02);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.DocSearch-Modal .DocSearch-Logo {
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.DocSearch-Modal .DocSearch-Logo:hover {
+    opacity: 1;
+}
+
+.DocSearch-Modal .DocSearch-Commands {
+    display: flex;
+    gap: 8px;
+}
+
+.DocSearch-Modal .DocSearch-Commands-Key {
+    background: rgba(128, 245, 168, 0.15);
+    border: 1px solid rgba(128, 245, 168, 0.3);
+    border-radius: 4px;
+    color: var(--expressots-brand);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 6px;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Screen Reader */
+.DocSearch-Modal .DocSearch-ScreenReaderText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Loading State */
+.DocSearch-Modal .DocSearch-LoadingIndicator {
+    color: var(--expressots-brand);
+}
+
+.DocSearch-Modal .DocSearch-Spinner {
+    border-color: rgba(128, 245, 168, 0.3);
+    border-top-color: var(--expressots-brand);
+}
+
+/* Responsive Modal */
+@media screen and (max-width: 768px) {
+    .DocSearch-Modal {
+        border-radius: 12px;
+        margin: 10px;
+        max-width: calc(100vw - 20px);
+    }
+
+    .DocSearch-Modal .DocSearch-SearchBar {
+        padding: 16px;
+    }
+
+    .DocSearch-Modal .DocSearch-Form {
+        height: 48px;
+    }
+
+    .DocSearch-Modal .DocSearch-Form {
+        height: 44px;
+    }
+
+    .DocSearch-Modal .DocSearch-Input {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 0 10px;
+    }
+
+    .DocSearch-Modal .DocSearch-MagnifierLabel {
+        padding-left: 12px;
+    }
+
+    .DocSearch-Modal .DocSearch-MagnifierLabel .DocSearch-Search-Icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .DocSearch-Modal .DocSearch-Action {
+        padding-right: 8px;
+    }
+
+    .DocSearch-Modal .DocSearch-Clear {
     width: 24px;
     height: 24px;
-    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%23ffffff' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
-        no-repeat;
-    background-size: contain;
-    background-position: center;
+    }
+
+    .DocSearch-Modal .DocSearch-Clear::before,
+    .DocSearch-Modal .DocSearch-Clear::after {
+        width: 10px;
+    }
+
+    .DocSearch-Modal .DocSearch-Hit a {
+        padding: 10px 14px;
+    }
 }
 
-/* Hover state with adjusted color */
-.header-github-link:hover {
-    background: url("data:image/svg+xml;charset=utf-8,%3Csvg fill='%2380f5a8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
-        no-repeat;
-    background-size: contain;
-    background-position: center;
-    opacity: 0.8;
+/* Responsive adjustments for search button */
+@media screen and (max-width: 996px) {
+    .DocSearch-Button {
+        min-width: 150px;
+        max-width: 200px;
+        padding: 0 10px;
+    }
+
+    .DocSearch-Button .DocSearch-Button-Placeholder {
+        font-size: 13px;
+        padding-left: 6px;
+    }
+
+    .DocSearch-Button .DocSearch-Search-Icon {
+        width: 14px;
+        height: 14px;
+        margin-right: 6px;
+    }
 }
 
-/* General navbar styles */
-.navbar {
-    padding: 0 8rem;
-    text-transform: uppercase;
-}
+@media screen and (max-width: 768px) {
+    .DocSearch-Button {
+        min-width: 120px;
+        max-width: 150px;
+    }
 
-/* Adjust navbar item spacing */
-.navbar__item {
-    margin-right: 10px; /* Adjust for consistent spacing */
-}
+    .DocSearch-Button .DocSearch-Button-Placeholder {
+        display: none;
+    }
 
-/* Remove extra margin from the last navbar item */
-.navbar__item:last-child {
+    .DocSearch-Button .DocSearch-Search-Icon {
     margin-right: 0;
+    }
 }
 
-/* Specific adjustments for the GitHub icon */
-.header-github-link {
-    margin-right: 20px; /* Match with other navbar items */
+/* Enhanced footer */
+[data-theme="dark"] .footer {
+    border-top: 1px solid rgba(128, 245, 168, 0.1);
+    background: linear-gradient(180deg, #1b1b1d 0%, #111111 100%);
+}
+
+[data-theme="dark"] .footer__link-item {
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .footer__link-item:hover {
+    color: var(--expressots-brand);
+    transform: translateX(4px);
+}
+
+/* Smooth page transitions */
+.main-wrapper {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Enhanced scrollbar */
+[data-theme="dark"] ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #1b1b1d;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(128, 245, 168, 0.3);
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 245, 168, 0.5);
+}
+
+/* Enhanced markdown content */
+[data-theme="dark"] .markdown h1,
+[data-theme="dark"] .markdown h2,
+[data-theme="dark"] .markdown h3 {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+[data-theme="dark"] .markdown h2 {
+    border-bottom: 2px solid rgba(128, 245, 168, 0.2);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+}
+
+/* Enhanced code inline */
+[data-theme="dark"] code {
+    background: rgba(128, 245, 168, 0.1);
+    border: 1px solid rgba(128, 245, 168, 0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] code:hover {
+    background: rgba(128, 245, 168, 0.15);
+    border-color: rgba(128, 245, 168, 0.3);
+}
+
+/* Enhanced blockquotes */
+[data-theme="dark"] blockquote {
+    border-left: 4px solid var(--expressots-brand);
+    background: rgba(128, 245, 168, 0.05);
+    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] blockquote:hover {
+    background: rgba(128, 245, 168, 0.08);
+    transform: translateX(4px);
+}
+
+/* Enhanced tables */
+[data-theme="dark"] table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] table th {
+    background: rgba(128, 245, 168, 0.1);
+    font-weight: 600;
+}
+
+[data-theme="dark"] table tr {
+    transition: background 0.2s ease;
+}
+
+[data-theme="dark"] table tr:hover {
+    background: rgba(128, 245, 168, 0.05);
 }
