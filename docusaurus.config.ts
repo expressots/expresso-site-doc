@@ -32,10 +32,13 @@ const config: Config = {
                     remarkPlugins: [
                         [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
                     ],
-                    lastVersion: "3.0.0",
+                    lastVersion: "4.0.0",
                     versions: {
                         current: {
                             label: "NEXT",
+                        },
+                        "4.0.0": {
+                            label: "4.0.0",
                         },
                         "3.0.0": {
                             label: "3.0.0",

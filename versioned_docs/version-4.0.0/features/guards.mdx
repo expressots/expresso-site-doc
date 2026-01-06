@@ -1,0 +1,444 @@
+---
+sidebar_position: 16
+title: Guards & Authorization
+description: Comprehensive guard system for authentication and authorization.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Guards & Authorization
+
+ExpressoTS v4 includes a comprehensive guard system for implementing authentication and authorization. Guards determine whether a request should be handled by the route handler based on conditions like roles, permissions, or custom logic.
+
+## Overview
+
+The guard system provides:
+
+-   **Built-in Guards**: Ready-to-use guards for common patterns
+-   **Role-Based Access Control (RBAC)**: `@RequireRoles()` decorator
+-   **Permission-Based Access**: `@RequirePermissions()` decorator
+-   **Attribute-Based Access Control (ABAC)**: `RequirePolicy()` for complex rules
+-   **Resource Ownership**: `@RequireOwnership()` for user-owned resources
+-   **Guard Composition**: Combine guards with `combineGuards()`, `sequenceGuards()`
+-   **Conditional Guards**: `whenGuard()` for conditional execution
+-   **Guard Caching**: Request-scoped caching for performance
+
+## Basic Usage
+
+### Authentication Guard
+
+Require authentication for routes:
+
+```typescript
+import { controller, Get, RequireAuthentication, principal, Principal } from "@expressots/core";
+
+@controller("/api/users")
+export class UserController {
+    @Get("/profile")
+    @RequireAuthentication()
+    getProfile(@principal() user: Principal) {
+        return { user: user.details };
+    }
+}
+```
+
+### Role-Based Access
+
+Restrict access based on user roles:
+
+```typescript
+import { controller, Get, RequireRoles } from "@expressots/core";
+
+@controller("/api/admin")
+export class AdminController {
+    @Get("/dashboard")
+    @RequireRoles("admin")
+    getDashboard() {
+        return { message: "Welcome, admin!" };
+    }
+
+    @Get("/super")
+    @RequireRoles("admin", "super-admin") // Any of these roles
+    getSuperDashboard() {
+        return { message: "Welcome, super admin!" };
+    }
+}
+```
+
+### Permission-Based Access
+
+Control access with granular permissions:
+
+```typescript
+import { controller, Get, Post, Delete, RequirePermissions } from "@expressots/core";
+
+@controller("/api/documents")
+export class DocumentController {
+    @Get("/")
+    @RequirePermissions("documents:read")
+    listDocuments() {
+        return this.documentService.findAll();
+    }
+
+    @Post("/")
+    @RequirePermissions("documents:write")
+    createDocument(@body() dto: CreateDocumentDto) {
+        return this.documentService.create(dto);
+    }
+
+    @Delete("/:id")
+    @RequirePermissions("documents:delete")
+    deleteDocument(@param("id") id: string) {
+        return this.documentService.delete(id);
+    }
+}
+```
+
+### Resource Ownership
+
+Ensure users can only access their own resources:
+
+```typescript
+import { controller, Get, Put, Delete, RequireOwnership } from "@expressots/core";
+
+@controller("/api/posts")
+export class PostController {
+    @Get("/:id")
+    @RequireOwnership("id") // Checks if user.id matches post.authorId
+    getPost(@param("id") id: string) {
+        return this.postService.findById(id);
+    }
+
+    @Put("/:id")
+    @RequireOwnership("id")
+    updatePost(@param("id") id: string, @body() dto: UpdatePostDto) {
+        return this.postService.update(id, dto);
+    }
+
+    @Delete("/:id")
+    @RequireOwnership("id")
+    deletePost(@param("id") id: string) {
+        return this.postService.delete(id);
+    }
+}
+```
+
+## Attribute-Based Access Control (ABAC)
+
+Use `RequirePolicy()` for complex authorization rules:
+
+```typescript
+import { controller, Get, UseGuards, RequireAuth, RequirePolicy } from "@expressots/core";
+
+@controller("/api/resources")
+export class ResourceController {
+    @Get("/:id")
+    @UseGuards(
+        RequireAuth(),
+        RequirePolicy((attrs) => {
+            // Complex authorization logic
+            const { user, resource, request } = attrs;
+            
+            // Admin can access everything
+            if (user.roles.includes("admin")) {
+                return true;
+            }
+            
+            // User can access their own resources
+            if (resource.ownerId === user.id) {
+                return true;
+            }
+            
+            // Users can access public resources
+            if (resource.isPublic) {
+                return true;
+            }
+            
+            return false;
+        })
+    )
+    getResource(@param("id") id: string) {
+        return this.resourceService.findById(id);
+    }
+}
+```
+
+## Guard Composition
+
+### Combining Guards
+
+Require all guards to pass:
+
+```typescript
+import { combineGuards, RequireAuth, RequireRole, RequirePermission } from "@expressots/core";
+
+@Post("/critical")
+@UseGuards(
+    combineGuards(
+        RequireAuth(),
+        RequireRole("admin"),
+        RequirePermission("critical:access")
+    )
+)
+criticalAction() {
+    return { message: "Critical action performed" };
+}
+```
+
+### Sequencing Guards
+
+Execute guards in sequence with dependencies:
+
+```typescript
+import { sequenceGuards } from "@expressots/core";
+
+@Get("/data")
+@UseGuards(
+    sequenceGuards(
+        AuthGuard,        // First: authenticate
+        TenantGuard,      // Second: verify tenant access
+        ResourceGuard     // Third: verify resource access
+    )
+)
+getData() {}
+```
+
+### Conditional Guards
+
+Execute guards based on conditions:
+
+```typescript
+import { whenGuard, RequireRole, RequireAuth } from "@expressots/core";
+
+@Get("/data")
+@Post("/data")
+@UseGuards(
+    RequireAuth(),
+    // Only require admin role for POST requests
+    whenGuard(
+        ctx => ctx.request.method === "POST",
+        RequireRole("admin")
+    )
+)
+handleData() {}
+```
+
+## Creating Custom Guards
+
+Implement custom guards by implementing `IGuard`:
+
+```typescript
+import { provide, inject, IGuard, GuardContext } from "@expressots/core";
+
+@provide(CustomGuard)
+export class CustomGuard implements IGuard {
+    constructor(@inject(PermissionService) private permissionService: PermissionService) {}
+
+    async canActivate(context: GuardContext): Promise<boolean> {
+        const { request, user } = context;
+        
+        // Custom authorization logic
+        const resourceId = request.params.id;
+        const hasAccess = await this.permissionService.checkAccess(
+            user.id,
+            resourceId
+        );
+        
+        return hasAccess;
+    }
+}
+
+// Usage
+@Get("/:id")
+@UseGuards(CustomGuard)
+getResource(@param("id") id: string) {}
+```
+
+### Guard Decorator
+
+Use `@Guard()` for auto-discovery:
+
+```typescript
+import { Guard, IGuard, GuardContext } from "@expressots/core";
+
+@Guard()
+@provide(RateLimitGuard)
+export class RateLimitGuard implements IGuard {
+    constructor(@inject(RateLimitService) private rateLimitService: RateLimitService) {}
+
+    async canActivate(context: GuardContext): Promise<boolean> {
+        const { request } = context;
+        const clientIp = request.ip;
+        
+        return await this.rateLimitService.checkLimit(clientIp);
+    }
+}
+```
+
+## Guard Caching
+
+Cache guard results for performance:
+
+```typescript
+import { provide, inject, IGuard, IGuardCache, GuardContext } from "@expressots/core";
+
+@provide(ExpensiveGuard)
+export class ExpensiveGuard implements IGuard {
+    constructor(@inject(IGuardCache) private cache: IGuardCache) {}
+
+    async canActivate(context: GuardContext): Promise<boolean> {
+        const cacheKey = `guard:${context.user.id}:${context.request.path}`;
+        
+        // Check cache first
+        const cached = this.cache.get(cacheKey);
+        if (cached !== undefined) {
+            return cached;
+        }
+        
+        // Expensive check
+        const result = await this.expensivePermissionCheck(context);
+        
+        // Cache for this request
+        this.cache.set(cacheKey, result);
+        
+        return result;
+    }
+
+    private async expensivePermissionCheck(context: GuardContext): Promise<boolean> {
+        // Complex logic...
+        return true;
+    }
+}
+```
+
+## Permission Hierarchy
+
+Define permission inheritance:
+
+```typescript
+import { setupAuthorizationForExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        setupAuthorizationForExpress(
+            this.config.Container,
+            {
+                permissionHierarchy: {
+                    "super-admin": ["admin", "moderator", "user"],
+                    "admin": ["moderator", "user"],
+                    "moderator": ["user"],
+                },
+            },
+            this.Middleware,
+            MyAuthProvider
+        );
+    }
+}
+```
+
+With this hierarchy:
+- `super-admin` has all permissions of `admin`, `moderator`, and `user`
+- `admin` has all permissions of `moderator` and `user`
+- `moderator` has all permissions of `user`
+
+## Auth Provider
+
+Implement an `AuthProvider` to integrate with your authentication system:
+
+```typescript
+import { provide, AuthProvider, Principal } from "@expressots/core";
+import { Request } from "express";
+
+@provide(MyAuthProvider)
+export class MyAuthProvider implements AuthProvider {
+    async authenticate(request: Request): Promise<Principal | null> {
+        const token = request.headers.authorization?.replace("Bearer ", "");
+        
+        if (!token) {
+            return null;
+        }
+        
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            
+            return {
+                id: decoded.sub,
+                roles: decoded.roles,
+                permissions: decoded.permissions,
+                details: decoded,
+            };
+        } catch {
+            return null;
+        }
+    }
+
+    async hasRole(principal: Principal, role: string): Promise<boolean> {
+        return principal.roles.includes(role);
+    }
+
+    async hasPermission(principal: Principal, permission: string): Promise<boolean> {
+        return principal.permissions.includes(permission);
+    }
+
+    async isResourceOwner(principal: Principal, resourceId: string): Promise<boolean> {
+        const resource = await this.resourceService.findById(resourceId);
+        return resource?.ownerId === principal.id;
+    }
+}
+```
+
+## Setup
+
+Configure the authorization system in your application:
+
+```typescript
+import { setupAuthorizationForExpress } from "@expressots/adapter-express";
+import { MyAuthProvider } from "./auth/my-auth-provider";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        setupAuthorizationForExpress(
+            this.config.Container,
+            {
+                enablePreloading: true,
+                enableCaching: true,
+                permissionHierarchy: {
+                    "super-admin": ["admin", "moderator", "user"],
+                    "admin": ["moderator", "user"],
+                    "moderator": ["user"],
+                },
+            },
+            this.Middleware,
+            MyAuthProvider
+        );
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Built-in Guards**: Start with built-in guards before creating custom ones
+2. **Combine Guards**: Use `combineGuards()` for multiple requirements
+3. **Use Conditions**: Use `whenGuard()` for conditional authorization
+4. **Cache Results**: Use `IGuardCache` for expensive checks
+5. **Define Hierarchy**: Set up permission hierarchy to reduce configuration
+6. **Implement AuthProvider**: Integrate with your auth system properly
+
+## Comparison with Other Frameworks
+
+| Feature                  | ExpressoTS             | NestJS              | Spring Boot         |
+| ------------------------ | ---------------------- | ------------------- | ------------------- |
+| Built-in Guards          | ✅ 5+ guards           | ⚠️ Basic guards     | ✅ Via Security     |
+| Guard Composition        | ✅ `combineGuards()`   | ❌ Manual           | ❌ Manual           |
+| Conditional Guards       | ✅ `whenGuard()`       | ❌ Not available    | ❌ Not available    |
+| Guard Caching            | ✅ `IGuardCache`       | ❌ Not available    | ❌ Not available    |
+| Permission Hierarchy     | ✅ Built-in            | ❌ Manual           | ✅ Via Security     |
+| ABAC Support             | ✅ `RequirePolicy()`   | ❌ Manual           | ⚠️ SpEL expressions |
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

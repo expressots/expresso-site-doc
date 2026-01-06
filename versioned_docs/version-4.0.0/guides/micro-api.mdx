@@ -1,0 +1,392 @@
+---
+sidebar_position: 5
+title: Micro API
+description: Build lightweight, single-file APIs with ExpressoTS Micro API.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Micro API
+
+Micro API is a lightweight template for building small, focused APIs with minimal boilerplate. It's ideal for quick prototyping, microservices, and serverless functions.
+
+## Overview
+
+Micro API provides:
+
+-   **Zero Boilerplate**: Single file application
+-   **Full Framework Power**: Access to DI, middleware, and plugins
+-   **Quick Prototyping**: Start building in seconds
+-   **Microservices**: Perfect for small, focused services
+-   **Serverless Ready**: Ideal for AWS Lambda, Vercel, etc.
+
+## Getting Started
+
+### Create a New Micro API Project
+
+```bash
+expressots new my-api --template micro
+```
+
+### Project Structure
+
+```tree
+my-api/
+├── src/
+│   └── api.ts        # Main entry point
+├── test/
+│   └── api.spec.ts   # Unit test
+├── package.json
+├── tsconfig.json
+└── expressots.config.ts
+```
+
+## Basic Usage
+
+The entire application is defined in a single file:
+
+```typescript
+// src/api.ts
+import { createMicroAPI } from "@expressots/adapter-express";
+import { Request, Response } from "express";
+
+const microAPI = createMicroAPI();
+const app = microAPI.build();
+
+// Add middleware
+app.Middleware.addBodyParser();
+
+// Define routes
+app.Route.get("/", (req: Request, res: Response) => {
+    res.send("Hello from ExpressoTS Micro API!");
+});
+
+app.Route.get("/users", (req: Request, res: Response) => {
+    res.json([
+        { id: 1, name: "John" },
+        { id: 2, name: "Jane" },
+    ]);
+});
+
+app.Route.post("/users", (req: Request, res: Response) => {
+    const user = req.body;
+    res.status(201).json({ id: 3, ...user });
+});
+
+// Start server
+app.listen(3000);
+```
+
+## Route Definition
+
+### HTTP Methods
+
+```typescript
+app.Route.get("/path", handler);
+app.Route.post("/path", handler);
+app.Route.put("/path", handler);
+app.Route.patch("/path", handler);
+app.Route.delete("/path", handler);
+app.Route.options("/path", handler);
+app.Route.head("/path", handler);
+```
+
+### Route Parameters
+
+```typescript
+app.Route.get("/users/:id", (req: Request, res: Response) => {
+    const { id } = req.params;
+    res.json({ id, name: "User " + id });
+});
+
+app.Route.get("/posts/:postId/comments/:commentId", (req: Request, res: Response) => {
+    const { postId, commentId } = req.params;
+    res.json({ postId, commentId });
+});
+```
+
+### Query Parameters
+
+```typescript
+app.Route.get("/search", (req: Request, res: Response) => {
+    const { q, page, limit } = req.query;
+    res.json({
+        query: q,
+        page: Number(page) || 1,
+        limit: Number(limit) || 10,
+    });
+});
+```
+
+## Adding Middleware
+
+### Global Middleware
+
+```typescript
+const app = microAPI.build();
+
+// Built-in middleware
+app.Middleware.addBodyParser();
+app.Middleware.addCors();
+app.Middleware.addCompression();
+
+// Custom middleware
+app.Middleware.addMiddleware((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+```
+
+### Route-Specific Middleware
+
+```typescript
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+    next();
+};
+
+app.Route.get("/protected", authMiddleware, (req: Request, res: Response) => {
+    res.json({ message: "Secret data" });
+});
+```
+
+## Configuration
+
+### Global Route Prefix
+
+```typescript
+const microAPI = createMicroAPI();
+microAPI.setGlobalRoutePrefix("/api/v1");
+
+const app = microAPI.build();
+
+// Routes become /api/v1/users, /api/v1/posts, etc.
+app.Route.get("/users", handler);
+app.Route.get("/posts", handler);
+```
+
+### CORS Configuration
+
+```typescript
+app.Middleware.addCors({
+    origin: ["https://example.com"],
+    methods: ["GET", "POST"],
+    credentials: true,
+});
+```
+
+### Rate Limiting
+
+```typescript
+app.Middleware.addRateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+```
+
+## Using Dependency Injection
+
+Even in Micro API, you can leverage DI:
+
+```typescript
+import { createMicroAPI, Container } from "@expressots/adapter-express";
+
+// Create container
+const container = new Container();
+
+// Register services
+container.addScoped(UserService);
+container.addSingleton(DatabaseService);
+
+// Build with container
+const microAPI = createMicroAPI();
+const app = microAPI.build({ container });
+
+// Use services in routes
+app.Route.get("/users", async (req: Request, res: Response) => {
+    const userService = container.get(UserService);
+    const users = await userService.findAll();
+    res.json(users);
+});
+```
+
+## Error Handling
+
+### Global Error Handler
+
+```typescript
+const app = microAPI.build();
+
+app.Middleware.setErrorHandler({
+    showStackTrace: process.env.NODE_ENV === "development",
+});
+
+// Errors are automatically caught and formatted
+app.Route.get("/error", (req: Request, res: Response) => {
+    throw new Error("Something went wrong!");
+});
+```
+
+### Custom Error Responses
+
+```typescript
+app.Route.get("/users/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    
+    try {
+        const user = await findUser(id);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+```
+
+## Environment Variables
+
+```typescript
+import { Env } from "@expressots/core";
+
+const app = microAPI.build();
+
+// Access environment variables
+app.Route.get("/config", (req: Request, res: Response) => {
+    res.json({
+        environment: process.env.NODE_ENV,
+        version: process.env.APP_VERSION,
+    });
+});
+
+// Dynamic port
+const port = process.env.PORT || 3000;
+app.listen(port);
+```
+
+## Testing
+
+### Unit Testing
+
+```typescript
+// test/api.spec.ts
+import request from "supertest";
+import { createMicroAPI } from "@expressots/adapter-express";
+
+describe("API", () => {
+    let app: any;
+
+    beforeAll(() => {
+        const microAPI = createMicroAPI();
+        app = microAPI.build();
+        
+        app.Route.get("/", (req, res) => {
+            res.json({ message: "Hello" });
+        });
+    });
+
+    test("GET / returns hello message", async () => {
+        const response = await request(app.getApp()).get("/");
+        expect(response.status).toBe(200);
+        expect(response.body.message).toBe("Hello");
+    });
+});
+```
+
+### Using ExpressoTS Testing Module
+
+```typescript
+import { createTestApp, request } from "@expressots/testing";
+
+describe("API", () => {
+    test("GET /users returns users", async () => {
+        const { app } = await createTestApp(MicroApp);
+        
+        await request(app)
+            .get("/users")
+            .expectStatus(200)
+            .expectBody((users) => users.length > 0);
+    });
+});
+```
+
+## Serverless Deployment
+
+### AWS Lambda
+
+```typescript
+// api.ts
+import { createMicroAPI } from "@expressots/adapter-express";
+import serverless from "serverless-http";
+
+const microAPI = createMicroAPI();
+const app = microAPI.build();
+
+app.Middleware.addBodyParser();
+
+app.Route.get("/", (req, res) => {
+    res.json({ message: "Hello from Lambda!" });
+});
+
+// Export for Lambda
+export const handler = serverless(app.getApp());
+```
+
+### Vercel
+
+```typescript
+// api/index.ts
+import { createMicroAPI } from "@expressots/adapter-express";
+
+const microAPI = createMicroAPI();
+const app = microAPI.build();
+
+app.Route.get("/api", (req, res) => {
+    res.json({ message: "Hello from Vercel!" });
+});
+
+export default app.getApp();
+```
+
+## Best Practices
+
+1. **Keep It Simple**: Micro API is for simple services; use full templates for complex apps
+2. **Use Middleware**: Leverage built-in middleware for common functionality
+3. **Handle Errors**: Always implement proper error handling
+4. **Environment Config**: Use environment variables for configuration
+5. **Test Routes**: Write tests for all endpoints
+
+## When to Use Micro API
+
+**Use Micro API for:**
+-   Quick prototypes and POCs
+-   Simple CRUD APIs
+-   Webhook handlers
+-   Serverless functions
+-   Microservices with few endpoints
+
+**Use Full Template for:**
+-   Complex business logic
+-   Multi-module applications
+-   Applications requiring extensive DI
+-   Projects with complex authorization
+
+## Migrating to Full Template
+
+If your Micro API grows, you can migrate to a full template:
+
+1. Create a new project with `expressots new my-app --template opinionated`
+2. Move routes to controllers
+3. Extract business logic to use cases
+4. Configure DI container
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

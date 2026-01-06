@@ -1,0 +1,404 @@
+---
+sidebar_position: 14
+title: Event System
+description: Type-safe, auto-discovered event system for decoupled architecture.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Event System
+
+ExpressoTS v4 includes a powerful, type-safe event system for building decoupled, event-driven architectures. Unlike string-based event systems in other frameworks, ExpressoTS uses typed event classes for full TypeScript inference.
+
+## Overview
+
+The event system provides:
+
+-   **Type-Safe Events**: Event classes instead of strings for full TypeScript inference
+-   **Auto-Discovery**: Event handlers discovered automatically via decorators
+-   **Priority Execution**: Multiple handlers with configurable execution order
+-   **Conditional Handlers**: Execute handlers based on conditions
+-   **Event Replay**: Built-in event recording and replay for debugging
+-   **Flow Visualization**: Track and visualize event propagation
+
+## Creating Events
+
+Define events as TypeScript classes:
+
+```typescript
+// events/user.events.ts
+
+export class UserCreatedEvent {
+    constructor(
+        public readonly userId: string,
+        public readonly email: string,
+        public readonly timestamp: Date = new Date()
+    ) {}
+}
+
+export class UserUpdatedEvent {
+    constructor(
+        public readonly userId: string,
+        public readonly changes: Record<string, any>
+    ) {}
+}
+
+export class UserDeletedEvent {
+    constructor(public readonly userId: string) {}
+}
+```
+
+### Benefits of Class-Based Events
+
+-   **Full TypeScript Inference**: Auto-complete on event properties
+-   **Compile-Time Safety**: TypeScript catches errors at build time
+-   **Self-Documenting**: Event structure is clear from the class definition
+-   **Validation**: Add validation logic in constructors if needed
+
+## Creating Event Handlers
+
+Event handlers are classes decorated with `@OnEvent()`:
+
+```typescript
+import { provide, OnEvent, IEventHandler } from "@expressots/core";
+import { UserCreatedEvent } from "../events/user.events";
+
+@provide(SendWelcomeEmailHandler)
+@OnEvent(UserCreatedEvent)
+export class SendWelcomeEmailHandler implements IEventHandler<UserCreatedEvent> {
+    constructor(@inject(EmailService) private emailService: EmailService) {}
+
+    async handle(event: UserCreatedEvent): Promise<void> {
+        // Full TypeScript inference on event payload!
+        await this.emailService.sendWelcome(event.email);
+        console.log(`Welcome email sent to ${event.email}`);
+    }
+}
+```
+
+### Key Concepts
+
+-   **@provide()**: Registers the handler in the DI container
+-   **@OnEvent()**: Associates the handler with an event type
+-   **IEventHandler\<T\>**: Interface ensuring type-safe event handling
+
+## Emitting Events
+
+Inject the `EventEmitter` service to emit events:
+
+```typescript
+import { provide, inject, EventEmitter } from "@expressots/core";
+import { UserCreatedEvent } from "../events/user.events";
+
+@provide(UserService)
+export class UserService {
+    constructor(@inject(EventEmitter) private eventEmitter: EventEmitter) {}
+
+    async createUser(dto: CreateUserDto): Promise<User> {
+        const user = await this.userRepository.create(dto);
+
+        // Emit type-safe event
+        await this.eventEmitter.emit(
+            new UserCreatedEvent(user.id, user.email)
+        );
+
+        return user;
+    }
+}
+```
+
+### Type Safety
+
+```typescript
+// ✅ Correct - TypeScript validates arguments
+this.eventEmitter.emit(new UserCreatedEvent("123", "user@example.com"));
+
+// ❌ Error - TypeScript catches type mismatch
+this.eventEmitter.emit(new UserCreatedEvent(123, "user@example.com"));
+//                                          ^^^ Type 'number' not assignable to 'string'
+```
+
+## Multiple Handlers with Priority
+
+Register multiple handlers for the same event with execution priority:
+
+```typescript
+@provide(SendWelcomeEmailHandler)
+@OnEvent(UserCreatedEvent, { priority: 1 }) // Runs first
+export class SendWelcomeEmailHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        await this.emailService.sendWelcome(event.email);
+    }
+}
+
+@provide(CreateUserProfileHandler)
+@OnEvent(UserCreatedEvent, { priority: 2 }) // Runs second
+export class CreateUserProfileHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        await this.profileService.create(event.userId);
+    }
+}
+
+@provide(LogAnalyticsHandler)
+@OnEvent(UserCreatedEvent, { priority: 3 }) // Runs last
+export class LogAnalyticsHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        this.analytics.track("user_created", { userId: event.userId });
+    }
+}
+```
+
+### Priority Rules
+
+-   Lower numbers execute first
+-   Handlers without priority default to `0`
+-   Handlers with the same priority execute in registration order
+
+## Conditional Handlers
+
+Execute handlers only when specific conditions are met:
+
+```typescript
+import { provide, OnEvent, When, IEventHandler } from "@expressots/core";
+
+@provide(PremiumFeatureHandler)
+@OnEvent(UserCreatedEvent)
+@When((event: UserCreatedEvent) => event.isPremium)
+export class PremiumFeatureHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        // Only executed for premium users
+        await this.premiumService.activateFeatures(event.userId);
+    }
+}
+
+@provide(RegionalNotificationHandler)
+@OnEvent(UserCreatedEvent)
+@When((event: UserCreatedEvent) => event.region === "EU")
+export class RegionalNotificationHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        // Only for EU users
+        await this.gdprService.sendConsent(event.email);
+    }
+}
+```
+
+### Async Conditions
+
+Conditions can be asynchronous:
+
+```typescript
+@provide(SpecialOfferHandler)
+@OnEvent(UserCreatedEvent)
+@When(async (event: UserCreatedEvent) => {
+    const user = await userRepository.findById(event.userId);
+    return user.signupSource === "referral";
+})
+export class SpecialOfferHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        await this.offerService.sendReferralBonus(event.userId);
+    }
+}
+```
+
+## Event Aggregation
+
+Handle multiple event types with a single handler:
+
+```typescript
+import { provide, OnEvents, IEventHandler } from "@expressots/core";
+import { UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from "../events/user.events";
+
+@provide(UserAuditHandler)
+@OnEvents([UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent])
+export class UserAuditHandler implements IEventHandler<UserCreatedEvent | UserUpdatedEvent | UserDeletedEvent> {
+    async handle(event: UserCreatedEvent | UserUpdatedEvent | UserDeletedEvent) {
+        // Handle any user-related event
+        const eventType = event.constructor.name;
+        await this.auditService.log({
+            type: eventType,
+            userId: event.userId,
+            timestamp: new Date(),
+        });
+    }
+}
+```
+
+## Async Event Handlers
+
+Handle events asynchronously with error handling:
+
+```typescript
+@provide(AsyncNotificationHandler)
+@OnEvent(UserCreatedEvent, { async: true })
+export class AsyncNotificationHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        // Runs asynchronously - doesn't block the emitter
+        await this.notificationService.sendPushNotification(event.userId);
+    }
+}
+```
+
+### Retry Logic
+
+Configure retry behavior for failed handlers:
+
+```typescript
+@provide(RetryableHandler)
+@OnEvent(UserCreatedEvent, { 
+    async: true,
+    retry: {
+        maxRetries: 3,
+        backoff: "exponential",
+        initialDelay: 1000,
+    }
+})
+export class RetryableHandler implements IEventHandler<UserCreatedEvent> {
+    async handle(event: UserCreatedEvent) {
+        // Automatically retries on failure
+        await this.externalService.sync(event);
+    }
+}
+```
+
+## Event Recording & Replay
+
+Record events for debugging and replay:
+
+```typescript
+import { EventRecorder } from "@expressots/core";
+
+@provide(DebugController)
+@controller("/debug")
+export class DebugController {
+    constructor(@inject(EventRecorder) private recorder: EventRecorder) {}
+
+    @Get("/events")
+    getRecordedEvents() {
+        return this.recorder.getEvents();
+    }
+
+    @Get("/events/replay")
+    replayEvents(@query("from") fromTimestamp: number) {
+        return this.recorder.replay({
+            fromTimestamp,
+        });
+    }
+
+    @Get("/events/export")
+    exportEvents(@query("format") format: "json" | "csv" | "timeline") {
+        return this.recorder.export(format);
+    }
+}
+```
+
+### Replay Options
+
+```typescript
+// Replay last 5 minutes of events
+recorder.replay({
+    fromTimestamp: Date.now() - 5 * 60 * 1000,
+});
+
+// Replay specific event types
+recorder.replay({
+    eventTypes: [UserCreatedEvent, UserUpdatedEvent],
+});
+
+// Replay with filter
+recorder.replay({
+    filter: (event) => event.userId === "specific-user-id",
+});
+```
+
+### Export Formats
+
+```typescript
+// JSON format
+const json = recorder.export("json");
+
+// CSV format
+const csv = recorder.export("csv");
+
+// Visual timeline
+const timeline = recorder.export("timeline");
+// Outputs ASCII art visualization of events
+```
+
+## Event Flow Visualization
+
+Track event propagation through your application:
+
+```typescript
+import { EventFlowTracker } from "@expressots/core";
+
+@provide(DiagnosticsController)
+@controller("/diagnostics")
+export class DiagnosticsController {
+    constructor(@inject(EventFlowTracker) private flowTracker: EventFlowTracker) {}
+
+    @Get("/flow/:requestId")
+    getEventFlow(@param("requestId") requestId: string) {
+        return this.flowTracker.getFlow(requestId);
+    }
+
+    @Get("/flow/:requestId/visualize")
+    visualizeFlow(@param("requestId") requestId: string) {
+        return this.flowTracker.visualize(requestId);
+        // Returns ASCII art visualization:
+        // UserCreatedEvent
+        //   ├── SendWelcomeEmailHandler (12ms)
+        //   ├── CreateUserProfileHandler (8ms)
+        //   └── LogAnalyticsHandler (2ms)
+    }
+}
+```
+
+## Setup
+
+Enable the event system in your application:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { EventEmitter, EventRecorder, EventFlowTracker } from "@expressots/core";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // Register event system services
+        this.Provider.register(EventEmitter);
+        
+        // Optional: Enable event recording (development only)
+        if (await this.isDevelopment()) {
+            this.Provider.register(EventRecorder);
+            this.Provider.register(EventFlowTracker);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Descriptive Event Names**: `UserCreatedEvent` is better than `Event1`
+2. **Keep Events Immutable**: Use `readonly` properties
+3. **Single Responsibility**: Each handler should do one thing
+4. **Use Priority Wisely**: Reserve low numbers for critical handlers
+5. **Handle Errors**: Wrap handler logic in try/catch
+6. **Test Events**: Test event emission and handling separately
+
+## Comparison with Other Frameworks
+
+| Feature                  | ExpressoTS             | NestJS               | Laravel              |
+| ------------------------ | ---------------------- | -------------------- | -------------------- |
+| Type-Safe Events         | ✅ Event classes       | ❌ String-based      | ❌ String-based      |
+| Auto-Discovery           | ✅ Via `@OnEvent()`    | ⚠️ Manual registration | ⚠️ Manual registration |
+| Priority Execution       | ✅ Built-in            | ⚠️ Manual ordering   | ⚠️ Manual ordering   |
+| Conditional Handlers     | ✅ `@When()` decorator | ❌ Manual            | ❌ Manual            |
+| Event Replay             | ✅ Built-in            | ❌ Not available     | ❌ Not available     |
+| Flow Visualization       | ✅ Built-in            | ❌ Not available     | ❌ Not available     |
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

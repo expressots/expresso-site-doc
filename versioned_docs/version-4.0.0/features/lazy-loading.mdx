@@ -1,0 +1,339 @@
+---
+sidebar_position: 17
+title: Lazy Loading
+description: Performance optimization through on-demand module loading.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Lazy Loading
+
+ExpressoTS v4 introduces lazy loading for modules, allowing you to optimize application startup time by loading modules only when they're first accessed.
+
+## Overview
+
+Lazy loading provides:
+
+-   **Reduced Startup Time**: Load modules on-demand, not at startup
+-   **Memory Efficiency**: Only load what's needed
+-   **Progressive Loading**: Spread initialization cost over time
+-   **Preloading Hints**: Configure critical modules to preload
+-   **Auto-Detection**: Framework detects which modules can be lazy-loaded
+
+## When to Use Lazy Loading
+
+Lazy loading is ideal for:
+
+-   **Admin Modules**: Rarely accessed by most users
+-   **Feature Flags**: Modules that may not be used
+-   **Heavy Modules**: Modules with expensive initialization
+-   **Optional Features**: Premium or experimental features
+
+## Basic Usage
+
+### Marking Modules as Lazy
+
+Use the `@LazyModule()` decorator:
+
+```typescript
+import { LazyModule } from "@expressots/core";
+
+@LazyModule()
+export class AdminModule {
+    // Module is loaded only when /admin routes are accessed
+}
+```
+
+### Configuring Lazy Loading
+
+Control lazy loading behavior:
+
+```typescript
+import { LazyModule } from "@expressots/core";
+
+@LazyModule({
+    preload: false,        // Don't preload at startup
+    loadTimeout: 5000,     // Max time to wait for load (ms)
+    retryOnError: true,    // Retry if loading fails
+})
+export class ReportsModule {
+    // Heavy reporting functionality
+}
+```
+
+## Preloading
+
+### Critical Modules
+
+For modules that should be ready quickly but not block startup:
+
+```typescript
+@LazyModule({ preload: true })
+export class UserModule {
+    // Preloaded after initial startup
+}
+```
+
+### Preloading Configuration
+
+Configure global preloading behavior:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { LazyLoadingConfig } from "@expressots/core";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Provider.register(LazyLoadingConfig, {
+            preloadDelay: 1000,       // Wait 1s after startup to preload
+            preloadConcurrency: 3,    // Load 3 modules at a time
+            logLoadTimes: true,       // Log module load times
+        });
+    }
+}
+```
+
+## Loading Strategies
+
+### On-Demand Loading (Default)
+
+Module loads when first route is accessed:
+
+```typescript
+@LazyModule()
+export class AnalyticsModule {
+    // Loads on first /analytics/* request
+}
+```
+
+### Trigger-Based Loading
+
+Load based on custom triggers:
+
+```typescript
+import { LazyModule, LazyLoadTrigger } from "@expressots/core";
+
+@LazyModule({
+    trigger: LazyLoadTrigger.CUSTOM,
+    loadWhen: async () => {
+        // Load when feature flag is enabled
+        const flags = await getFeatureFlags();
+        return flags.analyticsEnabled;
+    },
+})
+export class AdvancedAnalyticsModule {}
+```
+
+### Time-Based Loading
+
+Load after a delay:
+
+```typescript
+@LazyModule({
+    trigger: LazyLoadTrigger.TIMER,
+    loadAfter: 5000, // Load 5 seconds after startup
+})
+export class BackgroundTasksModule {}
+```
+
+## Progressive Loading
+
+Spread module loading over time:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { ProgressiveLoader } from "@expressots/core";
+
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        const loader = this.Provider.get(ProgressiveLoader);
+        
+        // Load modules progressively based on priority
+        await loader.loadProgressively([
+            { module: CoreModule, priority: 1 },      // First
+            { module: UserModule, priority: 2 },      // Second
+            { module: AdminModule, priority: 3 },     // Third
+            { module: ReportsModule, priority: 4 },   // Fourth
+        ], {
+            delayBetween: 500,  // 500ms between each load
+        });
+    }
+}
+```
+
+## Module Loading Events
+
+Subscribe to loading events:
+
+```typescript
+import { LazyLoadingEvents } from "@expressots/core";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        const events = this.Provider.get(LazyLoadingEvents);
+        
+        events.on("moduleLoading", (moduleName) => {
+            console.log(`Loading module: ${moduleName}`);
+        });
+        
+        events.on("moduleLoaded", (moduleName, duration) => {
+            console.log(`Module ${moduleName} loaded in ${duration}ms`);
+        });
+        
+        events.on("moduleLoadError", (moduleName, error) => {
+            console.error(`Failed to load ${moduleName}:`, error);
+        });
+    }
+}
+```
+
+## Error Handling
+
+### Retry Configuration
+
+Configure retry behavior for failed loads:
+
+```typescript
+@LazyModule({
+    retryOnError: true,
+    retryConfig: {
+        maxRetries: 3,
+        backoff: "exponential",
+        initialDelay: 1000,
+    },
+})
+export class ExternalIntegrationModule {}
+```
+
+### Fallback Modules
+
+Provide fallback when module fails to load:
+
+```typescript
+@LazyModule({
+    fallback: SimplifiedReportsModule,
+})
+export class AdvancedReportsModule {}
+```
+
+## Monitoring
+
+### Load Statistics
+
+Get statistics about module loading:
+
+```typescript
+import { LazyLoadingStats } from "@expressots/core";
+
+@controller("/diagnostics")
+export class DiagnosticsController {
+    constructor(@inject(LazyLoadingStats) private stats: LazyLoadingStats) {}
+
+    @Get("/lazy-loading")
+    getStats() {
+        return {
+            loadedModules: this.stats.getLoadedModules(),
+            pendingModules: this.stats.getPendingModules(),
+            loadTimes: this.stats.getLoadTimes(),
+            averageLoadTime: this.stats.getAverageLoadTime(),
+            failedLoads: this.stats.getFailedLoads(),
+        };
+    }
+}
+```
+
+### Health Check Integration
+
+Include lazy loading in health checks:
+
+```typescript
+import { HealthCheck } from "@expressots/core";
+
+@provide(LazyLoadingHealthCheck)
+export class LazyLoadingHealthCheck implements HealthCheck {
+    constructor(@inject(LazyLoadingStats) private stats: LazyLoadingStats) {}
+
+    async check() {
+        const failed = this.stats.getFailedLoads();
+        
+        return {
+            name: "lazy-loading",
+            status: failed.length === 0 ? "healthy" : "degraded",
+            details: {
+                loadedModules: this.stats.getLoadedModules().length,
+                failedModules: failed.length,
+            },
+        };
+    }
+}
+```
+
+## Best Practices
+
+1. **Identify Candidates**: Use lazy loading for large, rarely-used modules
+2. **Configure Preloading**: Preload modules that will likely be needed soon
+3. **Set Timeouts**: Configure appropriate load timeouts
+4. **Handle Errors**: Implement fallbacks for critical modules
+5. **Monitor Performance**: Track load times to optimize
+6. **Test Loading**: Test that lazy modules load correctly
+
+## Example: Complete Setup
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { LazyLoadingConfig, ProgressiveLoader } from "@expressots/core";
+
+// Eager modules (loaded at startup)
+import { CoreModule } from "./modules/core.module";
+import { AuthModule } from "./modules/auth.module";
+
+// Lazy modules (imported dynamically)
+@LazyModule({ preload: true })
+export class UserModule {}
+
+@LazyModule()
+export class AdminModule {}
+
+@LazyModule({ preload: false })
+export class ReportsModule {}
+
+export class App extends AppExpress {
+    private config: AppContainer = this.configContainer([
+        CoreModule,    // Eager
+        AuthModule,    // Eager
+        UserModule,    // Lazy (preloaded)
+        AdminModule,   // Lazy
+        ReportsModule, // Lazy
+    ]);
+
+    async configureServices(): Promise<void> {
+        this.Provider.register(LazyLoadingConfig, {
+            preloadDelay: 2000,
+            logLoadTimes: true,
+        });
+    }
+
+    async postServerInitialization(): Promise<void> {
+        console.log("Server started, lazy modules will load on demand");
+    }
+}
+```
+
+## Comparison with Other Frameworks
+
+| Feature                  | ExpressoTS             | NestJS              | Spring Boot         |
+| ------------------------ | ---------------------- | ------------------- | ------------------- |
+| Lazy Modules             | ✅ `@LazyModule()`     | ✅ Lazy-loaded      | ✅ Lazy beans       |
+| Preloading Hints         | ✅ `preload: true`     | ❌ Not available    | ❌ Not available    |
+| Progressive Loading      | ✅ `ProgressiveLoader` | ❌ Not available    | ❌ Not available    |
+| Load Events              | ✅ Event subscription  | ❌ Not available    | ⚠️ Via listeners    |
+| Auto-Detection           | ✅ Decorator-based     | ⚠️ Manual           | ⚠️ Manual           |
+| Fallback Modules         | ✅ Built-in            | ❌ Not available    | ❌ Not available    |
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

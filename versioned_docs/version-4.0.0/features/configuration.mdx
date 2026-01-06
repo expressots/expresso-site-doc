@@ -1,0 +1,386 @@
+---
+sidebar_position: 15
+title: Enhanced Configuration
+description: Type-safe configuration management with validation and environment switching.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Enhanced Configuration
+
+ExpressoTS v4 introduces an enhanced configuration system that provides type-safe configuration management with helpful validation, automatic environment switching, and secure secret handling.
+
+## Overview
+
+The enhanced configuration system provides:
+
+-   **Type-Safe Config**: Full TypeScript inference on configuration values
+-   **Helpful Validation**: Detailed error messages with examples and hints
+-   **Environment Switching**: Automatic config switching based on environment
+-   **Secret Management**: `SecretValue` class for secure handling
+-   **Environment Variables**: Type-safe access to environment variables
+
+## Defining Configuration
+
+Use `defineConfig` to create a type-safe configuration:
+
+```typescript
+// config/app.config.ts
+import { defineConfig, env } from "@expressots/core";
+
+export default defineConfig({
+    app: {
+        name: env.string("APP_NAME").default("My API"),
+        port: env.number("PORT").default(3000),
+        environment: env.string("NODE_ENV").default("development"),
+    },
+    database: {
+        url: env.string("DATABASE_URL").required(),
+        pool: env.number("DB_POOL_SIZE").default(10),
+        ssl: env.boolean("DB_SSL").default(false),
+    },
+    features: {
+        caching: env.boolean("ENABLE_CACHE").default(true),
+        rateLimit: env.number("RATE_LIMIT").default(100),
+    },
+    api: {
+        version: env.string("API_VERSION").default("v1"),
+        prefix: env.string("API_PREFIX").default("/api"),
+    },
+});
+```
+
+## Environment Field Builders
+
+The `env` object provides type-safe builders for environment variables:
+
+### String Values
+
+```typescript
+env.string("VAR_NAME")
+    .required()           // Make required
+    .default("fallback")  // Set default value
+    .enum(["a", "b", "c"]) // Restrict to specific values
+    .pattern(/^[a-z]+$/)  // Validate with regex
+```
+
+### Number Values
+
+```typescript
+env.number("VAR_NAME")
+    .required()
+    .default(100)
+    .min(1)      // Minimum value
+    .max(1000)   // Maximum value
+    .integer()   // Must be integer
+```
+
+### Boolean Values
+
+```typescript
+env.boolean("VAR_NAME")
+    .required()
+    .default(false)
+// Accepts: true, false, "true", "false", "1", "0", "yes", "no"
+```
+
+### Array Values
+
+```typescript
+env.array("VAR_NAME")
+    .required()
+    .default(["item1", "item2"])
+    .separator(",")  // Custom separator (default: ",")
+// VAR_NAME=item1,item2,item3 → ["item1", "item2", "item3"]
+```
+
+### Object Values
+
+```typescript
+env.json("VAR_NAME")
+    .required()
+    .default({ key: "value" })
+// VAR_NAME='{"key":"value"}' → { key: "value" }
+```
+
+## Using Configuration
+
+### In Services
+
+Inject configuration using the `Config` provider:
+
+```typescript
+import { provide, inject, Config } from "@expressots/core";
+
+@provide(DatabaseService)
+export class DatabaseService {
+    constructor(@inject(Config) private config: Config) {}
+
+    connect() {
+        const dbUrl = this.config.get("database.url");
+        const poolSize = this.config.get("database.pool");
+        
+        // TypeScript knows the types!
+        return this.createPool(dbUrl, poolSize);
+    }
+}
+```
+
+### In Application Class
+
+Access configuration in the application class:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async globalConfiguration(): Promise<void> {
+        const config = this.getConfig();
+        
+        this.setGlobalRoutePrefix(config.get("api.prefix"));
+    }
+
+    async configureServices(): Promise<void> {
+        const config = this.getConfig();
+        
+        if (config.get("features.caching")) {
+            this.Middleware.addCaching();
+        }
+        
+        if (config.get("features.rateLimit") > 0) {
+            this.Middleware.addRateLimiter({
+                max: config.get("features.rateLimit"),
+            });
+        }
+    }
+}
+```
+
+## Helpful Validation
+
+When configuration is invalid, ExpressoTS provides detailed error messages:
+
+```
+❌ Configuration Error: DATABASE_URL
+
+   Missing required environment variable
+
+   Expected: A valid database connection string
+   Example:  postgresql://user:password@localhost:5432/mydb
+   
+   Hint: Create a .env file with DATABASE_URL=your_connection_string
+```
+
+### Validation Examples
+
+```typescript
+// Required field missing
+env.string("API_KEY").required()
+// ❌ Missing required environment variable: API_KEY
+
+// Invalid number
+env.number("PORT").min(1).max(65535)
+// PORT=99999
+// ❌ PORT must be between 1 and 65535, got: 99999
+
+// Invalid enum
+env.string("LOG_LEVEL").enum(["debug", "info", "warn", "error"])
+// LOG_LEVEL=verbose
+// ❌ LOG_LEVEL must be one of: debug, info, warn, error, got: verbose
+
+// Pattern mismatch
+env.string("SLUG").pattern(/^[a-z0-9-]+$/)
+// SLUG=My Slug
+// ❌ SLUG does not match pattern: /^[a-z0-9-]+$/
+```
+
+## Environment-Specific Configuration
+
+Define different configurations per environment:
+
+```typescript
+import { defineConfig, env, when } from "@expressots/core";
+
+export default defineConfig({
+    database: {
+        url: when(env.string("NODE_ENV"), {
+            development: "postgresql://localhost:5432/dev",
+            test: "postgresql://localhost:5432/test",
+            production: env.string("DATABASE_URL").required(),
+        }),
+        pool: when(env.string("NODE_ENV"), {
+            development: 5,
+            test: 2,
+            production: 20,
+        }),
+    },
+    logging: {
+        level: when(env.string("NODE_ENV"), {
+            development: "debug",
+            test: "warn",
+            production: "error",
+        }),
+    },
+});
+```
+
+### Alternative: Multiple Config Files
+
+```typescript
+// config/development.ts
+export default defineConfig({
+    database: { url: "postgresql://localhost:5432/dev" },
+    logging: { level: "debug" },
+});
+
+// config/production.ts
+export default defineConfig({
+    database: { url: env.string("DATABASE_URL").required() },
+    logging: { level: "error" },
+});
+
+// config/index.ts
+import development from "./development";
+import production from "./production";
+
+export default env.string("NODE_ENV").value === "production"
+    ? production
+    : development;
+```
+
+## Secret Management
+
+Use `SecretValue` for sensitive data:
+
+```typescript
+import { defineConfig, env, SecretValue } from "@expressots/core";
+
+export default defineConfig({
+    auth: {
+        jwtSecret: new SecretValue(env.string("JWT_SECRET").required()),
+        apiKey: new SecretValue(env.string("API_KEY").required()),
+    },
+});
+```
+
+### SecretValue Features
+
+```typescript
+const secret = config.get("auth.jwtSecret");
+
+// Access the actual value
+const value = secret.reveal(); // Returns the actual secret
+
+// Safe logging (won't expose secret)
+console.log(secret); // Outputs: [SECRET]
+console.log(secret.toString()); // Outputs: [SECRET]
+console.log(secret.toJSON()); // Outputs: "[REDACTED]"
+
+// Comparison without exposing
+secret.equals("expected-value"); // Returns true/false
+```
+
+## Configuration in expressots.config.ts
+
+You can also use configuration in `expressots.config.ts`:
+
+```typescript
+// expressots.config.ts
+import { ExpressoTSConfig } from "@expressots/shared";
+
+const config: ExpressoTSConfig = {
+    sourceRoot: "src",
+    entryPoint: {
+        opinionated: "main.ts",
+        nonOpinionated: "main.ts",
+    },
+    env: {
+        development: ".env.development",
+        production: ".env.production",
+        test: ".env.test",
+    },
+};
+
+export default config;
+```
+
+## Configuration Schema
+
+Define a schema for configuration validation:
+
+```typescript
+import { defineConfig, defineSchema, env } from "@expressots/core";
+
+const schema = defineSchema({
+    database: {
+        url: {
+            type: "string",
+            required: true,
+            description: "Database connection URL",
+            example: "postgresql://user:pass@localhost:5432/db",
+        },
+        pool: {
+            type: "number",
+            default: 10,
+            min: 1,
+            max: 100,
+            description: "Connection pool size",
+        },
+    },
+});
+
+export default defineConfig(schema, {
+    database: {
+        url: env.string("DATABASE_URL"),
+        pool: env.number("DB_POOL_SIZE"),
+    },
+});
+```
+
+## Best Practices
+
+1. **Use Type-Safe Builders**: Always use `env.string()`, `env.number()`, etc.
+2. **Provide Defaults**: Use `.default()` for optional configuration
+3. **Mark Required Fields**: Use `.required()` for essential config
+4. **Use SecretValue**: Wrap sensitive data in `SecretValue`
+5. **Validate Early**: Configuration is validated at startup
+6. **Document Config**: Use schema descriptions for documentation
+
+## Migration from v3
+
+If you're using the v3 `Env` provider, you can continue using it:
+
+```typescript
+// v3 style (still works in v4)
+import { Env } from "@expressots/core";
+
+this.initEnvironment("development", {
+    env: {
+        development: ".env.development",
+        production: ".env.production",
+    },
+});
+
+// Access via Env provider
+const port = this.Provider.get(Env).get("PORT");
+```
+
+The new `defineConfig` approach is recommended for new projects but is fully optional.
+
+## Comparison with Other Frameworks
+
+| Feature                  | ExpressoTS             | NestJS              | Spring Boot         |
+| ------------------------ | ---------------------- | ------------------- | ------------------- |
+| Type-Safe Config         | ✅ Full inference      | ⚠️ Partial          | ⚠️ Via annotations  |
+| Helpful Validation       | ✅ Examples & hints    | ❌ Basic errors     | ⚠️ Basic errors     |
+| Environment Switching    | ✅ Automatic           | ⚠️ Manual           | ✅ Profiles         |
+| Secret Management        | ✅ SecretValue         | ❌ Manual           | ⚠️ Via Vault        |
+| Schema Definition        | ✅ Built-in            | ❌ Via class-validator | ✅ Via annotations |
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

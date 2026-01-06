@@ -1,0 +1,166 @@
+---
+sidebar_position: 1
+title: Generate
+description: Scaffold ExpressoTS resources using the CLI.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Generate
+
+In order to provide a better developer experience, the ExpressoTS CLI provides a set of commands to help you scaffold the application resources such as use cases, controllers, DTO's, providers and services.
+
+This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
+
+## Command syntax
+
+One big advantage of the ExpressoTS CLI is the ability to scaffold resources using two different structures: the <span class="span-table">shorthand</span> and
+the <span class="span-table">folder/subfolder/resource</span>. The shorthand operation is a more concise way to scaffold resources (recommended to be used in the opinionated template), while
+the folder/subfolder/resource structure is more flexible and can be used in both templates.
+
+The generate command can be executed as follows:
+
+```bash
+expressots generate <resource> <structure> [options]
+```
+
+Or in its short form:
+
+```bash
+expressots g <resource-alias> <structure> [options]
+```
+
+<Tabs>
+    <TabItem label="Non Opinionated" value="non-opinionated">
+```bash title="Full form"
+expressots generate service user/create
+```
+
+```bash title="Short form"
+expressots g s user/create
+```
+
+    </TabItem>
+    <TabItem label="Opinionated" value="opinionated">
+
+```bash title="Full form"
+expressots generate service user-create
+```
+
+```bash title="Short form"
+expressots g s user-create
+```
+
+```bash title="Passing http parameter as option"
+expressots g s user-create -m post
+```
+
+    </TabItem>
+
+</Tabs>
+
+## Command structure
+
+We provide two different structures to scaffold the resources, the **shorthand** and the **folder/subfolder/resource**.
+These scaffold strategies work differently based on the project template used. The `opinionated` template provides a more structured project, while the `non-opinionated` template provides a more flexible project structure.
+
+#### Using single name
+
+```bash
+expressots g c user
+```
+
+```bash title="Output"
+src
+└── user.controller.ts
+```
+
+#### Using the shorthand operation
+
+```bash
+expressots g c user-create
+```
+
+```bash title="Output"
+src
+└── user
+    └── create
+        └── user-create.controller.ts
+```
+
+#### Using the folder/subfolder/resource structure
+
+```bash
+expressots g c user/create
+```
+
+```bash title="Output"
+src
+└── user
+    └── create.controller.ts
+```
+
+If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots g c user/create/`
+
+```bash title="Output"
+src
+└── user
+    └── create
+        └── create.controller.ts
+```
+
+:::info
+Opinionated templates come with predefined folder structures for each resource type, ensuring that resources are always created in the following designated folders:
+
+    -   useCases
+    -   entities
+    -   providers
+
+:::
+
+The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
+
+## Resource types
+
+Resources available to be scaffolded are:
+
+| Long form  | short | Command                    | Expected result                                                                          |
+| ---------- | ----- | -------------------------- | ---------------------------------------------------------------------------------------- |
+| usecase    | u     | expressots g u user/find   | Use case to be created in the folder `useCases` with this folder structure: user/find    |
+| controller | c     | expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                    |
+| dto        | d     | expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                           |
+| provider   | p     | expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                     |
+| service    | s     | expressots g s user/find   | Service creates usecase, controller and DTO and add them in the desired folder user/find |
+| entity     | e     | expressots g e user        | Entity to be created in the folder `entities` with this folder structure: user           |
+| middleware | mi    | expressots g mi auth       | Middleware to be created in the folder `middlewares` with this folder structure: auth    |
+| module     | mo    | expressots g mo user       | Module to be created in the folder where `controllers` and `usecases` are located        |
+
+For services, you can take advantage of creating the use case, controller and DTO at once.
+
+```bash
+expressots g s user-create
+```
+
+```bash title="Output for the non opinionated template"
+src
+└── user
+    └── create
+        ├── user-create.controller.ts
+        ├── user-create.dto.ts
+        ├── user-create.usecase.ts
+        └── user-create.usecase.ts
+```
+
+:::info
+The `expressots.config.ts` file, located in the project root folder, defines where all resources will be created and specifies the naming conventions for each type of resource.
+:::
+
+Read more about the [ExpressoTS Config File](../features/expressots-config.mdx).
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

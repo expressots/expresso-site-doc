@@ -1,0 +1,156 @@
+---
+sidebar_position: 7
+title: Entities
+description: Entities are objects that represent data.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Entities
+
+Entities are the core components of an ExpressoTS application, representing the data that the application manipulates.
+When an entity changes, it's likely that use cases and controllers will need to be updated as well, since they
+are responsible for handling and processing the data represented by these entities.
+
+## Create an entity
+
+To create an entity, you can use the CLI with the following command:
+
+```bash
+expressots g e user
+```
+
+<Tabs>
+    <TabItem value="non-opinionated" label="Non Opinionated">
+
+```ts
+import { provide } from "@expressots/core";
+
+@provide(UserEntity)
+export class UserEntity {}
+```
+
+    </TabItem>
+    <TabItem value="opinionated" label="Opinionated">
+
+```typescript
+import { provide } from "@expressots/core";
+import { randomUUID } from "node:crypto";
+
+@provide(UserEntity)
+export class UserEntity {
+    id: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+    </TabItem>
+
+</Tabs>
+
+## Entity injection
+
+If your entity has dependencies, you can inject them using the `@inject()` decorator.
+
+```typescript
+@provide(UserEntity)
+class UserEntity {
+    constructor(@inject(Logger) private logger: Logger) {}
+}
+```
+
+## Injecting primitive parameters
+
+Avoid marking constructors with primitive parameters as injectable. This is because it can be difficult for the DI container
+to infer what values to provide for these parameters. Here is an example of what you should avoid:
+
+```typescript
+@provide(UserEntity)
+class UserEntity {
+    name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+```
+
+:::info
+In many dependency injection (DI) systems, including `InversifyJS`, the DI container is responsible for constructing
+objects and injecting dependencies. When a class constructor contains primitive parameters, it can be difficult
+for the DI container to infer what values to provide for these parameters. This is because primitive values
+(like strings, numbers, and booleans) do not carry any inherent semantic meaning that the container can understand.
+:::
+
+Here are some of the reasons why constructors with primitive parameters can be problematic in DI:
+
+-   Ambiguity: If a class has a constructor that requires primitive types, the DI container won't know what values to inject. For example, if a class requires a number in its constructor, the DI container doesn't know what this number represents and what value it should have.
+
+-   Inflexibility: A primitive value in the constructor implies that the value is a fixed part of the class. However, DI is often used to manage interchangeable parts of an application (e.g., different implementations of an interface).
+
+-   Non-descriptive: Primitive values are often non-descriptive and can lead to confusing code. For example, a constructor that takes two string parameters might raise questions like: What do these strings represent? Are there any specific formats or constraints on these strings?
+
+## Primitive injection alternative
+
+If you need to inject a primitive into your class, it's worth reconsidering your design. If primitive parameters are essential
+in your constructor, consider using factories to create your entities or applying the Repository pattern.
+
+Here is an example of a factory:
+
+```typescript title="user.entity.ts"
+@provide(UserEntity)
+class UserEntity {
+    public id: string;
+    public name: string;
+    public email: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+```typescript title="user.factory.interface.ts"
+interface IUserEntityFactory {
+    create(name: string, email: string): User;
+}
+```
+
+```typescript title="user.factory.ts"
+@provide(UserEntityFactory)
+class UserEntityFactory implements IUserEntityFactory {
+    create(name: string, email: string): User {
+        const user = new User();
+        user.name = name;
+        user.email = email;
+        return user;
+    }
+}
+```
+
+Now `UserEntityFactory` can be easily injected into other classes.
+
+As mentioned above, there are several other approaches, as long as you remain strong 😁 of not using constructors with primitives parameters in classes that you are planning to inject.
+
+## Entities are just data 💡
+
+For years we have been told that entities or classes properties should be encapsulated, its methods should abstract the internal implementation and expose only the necessary information to the outside world. This is a good practice when thinking about Object Oriented Programming Paradigm, however this is not always the best approach.
+
+If you think about it, classes, or entities, whatever you call it, are just a way to represent data. They are just a way to group data together.
+With this in mind, classes or entities became much more simple to maintain and understand, as they don't contain any logic.
+
+This way of thinking is called **[Anemic Domain Model](https://martinfowler.com/bliki/AnemicDomainModel.html)** and it's a very controversial topic. It's not the purpose of this documentation to discuss this topic, but it's important to mention it, as it's a very important concept when thinking about ExpressoTS entities.
+
+<span class="span-table">
+    Say good bye to God classes, and say hello to simple entities, say hello to data.
+</span>
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

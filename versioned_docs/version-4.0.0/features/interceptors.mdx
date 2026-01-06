@@ -1,0 +1,424 @@
+---
+sidebar_position: 12
+title: Interceptors
+description: AOP interceptors for cross-cutting concerns like logging, caching, and transformation.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Interceptors
+
+Interceptors are a powerful mechanism for implementing cross-cutting concerns in your application using Aspect-Oriented Programming (AOP) patterns. They can intercept incoming requests and outgoing responses, allowing you to:
+
+-   Add extra logic before/after method execution
+-   Transform the result returned from a method
+-   Transform exceptions thrown from a method
+-   Extend basic method behavior
+-   Completely override a method based on specific conditions (e.g., for caching)
+
+## Overview
+
+Interceptors complete the AOP trinity in ExpressoTS alongside Middleware and Guards:
+
+| Feature     | Purpose                        | Execution Phase      |
+| ----------- | ------------------------------ | -------------------- |
+| Middleware  | Request/Response transformation | Before routing       |
+| Guards      | Authorization/Authentication   | After routing        |
+| Interceptors | Method wrapping/transformation | Around method execution |
+
+## Creating an Interceptor
+
+An interceptor is a class decorated with `@provide()` that implements the `IInterceptor` interface:
+
+```typescript
+import { provide, IInterceptor, ExecutionContext, CallHandler } from "@expressots/core";
+
+@provide(LoggingInterceptor)
+export class LoggingInterceptor implements IInterceptor {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+        const start = Date.now();
+        const { request } = context;
+        
+        console.log(`[${request.method}] ${request.url} - Started`);
+        
+        // Call the next handler (controller method)
+        const result = await next.handle();
+        
+        const duration = Date.now() - start;
+        console.log(`[${request.method}] ${request.url} - Completed in ${duration}ms`);
+        
+        return result;
+    }
+}
+```
+
+### Key Concepts
+
+-   **ExecutionContext**: Provides access to the current request, response, and route handler details
+-   **CallHandler**: Represents the route handler; calling `next.handle()` invokes the controller method
+-   **Return Value**: The interceptor must return the result (potentially transformed)
+
+## Using Interceptors
+
+### Method-Level
+
+Apply interceptors to specific route methods:
+
+```typescript
+import { controller, Get, UseInterceptors } from "@expressots/core";
+import { LoggingInterceptor } from "./interceptors/logging.interceptor";
+
+@controller("/users")
+export class UserController {
+    @Get("/")
+    @UseInterceptors(LoggingInterceptor)
+    getUsers() {
+        return this.userService.findAll();
+    }
+}
+```
+
+### Controller-Level
+
+Apply interceptors to all methods in a controller:
+
+```typescript
+import { controller, Get, Post, UseInterceptors } from "@expressots/core";
+import { LoggingInterceptor } from "./interceptors/logging.interceptor";
+
+@controller("/users")
+@UseInterceptors(LoggingInterceptor)
+export class UserController {
+    @Get("/")
+    getUsers() {
+        return this.userService.findAll();
+    }
+
+    @Post("/")
+    createUser(@body() dto: CreateUserDto) {
+        return this.userService.create(dto);
+    }
+}
+```
+
+### Multiple Interceptors
+
+Apply multiple interceptors in order:
+
+```typescript
+@Get("/")
+@UseInterceptors(LoggingInterceptor, CacheInterceptor, TransformInterceptor)
+getUsers() {
+    return this.userService.findAll();
+}
+```
+
+Interceptors execute in order from left to right, with responses flowing back in reverse order.
+
+## Built-in Interceptors
+
+ExpressoTS provides several built-in interceptors:
+
+### PerformanceInterceptor
+
+Tracks execution time and logs slow requests:
+
+```typescript
+import { UseInterceptors, PerformanceInterceptor } from "@expressots/core";
+
+@Get("/slow-endpoint")
+@UseInterceptors(PerformanceInterceptor)
+getSlowData() {
+    return this.service.heavyOperation();
+}
+```
+
+Access performance metrics programmatically:
+
+```typescript
+import { PerformanceInterceptorService } from "@expressots/core";
+
+@provide(AnalyticsController)
+@controller("/analytics")
+export class AnalyticsController {
+    constructor(
+        @inject(PerformanceInterceptorService) 
+        private perfService: PerformanceInterceptorService
+    ) {}
+
+    @Get("/metrics")
+    getMetrics() {
+        return this.perfService.getMetrics();
+        // Returns: {
+        //   "/slow-endpoint": {
+        //     avgTime: 1234,
+        //     maxTime: 5678,
+        //     minTime: 123,
+        //     callCount: 42,
+        //     slowCalls: 5
+        //   }
+        // }
+    }
+}
+```
+
+### LoggingInterceptor
+
+Logs request/response details:
+
+```typescript
+import { UseInterceptors, LoggingInterceptor } from "@expressots/core";
+
+@controller("/api")
+@UseInterceptors(LoggingInterceptor)
+export class ApiController {
+    // All methods will be logged
+}
+```
+
+### TimeoutInterceptor
+
+Adds timeout to route handlers:
+
+```typescript
+import { UseInterceptors, TimeoutInterceptor } from "@expressots/core";
+
+@Get("/external-api")
+@UseInterceptors(TimeoutInterceptor.configure({ timeout: 5000 }))
+async callExternalAPI() {
+    return await this.externalService.fetch();
+}
+```
+
+## Conditional Interceptors
+
+One of ExpressoTS's unique features is conditional interceptor execution:
+
+### whenInterceptor
+
+Execute an interceptor only when a condition is met:
+
+```typescript
+import { whenInterceptor, UseInterceptors } from "@expressots/core";
+
+@Get("/data")
+@UseInterceptors(
+    // Only run cache interceptor if x-cache header is present
+    whenInterceptor(
+        ctx => ctx.request.headers['x-cache'] === 'true',
+        CacheInterceptor
+    ),
+    LoggingInterceptor // Always runs
+)
+getData() {
+    return this.service.getLargeDataset();
+}
+```
+
+### unlessInterceptor
+
+Execute an interceptor unless a condition is met:
+
+```typescript
+import { unlessInterceptor, UseInterceptors } from "@expressots/core";
+
+@Get("/public")
+@UseInterceptors(
+    // Skip auth interceptor for requests with API key
+    unlessInterceptor(
+        ctx => !!ctx.request.headers['x-api-key'],
+        AuthInterceptor
+    )
+)
+getPublicData() {
+    return this.service.getPublicData();
+}
+```
+
+### Async Conditions
+
+Conditions can be asynchronous:
+
+```typescript
+@Get("/api")
+@UseInterceptors(
+    whenInterceptor(
+        async ctx => {
+            const user = await getUser(ctx.request);
+            return user.isAdmin;
+        },
+        AdminAuditInterceptor
+    )
+)
+apiHandler() {}
+```
+
+## Interceptor Composition
+
+### pipeInterceptors
+
+Execute interceptors in a sequential pipeline:
+
+```typescript
+import { pipeInterceptors, UseInterceptors } from "@expressots/core";
+
+@Get("/api/data")
+@UseInterceptors(
+    pipeInterceptors(
+        ValidationInterceptor,
+        TransformInterceptor,
+        CacheInterceptor,
+        LoggingInterceptor
+    )
+)
+getData() {}
+```
+
+### combineInterceptors
+
+Combine interceptors with all-must-pass semantics:
+
+```typescript
+import { combineInterceptors, UseInterceptors } from "@expressots/core";
+
+@Post("/secure")
+@UseInterceptors(
+    combineInterceptors(
+        AuthInterceptor,
+        RateLimitInterceptor,
+        ValidationInterceptor
+    )
+)
+secureEndpoint() {}
+```
+
+## Creating Custom Interceptors
+
+### Response Transformation
+
+Transform response data before sending:
+
+```typescript
+@provide(SerializeInterceptor)
+export class SerializeInterceptor implements IInterceptor {
+    constructor(private dto: new () => any) {}
+
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+        const data = await next.handle();
+        return plainToClass(this.dto, data, { excludeExtraneousValues: true });
+    }
+}
+
+// Usage
+@Get("/users")
+@UseInterceptors(new SerializeInterceptor(UserResponseDto))
+getUsers() {
+    return this.userService.findAll();
+}
+```
+
+### Caching Interceptor
+
+Implement caching logic:
+
+```typescript
+@provide(CacheInterceptor)
+export class CacheInterceptor implements IInterceptor {
+    constructor(@inject(CacheService) private cache: CacheService) {}
+
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+        const cacheKey = `${context.request.method}:${context.request.url}`;
+        
+        // Check cache
+        const cached = await this.cache.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+        
+        // Execute handler and cache result
+        const result = await next.handle();
+        await this.cache.set(cacheKey, result, { ttl: 60 });
+        
+        return result;
+    }
+}
+```
+
+### Error Handling Interceptor
+
+Handle and transform errors:
+
+```typescript
+@provide(ErrorHandlingInterceptor)
+export class ErrorHandlingInterceptor implements IInterceptor {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+        try {
+            return await next.handle();
+        } catch (error) {
+            // Log error
+            console.error('Error in handler:', error);
+            
+            // Transform error response
+            throw new AppError(
+                error.message || 'Internal Server Error',
+                error.status || 500
+            );
+        }
+    }
+}
+```
+
+## Dependency Injection
+
+Interceptors support full dependency injection:
+
+```typescript
+@provide(AuditInterceptor)
+export class AuditInterceptor implements IInterceptor {
+    constructor(
+        @inject(AuditService) private auditService: AuditService,
+        @inject(Logger) private logger: Logger
+    ) {}
+
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
+        const { request } = context;
+        
+        // Log audit entry
+        await this.auditService.log({
+            method: request.method,
+            path: request.url,
+            userId: request.user?.id,
+            timestamp: new Date()
+        });
+        
+        return next.handle();
+    }
+}
+```
+
+## Best Practices
+
+1. **Keep interceptors focused**: Each interceptor should handle one concern
+2. **Use composition**: Combine small interceptors instead of creating large ones
+3. **Consider order**: Interceptors execute in declaration order
+4. **Use conditions wisely**: Conditional interceptors avoid unnecessary processing
+5. **Handle errors**: Always consider error handling in your interceptors
+6. **Leverage DI**: Inject services for complex logic instead of hardcoding
+
+## Comparison with Other Frameworks
+
+| Feature                  | ExpressoTS               | NestJS           | Spring Boot      |
+| ------------------------ | ------------------------ | ---------------- | ---------------- |
+| Conditional Execution    | ✅ `whenInterceptor()`   | ❌ Manual        | ❌ Manual        |
+| Auto-Discovery           | ✅ Via `@provide()`      | ❌ Manual        | ⚠️ Component scan |
+| Composition Utilities    | ✅ `pipeInterceptors()`  | ❌ Arrays only   | ❌ Manual        |
+| Built-in Performance     | ✅ `PerformanceInterceptor` | ❌ Manual     | ⚠️ Via Actuator  |
+| Class Reference Support  | ✅ No `new` keyword      | ❌ Requires `new` | ⚠️ Container managed |
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

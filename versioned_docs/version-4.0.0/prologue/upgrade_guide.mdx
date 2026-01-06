@@ -1,0 +1,262 @@
+---
+sidebar_position: 2
+title: Upgrade guide
+description: Upgrade guide for ExpressoTS 4.0.0.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Upgrade guide
+
+This guide will help you upgrade your ExpressoTS application from version 3.x to version 4.0.0.
+
+## Prerequisites
+
+-   Node.js version 20.18.0 or higher
+-   ExpressoTS 3.x application
+
+## Step 1: Update Dependencies
+
+Update your `package.json` dependencies to the latest versions:
+
+```json
+{
+    "dependencies": {
+        "@expressots/core": "^4.0.0",
+        "@expressots/adapter-express": "^4.0.0",
+        "@expressots/shared": "^4.0.0"
+    },
+    "devDependencies": {
+        "@expressots/cli": "^4.0.0"
+    }
+}
+```
+
+Then run:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm install
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn install
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm install
+```
+
+</TabItem>
+</Tabs>
+
+## Step 2: Update Node.js Version
+
+Ensure your Node.js version is 20.18.0 or higher:
+
+```bash
+node --version
+```
+
+## Step 3: Application Changes
+
+### Bootstrap Function (Optional)
+
+v4 introduces a simplified `bootstrap()` function. While the existing `AppFactory.create()` pattern still works, you can optionally migrate to the new pattern:
+
+**Before (v3 - still works in v4):**
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+```
+
+**After (v4 - new option):**
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "app";
+
+await bootstrap(App);
+
+// Or with options
+await bootstrap(App, {
+    port: 4000,
+    appName: "My API",
+    appVersion: "1.0.0",
+});
+```
+
+### No Breaking Changes in Core APIs
+
+The core APIs remain backward compatible:
+
+-   `configContainer()` works the same
+-   `globalConfiguration()` works the same
+-   `configureServices()` works the same
+-   `postServerInitialization()` works the same
+-   `serverShutdown()` works the same
+
+## Step 4: Using New Features (Optional)
+
+### Interceptors
+
+Add interceptors to your routes:
+
+```ts
+import { UseInterceptors, PerformanceInterceptor, LoggingInterceptor } from "@expressots/core";
+
+@controller("/users")
+export class UserController {
+    @Get("/")
+    @UseInterceptors(PerformanceInterceptor, LoggingInterceptor)
+    getUsers() {
+        return this.userService.findAll();
+    }
+}
+```
+
+### Event System
+
+Create type-safe events:
+
+```ts
+// events/user.events.ts
+export class UserCreatedEvent {
+    constructor(
+        public readonly userId: string,
+        public readonly email: string
+    ) {}
+}
+
+// handlers/user-created.handler.ts
+import { provide, OnEvent, IEventHandler } from "@expressots/core";
+import { UserCreatedEvent } from "../events/user.events";
+
+@provide(UserCreatedHandler)
+@OnEvent(UserCreatedEvent)
+export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
+    handle(event: UserCreatedEvent) {
+        console.log(`User created: ${event.userId}`);
+    }
+}
+```
+
+### Testing Module
+
+Use the new testing utilities:
+
+```ts
+import { createTestApp, request } from "@expressots/testing";
+
+describe("UserController", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        const testApp = await createTestApp(App);
+        app = testApp.app;
+    });
+
+    test("GET /users", async () => {
+        await request(app)
+            .get("/users")
+            .expectStatus(200);
+    });
+});
+```
+
+### Enhanced Configuration
+
+Use type-safe configuration:
+
+```ts
+import { defineConfig, env } from "@expressots/core";
+
+export default defineConfig({
+    database: {
+        url: env.string("DATABASE_URL").required(),
+        pool: env.number("DB_POOL_SIZE").default(10),
+    },
+});
+```
+
+## Step 5: Testing
+
+After upgrading, run your tests to ensure everything works:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm test
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn test
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm test
+```
+
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Node.js Version Error**
+
+    If you see errors about unsupported Node.js features, ensure you're using Node.js 20.18.0 or higher.
+
+2. **TypeScript Errors**
+
+    Update your TypeScript to version 5.x or higher for best compatibility.
+
+3. **Dependency Conflicts**
+
+    Clear your `node_modules` and lock file, then reinstall:
+
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+
+### Getting Help
+
+If you encounter issues during the upgrade:
+
+-   Check the [GitHub Issues](https://github.com/expressots/expressots/issues)
+-   Join our [Discord community](https://discord.com/invite/PyPJfGK)
+-   Read the [documentation](https://doc.expresso-ts.com)
+
+---
+
+## Summary
+
+ExpressoTS 4.0.0 is designed to be backward compatible with v3.x applications. The upgrade process should be straightforward:
+
+1. Update dependencies to v4.0.0
+2. Ensure Node.js 20.18.0+
+3. Run tests
+4. Optionally adopt new features (interceptors, events, testing module, etc.)
+
+The new features are additive and don't require changes to existing code. You can gradually adopt them as needed.

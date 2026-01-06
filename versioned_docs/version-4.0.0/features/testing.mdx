@@ -1,0 +1,472 @@
+---
+sidebar_position: 13
+title: Testing Module
+description: Comprehensive testing utilities for unit, integration, and E2E testing.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Testing Module
+
+ExpressoTS v4 includes a powerful testing module that provides comprehensive utilities for unit, integration, and end-to-end testing with zero-config setup.
+
+## Overview
+
+The testing module provides:
+
+-   **Zero-Config Setup**: Create fully functional test apps with one function call
+-   **Smart Mocks**: Auto-suggestion of dependencies with full TypeScript support
+-   **Fluent HTTP Testing**: Chainable, readable API better than supertest
+-   **Snapshot Testing**: API snapshot testing with diff output
+-   **Load Testing**: Built-in performance testing utilities
+-   **Database Testing**: Fixtures and test database management
+
+## Getting Started
+
+### Installation
+
+The testing module is included in `@expressots/core`:
+
+```typescript
+import { createTestApp, request, mockProvider } from "@expressots/testing";
+```
+
+### Zero-Config Test Setup
+
+Create a fully functional test application with a single function call:
+
+```typescript
+import { createTestApp } from "@expressots/testing";
+import { App } from "./app";
+
+describe("UserController", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close();
+    });
+
+    test("GET /users returns user list", async () => {
+        const response = await testApp.request.get("/users");
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+### createTestApp Return Value
+
+The `createTestApp` function returns:
+
+```typescript
+const {
+    app,        // The Express application instance
+    container,  // The DI container for resolving services
+    request,    // Fluent HTTP testing client
+    close,      // Cleanup function
+} = await createTestApp(App);
+```
+
+## Fluent HTTP Testing
+
+The fluent request API provides a chainable, readable interface for HTTP testing:
+
+### Basic Requests
+
+```typescript
+import { request } from "@expressots/testing";
+
+// GET request
+await request(app).get("/users").expectStatus(200);
+
+// POST request
+await request(app)
+    .post("/users")
+    .send({ name: "John", email: "john@test.com" })
+    .expectStatus(201);
+
+// PUT request
+await request(app)
+    .put("/users/123")
+    .send({ name: "Jane" })
+    .expectStatus(200);
+
+// DELETE request
+await request(app).delete("/users/123").expectStatus(204);
+```
+
+### Response Assertions
+
+```typescript
+await request(app)
+    .get("/users/123")
+    .expectStatus(200)
+    .expectBody<User>({
+        id: 123,
+        name: "John",
+        email: "john@test.com",
+    })
+    .expectHeaders({ "content-type": "application/json" });
+```
+
+### Performance Assertions
+
+```typescript
+// Assert response time
+await request(app)
+    .get("/users")
+    .expectStatus(200)
+    .expectTime({ lessThan: 100 }); // Response under 100ms
+```
+
+### Custom Assertions
+
+```typescript
+await request(app)
+    .get("/users/123")
+    .expectStatus(200)
+    .expect((user: User) => {
+        // Custom assertions with full TypeScript support
+        expect(user.email).toContain("@");
+        expect(user.createdAt).toBeDefined();
+    });
+```
+
+### Predicate Assertions
+
+```typescript
+await request(app)
+    .get("/users")
+    .expectStatus(200)
+    .expectBody<User[]>((users) => users.length > 0);
+```
+
+### Regex Matching
+
+```typescript
+await request(app)
+    .post("/users")
+    .send({ name: "John" })
+    .expectStatus(201)
+    .expectHeader("location", /\/users\/\d+/);
+```
+
+## Smart Mocks
+
+The `mockProvider` function provides intelligent mocking with TypeScript auto-completion:
+
+```typescript
+import { mockProvider } from "@expressots/testing";
+
+describe("UserService", () => {
+    test("createUser calls repository", async () => {
+        const { service, mocks } = mockProvider(UserService, {
+            mocks: {
+                UserRepository: {
+                    findById: jest.fn().mockResolvedValue(mockUser),
+                    create: jest.fn().mockResolvedValue(mockUser),
+                },
+                EmailService: {
+                    sendWelcomeEmail: jest.fn().mockResolvedValue(true),
+                },
+            },
+        });
+
+        await service.createUser({ email: "test@test.com" });
+
+        // Verify mock calls
+        expect(mocks.UserRepository.create).toHaveBeenCalled();
+        expect(mocks.EmailService.sendWelcomeEmail).toHaveBeenCalled();
+    });
+});
+```
+
+### Mock Overrides
+
+Override specific methods per test:
+
+```typescript
+test("handles repository error", async () => {
+    const { service, mocks } = mockProvider(UserService, {
+        mocks: {
+            UserRepository: {
+                create: jest.fn().mockRejectedValue(new Error("DB Error")),
+            },
+        },
+    });
+
+    await expect(service.createUser(dto)).rejects.toThrow("DB Error");
+});
+```
+
+## Snapshot Testing
+
+Test API response structures with snapshots:
+
+```typescript
+import { snapshotRequest } from "@expressots/testing";
+
+describe("API Snapshots", () => {
+    test("GET /users matches snapshot", async () => {
+        await snapshotRequest(app).get("/users").expect();
+        // Creates snapshot on first run, compares on subsequent runs
+    });
+
+    test("POST /users response structure", async () => {
+        await snapshotRequest(app)
+            .post("/users")
+            .send({ name: "Test" })
+            .expectSnapshot({
+                // Ignore dynamic fields
+                ignore: ["id", "createdAt", "updatedAt"],
+            });
+    });
+});
+```
+
+### Snapshot Benefits
+
+-   **Detect Breaking Changes**: Automatically detect API structure changes
+-   **Ignore Dynamic Fields**: Exclude timestamps, IDs, etc.
+-   **Visual Diffs**: Clear diff output showing exactly what changed
+
+## Load Testing
+
+Built-in load testing utilities for performance testing:
+
+```typescript
+import { loadTest } from "@expressots/testing";
+
+describe("Performance Tests", () => {
+    test("handles concurrent requests", async () => {
+        const results = await loadTest(app, {
+            endpoint: "/users",
+            method: "GET",
+            concurrent: 100,
+            duration: "10s",
+            rampUp: "2s", // Gradually increase load
+        });
+
+        // Comprehensive metrics
+        expect(results.totalRequests).toBeGreaterThan(100);
+        expect(results.averageResponseTime).toBeLessThan(100);
+        expect(results.maxResponseTime).toBeLessThan(500);
+        expect(results.errors).toBe(0);
+        expect(results.throughput).toBeGreaterThan(50); // requests/second
+    });
+});
+```
+
+### Percentile Metrics
+
+```typescript
+test("response time percentiles", async () => {
+    const results = await loadTest(app, {
+        endpoint: "/api/data",
+        concurrent: 50,
+        duration: "30s",
+    });
+
+    // Percentile assertions
+    expect(results.p50ResponseTime).toBeLessThan(50);  // 50th percentile
+    expect(results.p95ResponseTime).toBeLessThan(200); // 95th percentile
+    expect(results.p99ResponseTime).toBeLessThan(500); // 99th percentile
+});
+```
+
+### Real-Time Assertions
+
+```typescript
+test("maintains performance under load", async () => {
+    const results = await loadTest(app, {
+        endpoint: "/api/data",
+        concurrent: 100,
+        duration: "60s",
+        assertions: {
+            maxErrorRate: 0.01,  // Max 1% error rate
+            minThroughput: 50,   // Min 50 req/s
+            maxP95: 200,         // Max 200ms p95
+        },
+    });
+});
+```
+
+## Database Testing
+
+Utilities for testing with databases:
+
+```typescript
+import { createTestDatabase } from "@expressots/testing";
+
+describe("Database Tests", () => {
+    const db = createTestDatabase({
+        type: "in-memory", // or "postgres", "mysql"
+        fixtures: [userFixtures, postFixtures],
+    });
+
+    beforeEach(async () => {
+        await db.reset(); // Reset to fixtures between tests
+    });
+
+    test("user repository creates user", async () => {
+        const user = await userRepository.create({ name: "Test" });
+
+        // Query test database directly
+        const dbUser = await db.query(
+            "SELECT * FROM users WHERE id = $1",
+            [user.id]
+        );
+        expect(dbUser).toMatchObject({ name: "Test" });
+    });
+});
+```
+
+## Request Context Mocking
+
+Mock the entire request context for testing guards and middleware:
+
+```typescript
+import { mockContext } from "@expressots/testing";
+
+describe("Guards", () => {
+    test("admin guard allows admin users", async () => {
+        const context = mockContext({
+            user: { id: 123, role: "admin" },
+            headers: { authorization: "Bearer token" },
+            params: { id: "456" },
+        });
+
+        const guard = container.get(AdminGuard);
+        const result = await guard.canActivate(context);
+
+        expect(result).toBe(true);
+    });
+
+    test("admin guard rejects non-admin users", async () => {
+        const context = mockContext({
+            user: { id: 123, role: "user" },
+        });
+
+        const guard = container.get(AdminGuard);
+        const result = await guard.canActivate(context);
+
+        expect(result).toBe(false);
+    });
+});
+```
+
+## Integration with Jest
+
+The testing module integrates seamlessly with Jest:
+
+### Custom Matchers
+
+```typescript
+// jest.setup.ts
+import { registerMatchers } from "@expressots/testing";
+
+registerMatchers();
+
+// Now you can use custom matchers
+expect(response).toHaveStatus(200);
+expect(response).toHaveHeader("content-type", "application/json");
+expect(response).toBeValidUser();
+```
+
+### Lifecycle Hooks
+
+```typescript
+import { createTestApp } from "@expressots/testing";
+
+describe("API Tests", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close(); // Cleanup
+    });
+
+    beforeEach(async () => {
+        // Reset state between tests if needed
+    });
+});
+```
+
+## Best Practices
+
+1. **Use createTestApp**: Avoid manual test setup when possible
+2. **Isolate tests**: Reset state between tests
+3. **Mock external services**: Use mockProvider for dependencies
+4. **Test edge cases**: Use fluent API for comprehensive assertions
+5. **Performance baselines**: Use load testing to establish baselines
+6. **Snapshot judiciously**: Snapshot critical API structures
+
+## Example: Complete Test Suite
+
+```typescript
+import { createTestApp, request, mockProvider } from "@expressots/testing";
+import { App } from "./app";
+import { UserService } from "./user.service";
+
+describe("User API", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close();
+    });
+
+    describe("GET /users", () => {
+        test("returns user list", async () => {
+            await request(testApp.app)
+                .get("/users")
+                .expectStatus(200)
+                .expectBody<User[]>((users) => users.length >= 0);
+        });
+
+        test("responds within 100ms", async () => {
+            await request(testApp.app)
+                .get("/users")
+                .expectStatus(200)
+                .expectTime({ lessThan: 100 });
+        });
+    });
+
+    describe("POST /users", () => {
+        test("creates a new user", async () => {
+            await request(testApp.app)
+                .post("/users")
+                .send({ name: "John", email: "john@test.com" })
+                .expectStatus(201)
+                .expect((user: User) => {
+                    expect(user.id).toBeDefined();
+                    expect(user.name).toBe("John");
+                });
+        });
+
+        test("validates required fields", async () => {
+            await request(testApp.app)
+                .post("/users")
+                .send({})
+                .expectStatus(400);
+        });
+    });
+});
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

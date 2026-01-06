@@ -1,0 +1,107 @@
+---
+sidebar_position: 7
+title: DTO validator
+description: DTO validator provider.
+---
+
+# Payload
+
+A payload in a web application refers to the data sent between the client and server, typically within a request body. This data is essential for performing operations like creating, updating, or retrieving resources. Payloads contain the information that the server needs to process a request and return an appropriate response.
+
+## DTO pattern
+
+The Data Transfer Object (DTO) pattern is used to standardize the structure of this payload data as it moves between different layers of the application. DTOs ensure that the data being transferred adheres to specific formats, making it easier to manage and validate. By separating the data structure from business logic, DTOs help keep the application modular, maintainable, and less prone to errors.
+
+## DTO validator
+
+The DTO Validator in ExpressoTS plays a critical role in ensuring the integrity of incoming payloads. This provider validates the data sent by the client, checking for required fields, data types, and overall consistency. By doing so, it helps developers avoid runtime errors that could occur due to missing or invalid data.
+
+When you scaffold a new ExpressoTS project, the DTO Validator is included as middleware named validateDTO. This middleware can be applied to any endpoint to automatically validate incoming data against the defined DTO structure before the request is processed further. This validation step ensures that only well-formed, valid data enters your application's processing pipeline, enhancing reliability and security.
+
+## Pre requisites
+
+The DTO validator is based on the [class-validator](https://www.npmjs.com/package/class-validator) and [class-transformer](https://www.npmjs.com/package/class-transformer) packages. It uses decorators to validate the DTOs.
+
+:::caution
+If you don't have class-validator and class-transformer installed and try to use the DTO validator, you will get an warning message in the console mentioning that you need to install the packages.
+:::
+
+Another key point is that the DTO Validator works exclusively with classes, as interfaces do not exist at runtime. Therefore, if you want to use the DTO Validator, you'll need to change the interface provided by ExpressoTS to a class that represents your DTO instead. This allows the validator to properly validate the incoming data, ensuring it adheres to the defined structure.
+
+## Usage example
+
+You can use the DTO validator in any endpoint by adding the `validateDTO` middleware in the endpoint route.
+
+Endpoint that creates a new user:
+
+```typescript
+@httpPost("/", ValidateDTO(CreateUserDTO))
+execute(@requestBody() payload: CreateUserDTO, @response() res: Response) {
+  return res.status(StatusCode.Created).json(this.createUserUseCase.execute(payload));
+}
+```
+
+Here it is the `CreateUserDTO` class:
+
+```typescript
+import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
+
+class CreateUserDTO {
+    @IsNotEmpty()
+    @MinLength(10)
+    name: string;
+    @IsNotEmpty()
+    @IsEmail({}, { message: "Invalid email" })
+    email: string;
+}
+
+export { CreateUserDTO };
+```
+
+:::info
+For more information about the decorators, please check the [class-validator](https://www.npmjs.com/package/class-validator) package.
+:::
+
+## Error messages
+
+If you submit a payload that doesn't match the DTO `CreateUserDTO` above, the DTO validator will return an error message with the following format:
+
+**Payload:**
+
+```json title="Invalid payload"
+{
+    "name": "",
+    "email": ""
+}
+```
+
+**Response:**
+
+```json
+{
+    "errorCode": 400,
+    "errorMessage": "Bad Request",
+    "DTO": [
+        {
+            "property": "name",
+            "messages": [
+                "name must be longer than or equal to 10 characters",
+                "name should not be empty"
+            ]
+        },
+        {
+            "property": "email",
+            "messages": ["invalid email", "email should not be empty"]
+        }
+    ]
+}
+```
+
+Messages are split by property, so you can easily identify which property has an error and what is the error message. This is useful when you have a DTO with a lot of properties, as you can easily identify which property has an error. It also helps the frontend application on getting the error messages more easily.
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
