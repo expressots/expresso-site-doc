@@ -1,0 +1,133 @@
+---
+sidebar_position: 4
+title: Security & Authorization
+description: Security and authorization comparison across frameworks.
+---
+
+# Security & Authorization Comparison
+
+Compare ExpressoTS's security features with other major frameworks.
+
+## Authentication
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Auth Provider Interface** | ✅ `AuthProvider` | ✅ `AuthenticationManager` | ✅ `IAuthenticationHandler` | ✅ `@nestjs/passport` | ✅ Auth backends | ✅ Auth guards |
+| **JWT Support** | ⚠️ Plugin | ✅ Spring Security JWT | ✅ Built-in | ✅ `@nestjs/jwt` | ⚠️ Plugin | ✅ Built-in |
+| **OAuth 2.0** | ⚠️ Plugin | ✅ Spring Security OAuth | ✅ Built-in | ⚠️ Plugin | ⚠️ Plugin | ✅ Socialite |
+| **Session Auth** | ✅ Via middleware | ✅ Spring Session | ✅ Built-in | ⚠️ Plugin | ✅ Built-in | ✅ Built-in |
+| **Multi-factor Auth** | ⚠️ Manual | ✅ Spring Security | ⚠️ Plugin | ⚠️ Manual | ⚠️ Plugin | ⚠️ Plugin |
+
+## Authorization
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Guards System** | ✅ **COMPREHENSIVE** | ✅ Security annotations | ✅ `[Authorize]` | ✅ `@UseGuards()` | ✅ Permissions | ✅ Gates & Policies |
+| **Role-based Access** | ✅ **`@RequireRoles()`** | ✅ `@RolesAllowed` | ✅ `[Authorize(Roles)]` | ✅ `@Roles()` | ✅ Groups & perms | ✅ Built-in |
+| **Permission-based** | ✅ **`@RequirePermissions()`** | ✅ SpEL expressions | ✅ Claims-based | ⚠️ Custom guards | ✅ Permissions system | ✅ Gates |
+| **ABAC (Attribute-Based)** | ✅ **`RequirePolicy()`** | ✅ SpEL | ✅ Policy requirements | ⚠️ Custom guards | ⚠️ Custom | ⚠️ Custom |
+| **Resource Ownership** | ✅ **`@RequireOwnership()`** | ⚠️ Custom | ⚠️ Custom | ⚠️ Custom | ⚠️ Object-level perms | ✅ Policies |
+| **Guard Composition** | ✅ **`combineGuards()`** | ⚠️ Manual | ⚠️ Via middleware | ⚠️ Via arrays | ⚠️ Manual | ⚠️ Manual |
+| **Conditional Guards** | ✅ **`whenGuard()`** | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual |
+| **Guard Caching** | ✅ **`IGuardCache`** | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
+| **Permission Hierarchy** | ✅ **`IPermissionHierarchy`** | ✅ Role hierarchy | ⚠️ Manual | ❌ Not available | ⚠️ Custom | ⚠️ Custom |
+| **Multi-tenant Support** | ✅ **`IPermissionService`** | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual |
+
+### ExpressoTS Advantage
+
+- ✅ **Most comprehensive guard system** in TypeScript
+- ✅ **Four unique features**:
+  1. `combineGuards()` / `sequenceGuards()` - Guard composition
+  2. `whenGuard()` - Conditional guard execution
+  3. `IGuardCache` - Request-scoped guard result caching
+  4. Built-in multi-tenant permission system
+- ✅ **Better than NestJS** with additional features like guard caching and ABAC
+
+### Built-in Guards
+
+- `AuthenticatedGuard` - Require authentication
+- `RoleGuard` - Role-based access control
+- `PermissionGuard` - Permission-based access
+- `ResourceOwnerGuard` - Resource ownership verification
+- `AttributeBasedGuard` - ABAC policies
+
+### Convenience Decorators
+
+```typescript
+// Basic authentication guard
+@Get("/profile")
+@RequireAuthentication()
+getProfile(@principal() user: Principal) {
+    return { user: user.details };
+}
+
+// Role-based access
+@Get("/admin")
+@RequireRoles("admin", "super-admin")
+adminDashboard() {}
+
+// Permission-based access
+@Get("/documents")
+@RequirePermissions("documents:read")
+listDocuments() {}
+
+// Resource ownership
+@Delete("/posts/:id")
+@RequireOwnership("id")
+deletePost(@param("id") id: string) {}
+```
+
+### ABAC (Attribute-Based Access Control)
+
+```typescript
+@Get("/resource/:id")
+@UseGuards(
+    RequireAuth(),
+    RequirePolicy((attrs) => {
+        return attrs.user.roles.includes("admin") ||
+               attrs.resource.id.startsWith(attrs.user.id);
+    })
+)
+getResource() {}
+```
+
+### Guard Composition
+
+```typescript
+// Combine guards (all must pass)
+@Post("/critical")
+@UseGuards(combineGuards(
+    RequireAuth(),
+    RequireRole("admin"),
+    RequirePermission("critical:access")
+))
+criticalAction() {}
+
+// Conditional guards
+@Get("/data")
+@Post("/data")
+@UseGuards(
+    whenGuard(ctx => ctx.request.method === "POST", RequireRole("admin")),
+    RequireAuth()
+)
+handleData() {}
+```
+
+### Permission Hierarchy
+
+```typescript
+setupAuthorizationForExpress(container, {
+    permissionHierarchy: {
+        "super-admin": ["admin", "moderator", "user"],
+        "admin": ["moderator", "user"],
+        "moderator": ["user"],
+    },
+});
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

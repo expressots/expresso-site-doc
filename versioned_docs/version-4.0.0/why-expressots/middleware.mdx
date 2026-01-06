@@ -1,0 +1,122 @@
+---
+sidebar_position: 3
+title: Middleware
+description: Middleware system comparison across frameworks.
+---
+
+# Middleware Comparison
+
+Compare ExpressoTS's middleware system with other major frameworks.
+
+## Middleware Types
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Class-based Middleware** | ✅ `IExpressoMiddleware` | ✅ `HandlerInterceptor` | ✅ `IMiddleware` | ✅ `NestMiddleware` | ✅ Middleware classes | ✅ Middleware classes |
+| **Function Middleware** | ✅ Express handlers | ✅ Functional filters | ✅ `RequestDelegate` | ✅ Function middleware | ✅ Function middleware | ✅ Closures |
+| **Global Middleware** | ✅ `configureServices()` | ✅ `@Configuration` | ✅ `app.Use()` | ✅ `app.use()` | ✅ `MIDDLEWARE` | ✅ Kernel |
+| **Route-specific Middleware** | ✅ Via decorators | ✅ Via `@Interceptor` | ✅ `[Middleware]` | ✅ `@UseGuards()` | ✅ `@decorator` | ✅ Route middleware |
+| **Conditional Middleware** | ✅ **UNIQUE** - `when()`, `unless()` | ⚠️ Manual | ✅ `MapWhen()` | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual |
+| **Middleware Composition** | ✅ **UNIQUE** - `combine()`, `sequence()` | ⚠️ Via arrays | ⚠️ Via arrays | ⚠️ Via arrays | ⚠️ Manual | ⚠️ Via arrays |
+| **Class Reference Support** | ✅ **UNIQUE** - No `new` keyword | ⚠️ Managed by container | ⚠️ Managed by container | ⚠️ Requires instantiation | ⚠️ Manual | ⚠️ Manual |
+
+## Built-in Middleware
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Body Parser** | ✅ `addBodyParser()` | ✅ Auto | ✅ Built-in | ✅ Built-in | ✅ Built-in | ✅ Built-in |
+| **URL Encoded Parser** | ✅ `addUrlEncodedParser()` | ✅ Auto | ✅ Built-in | ✅ Built-in | ✅ Built-in | ✅ Built-in |
+| **CORS** | ✅ `addCors()` | ✅ `@CrossOrigin` | ✅ `UseCors()` | ✅ `@nestjs/common` | ✅ `django-cors-headers` | ✅ Built-in |
+| **Compression** | ✅ `addCompression()` | ✅ Auto | ✅ `UseResponseCompression()` | ⚠️ Plugin | ✅ `GZipMiddleware` | ✅ Built-in |
+| **Rate Limiting** | ✅ `addRateLimiter()` | ✅ Bucket4j | ✅ `UseRateLimiter()` | ⚠️ Plugin | ⚠️ Plugin | ✅ Built-in |
+| **Session** | ✅ `addSession()` | ✅ Spring Session | ✅ `UseSession()` | ⚠️ Plugin | ✅ Session framework | ✅ Built-in |
+| **Cookie Parser** | ✅ `addCookieParser()` | ✅ Auto | ✅ Built-in | ⚠️ Plugin | ✅ Built-in | ✅ Built-in |
+| **Helmet (Security)** | ✅ `addHelmet()` | ⚠️ Via Spring Security | ⚠️ Via middleware | ⚠️ Plugin | ⚠️ Via packages | ⚠️ Via packages |
+| **Morgan (Logging)** | ✅ `addMorgan()` | ✅ Logback | ✅ `ILogger` | ⚠️ Plugin | ✅ Logging framework | ✅ Log facade |
+| **Multer (File Upload)** | ✅ `setupMulter()` | ✅ MultipartFile | ✅ `IFormFile` | ⚠️ Plugin | ✅ FileField | ✅ File upload |
+| **Static Files** | ✅ `serveStatic()` | ✅ Resource handling | ✅ `UseStaticFiles()` | ✅ `@nestjs/serve-static` | ✅ `staticfiles` | ✅ Built-in |
+| **Error Handler** | ✅ `addErrorHandler()` | ✅ `@ExceptionHandler` | ✅ Exception middleware | ✅ Exception filters | ✅ Middleware | ✅ Exception handler |
+| **Content Negotiation** | ✅ `addContentNegotiation()` | ✅ Built-in | ✅ Built-in | ⚠️ Plugin | ✅ REST framework | ⚠️ Via packages |
+| **Health Check** | ✅ `addHealthCheck()` | ✅ Actuator | ✅ Health checks | ⚠️ Terminus | ⚠️ Manual | ⚠️ Manual |
+| **Middleware Presets** | ✅ **UNIQUE** - `usePreset()` | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
+| **Performance Profiling** | ✅ **UNIQUE** - Built-in profiler | ⚠️ Via Actuator | ⚠️ Via Application Insights | ⚠️ Plugin | ⚠️ Via packages | ⚠️ Via packages |
+| **Pipeline Introspection** | ✅ **UNIQUE** - `getMiddlewarePipeline()` | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
+
+### ExpressoTS Advantage
+
+- ✅ **Most comprehensive middleware system** - 15+ built-in middleware helpers
+- ✅ **Middleware Presets** - Pre-configured bundles (`api`, `production`, `development`) - **UNIQUE**
+- ✅ **Performance Profiling** - Built-in middleware profiler with metrics - **UNIQUE**
+- ✅ **Pipeline Introspection** - Query middleware pipeline at runtime - **UNIQUE**
+- ✅ **Zero dependencies** - All middleware helpers included, no external packages needed
+
+### Unique Features
+
+1. **`when()` / `unless()`** - Conditional execution based on request context
+2. **`combine()` / `sequence()`** - Semantic middleware grouping
+3. **Class references without `new` keyword** - Cleaner API
+
+### Conditional Middleware Example
+
+```typescript
+import { when, unless } from "@expressots/adapter-express";
+
+// Execute middleware only when condition is true
+@Get("/admin",
+    when(req => req.hostname.startsWith("admin."), AdminMiddleware),
+    AuthMiddleware
+)
+async adminHandler() {}
+
+// Execute middleware unless condition is true
+@Get("/public",
+    unless(req => req.headers.authorization, AuthMiddleware)
+)
+async publicHandler() {}
+
+// Async conditions are also supported
+@Get("/api",
+    when(async req => {
+        const user = await getUser(req);
+        return user.isAdmin;
+    }, AdminMiddleware)
+)
+async apiHandler() {}
+```
+
+### Middleware Composition Example
+
+```typescript
+import { combine, sequence } from "@expressots/adapter-express";
+
+// Combine multiple middleware into a reusable group
+@Get("/api", combine(AuthMiddleware, LoggingMiddleware, RateLimitMiddleware))
+async apiHandler() {}
+
+// Sequence middleware where each depends on the previous
+@Get("/data", sequence(ValidateMiddleware, TransformMiddleware, ProcessMiddleware))
+async dataHandler() {}
+```
+
+### Middleware Presets
+
+Pre-configured middleware bundles for common scenarios:
+
+- **`api`** - CORS, Helmet, Body Parser, Compression, Rate Limiting
+- **`production`** - All security middleware, compression, rate limiting  
+- **`development`** - Development-friendly configuration with detailed logging
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.usePreset("api");
+    }
+}
+```
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.
