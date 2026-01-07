@@ -1,0 +1,302 @@
+---
+sidebar_position: 1
+title: Bootstrap
+description: Zero-configuration application startup with comprehensive deployment options.
+---
+
+# Bootstrap
+
+The `bootstrap()` function provides zero-configuration application startup with comprehensive options for different deployment scenarios.
+
+## Basic Usage
+
+The simplest way to start your application:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+await bootstrap(App);
+```
+
+This starts the application on port 3000 (or `process.env.PORT` if set) with automatic environment detection.
+
+## Configuration Options
+
+### Port Configuration
+
+```typescript
+// Custom port
+await bootstrap(App, { port: 8080 });
+
+// OS-assigned port (useful for testing)
+const server = await bootstrap(App, { port: 0 });
+const actualPort = server.port; // Use in tests
+```
+
+Port priority: `options.port` > `process.env.PORT` > `3000`
+
+### Application Metadata
+
+```typescript
+await bootstrap(App, {
+    appName: "My API",
+    appVersion: "1.0.0",
+});
+```
+
+Defaults to `package.json` name and version if not specified.
+
+### Environment Configuration
+
+The `envFileConfig` option enables .env file loading (opt-in):
+
+```typescript
+await bootstrap(App, {
+    currentEnvironment: "development",
+    envFileConfig: {
+        files: {
+            development: ".env.dev",
+            production: ".env.prod",
+            staging: ".env.staging",
+        },
+        required: ["DATABASE_URL", "JWT_SECRET"],
+        autoCreateTemplate: true,
+        validateValues: true,
+    },
+});
+```
+
+**Environment File Options:**
+
+-   `files`: Custom mapping of environment names to .env file paths
+-   `required`: Array of required environment variable names
+-   `autoCreateTemplate`: Automatically create template .env file if missing
+-   `validateValues`: Validate that all variables have non-empty values
+-   `skipFileLoading`: Skip .env file loading (use `process.env` only)
+-   `ciMode`: Force CI/CD mode (skips file loading, validates process.env)
+
+### Type-Safe Configuration
+
+You can scaffold type-safe configuration files using the CLI:
+
+```bash
+expressots generate config <name>
+# or shorthand
+expressots g cfg <name>
+```
+
+This generates a `config.ts` file with type-safe configuration using `defineConfig`:
+
+```typescript
+import { defineConfig, Env, loadEnvSync } from "@expressots/core";
+
+// Load environment files before config resolution
+const envFiles = {
+    development: ".env.local",
+    production: ".env.prod",
+};
+
+loadEnvSync({ files: envFiles });
+
+export const appConfig = defineConfig({
+    app: {
+        name: Env.string("APP_NAME", { default: "My App" }),
+        version: Env.string("APP_VERSION", { default: "1.0.0" }),
+    },
+    server: {
+        port: Env.number("PORT", { default: 3000 }),
+    },
+    database: {
+        url: Env.string("DATABASE_URL", { required: true }),
+        pool: Env.number("DB_POOL_SIZE", { default: 10, min: 1, max: 100 }),
+    },
+    bootstrap: {
+        envFileConfig: {
+            autoCreateTemplate: true,
+            files: envFiles,
+        },
+    },
+});
+
+// Export typed config values
+export const config = appConfig.values;
+export type AppConfig = typeof config;
+```
+
+**Benefits of Type-Safe Configuration:**
+
+-   Full TypeScript inference for all config values
+-   Validation with helpful error messages
+-   Default values and constraints (min, max, etc.)
+-   Secret management with automatic redaction
+-   Multi-environment support
+-   Can be integrated with bootstrap options
+
+You can then use the configuration in your bootstrap call:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+import { appConfig } from "./config";
+
+await bootstrap(App, {
+    port: appConfig.values.server.port,
+    appName: appConfig.values.app.name,
+    appVersion: appConfig.values.app.version,
+    envFileConfig: appConfig.values.bootstrap.envFileConfig,
+});
+```
+
+## Common Patterns
+
+### Development with Auto-Creation
+
+```typescript
+await bootstrap(App, {
+    currentEnvironment: "development",
+    envFileConfig: {
+        autoCreateTemplate: true,
+        required: ["DATABASE_URL"],
+    },
+});
+```
+
+### Production with Validation
+
+```typescript
+await bootstrap(App, {
+    currentEnvironment: "production",
+    envFileConfig: {
+        files: {
+            production: ".env.prod",
+        },
+        required: ["DATABASE_URL", "JWT_SECRET", "API_KEY"],
+        validateValues: true,
+    },
+});
+```
+
+### Containerized Deployment (Docker/K8s)
+
+```typescript
+await bootstrap(App, {
+    envFileConfig: {
+        skipFileLoading: true, // Use process.env only
+        required: ["DATABASE_URL", "REDIS_URL"],
+    },
+});
+```
+
+### Testing with Dynamic Ports
+
+```typescript
+const server = await bootstrap(App, {
+    port: 0, // Auto-assign available port
+    envFileConfig: {
+        skipFileLoading: true,
+    },
+});
+
+// Use server.port in your tests
+expect(server.port).toBeGreaterThan(0);
+```
+
+## Startup Phases
+
+The `bootstrap()` function orchestrates 8 critical startup phases:
+
+1. **Environment Detection**: Detects CI/CD vs local environment
+2. **Smart .env Loading**: Opt-in .env file loading with auto-creation
+3. **Port Determination**: Resolves port from priority chain
+4. **Package.json Extraction**: Reads app name and version (cached)
+5. **DI Container Initialization**: Creates application instance
+6. **Environment Injection**: Injects environment into app instance
+7. **API Version Detection**: Detects API versions from decorators
+8. **Server Startup**: Starts server with graceful shutdown handling
+
+## CI/CD Support
+
+Bootstrap automatically detects CI/CD environments and adjusts behavior accordingly, providing zero-configuration support for containerized deployments.
+
+### Automatic Detection
+
+Bootstrap detects CI/CD environments by checking for platform-specific environment variables:
+
+```typescript
+// Generic CI flag (most platforms set this)
+process.env.CI
+
+// Platform-specific detection
+process.env.GITHUB_ACTIONS      // GitHub Actions
+process.env.GITLAB_CI           // GitLab CI
+process.env.JENKINS_URL         // Jenkins
+process.env.CIRCLECI            // CircleCI
+process.env.TRAVIS              // Travis CI
+process.env.BUILDKITE           // Buildkite
+process.env.AZURE_HTTP_USER_AGENT // Azure DevOps
+process.env.BAMBOO_BUILDKEY     // Bamboo
+process.env.TEAMCITY_VERSION    // TeamCity
+```
+
+**Supported Platforms:**
+-   GitHub Actions
+-   GitLab CI
+-   Jenkins
+-   CircleCI
+-   Travis CI
+-   Buildkite
+-   Azure DevOps
+-   Bamboo
+-   TeamCity
+
+### CI/CD Behavior
+
+When a CI/CD environment is detected:
+
+1. **Skips .env file loading**: Uses `process.env` variables injected by the platform
+2. **Validates required variables**: Checks that all required variables are present in `process.env`
+3. **Never creates template files**: Prevents file creation in CI environments
+4. **Provides platform-specific hints**: Error messages include setup instructions for the detected platform
+5. **Supports .env.vault**: Automatically loads encrypted `.env.vault` files if `DOTENV_KEY` is present
+
+### Platform-Specific Error Messages
+
+When validation fails in CI/CD, bootstrap provides platform-specific setup instructions:
+
+**GitHub Actions:**
+```
+🔧 GitHub Actions Setup:
+   - Go to: Settings → Secrets and variables → Actions
+   - Add repository secrets for: DATABASE_URL, JWT_SECRET
+   - Use: ${{ secrets.VARIABLE_NAME }} in workflow files
+```
+
+**GitLab CI:**
+```
+🔧 GitLab CI Setup:
+   - Go to: Settings → CI/CD → Variables
+   - Add CI/CD variables for: DATABASE_URL, JWT_SECRET
+   - Use: $VARIABLE_NAME in .gitlab-ci.yml
+```
+
+**Jenkins:**
+```
+🔧 Jenkins Setup:
+   - Configure: Manage Jenkins → Credentials
+   - Add credentials for: DATABASE_URL, JWT_SECRET
+   - Use: env.VARIABLE_NAME in pipeline
+```
+
+### Performance
+
+-   **Detection**: Cached after first call (O(1) subsequent calls)
+-   **Platform identification**: Uses optimized Map lookup for O(1) performance
+-   **No file I/O**: Skips file system operations in CI environments
+
+## Performance
+
+-   Startup time: ~8-25ms (optimized)
+-   Package.json read: Cached after first call
+-   CI detection: Cached after first call
+-   Logger instances: Lazy initialization

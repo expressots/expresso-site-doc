@@ -6,57 +6,121 @@ description: Introduction to ExpressoTS.
 
 # EXPRESSO<span class="span-table">TS</span>
 
-ExpressoTS ( 🐎 ) is designed to simplify the software development process, enabling developers to concentrate on the core business logic by abstracting technical complexities. Our goal is to enhance your productivity through a framework that not only accelerates development but also offers comprehensive documentation and a superior developer experience, minimizing the necessity for building custom solutions from scratch.
+ExpressoTS is a TypeScript framework for building server-side applications on Node.js. It provides an abstraction layer over Express.js, offering dependency injection, decorators, and architectural patterns to help structure scalable applications.
 
-Your insights, feedback, and contributions are invaluable in creating an optimal developer experience for everyone.
+## What is ExpressoTS?
 
-## Structure
+ExpressoTS is a lightweight, TypeScript-first framework that extends Express.js with:
 
-This documentation is organized into distinct sections, each focusing on a specific aspect of ExpressoTS.
+-   **Dependency Injection**: Powered by a custom DI based on [InversifyJS](https://inversify.io/) for managing application dependencies
+-   **Decorator-based APIs**: Controllers, routes, middleware, and guards defined using decorators
+-   **Modular Architecture**: Application structure based on modules and providers
+-   **Type Safety**: Full TypeScript inference throughout the framework
+-   **Zero-Config Defaults**: Sensible defaults with minimal configuration required
 
-> **PROLOGUE**: Provides release notes and upgrade guides information and outlines the structure of the documentation.
+## Version 4.0
 
-> **CORE**: Provides guidance on the core building blocks of ExpressoTS.
+This documentation covers ExpressoTS version 4.0.0, released in January 2026. Version 4.0 introduces five major features:
 
-> **FEATURES**: Details the features and functionalities of ExpressoTS that are part of the core framework.
+1. **Interceptors System**: AOP-based interceptor system for cross-cutting concerns
+2. **Testing Module**: Comprehensive testing utilities for unit, integration, and E2E testing
+3. **Event System**: Type-safe event system with auto-discovery and replay capabilities
+4. **Lazy-Loading Modules**: Performance optimization for large applications
+5. **Enhanced Configuration**: Type-safe configuration with validation and environment switching
 
-> **CLI**: Details the command-line interface, including usage instructions.
+ExpressoTS 4.0 achieves feature parity with other major TypeScript frameworks and extends beyond them with unique capabilities, making it more performant and professional-grade than alternatives.
 
-> **GUIDES**: A comprehensive, step-by-step guide to accomplishing specific tasks within ExpressoTS.
+### ExpressoTS Studio
 
-> **ROADMAP**: Outlines the future direction and planned features of ExpressoTS.
+ExpressoTS Studio provides a unified platform for backend development, deployment, and management. It offers:
 
-> **GOVERNANCE**: Explains the governance model of ExpressoTS.
+-   **Application Visualization**: Full view of your backend application architecture and structure
+-   **Observability**: Real-time monitoring and insights into application behavior
+-   **AI Capabilities**: Intelligent assistance for development and debugging
+-   **Visual Interaction**: Visual interface for interacting with and managing backend components
+-   **Performance Monitoring**: Track and optimize application performance metrics
+-   **Security Management**: Security monitoring and vulnerability assessment
+-   **Package Store**: Centralized store with all available adapters and extensions to extend framework capabilities
+-   **Deployment Tools**: Streamlined deployment workflows and management
 
-> **SUPPORT US ❤️**: Details how you can support the development of ExpressoTS and describe how to contribute to the project.
+ExpressoTS Studio consolidates these capabilities in one place, making development more efficient, deployment easier, and applications more performant and professional-grade.
 
-## Alert types
+For detailed release information, see the [release notes](./release.mdx). For upgrading from version 3.x, see the [upgrade guide](./upgrade_guide.mdx).
 
-Throughout this documentation, various formats are used to draw attention to different types of information:
+## Requirements
 
-**[Links](doc.expresso-ts.com)**: Bold green text indicates hyperlinks to other documentation pages or external resources.
+-   **Node.js**: Version 20.18.0 or higher
+-   **TypeScript**: Version 5.0 or higher
+-   **Package Manager**: npm, yarn, or pnpm
 
-```
+## Documentation Structure
+
+This documentation is organized into the following sections:
+
+> **PROLOGUE**: Release notes and upgrade guides.
+
+> **CORE**: Core building blocks and concepts.
+
+> **FEATURES**: Framework features and capabilities.
+
+> **CLI**: Command-line interface documentation.
+
+> **GUIDES**: Step-by-step guides and tutorials.
+
+> **ROADMAP**: Future development plans.
+
+> **GOVERNANCE**: Project governance and contribution guidelines.
+
+> **SUPPORT US ❤️**: How to support and contribute to the project.
+
+## Documentation Conventions
+
+### Links
+
+Bold green text indicates hyperlinks to other documentation pages or external resources:
+
+```md
 [Links](doc.expresso-ts.com)
 ```
 
-**Code**: Code snippets, commands, and key technical terms are highlighted.
+### Code Examples
+
+Code snippets use TypeScript syntax highlighting:
 
 ```ts
-console.log("Hello, ExpressoTS!");
+import { controller, Get } from "@expressots/core";
+
+@controller("/users")
+export class UserController {
+    @Get("/")
+    getUsers() {
+        return { users: [] };
+    }
+}
 ```
 
-**Alerts**: Specific alerts are employed to emphasize crucial information, utilizing the following markers:
+### Alert Types
 
-:::note Conveys general information or reminders.
+The following alert types are used throughout the documentation:
+
+:::note
+General information or reminders.
 :::
-:::tip Provides helpful suggestions or best practices.
+
+:::tip
+Helpful suggestions or best practices.
 :::
-:::info Offers additional, non-critical information.
+
+:::info
+Additional, non-critical information.
 :::
-:::caution Alerts to potential issues or problems that could arise.
+
+:::caution
+Potential issues or problems that could arise.
 :::
-:::danger Warns of critical issues or problems that could arise.
+
+:::danger
+Critical issues or problems that could arise.
 :::
 
 ---
@@ -64,4 +128,5 @@ console.log("Hello, ExpressoTS!");
 ## Support us ❤️
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+
 If you'd like to help, please read our **[support guide](../support-us.mdx)**.
