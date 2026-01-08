@@ -1,0 +1,476 @@
+---
+sidebar_position: 11
+---
+
+# Contributing to Templates & Pricing
+
+Learn how to contribute templates and pricing data to the ExpressoTS ecosystem. Community contributions help keep the CLI up-to-date without requiring CLI releases.
+
+## Why Contribute?
+
+- **Help the community:** Improve templates for everyone
+- **Keep pricing current:** Ensure accurate cost estimates
+- **Add platforms:** Support new CI/CD platforms or cloud providers
+- **Share expertise:** Contribute your organization's best practices
+
+## Contributing Templates
+
+### Repository Structure
+
+Templates are stored in the [`expressots/templates`](https://github.com/expressots/templates) repository:
+
+```
+templates/
+├── manifest.json              # Template registry
+├── cicd/
+│   ├── github/
+│   ├── gitlab/
+│   ├── circleci/
+│   └── ...
+├── docker/
+├── kubernetes/
+└── migrations/
+```
+
+### Step-by-Step: Adding a New Template
+
+#### 1. Fork and Clone
+
+```bash
+git clone https://github.com/YOUR_USERNAME/templates
+cd templates
+```
+
+#### 2. Create Your Template
+
+Create a new file in the appropriate directory:
+
+```bash
+# Example: Add a "minimal" strategy for GitHub Actions
+touch cicd/github/minimal.yml
+```
+
+Edit the file with your template:
+
+```yaml
+# cicd/github/minimal.yml
+name: Minimal CI
+
+on:
+  push:
+    branches: [{{branch}}]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '{{nodeVersion}}'
+      - run: {{installCmd}}
+      - run: {{testCmd}}
+```
+
+#### 3. Update manifest.json
+
+Add your template to the registry:
+
+```json
+{
+  "version": "1.1.0",
+  "updated": "2026-01-15T00:00:00Z",
+  "templates": {
+    "cicd": {
+      "github": {
+        "minimal": {
+          "path": "cicd/github/minimal.yml",
+          "version": "1.0.0",
+          "description": "Ultra-minimal CI pipeline with just tests",
+          "variables": ["branch", "nodeVersion", "installCmd", "testCmd"]
+        }
+      }
+    }
+  }
+}
+```
+
+#### 4. Test Locally
+
+```bash
+# Point CLI to your fork
+expressots templates repo set YOUR_USERNAME/templates
+
+# Update cache
+expressots templates update
+
+# Test template generation
+cd your-expressots-project
+expressots cicd generate github --strategy minimal
+
+# Verify generated file
+cat .github/workflows/ci.yml
+
+# Reset to default
+expressots templates repo reset
+```
+
+#### 5. Submit Pull Request
+
+```bash
+git add .
+git commit -m "feat: add minimal GitHub Actions strategy"
+git push origin main
+```
+
+Then create a PR on GitHub with description:
+- What the template does
+- Why it's useful
+- What variables it uses
+- Any testing you've done
+
+### Step-by-Step: Updating an Existing Template
+
+#### 1. Identify the Template
+
+```bash
+# Find the template you want to update
+expressots templates list --category cicd --platform github
+```
+
+#### 2. Edit the Template
+
+Let's say you want to add caching to the basic GitHub Actions template:
+
+```yaml
+# cicd/github/basic.yml
+
+# Add after checkout step:
+- name: Cache dependencies
+  uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+```
+
+#### 3. Bump Version
+
+```json
+{
+  "templates": {
+    "cicd": {
+      "github": {
+        "basic": {
+          "path": "cicd/github/basic.yml",
+          "version": "1.1.0",  // Was 1.0.0
+          "description": "Basic pipeline with dependency caching"
+        }
+      }
+    }
+  }
+}
+```
+
+#### 4. Test and Submit
+
+Same testing process as adding a new template.
+
+### Template Guidelines
+
+#### Variable Naming
+- Use `camelCase` for variable names
+- Use descriptive names: `nodeVersion` not `nv`
+- Match existing conventions
+
+#### Conditionals
+- Keep conditionals optional
+- Provide reasonable defaults
+- Don't break when variable is missing
+
+#### Comments
+```yaml
+# Good: Explain WHY
+# Cache dependencies for faster builds
+- uses: actions/cache@v4
+
+# Bad: Explain WHAT (obvious from code)
+# Use cache action
+- uses: actions/cache@v4
+```
+
+#### Testing
+Before submitting:
+- Test with multiple Node versions
+- Test with different package managers
+- Test all conditional paths
+- Verify variable substitution works
+
+## Contributing Pricing Data
+
+### Repository Structure
+
+Pricing data is stored in `cli-templates/pricing.json` within the templates repository.
+
+### Step-by-Step: Updating Pricing
+
+#### 1. Research Current Pricing
+
+Visit official provider pricing pages:
+- AWS: https://aws.amazon.com/fargate/pricing/
+- GCP: https://cloud.google.com/run/pricing
+- Azure: https://azure.microsoft.com/pricing/details/container-apps/
+- Railway: https://railway.app/pricing
+- Render: https://render.com/pricing
+- Fly.io: https://fly.io/docs/about/pricing/
+
+#### 2. Update pricing.json
+
+```json
+{
+  "version": "1.1.0",  // Bump version
+  "updated": "2026-01-15T00:00:00Z",  // Today's date
+  "providers": {
+    "railway": {
+      "serviceName": "Web Service",
+      "cpuPerHour": 0.000463,  // Updated from provider website
+      "memoryPerGbHour": 0.000231,  // Updated
+      "source": "https://railway.app/pricing",
+      "lastVerified": "2026-01-15"  // Today's date
+    }
+  }
+}
+```
+
+#### 3. Document Your Changes
+
+In the PR description, include:
+- Which providers you updated
+- Source URLs for verification
+- Date of verification
+- Any assumptions or notes
+
+#### 4. Test Calculations
+
+```bash
+# Test with your fork
+expressots templates repo set YOUR_USERNAME/templates
+expressots costs update
+
+# Verify pricing displays correctly
+expressots costs pricing railway
+
+# Test cost estimation
+expressots costs estimate railway --cpu 2 --memory 4
+
+# Compare with provider's calculator
+# Verify results are reasonably close
+```
+
+### Pricing Guidelines
+
+#### Regional Pricing
+- Use **US East** as the default region
+- Document region in `notes` field
+- Prices can vary 20-50% by region
+
+#### Free Tiers
+- Document free tier limits accurately
+- Include in `freeBandwidth` and `freeCredits`
+- Note any time limits (e.g., "first 12 months")
+
+#### Verification
+- Always include `source` URL
+- Update `lastVerified` to today's date
+- Check quarterly (prices change often)
+
+#### Edge Cases
+```json
+{
+  "notes": "First 180,000 vCPU-seconds free per month. Prices for consumption beyond free tier."
+}
+```
+
+## Review Process
+
+### For Templates
+
+Maintainers review for:
+1. **Correctness:** Does it work?
+2. **Completeness:** Are all variables documented?
+3. **Compatibility:** Does it follow conventions?
+4. **Security:** No hardcoded secrets or vulnerabilities
+5. **Testing:** Evidence of testing provided
+
+**Typical review time:** 1-3 days
+
+### For Pricing
+
+Maintainers review for:
+1. **Accuracy:** Prices match official sources
+2. **Sources:** Official URLs provided
+3. **Calculations:** Test estimates make sense
+4. **Recency:** Data is current (< 3 months old)
+
+**Typical review time:** 1-2 days
+
+## Release Schedule
+
+### Templates
+
+- **On-demand:** Merged as PRs are approved
+- **No version releases needed:** CLI fetches from `main` branch
+- **Changelog:** Maintained in repository
+
+### Pricing
+
+- **Weekly:** Pricing PRs reviewed and merged weekly
+- **Urgent updates:** Critical pricing errors fixed within 24h
+- **Quarterly reviews:** Maintainers verify all providers quarterly
+
+## Advanced Contributions
+
+### Adding a New CI/CD Platform
+
+If you want to add support for a new platform (e.g., "TeamCity"):
+
+#### 1. Create Template Directory
+
+```bash
+mkdir -p cicd/teamcity
+```
+
+#### 2. Create Strategy Files
+
+```bash
+touch cicd/teamcity/basic.yml
+touch cicd/teamcity/comprehensive.yml
+```
+
+#### 3. Update Manifest
+
+```json
+{
+  "templates": {
+    "cicd": {
+      "teamcity": {
+        "basic": {
+          "path": "cicd/teamcity/basic.yml",
+          "version": "1.0.0",
+          "description": "Basic TeamCity pipeline"
+        }
+      }
+    }
+  }
+}
+```
+
+#### 4. Update CLI Types (Requires CLI PR)
+
+This is the **only** case where CLI needs updating:
+
+```typescript
+// expressots-cli/src/templates/types.ts
+export type CICDPlatform = 
+  | "github" 
+  | "gitlab" 
+  | "circleci" 
+  | "jenkins" 
+  | "bitbucket" 
+  | "azure"
+  | "teamcity";  // Add new platform
+```
+
+Submit **two PRs:**
+1. Template repository (templates)
+2. CLI repository (type definition)
+
+### Adding a New Cloud Provider
+
+Similar process:
+
+1. Add provider to `pricing.json`
+2. Update CLI types in `src/costs/types.ts`
+3. Submit PRs to both repositories
+
+## Community Recognition
+
+Contributors are recognized:
+- Listed in repository CONTRIBUTORS.md
+- Mentioned in release notes
+- Credited in template comments
+
+## Getting Help
+
+- **Questions:** Open a discussion on GitHub
+- **Bugs:** Open an issue
+- **Ideas:** Open a feature request
+
+## Example Contributions
+
+### Real-World Examples
+
+**Adding GitHub Actions Caching:**
+```yaml
+# Before
+- run: npm ci
+
+# After
+- name: Cache dependencies
+  uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+- run: npm ci
+```
+
+**Adding Railway Auto-Deploy:**
+```yaml
+# New section in comprehensive.yml
+{{#deployRailway}}
+deploy:
+  stage: deploy
+  script:
+    - npm install -g @railway/cli
+    - railway up
+  environment:
+    name: production
+{{/deployRailway}}
+```
+
+**Updating AWS Pricing:**
+```json
+{
+  "aws": {
+    "cpuPerHour": 0.04048,  // Updated from 0.04
+    "lastVerified": "2026-01-15"  // Updated
+  }
+}
+```
+
+## FAQ
+
+**Q: How long until my contribution is available?**  
+A: Once merged, users get it on next `expressots templates update` (typically 24h cache).
+
+**Q: Can I contribute templates for my company's internal use?**  
+A: Yes! Fork the repo, customize, and point your team's CLI to your fork.
+
+**Q: What if I break something?**  
+A: Don't worry - CLI has embedded fallbacks. Maintainers will catch issues in review.
+
+**Q: How do I test before submitting?**  
+A: Point CLI to your fork: `expressots templates repo set YOUR_USERNAME/templates`
+
+**Q: Can I add completely new template categories?**  
+A: Yes, but it requires CLI changes. Open an issue first to discuss.
+
+**Q: Do I need to update the CLI code?**  
+A: No, except when adding new platforms or categories (just the type definitions).
+
+---
+
+## Next Steps
+
+- [View all templates](./templates.mdx)
+- [Manage pricing data](./pricing.mdx)
+- [Generate CI/CD pipelines](./overview.mdx#cicd-pipeline-generation)

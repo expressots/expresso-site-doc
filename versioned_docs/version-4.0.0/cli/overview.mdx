@@ -25,31 +25,64 @@ npm install -g @expressots/cli
 
 The CLI provides the following commands:
 
-| Name        | Alias   | Description                                           |
-| ----------- | ------- | ----------------------------------------------------- |
-| new project | new     | Generate a new project                                |
-| info        | i       | Provides project information                          |
-| resources   | r       | Displays CLI commands and resources                   |
-| scripts     | scripts | Run scripts list or a specific script                 |
-| help        | help    | Show command help                                     |
-| service     | g s     | Generate a service [controller, usecase, dto, module] |
-| controller  | g c     | Generate a controller                                 |
-| usecase     | g u     | Generate a usecase                                    |
-| dto         | g d     | Generate a DTO                                        |
-| entity      | g e     | Generate an entity                                    |
-| provider    | g p     | Generate internal provider                            |
-| provider    | add     | Add external provider to the project                  |
-| provider    | remove  | remove external provider                              |
-| provider    | create  | Create external provider                              |
-| module      | g mo    | Generate a module                                     |
-| middleware  | g mi    | Generate a middleware                                 |
+### Project Commands
+
+| Name        | Alias   | Description                           |
+| ----------- | ------- | ------------------------------------- |
+| new project | new     | Generate a new project                |
+| info        | i       | Provides project information          |
+| resources   | r       | Displays CLI commands and resources   |
+| scripts     | scripts | Run scripts list or a specific script |
+| help        | help    | Show command help                     |
+
+### Development Commands
+
+| Name   | Alias  | Description                               |
+| ------ | ------ | ----------------------------------------- |
+| dev    | dev    | Start development server                  |
+| dev -c | dev -c | Start development inside Docker container |
+| build  | build  | Build the project for production          |
+| prod   | prod   | Run in production mode                    |
+
+### Generate Commands
+
+| Name       | Alias | Description                                           |
+| ---------- | ----- | ----------------------------------------------------- |
+| service    | g s   | Generate a service [controller, usecase, dto, module] |
+| controller | g c   | Generate a controller                                 |
+| usecase    | g u   | Generate a usecase                                    |
+| dto        | g d   | Generate a DTO                                        |
+| entity     | g e   | Generate an entity                                    |
+| provider   | g p   | Generate internal provider                            |
+| module     | g mo  | Generate a module                                     |
+| middleware | g mi  | Generate a middleware                                 |
+| config     | g cfg | Generate type-safe configuration file                 |
+
+### Provider Commands
+
+| Name   | Alias  | Description                          |
+| ------ | ------ | ------------------------------------ |
+| add    | add    | Add external provider to the project |
+| remove | remove | Remove external provider             |
+| create | create | Create external provider             |
+
+### Container & Deployment Commands
+
+| Name         | Alias        | Description                                |
+| ------------ | ------------ | ------------------------------------------ |
+| containerize | c            | Generate Docker/Kubernetes configuration   |
+| cicd         | ci, pipeline | Generate CI/CD pipeline configurations     |
+| migrate      | mig          | Generate cloud migration configurations    |
+| profile      | prof         | Analyze and optimize Docker configurations |
+| costs        | cost         | Estimate cloud deployment costs            |
+| templates    | tpl          | Manage CLI templates (list, update, clear) |
 
 ## Usage examples
 
 You can use the CLI either with:
 
-- `expressots`
-- `ex` as an alias.
+-   `expressots`
+-   `ex` as an alias.
 
 Command example:
 
@@ -132,6 +165,325 @@ Create a new ExpressoTS provider. For more information about providers, check th
 ```bash
 expressots create <provider-name>
 ```
+
+## Development Commands
+
+### Start Development Server
+
+Run the development server with hot reload:
+
+```bash
+# Local development (default)
+expressots dev
+
+# With verbose output
+expressots dev --verbose
+expressots dev -v
+```
+
+### Container Development
+
+Run development inside a Docker container with automatic setup:
+
+```bash
+# Start container development (auto-generates files if needed)
+expressots dev --container
+expressots dev -c
+
+# Rebuild container before starting
+expressots dev -c --build
+expressots dev -c -b
+
+# Run in background
+expressots dev -c --detach
+expressots dev -c -d
+```
+
+This command automatically:
+
+-   Generates Docker files if missing
+-   Sets up local dependencies if detected
+-   Starts containers with hot reload enabled
+-   Mounts source code for live editing
+
+### Build for Production
+
+```bash
+expressots build
+```
+
+### Run in Production
+
+```bash
+expressots prod
+```
+
+## Container & Deployment Commands
+
+### Containerize
+
+Generate Docker and Kubernetes configurations for your application:
+
+```bash
+# Interactive mode
+expressots containerize docker
+
+# With specific environment
+expressots containerize docker --env development
+expressots containerize docker --env production
+
+# With preset
+expressots containerize docker --preset minimal    # Dockerfile only
+expressots containerize docker --preset standard   # + Docker Compose
+expressots containerize docker --preset full       # + Kubernetes + CI/CD
+
+# Generate Kubernetes manifests
+expressots containerize k8s
+
+# Generate all configurations
+expressots containerize all
+```
+
+**Options:**
+
+| Option           | Alias | Description                                                       |
+| ---------------- | ----- | ----------------------------------------------------------------- |
+| `--env`          | `-e`  | Environment (development, production, all)                        |
+| `--preset`       | `-p`  | Configuration preset (minimal, standard, full)                    |
+| `--skip-compose` |       | Skip Docker Compose generation                                    |
+| `--ci`           |       | Include CI/CD pipeline                                            |
+| `--ci-platform`  |       | CI platform (github, gitlab, circleci, jenkins, bitbucket, azure) |
+
+### CI/CD Pipeline Generation
+
+Generate CI/CD pipeline configurations for various platforms:
+
+```bash
+# Interactive setup
+expressots cicd init
+
+# Generate for specific platform
+expressots cicd generate github
+expressots cicd generate gitlab
+expressots cicd generate circleci
+expressots cicd generate jenkins
+expressots cicd generate bitbucket
+expressots cicd generate azure
+
+# Generate for all platforms
+expressots cicd generate all
+
+# With CI strategy
+expressots cicd generate github --strategy basic
+expressots cicd generate github --strategy comprehensive
+expressots cicd generate github --strategy security-focused
+
+# Include security scanning
+expressots cicd generate github --security
+
+# Include E2E tests
+expressots cicd generate github --e2e
+
+# Include code coverage
+expressots cicd generate github --coverage
+
+# List available platforms
+expressots cicd list
+
+# Validate existing pipelines
+expressots cicd validate
+```
+
+**Options:**
+
+| Option              | Alias | Description                                          |
+| ------------------- | ----- | ---------------------------------------------------- |
+| `--strategy`        | `-s`  | CI strategy (basic, comprehensive, security-focused) |
+| `--security`        |       | Include security scanning (Trivy, npm audit)         |
+| `--e2e`             |       | Include E2E testing stage                            |
+| `--coverage`        |       | Include code coverage reporting                      |
+| `--docker-registry` |       | Docker registry URL                                  |
+| `--deploy-target`   |       | Deployment target (kubernetes, railway, render, fly) |
+| `--branch`          |       | Git branch trigger                                   |
+| `--node-version`    |       | Node.js version                                      |
+
+### Cloud Migration
+
+Generate migration configurations from one platform to another:
+
+```bash
+# Interactive migration
+expressots migrate init
+
+# Migrate from Heroku
+expressots migrate generate --from heroku --to railway
+expressots migrate generate --from heroku --to render
+expressots migrate generate --from heroku --to fly
+
+# Migrate from Docker Compose
+expressots migrate generate --from compose --to kubernetes
+expressots migrate generate --from compose --to railway
+expressots migrate generate --from compose --to render
+
+# Analyze current platform
+expressots migrate analyze
+
+# List available migration paths
+expressots migrate list
+```
+
+**Supported Migration Paths:**
+
+| From           | To                                                               |
+| -------------- | ---------------------------------------------------------------- |
+| Heroku         | Railway, Render, Fly.io                                          |
+| Docker Compose | Kubernetes, Railway, Render                                      |
+| Generic        | Docker, Kubernetes, AWS ECS, GCP Cloud Run, Azure Container Apps |
+
+### Container Profiling
+
+Analyze and optimize your Docker configuration:
+
+```bash
+# Profile Dockerfile
+expressots profile container
+
+# Profile built Docker image
+expressots profile image my-app:latest
+
+# Generate optimization recommendations
+expressots profile optimize
+
+# Generate detailed report
+expressots profile report
+
+# Output as JSON
+expressots profile container --format json
+
+# Output as HTML
+expressots profile report --format html
+```
+
+**Analysis includes:**
+
+-   Base image recommendations
+-   Layer optimization
+-   Multi-stage build suggestions
+-   Security best practices (non-root user, health checks)
+-   .dockerignore recommendations
+-   npm ci vs npm install usage
+-   Vulnerability scanning (via Trivy)
+
+### Cost Estimation
+
+Estimate and compare cloud deployment costs:
+
+```bash
+# Estimate costs for a provider
+expressots costs estimate aws
+expressots costs estimate gcp
+expressots costs estimate azure
+expressots costs estimate railway
+expressots costs estimate render
+expressots costs estimate fly
+expressots costs estimate digitalocean
+expressots costs estimate heroku
+
+# Compare costs across providers
+expressots costs compare
+
+# Get optimization recommendations
+expressots costs optimize
+
+# Show pricing details
+expressots costs pricing aws
+
+# With resource specifications
+expressots costs estimate aws --instances 2 --cpu 2 --memory 4 --storage 50
+
+# Output as JSON
+expressots costs compare --format json
+```
+
+**Options:**
+
+| Option        | Description                    |
+| ------------- | ------------------------------ |
+| `--instances` | Number of instances            |
+| `--cpu`       | CPU cores per instance         |
+| `--memory`    | Memory in GB per instance      |
+| `--storage`   | Storage in GB                  |
+| `--bandwidth` | Monthly bandwidth in GB        |
+| `--hours`     | Hours per month (default: 730) |
+| `--format`    | Output format (text, json)     |
+
+### Template Management
+
+Manage CLI templates for CI/CD, Docker, and Kubernetes configurations:
+
+```bash
+# List available templates
+expressots templates list
+
+# Update template cache from remote repository
+expressots templates update
+
+# Clear local template cache
+expressots templates clear
+
+# Show template info
+expressots templates info cicd github
+
+# Show template system status
+expressots templates status
+
+# Set custom template repository
+expressots templates repo set https://github.com/myorg/templates
+
+# Reset to default repository
+expressots templates repo reset
+```
+
+**Options:**
+
+| Option       | Alias | Description                                        |
+| ------------ | ----- | -------------------------------------------------- |
+| `--category` | `-c`  | Filter by category (cicd, docker, kubernetes)      |
+| `--platform` | `-p`  | Filter by platform (github, gitlab, etc.)          |
+
+:::tip Custom Templates
+You can use your own template repository by running `expressots templates repo set <url>`. This is useful for organizations that want to maintain custom CI/CD pipelines or deployment configurations.
+:::
+
+### Pricing Data Management
+
+Update and manage cloud provider pricing data:
+
+```bash
+# Update pricing data from remote sources
+expressots costs update
+
+# Show pricing data information
+expressots costs info
+```
+
+The CLI uses a cascading pricing data system:
+
+1. **API** - Fetch from ExpressoTS pricing API (when available)
+2. **Remote JSON** - Fetch from GitHub-hosted pricing file
+3. **Local JSON** - Read from `~/.expressots/pricing.json` (user override)
+
+This ensures pricing data is always up-to-date while supporting offline usage and custom pricing configurations.
+
+For detailed information, see the [Pricing Data Management](./pricing.mdx) guide.
+
+### Advanced Features
+
+:::info Learn More
+- **[Templates & Customization](./templates.mdx)** - Manage and customize CLI templates
+- **[Pricing Data Management](./pricing.mdx)** - Update and manage cloud pricing data
+- **[Contributing](./contributing.mdx)** - Contribute templates and pricing updates
+:::
 
 ## Scaffold resources
 

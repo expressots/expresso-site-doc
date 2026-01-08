@@ -16,7 +16,7 @@ The simplest way to start your application:
 import { bootstrap } from "@expressots/core";
 import { App } from "./app";
 
-await bootstrap(App);
+bootstrap(App);
 ```
 
 This starts the application on port 3000 (or `process.env.PORT` if set) with automatic environment detection.
@@ -27,11 +27,11 @@ This starts the application on port 3000 (or `process.env.PORT` if set) with aut
 
 ```typescript
 // Custom port
-await bootstrap(App, { port: 8080 });
+bootstrap(App, { port: 8080 });
 
 // OS-assigned port (useful for testing)
-const server = await bootstrap(App, { port: 0 });
-const actualPort = server.port; // Use in tests
+const webServer = await bootstrap(App, { port: 0 });
+const actualPort = await webServer.getPort(); // Use in tests
 ```
 
 Port priority: `options.port` > `process.env.PORT` > `3000`
@@ -191,16 +191,162 @@ await bootstrap(App, {
 ### Testing with Dynamic Ports
 
 ```typescript
-const server = await bootstrap(App, {
+const webServer = await bootstrap(App, {
     port: 0, // Auto-assign available port
     envFileConfig: {
         skipFileLoading: true,
     },
 });
 
-// Use server.port in your tests
-expect(server.port).toBeGreaterThan(0);
+// Get the actual assigned port
+const actualPort = await webServer.getPort();
+expect(actualPort).toBeGreaterThan(0);
+
+// Or access the HTTP server directly for advanced use cases
+const httpServer = await webServer.getHttpServer();
 ```
+
+## Environment Behavior
+
+ExpressoTS recognizes the following environments: `development`, `staging`, `production`, `test`, or any custom string. The current environment is determined by:
+
+1. `currentEnvironment` option in `bootstrap()`
+2. `process.env.NODE_ENV`
+3. Defaults to `"development"`
+
+### Automatic Framework Behavior
+
+The framework automatically adjusts behavior based on the environment:
+
+#### Error Handling
+
+**Development & Test:**
+
+-   Full error messages are exposed to clients
+-   Stack traces are included in error responses
+-   Detailed error context for debugging
+
+**Production & Staging:**
+
+-   Generic error messages ("An unexpected error occurred")
+-   Stack traces are hidden from responses (but still logged server-side)
+-   Internal implementation details are protected
+
+```typescript
+// Example error response in development
+{
+  "title": "User not found with id: 123",
+  "status": 404,
+  "stack": "Error: User not found...\n    at UserService.findById..."
+}
+
+// Example error response in production
+{
+  "title": "An unexpected error occurred",
+  "status": 500
+  // No stack trace
+}
+```
+
+#### Environment Validation
+
+**Production:**
+
+-   `validateValues` defaults to `true`
+-   Missing required environment variables will fail startup
+-   Strict validation is enforced
+
+**Other environments:**
+
+-   `validateValues` defaults to `false`
+-   Missing variables produce warnings instead of errors
+-   Allows for more flexible local development
+
+#### Helper Method
+
+Use `isDevelopment()` in your application to conditionally execute code:
+
+```typescript
+// In your App class (extends AppExpress)
+async configureServices(): Promise<void> {
+    this.Middleware.setErrorHandler({
+        showStackTrace: await this.isDevelopment(),
+    });
+}
+```
+
+### Environment-Specific Configuration
+
+Use `defineConfig` to set different defaults per environment:
+
+```typescript
+import { defineConfig, Env } from "@expressots/core";
+
+export const config = defineConfig({
+    server: {
+        host: Env.string("HOST", {
+            development: "localhost",
+            staging: "0.0.0.0",
+            production: "0.0.0.0",
+        }),
+    },
+
+    app: {
+        logLevel: Env.enum("LOG_LEVEL", ["debug", "info", "warn", "error"], {
+            development: "debug",
+            staging: "info",
+            production: "warn",
+        }),
+
+        debug: Env.boolean("DEBUG", {
+            development: true,
+            staging: false,
+            production: false,
+        }),
+    },
+
+    database: {
+        url: Env.url("DATABASE_URL", {
+            development: "postgresql://localhost:5432/dev_db",
+            staging: undefined, // Must be set explicitly
+            production: undefined, // Must be set explicitly
+        }),
+
+        ssl: Env.boolean("DB_SSL", {
+            development: false,
+            staging: true,
+            production: true,
+        }),
+    },
+});
+```
+
+The framework automatically selects the correct default based on `NODE_ENV`.
+
+### Environment File Loading
+
+Each environment loads its corresponding `.env` file by convention:
+
+| Environment   | Default File       | `validateValues` Default |
+| ------------- | ------------------ | ------------------------ |
+| `development` | `.env.development` | `false`                  |
+| `staging`     | `.env.staging`     | `false`                  |
+| `production`  | `.env.production`  | `true`                   |
+| `test`        | `.env.test`        | `false`                  |
+| CI/CD         | `process.env` only | `true`                   |
+
+Optional files are loaded silently (in order): `.env`, `.env.local`, `.env.{environment}.local`
+
+:::tip Testing Best Practice
+For tests, use `skipFileLoading: true` to avoid file I/O and rely on `process.env`:
+
+```typescript
+await bootstrap(App, {
+    envFileConfig: { skipFileLoading: true },
+});
+```
+
+:::
 
 ## Startup Phases
 
@@ -225,21 +371,22 @@ Bootstrap detects CI/CD environments by checking for platform-specific environme
 
 ```typescript
 // Generic CI flag (most platforms set this)
-process.env.CI
+process.env.CI;
 
 // Platform-specific detection
-process.env.GITHUB_ACTIONS      // GitHub Actions
-process.env.GITLAB_CI           // GitLab CI
-process.env.JENKINS_URL         // Jenkins
-process.env.CIRCLECI            // CircleCI
-process.env.TRAVIS              // Travis CI
-process.env.BUILDKITE           // Buildkite
-process.env.AZURE_HTTP_USER_AGENT // Azure DevOps
-process.env.BAMBOO_BUILDKEY     // Bamboo
-process.env.TEAMCITY_VERSION    // TeamCity
+process.env.GITHUB_ACTIONS; // GitHub Actions
+process.env.GITLAB_CI; // GitLab CI
+process.env.JENKINS_URL; // Jenkins
+process.env.CIRCLECI; // CircleCI
+process.env.TRAVIS; // Travis CI
+process.env.BUILDKITE; // Buildkite
+process.env.AZURE_HTTP_USER_AGENT; // Azure DevOps
+process.env.BAMBOO_BUILDKEY; // Bamboo
+process.env.TEAMCITY_VERSION; // TeamCity
 ```
 
 **Supported Platforms:**
+
 -   GitHub Actions
 -   GitLab CI
 -   Jenkins
@@ -265,6 +412,7 @@ When a CI/CD environment is detected:
 When validation fails in CI/CD, bootstrap provides platform-specific setup instructions:
 
 **GitHub Actions:**
+
 ```
 🔧 GitHub Actions Setup:
    - Go to: Settings → Secrets and variables → Actions
@@ -273,6 +421,7 @@ When validation fails in CI/CD, bootstrap provides platform-specific setup instr
 ```
 
 **GitLab CI:**
+
 ```
 🔧 GitLab CI Setup:
    - Go to: Settings → CI/CD → Variables
@@ -281,6 +430,7 @@ When validation fails in CI/CD, bootstrap provides platform-specific setup instr
 ```
 
 **Jenkins:**
+
 ```
 🔧 Jenkins Setup:
    - Configure: Manage Jenkins → Credentials
@@ -300,3 +450,216 @@ When validation fails in CI/CD, bootstrap provides platform-specific setup instr
 -   Package.json read: Cached after first call
 -   CI detection: Cached after first call
 -   Logger instances: Lazy initialization
+
+## Container Development
+
+ExpressoTS provides a seamless containerized development experience with hot reload, debugging support, and automatic configuration.
+
+### Quick Start
+
+The simplest way to start development in a Docker container:
+
+```bash
+expressots dev --container
+```
+
+This single command automatically:
+
+1. **Generates Docker files** if missing (`Dockerfile.development`, `docker-compose.development.yml`)
+2. **Sets up local dependencies** if your project has local file dependencies
+3. **Starts the development container** with hot reload enabled
+
+### Container Development Options
+
+```bash
+# Start container development (auto-generates files if needed)
+expressots dev --container
+expressots dev -c
+
+# Rebuild container before starting
+expressots dev --container --build
+expressots dev -c -b
+
+# Run in background (detached mode)
+expressots dev --container --detach
+expressots dev -c -d
+
+# Combine options
+expressots dev -c -b -d
+```
+
+### What's Included
+
+When you run `expressots dev --container`, the development environment provides:
+
+| Feature          | Description                                   |
+| ---------------- | --------------------------------------------- |
+| 🔄 Hot Reload    | File changes automatically restart the app    |
+| 🔍 Debug Port    | Node.js debugger available on port 9229       |
+| 📦 Volume Mounts | Source code synced between host and container |
+| 🗄️ Services      | Auto-configured Redis, PostgreSQL if detected |
+| 📊 Health Checks | Automatic container health monitoring         |
+
+### Manual Container Configuration
+
+For more control, you can use the `containerize` command directly:
+
+```bash
+# Generate Docker configuration interactively
+expressots containerize docker
+
+# Generate development environment
+expressots containerize docker --env development
+
+# Generate with specific preset
+expressots containerize docker --preset minimal
+expressots containerize docker --preset standard
+expressots containerize docker --preset full
+
+# Include CI/CD pipeline
+expressots containerize docker --ci
+```
+
+### Container Presets
+
+| Preset     | Description                                 |
+| ---------- | ------------------------------------------- |
+| `minimal`  | Basic Dockerfile only                       |
+| `standard` | Dockerfile + Docker Compose + .dockerignore |
+| `full`     | All files + Kubernetes manifests + CI/CD    |
+
+### Generated Files
+
+Depending on the preset, the containerize command generates:
+
+```
+project/
+├── Dockerfile                      # Production multi-stage build
+├── Dockerfile.development          # Development with hot reload
+├── docker-compose.yml              # Production compose
+├── docker-compose.development.yml  # Development compose with volumes
+├── .dockerignore                   # Optimized ignore patterns
+├── docker-setup.js                 # Local dependency setup script
+└── k8s/                            # Kubernetes manifests (full preset)
+    ├── deployment.yaml
+    ├── service.yaml
+    ├── configmap.yaml
+    └── kustomization.yaml
+```
+
+### Local Dependencies
+
+If your project uses local file dependencies (e.g., monorepo with `file:../shared`), the CLI automatically:
+
+1. Creates `.docker-deps/` directory with packed dependencies
+2. Generates `package.docker.json` with correct paths
+3. Updates `Dockerfile.development` to use these files
+
+```bash
+# Manually run setup if needed
+npm run docker:setup
+```
+
+### Stopping Containers
+
+```bash
+# Stop development containers
+docker-compose -f docker-compose.development.yml down
+
+# Stop and remove volumes
+docker-compose -f docker-compose.development.yml down -v
+```
+
+### Container Profiling
+
+Analyze your Docker setup for optimization opportunities:
+
+```bash
+# Profile Dockerfile
+expressots profile container
+
+# Profile built image
+expressots profile image my-app:latest
+
+# Generate optimization recommendations
+expressots profile optimize
+```
+
+### CI/CD Integration
+
+Generate CI/CD pipelines for your containerized application:
+
+```bash
+# Generate GitHub Actions workflow
+expressots cicd generate github
+
+# Generate for multiple platforms
+expressots cicd generate all
+
+# Include security scanning
+expressots cicd generate github --security
+
+# Include E2E tests
+expressots cicd generate github --e2e
+```
+
+Supported CI/CD platforms:
+
+-   GitHub Actions
+-   GitLab CI
+-   CircleCI
+-   Jenkins
+-   Bitbucket Pipelines
+-   Azure DevOps
+
+## Template System
+
+ExpressoTS CLI v4 introduces a dynamic template system that enables community contributions and keeps generated code up-to-date without requiring CLI updates.
+
+### How It Works
+
+1. **Remote Templates**: Templates are fetched from GitHub (`expressots/templates`)
+2. **Local Cache**: Cached for 24 hours in `~/.expressots/cache/templates/`
+3. **Automatic Updates**: Run `expressots templates update` to refresh
+4. **Embedded Fallback**: CLI always works offline with built-in templates
+
+### Managing Templates
+
+```bash
+# List available templates
+expressots templates list
+
+# Update to latest versions
+expressots templates update
+
+# Check template system status
+expressots templates status
+
+# Use custom template repository
+expressots templates repo set myorg/templates
+```
+
+### Community Contributions
+
+The template system allows anyone to contribute:
+
+-   **Add new CI/CD strategies**
+-   **Update Docker configurations**
+-   **Improve Kubernetes manifests**
+-   **Submit pricing updates**
+
+See the [Contributing Guide](../cli/contributing.mdx) for details.
+
+### Benefits
+
+-   **Always Up-to-Date**: Get latest best practices without CLI updates
+-   **Community-Driven**: Benefit from community expertise
+-   **Customizable**: Use your organization's templates
+-   **Offline Support**: Works without internet connection
+-   **Version Control**: Templates are versioned independently
+
+Learn more:
+
+-   [Templates & Customization](../cli/templates.mdx)
+-   [Pricing Data Management](../cli/pricing.mdx)
+-   [Contributing to Templates](../cli/contributing.mdx)
