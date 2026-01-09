@@ -47,11 +47,11 @@ into logical domains, register components, and resolve Controllers efficiently.
 </Tabs>
 
 :::info
-ExpressoTS provides the flexibility to choose the approach that best fits your project’s needs, whether it's adhering to SOLID principles
+ExpressoTS provides the flexibility to choose the approach that best fits your project's needs, whether it's adhering to SOLID principles
 for maximum maintainability or following the MVC pattern for simplicity and clarity.
 :::
 
-## Creating a module
+## Creating a Module
 
 To create a module using the CLI tool, run the following command:
 
@@ -67,9 +67,9 @@ import { CreateModule } from "@expressots/core";
 export const ProductModule = CreateModule([]);
 ```
 
-## Registering controllers
+## Registering Controllers
 
-To register controllers within a module, pass them as an array to the `CreateModule` function. For example:
+To register controllers within a module, pass them as an array to the `CreateModule` function:
 
 ```typescript
 import { CreateModule } from "@expressots/core";
@@ -78,67 +78,158 @@ import { ProductController } from "./product.controller";
 export const ProductModule = CreateModule([ProductController]);
 ```
 
-## Module scope
+## Module Scope
 
-Very similar to the `Container`, developers can set the scope of a module using the `Scope` enum. All controllers registered
+Developers can set the scope of a module using the `Scope` enum. All controllers registered
 within the module will inherit the module's scope.
 
-Here are the possible scope values:
+| Scope         | Lifecycle           | Performance | Use Case                     | Memory  |
+| ------------- | ------------------- | ----------- | ---------------------------- | ------- |
+| **Request**   | New per request     | Fast        | Stateless services (default) | Low     |
+| **Singleton** | Single instance     | Fastest     | DB connections, config       | High    |
+| **Transient** | New every injection | Slowest     | Pure functions, disposable   | Highest |
 
--   `Scope.Singleton` - The dependency will be created once and will be shared across all requests.
--   `Scope.Request` - The dependency will be created once per request.
--   `Scope.Transient` - The dependency will be created every time it is requested.
-
-When creating a module, you can pass the scope as a second argument to the `CreateModule` function.
-It is optional and if not provided, the default scope is acquired from the `AppContainer` which is `Request`.
+When creating a module, you can pass the scope as a second argument:
 
 ```typescript
 import { CreateModule, Scope } from "@expressots/core";
 
-export const ProductModule: ContainerModule = CreateModule([], Scope.Singleton);
+export const ProductModule = CreateModule([ProductController], Scope.Singleton);
 ```
 
-This flexibility allows for tailored dependency management strategies, such as combining Singleton scope modules for shared services
-with Request scope modules for request-specific services.
+If not provided, the default scope is acquired from the `AppContainer` which is `Request`.
 
-In the example above, all controllers registered within the `ProductModule` will have a Singleton scope.
+## Custom Bindings
 
-## Scope precedence
+Modules support custom bindings for advanced dependency injection patterns:
+
+### Basic Custom Binding
+
+```typescript
+export const AppModule = CreateModule([UserController], (bind) => {
+    bind<ILogger>("ILogger").to(ConsoleLogger).inSingletonScope();
+    bind<ICache>("ICache").to(RedisCache);
+});
+```
+
+### Module with Scope AND Bindings
+
+```typescript
+import { CreateModule, Scope } from "@expressots/core";
+
+export const DatabaseModule = CreateModule(
+    [DbController],
+    Scope.Singleton,
+    (bind) => {
+        bind<IDatabase>("IDatabase").to(PostgresDB);
+    }
+);
+```
+
+### Binding Types
+
+```typescript
+// Class binding
+bind<IService>("IService").to(MyService);
+
+// Constant value
+bind<IConfig>("IConfig").toConstantValue(config);
+
+// Dynamic value (factory)
+bind<ILogger>("ILogger").toDynamicValue((context) => {
+    return new Logger(context.container.get("IConfig"));
+});
+```
+
+### Binding Scopes
+
+```typescript
+.inSingletonScope()  // Single instance
+.inRequestScope()    // New per request
+.inTransientScope()  // New every injection
+```
+
+### Conditional Binding
+
+```typescript
+export const Module = CreateModule(
+    [Controller],
+    (bind, unbind, isBound, rebind) => {
+        if (!isBound("ILogger")) {
+            bind<ILogger>("ILogger").to(Logger);
+        }
+
+        if (isBound("OldCache")) {
+            rebind<ICache>("ICache").to(NewCache);
+        }
+    }
+);
+```
+
+## Advanced Module Patterns
+
+### Using createModule Helper
+
+```typescript
+import { createModule } from "@expressots/core";
+
+export const LoggingModule = createModule((bind) => {
+    bind<ILogger>("ILogger").to(WinstonLogger).inSingletonScope();
+});
+```
+
+### Combining Modules
+
+```typescript
+import { combineModules, CreateModule } from "@expressots/core";
+
+export const AppModule = combineModules(
+    CreateModule([UserController]),
+    CreateModule([AuthController]),
+    LoggingModule
+);
+```
+
+## Scope Precedence
 
 The hierarchy of scope precedence is:
-`AppContainer` > `Module` > `Controller`, ensuring a versatile and hierarchical approach
-to dependency scope management. This layered structure permits precise control over service
-instantiation and lifecycle across the entire application.
+`AppContainer` > `Module` > `Controller`
 
-1. AppContainer
+This ensures a versatile and hierarchical approach to dependency scope management.
 
--   Scope: Global
--   Role: The AppContainer is at the top of the hierarchy. It manages dependencies and services that need to be available throughout the entire application. Services registered here have the broadest scope and are shared across all modules and controllers.
+1. **AppContainer** (Global)
+   - Services registered here have the broadest scope and are shared across all modules and controllers.
 
-2. Module
+2. **Module** (Modular)
+   - Dependencies registered in a module are available to all controllers within that module.
 
--   Scope: Modular
--   Role: Within the AppContainer, each Module represents a distinct domain or feature in your application. Dependencies registered in a module are available to all controllers and services within that specific module, allowing for modular separation of concerns.
+3. **Controller** (Specific)
+   - Dependencies at this level are only available within the individual controller.
 
-3. Controller
+### Using @scope() Decorator
 
--   Scope: Specific
--   Role: The most specific layer is the Controller. Dependencies registered at this level are only available within the individual controller. This scope is ideal for services or logic that are only relevant to a particular controller’s operations.
+To override controller scope within a module, use the `@scope()` decorator:
 
-:::tip
-To override controller scope within a module, you can use `@scope()` decorator.
-:::
+```typescript
+import { scope, Scope } from "@expressots/core";
+import { controller } from "@expressots/adapter-express";
 
-```typescript title="@scope( ) decorator example"
-@scope("Singleton")
-@controller("/")
-export class ProductController {
-    @Get("/")
-    execute() {
-        return "ProductController";
-    }
+@scope(Scope.Singleton)
+@controller("/cache")
+export class CacheController {
+    // Single instance regardless of module scope
 }
 ```
+
+:::tip
+Use `@scope()` decorator when you need a specific controller to have a different lifecycle than its parent module.
+:::
+
+## Scope Selection Guide
+
+1. **Use Request scope** (default) for stateless services
+2. **Use Singleton** for expensive initialization (DB, cache)
+3. **Avoid Transient** unless necessary (disposable objects)
 
 ---
 
