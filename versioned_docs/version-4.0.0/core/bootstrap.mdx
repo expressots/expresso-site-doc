@@ -438,13 +438,67 @@ When validation fails in CI/CD, bootstrap provides platform-specific setup instr
    - Use: env.VARIABLE_NAME in pipeline
 ```
 
-### Performance
+### Testing CI Detection Locally
+
+You can test CI/CD detection locally by setting environment variables:
+
+**Windows PowerShell:**
+
+```powershell
+$env:CI = "true"
+npm run dev
+```
+
+**Windows CMD:**
+
+```cmd
+set CI=true
+npm run dev
+```
+
+**macOS/Linux:**
+
+```bash
+export CI=true
+npm run dev
+```
+
+**Test Specific Platforms:**
+
+```bash
+# GitHub Actions
+export GITHUB_ACTIONS=true
+npm run dev
+
+# GitLab CI
+export GITLAB_CI=true
+npm run dev
+
+# CircleCI
+export CIRCLECI=true
+npm run dev
+```
+
+**Expected Output (after banner):**
+
+```
+[ExpressoTS] 01/08/2026 01:38:18 PM [PID:18484] INFO  [bootstrap] 🔍 CI environment detected: CI Platform
+[ExpressoTS] 01/08/2026 01:38:18 PM [PID:18484] INFO  [bootstrap] ✅ Skipping .env file loading (using process.env)
+```
+
+:::note
+When `CI=true` is set (generic CI flag), it shows "CI Platform". For specific platforms like `GITHUB_ACTIONS=true`, it shows "GitHub Actions", etc.
+:::
+
+## Performance
+
+### CI Detection Performance
 
 -   **Detection**: Cached after first call (O(1) subsequent calls)
 -   **Platform identification**: Uses optimized Map lookup for O(1) performance
 -   **No file I/O**: Skips file system operations in CI environments
 
-## Performance
+### General Startup Performance
 
 -   Startup time: ~8-25ms (optimized)
 -   Package.json read: Cached after first call
@@ -663,3 +717,10 @@ Learn more:
 -   [Templates & Customization](../cli/templates.mdx)
 -   [Pricing Data Management](../cli/pricing.mdx)
 -   [Contributing to Templates](../cli/contributing.mdx)
+
+---
+
+## Support us ❤️
+
+ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
+If you'd like to help, please read our **[support guide](../support-us.mdx)**.

@@ -80,20 +80,22 @@ export const ProductModule = CreateModule([ProductController]);
 
 ## Module scope
 
-Very similar to the `Container`, developers can set the scope of a module using the same `BindingScopeEnum` enum. All controllers registered
+Very similar to the `Container`, developers can set the scope of a module using the `Scope` enum. All controllers registered
 within the module will inherit the module's scope.
 
 Here are the possible scope values:
 
--   `BindingScopeEnum.Singleton` - The dependency will be created once and will be shared across all requests.
--   `BindingScopeEnum.Request` - The dependency will be created once per request.
--   `BindingScopeEnum.Transient` - The dependency will be created every time it is requested.
+-   `Scope.Singleton` - The dependency will be created once and will be shared across all requests.
+-   `Scope.Request` - The dependency will be created once per request.
+-   `Scope.Transient` - The dependency will be created every time it is requested.
 
 When creating a module, you can pass the scope as a second argument to the `CreateModule` function.
-It is optional and if not provided, the default scope is acquired from the `AppContainer` which is `RequestScope`.
+It is optional and if not provided, the default scope is acquired from the `AppContainer` which is `Request`.
 
 ```typescript
-export const ProductModule: ContainerModule = CreateModule([], BindingScopeEnum.Singleton);
+import { CreateModule, Scope } from "@expressots/core";
+
+export const ProductModule: ContainerModule = CreateModule([], Scope.Singleton);
 ```
 
 This flexibility allows for tailored dependency management strategies, such as combining Singleton scope modules for shared services

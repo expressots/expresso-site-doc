@@ -8,72 +8,316 @@ description: The AppContainer simplifies module registration.
 
 ExpressoTS uses an IoC Container for dependency injection, making it easy to manage object creation, resolution, and lifecycle.
 
-## Setup
+## Configuration Options
 
-The application container can be customized to enhance flexibility in dependency management through the following options:
-
--   **defaultScope**:
-    -   Request Scope: Creates a new instance of a dependency for each request.
-    -   Singleton Scope: Creates a single instance shared across all requests.
-    -   Transient Scope: Creates a new instance every time the dependency is requested.
--   **skipBaseClassChecks**: When enabled, the container skips base class checks for derived classes, providing more flexibility.
--   **autoBindInjectable**: When enabled, the container automatically injects classes that are not explicitly bound.
-
-Here is the interface options definition:
+### Interface Definition
 
 ```typescript
 interface ContainerOptions {
-    defaultScope?: interfaces.BindingScope;
+    defaultScope?: "Request" | "Singleton" | "Transient";
     skipBaseClassChecks?: boolean;
-    autoBindInjectable: false;
+    autoBindInjectable?: boolean;
 }
 ```
 
-## Creating the container
+### Default Values
+
+-   `defaultScope`: `"Request"` (creates new instance per HTTP request)
+-   `autoBindInjectable`: `true` (automatically binds @injectable classes)
+-   `skipBaseClassChecks`: `false` (validates class inheritance)
+
+### Options Reference
+
+#### defaultScope
+
+Controls the default lifecycle for all bindings in the container.
+
+| Scope         | Lifecycle           | Performance | Use Case                     | Memory  |
+| ------------- | ------------------- | ----------- | ---------------------------- | ------- |
+| **Request**   | New per request     | Fast        | Stateless services (default) | Low     |
+| **Singleton** | Single instance     | Fastest     | DB connections, config       | High    |
+| **Transient** | New every injection | Slowest     | Pure functions, disposable   | Highest |
+
+#### skipBaseClassChecks
+
+**What it does**: Controls InversifyJS base class inheritance validation.
+
+**Performance Impact**:
+
+-   `false` (default): Container creation ~15-20ms, validates inheritance
+-   `true`: Container creation ~8-12ms, 40-50% faster, runtime validation only
+
+**When to enable**:
+
+-   Production environment after thorough testing
+-   Large applications with many classes
+-   Confident in class hierarchy correctness
+
+**When to disable**:
+
+-   Development environment
+-   Debugging DI issues
+-   Complex inheritance hierarchies
+
+#### autoBindInjectable
+
+**What it does**: Automatically binds classes decorated with @injectable()
+
+**Performance Impact**:
+
+-   `true` (default): No explicit binding needed, cleaner code
+-   `false`: Must explicitly bind every service, more control
+
+**When to disable**:
+
+-   Need explicit control over all bindings
+-   Debugging binding conflicts
+-   Large teams requiring strict binding rules
+
+## Creating the Container
+
+### Basic Setup
 
 ```typescript
-private config: AppContainer = this.configContainer([AppModule], {
-        autoBindInjectable: true,
-        defaultScope: "Request",
-        skipBaseClassChecks: true,
+export class App extends AppExpress {
+    private container: AppContainer = this.configContainer([AppModule]);
+
+    globalConfiguration(): void {}
+}
+```
+
+### With Custom Options
+
+```typescript
+import { Scope } from "@expressots/core";
+
+private container: AppContainer = this.configContainer([AppModule], {
+    defaultScope: Scope.Singleton,
+    autoBindInjectable: true,
+    skipBaseClassChecks: true
 });
 ```
 
-## Modules registration
+## Module Registration
 
-The `Container` facilitates module registration via its `configContainer([])` method, which accepts an array of modules.
+### Basic Module
 
-Here an example of PaymentModule creation:
-
-```typescript title="payment.module.ts"
-export const PaymentModule: ContainerModule = CreateModule([CreatePaymentController]);
+```typescript
+export const PaymentModule = CreateModule([PaymentController]);
 ```
 
-```typescript title="Module registration"
-private config: AppContainer = this.configContainer([AppModule, PaymentModule]);
+### Module with Scope
+
+```typescript
+import { CreateModule, Scope } from "@expressots/core";
+
+export const CacheModule = CreateModule([CacheController], Scope.Singleton);
 ```
 
-:::tip
-When scaffolding a new module using the Opinionated template, the module is automatically registered in the container.
-:::
+### Module with Custom Bindings
 
-## Container options
-
-After creating the container, you have the following options available:
-
--   <span class="span-table">Container Object</span>: Access the container and manage its bindings.
--   <span class="span-table">View Container Bindings</span>: Check the injected classes and their
-    scopes. The container can be used to view all the bindings that have been registered. This can
-    be useful for debugging purposes or to understand the dependencies that have been registered.
--   <span class="span-table">View Container Options</span>: Review the container's defined options
-
-See below image for a visual representation of the container bindings.
-
-```typescript title="app.ts"
-this.config.viewContainerBindings();
+```typescript
+export const AppModule = CreateModule([UserController], (bind) => {
+    bind<ILogger>("ILogger").to(ConsoleLogger).inSingletonScope();
+    bind<ICache>("ICache").to(RedisCache);
+});
 ```
+
+### Module with Scope AND Bindings
+
+```typescript
+import { CreateModule, Scope } from "@expressots/core";
+
+export const DatabaseModule = CreateModule(
+    [DbController],
+    Scope.Singleton,
+    (bind) => {
+        bind<IDatabase>("IDatabase").to(PostgresDB);
+    }
+);
+```
+
+### Advanced: Using createModule Helper
+
+```typescript
+import { createModule } from "@expressots/core";
+
+export const LoggingModule = createModule((bind) => {
+    bind<ILogger>("ILogger").to(WinstonLogger).inSingletonScope();
+});
+```
+
+### Advanced: Combining Modules
+
+```typescript
+import { combineModules, CreateModule } from "@expressots/core";
+
+export const AppModule = combineModules(
+    CreateModule([UserController]),
+    CreateModule([AuthController]),
+    LoggingModule
+);
+```
+
+## Scope Management
+
+### Available Scopes
+
+| Scope         | Lifecycle           | Performance | Use Case                     | Memory  |
+| ------------- | ------------------- | ----------- | ---------------------------- | ------- |
+| **Request**   | New per request     | Fast        | Stateless services (default) | Low     |
+| **Singleton** | Single instance     | Fastest     | DB connections, config       | High    |
+| **Transient** | New every injection | Slowest     | Pure functions, disposable   | Highest |
+
+### Scope Precedence
+
+Container default → Module scope → @scope() decorator (highest priority)
+
+### Using @scope() Decorator
+
+Override module scope at controller level:
+
+```typescript
+import { scope, Scope } from "@expressots/core";
+import { controller } from "@expressots/adapter-express";
+
+@scope(Scope.Singleton)
+@controller("/cache")
+export class CacheController {
+    // Single instance regardless of module scope
+}
+```
+
+## Container Access Methods
+
+### Viewing Bindings
+
+Debug and inspect all registered services:
+
+```typescript
+this.container.viewContainerBindings();
+```
+
+Output shows:
+
+-   Service Identifier
+-   Scope (Request/Singleton/Transient)
+-   Type (Constructor/ConstantValue/etc)
+-   Cache status
 
 ![Container Bindings View](./img/container-bindings.png)
+
+### Getting Container Options
+
+Inspect current configuration:
+
+```typescript
+const options = this.container.getContainerOptions();
+console.log(options.defaultScope);
+console.log(options.autoBindInjectable);
+```
+
+### Accessing Raw Container
+
+For advanced InversifyJS operations:
+
+```typescript
+const inversifyContainer = this.container.Container;
+// Use InversifyJS APIs directly
+```
+
+## Custom Bindings
+
+### Binding Types
+
+```typescript
+// Class binding
+bind<IService>("IService").to(MyService);
+
+// Constant value
+bind<IConfig>("IConfig").toConstantValue(config);
+
+// Dynamic value (factory)
+bind<ILogger>("ILogger").toDynamicValue((context) => {
+    return new Logger(context.container.get("IConfig"));
+});
+```
+
+### Binding Scopes
+
+```typescript
+.inSingletonScope()  // Single instance
+.inRequestScope()    // New per request
+.inTransientScope()  // New every injection
+```
+
+### Advanced Patterns
+
+```typescript
+// Conditional binding
+export const Module = CreateModule(
+    [Controller],
+    (bind, unbind, isBound, rebind) => {
+        if (!isBound("ILogger")) {
+            bind<ILogger>("ILogger").to(Logger);
+        }
+
+        if (isBound("OldCache")) {
+            rebind<ICache>("ICache").to(NewCache);
+        }
+    }
+);
+```
+
+## Performance Best Practices
+
+### Scope Selection Guide
+
+1. **Use Request scope** (default) for stateless services
+2. **Use Singleton** for expensive initialization (DB, cache)
+3. **Avoid Transient** unless necessary (disposable objects)
+
+### Production Optimization
+
+```typescript
+import { Scope } from "@expressots/core";
+
+private container: AppContainer = this.configContainer([AppModule], {
+    defaultScope: Scope.Request,
+    skipBaseClassChecks: true,  // 40-50% faster
+    autoBindInjectable: true
+});
+```
+
+### Memory Considerations
+
+-   Singleton: Lives for application lifetime
+-   Request: Cleaned up after request completes
+-   Transient: Creates memory churn if overused
+
+## Troubleshooting
+
+### Common Issues
+
+**DI Resolution Errors**
+
+-   Enable `viewContainerBindings()` to inspect registrations
+-   Check scope precedence chain
+-   Verify @injectable() decorator is present
+
+**Performance Issues**
+
+-   Profile container creation time
+-   Consider enabling `skipBaseClassChecks` in production
+-   Review scope usage (too many Transient?)
+
+**Binding Conflicts**
+
+-   Use `getContainerOptions()` to inspect config
+-   Check for duplicate bindings
+-   Use `isBound()` before binding
+
+---
 
 ## Support us ❤️
 

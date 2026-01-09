@@ -131,7 +131,7 @@ Read more about route string patterns and all the possibilities [here](https://e
 ## Scope
 
 The default scope of a controller is `Request`, as it is inherited from the `AppContainer` and default `Module` class scope.
-However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts the same BindingScopeEnum values.
+However, you can override the scope of a controller by using the `@scope()` decorator. This decorator accepts `Scope` values or string representations.
 
 :::caution
 If you define the module scope you can not override it in a specific controller by using the `@scope` decorator.
@@ -140,7 +140,7 @@ The `@scope` decorator can only be used in specific controllers if the module sc
 
 Here is an example of usage:
 
-Use `BindingScopeEnum.Singleton` or simply a string "Singleton".
+Use `Scope.Singleton` or simply a string "Singleton".
 
 ```typescript
 @scope("Singleton")
