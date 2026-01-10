@@ -115,11 +115,11 @@ project-name/
 </Tabs>
 ## Main Entry Point
 
-The entry point bootstraps the application and starts the server. Full Featured templates use `main.ts`, while Minimal templates use `api.ts`.
+The entry point bootstraps the application and starts the server. Full Featured templates use <span class="span-table">main.ts</span>, while Minimal templates use <span class="span-table">api.ts</span>.
 
 ### Bootstrap Function
 
-The `bootstrap()` function handles environment loading, port configuration, and server startup:
+The <span class="span-table">bootstrap( )</span> function handles environment loading, port configuration, and server startup:
 
 <Tabs>
     <TabItem label="Full Featured" value="full-featured">
@@ -152,7 +152,7 @@ app.listen(3000);
 
 </Tabs>
 
-The `bootstrap()` function automatically handles:
+The <span class="span-table">bootstrap( )</span> function automatically handles:
 
 -   Environment detection and .env file loading
 -   Port determination from environment or options
@@ -160,7 +160,7 @@ The `bootstrap()` function automatically handles:
 -   Application initialization
 -   Server startup with graceful shutdown
 
-Application configuration is handled in the [App class](./app-provider.mdx) (`app.ts`). For comprehensive bootstrap options, see the [Bootstrap](./bootstrap.mdx) guide.
+Application configuration is handled in the [App class](./app-provider.mdx). For comprehensive bootstrap options, see the [Bootstrap](./bootstrap.mdx) guide.
 
 ## Running the Application
 
@@ -182,7 +182,7 @@ Run in production mode:
 npm run prod
 ```
 
-Access the application at `http://localhost:3000/`. You should see "Hello from ExpressoTS!" displayed.
+Access the application at `http://localhost:3000/`. You should see <span class="span-table">"Hello from ExpressoTS!"</span> displayed.
 
 ## Development Tools
 

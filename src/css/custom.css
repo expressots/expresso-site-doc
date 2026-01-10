@@ -12,7 +12,7 @@ html {
 }
 
 body {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     font-family: "Montserrat", sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -59,9 +59,27 @@ body {
 
 html[data-theme="dark"] {
     background-color: #1f1f22;
-    background-image: 
-        radial-gradient(at 0% 0%, rgba(128, 245, 168, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(128, 245, 168, 0.03) 0px, transparent 50%);
+    background-image: radial-gradient(
+            ellipse at 0% 0%,
+            rgba(128, 245, 168, 0.06) 0%,
+            rgba(128, 245, 168, 0.03) 25%,
+            transparent 60%
+        ),
+        radial-gradient(
+            ellipse at 100% 100%,
+            rgba(128, 245, 168, 0.04) 0%,
+            rgba(128, 245, 168, 0.02) 25%,
+            transparent 60%
+        );
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* Ensure body and main containers inherit the gradient */
+[data-theme="dark"] body,
+[data-theme="dark"] #__docusaurus,
+[data-theme="dark"] main {
+    background: transparent !important;
 }
 
 [data-theme="dark"] .navbar {
@@ -79,7 +97,7 @@ html[data-theme="dark"] {
 
 [data-theme="dark"] .menu {
     background-color: #242427;
-    font-size: 15px;
+    font-size: 14px;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
@@ -120,13 +138,17 @@ html[data-theme="dark"] {
 }
 
 .navbar__link::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -4px;
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--expressots-brand), var(--expressots-brand-light));
+    background: linear-gradient(
+        90deg,
+        var(--expressots-brand),
+        var(--expressots-brand-light)
+    );
     transition: width 0.3s ease;
 }
 
@@ -160,21 +182,29 @@ html[data-theme="dark"] {
 }
 
 .customHeroBanner::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(128, 245, 168, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(128, 245, 168, 0.08) 0%, transparent 50%);
+    background: radial-gradient(
+            circle at 20% 50%,
+            rgba(128, 245, 168, 0.1) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 80%,
+            rgba(128, 245, 168, 0.08) 0%,
+            transparent 50%
+        );
     animation: gradientShift 15s ease infinite;
     pointer-events: none;
 }
 
 @keyframes gradientShift {
-    0%, 100% {
+    0%,
+    100% {
         opacity: 1;
     }
     50% {
@@ -247,12 +277,18 @@ html[data-theme="dark"] {
     --docsearch-muted-color: rgba(128, 245, 168, 0.7);
     --docsearch-container-background: rgba(0, 0, 0, 0.75);
     /* Modal */
-    --docsearch-modal-background: linear-gradient(135deg, rgba(27, 27, 29, 0.98) 0%, rgba(31, 31, 34, 0.98) 100%);
-    --docsearch-modal-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(128, 245, 168, 0.2);
+    --docsearch-modal-background: linear-gradient(
+        135deg,
+        rgba(27, 27, 29, 0.98) 0%,
+        rgba(31, 31, 34, 0.98) 100%
+    );
+    --docsearch-modal-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(128, 245, 168, 0.2);
     /* Search box */
     --docsearch-searchbox-background: rgba(255, 255, 255, 0.05);
     --docsearch-searchbox-focus-background: rgba(255, 255, 255, 0.08);
-    --docsearch-searchbox-shadow: 0 0 0 4px rgba(128, 245, 168, 0.15), 0 4px 20px rgba(128, 245, 168, 0.2);
+    --docsearch-searchbox-shadow: 0 0 0 4px rgba(128, 245, 168, 0.15),
+        0 4px 20px rgba(128, 245, 168, 0.2);
     /* Hit */
     --docsearch-hit-color: rgba(255, 255, 255, 0.95);
     --docsearch-hit-active-color: #80f5a8;
@@ -358,7 +394,7 @@ html[data-theme="dark"] {
 }
 
 .button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -383,7 +419,12 @@ html[data-theme="dark"] {
 .button--secondary {
     border: 2px solid transparent;
     background: linear-gradient(#1f1f22, #1f1f22) padding-box,
-                linear-gradient(135deg, var(--expressots-brand), var(--expressots-brand-light)) border-box;
+        linear-gradient(
+                135deg,
+                var(--expressots-brand),
+                var(--expressots-brand-light)
+            )
+            border-box;
 }
 
 .button--secondary:hover {
@@ -420,18 +461,37 @@ html[data-theme="dark"] {
 
 /* Inline code improvements */
 [data-theme="dark"] code {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(128, 245, 168, 0.08);
+    color: #80f5a8;
+    padding: 0.1rem 0.3rem;
+    margin: 0;
+    border-radius: 3px;
+    font-size: 0.95em;
     border: 1px solid rgba(128, 245, 168, 0.15);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 0.9em;
     transition: all 0.2s ease;
-    color: #e4e4e4;
+    display: inline;
+    line-height: 1;
+    vertical-align: baseline;
 }
 
 [data-theme="dark"] code:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(128, 245, 168, 0.12);
     border-color: rgba(128, 245, 168, 0.25);
+}
+
+/* Add padding ONLY to actual code blocks (not inline code) */
+[data-theme="dark"] .theme-code-block pre[class*="language-"] {
+    padding: 1rem !important;
+}
+
+/* Override inline code inside code blocks to remove padding */
+[data-theme="dark"] pre code {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    display: block;
+    line-height: inherit;
 }
 
 /* Code block line numbers */
@@ -542,13 +602,18 @@ html[data-theme="dark"] {
 }
 
 [data-theme="dark"] .admonition::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
     pointer-events: none;
 }
 
@@ -585,32 +650,32 @@ html[data-theme="dark"] {
     margin-bottom: 0;
 }
 
-/* Info Admonition - Dark Grey */
+/* Info Admonition - Dark Grey with subtle green accent */
 [data-theme="dark"] .admonition.admonition-info,
 [data-theme="dark"] .admonition--info {
-    background: rgba(60, 60, 65, 0.6);
-    border-left-color: rgba(255, 255, 255, 0.4);
+    background: rgba(45, 50, 55, 0.6);
+    border-left-color: rgba(120, 180, 200, 0.5);
     color: rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="dark"] .admonition.admonition-info .admonition-heading,
 [data-theme="dark"] .admonition--info .admonition-heading {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(120, 180, 200, 0.95);
 }
 
 [data-theme="dark"] .admonition.admonition-info:hover,
 [data-theme="dark"] .admonition--info:hover {
-    background: rgba(70, 70, 75, 0.7);
-    border-left-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.05);
+    background: rgba(50, 55, 60, 0.7);
+    border-left-color: rgba(120, 180, 200, 0.7);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(120, 180, 200, 0.1);
 }
 
-/* Tip Admonition - Dark Green */
+/* Tip Admonition - Brand Green (Primary) */
 [data-theme="dark"] .admonition.admonition-tip,
 [data-theme="dark"] .admonition--tip,
 [data-theme="dark"] .admonition.admonition-success,
 [data-theme="dark"] .admonition--success {
-    background: rgba(30, 60, 40, 0.6);
+    background: rgba(25, 50, 35, 0.6);
     border-left-color: rgba(128, 245, 168, 0.6);
     color: rgba(255, 255, 255, 0.9);
 }
@@ -626,38 +691,39 @@ html[data-theme="dark"] {
 [data-theme="dark"] .admonition--tip:hover,
 [data-theme="dark"] .admonition.admonition-success:hover,
 [data-theme="dark"] .admonition--success:hover {
-    background: rgba(35, 70, 50, 0.7);
+    background: rgba(30, 55, 40, 0.7);
     border-left-color: rgba(128, 245, 168, 0.8);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(128, 245, 168, 0.15);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(128, 245, 168, 0.15);
 }
 
-/* Note Admonition - Dark Teal/Blue */
+/* Note Admonition - Muted Purple/Grey */
 [data-theme="dark"] .admonition.admonition-note,
 [data-theme="dark"] .admonition--note {
-    background: rgba(30, 50, 60, 0.6);
-    border-left-color: rgba(78, 201, 176, 0.6);
+    background: rgba(50, 45, 60, 0.6);
+    border-left-color: rgba(160, 140, 200, 0.5);
     color: rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="dark"] .admonition.admonition-note .admonition-heading,
 [data-theme="dark"] .admonition--note .admonition-heading {
-    color: rgba(78, 201, 176, 0.95);
+    color: rgba(160, 140, 200, 0.95);
 }
 
 [data-theme="dark"] .admonition.admonition-note:hover,
 [data-theme="dark"] .admonition--note:hover {
-    background: rgba(35, 60, 70, 0.7);
-    border-left-color: rgba(78, 201, 176, 0.8);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(78, 201, 176, 0.15);
+    background: rgba(55, 50, 65, 0.7);
+    border-left-color: rgba(160, 140, 200, 0.7);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(160, 140, 200, 0.1);
 }
 
-/* Warning Admonition - Dark Yellow/Brown */
+/* Warning Admonition - Amber/Gold (more subtle) */
 [data-theme="dark"] .admonition.admonition-warning,
 [data-theme="dark"] .admonition--warning,
 [data-theme="dark"] .admonition.admonition-caution,
 [data-theme="dark"] .admonition--caution {
-    background: rgba(60, 50, 30, 0.6);
-    border-left-color: rgba(255, 193, 7, 0.7);
+    background: rgba(55, 50, 35, 0.6);
+    border-left-color: rgba(230, 180, 80, 0.6);
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -665,25 +731,25 @@ html[data-theme="dark"] {
 [data-theme="dark"] .admonition--warning .admonition-heading,
 [data-theme="dark"] .admonition.admonition-caution .admonition-heading,
 [data-theme="dark"] .admonition--caution .admonition-heading {
-    color: rgba(255, 193, 7, 0.95);
+    color: rgba(230, 180, 80, 0.95);
 }
 
 [data-theme="dark"] .admonition.admonition-warning:hover,
 [data-theme="dark"] .admonition--warning:hover,
 [data-theme="dark"] .admonition.admonition-caution:hover,
 [data-theme="dark"] .admonition--caution:hover {
-    background: rgba(70, 60, 40, 0.7);
-    border-left-color: rgba(255, 193, 7, 0.9);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 193, 7, 0.2);
+    background: rgba(60, 55, 40, 0.7);
+    border-left-color: rgba(230, 180, 80, 0.8);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(230, 180, 80, 0.15);
 }
 
-/* Danger Admonition - Dark Red */
+/* Danger Admonition - Coral/Red (softer) */
 [data-theme="dark"] .admonition.admonition-danger,
 [data-theme="dark"] .admonition--danger,
 [data-theme="dark"] .admonition.admonition-error,
 [data-theme="dark"] .admonition--error {
-    background: rgba(60, 30, 30, 0.6);
-    border-left-color: rgba(244, 135, 113, 0.7);
+    background: rgba(55, 35, 40, 0.6);
+    border-left-color: rgba(240, 120, 110, 0.6);
     color: rgba(255, 255, 255, 0.9);
 }
 
@@ -691,36 +757,205 @@ html[data-theme="dark"] {
 [data-theme="dark"] .admonition--danger .admonition-heading,
 [data-theme="dark"] .admonition.admonition-error .admonition-heading,
 [data-theme="dark"] .admonition--error .admonition-heading {
-    color: rgba(244, 135, 113, 0.95);
+    color: rgba(240, 120, 110, 0.95);
 }
 
 [data-theme="dark"] .admonition.admonition-danger:hover,
 [data-theme="dark"] .admonition--danger:hover,
 [data-theme="dark"] .admonition.admonition-error:hover,
 [data-theme="dark"] .admonition--error:hover {
-    background: rgba(70, 40, 40, 0.7);
-    border-left-color: rgba(244, 135, 113, 0.9);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(244, 135, 113, 0.2);
+    background: rgba(60, 40, 45, 0.7);
+    border-left-color: rgba(240, 120, 110, 0.8);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(240, 120, 110, 0.15);
 }
 
-/* Secondary/Default Admonition */
+/* Secondary/Default Admonition - Brand Green Subtle */
 [data-theme="dark"] .admonition.admonition-secondary,
 [data-theme="dark"] .admonition--secondary {
-    background: rgba(50, 50, 55, 0.6);
+    background: rgba(40, 45, 45, 0.6);
     border-left-color: rgba(128, 245, 168, 0.4);
     color: rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="dark"] .admonition.admonition-secondary .admonition-heading,
 [data-theme="dark"] .admonition--secondary .admonition-heading {
-    color: rgba(128, 245, 168, 0.9);
+    color: rgba(128, 245, 168, 0.85);
 }
 
 [data-theme="dark"] .admonition.admonition-secondary:hover,
 [data-theme="dark"] .admonition--secondary:hover {
-    background: rgba(60, 60, 65, 0.7);
+    background: rgba(45, 50, 50, 0.7);
     border-left-color: rgba(128, 245, 168, 0.6);
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(128, 245, 168, 0.1);
+}
+
+/* Alert classes override (for runtime styling) */
+[data-theme="dark"] .alert--info {
+    background: rgba(45, 50, 55, 0.6) !important;
+    border-left-color: rgba(120, 180, 200, 0.5) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .alert--success {
+    background: rgba(25, 50, 35, 0.6) !important;
+    border-left-color: rgba(128, 245, 168, 0.6) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .alert--secondary {
+    background: rgba(50, 45, 60, 0.6) !important;
+    border-left-color: rgba(160, 140, 200, 0.5) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .alert--warning {
+    background: rgba(55, 50, 35, 0.6) !important;
+    border-left-color: rgba(230, 180, 80, 0.6) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .alert--danger {
+    background: rgba(55, 35, 40, 0.6) !important;
+    border-left-color: rgba(240, 120, 110, 0.6) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Font size adjustments for all admonitions */
+[data-theme="dark"] .admonition,
+[data-theme="dark"] .alert {
+    font-size: 14px !important;
+}
+
+[data-theme="dark"] .admonition-heading,
+[data-theme="dark"] .admonition .admonition-heading {
+    font-size: 14px !important;
+}
+
+[data-theme="dark"] .admonition-content,
+[data-theme="dark"] .admonition-content p {
+    font-size: 14px !important;
+}
+
+/* Details/Summary Styling - Matches Documentation Theme */
+[data-theme="dark"] details {
+    background: rgba(40, 40, 45, 0.5);
+    border: 1px solid rgba(128, 245, 168, 0.15);
+    border-left: 3px solid rgba(128, 245, 168, 0.4);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] details:hover {
+    background: rgba(45, 45, 50, 0.6);
+    border-left-color: rgba(128, 245, 168, 0.6);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] details[open] {
+    background: rgba(45, 45, 50, 0.65);
+    border-color: rgba(128, 245, 168, 0.25);
+    border-left-color: rgba(128, 245, 168, 0.7);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35),
+        0 0 20px rgba(128, 245, 168, 0.08);
+}
+
+[data-theme="dark"] details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.25rem 0;
+    margin: -0.25rem 0 0 0;
+    list-style: none !important;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+[data-theme="dark"] details summary::-webkit-details-marker {
+    display: none !important;
+}
+
+[data-theme="dark"] details summary::marker {
+    display: none !important;
+    content: none !important;
+}
+
+[data-theme="dark"] details summary::before {
+    display: none !important;
+    content: none !important;
+}
+
+[data-theme="dark"] details summary:hover {
+    color: rgba(128, 245, 168, 0.95);
+}
+
+[data-theme="dark"] details summary strong {
+    color: inherit;
+}
+
+/* Light theme details styling */
+details {
+    background: rgba(240, 240, 245, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-left: 3px solid #415171;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+details:hover {
+    background: rgba(235, 235, 240, 0.7);
+    border-left-color: #323f58;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+details[open] {
+    background: rgba(230, 230, 238, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    border-left-color: #415171;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+details summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    color: #111111;
+    padding: 0.25rem 0;
+    margin: -0.25rem 0 0 0;
+    list-style: none !important;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none !important;
+}
+
+details summary::marker {
+    display: none !important;
+    content: none !important;
+}
+
+details summary::before {
+    display: none !important;
+    content: none !important;
+}
+
+details summary:hover {
+    color: #323f58;
+}
+
+details summary strong {
+    color: inherit;
 }
 
 /* Enhanced search */
@@ -765,13 +1000,18 @@ html[data-theme="dark"] {
 }
 
 .DocSearch-Button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(128, 245, 168, 0.1), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(128, 245, 168, 0.1),
+        transparent
+    );
     transition: left 0.5s ease;
 }
 
@@ -795,7 +1035,8 @@ html[data-theme="dark"] {
 .DocSearch-Button:focus {
     outline: none;
     border-color: var(--expressots-brand);
-    box-shadow: 0 0 0 3px rgba(128, 245, 168, 0.2), 0 4px 12px rgba(128, 245, 168, 0.3);
+    box-shadow: 0 0 0 3px rgba(128, 245, 168, 0.2),
+        0 4px 12px rgba(128, 245, 168, 0.3);
 }
 
 .DocSearch-Button .DocSearch-Button-Placeholder {
@@ -868,12 +1109,15 @@ html[data-theme="dark"] {
 .DocSearch-Modal {
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.6),
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(128, 245, 168, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(128, 245, 168, 0.2);
-    background: linear-gradient(135deg, rgba(27, 27, 29, 0.98) 0%, rgba(31, 31, 34, 0.98) 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(27, 27, 29, 0.98) 0%,
+        rgba(31, 31, 34, 0.98) 100%
+    );
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -892,13 +1136,18 @@ html[data-theme="dark"] {
 }
 
 .DocSearch-Modal::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(128, 245, 168, 0.5), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(128, 245, 168, 0.5),
+        transparent
+    );
     pointer-events: none;
 }
 
@@ -943,7 +1192,10 @@ html[data-theme="dark"] {
     transition: color 0.3s ease;
 }
 
-.DocSearch-Modal .DocSearch-Form:focus-within .DocSearch-MagnifierLabel .DocSearch-Search-Icon {
+.DocSearch-Modal
+    .DocSearch-Form:focus-within
+    .DocSearch-MagnifierLabel
+    .DocSearch-Search-Icon {
     color: var(--expressots-brand);
 }
 
@@ -954,7 +1206,7 @@ html[data-theme="dark"] {
     border: none;
     outline: none;
     color: #ffffff;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     padding: 0 12px;
     height: 100%;
@@ -1006,7 +1258,7 @@ html[data-theme="dark"] {
 /* X icon using pseudo-elements */
 .DocSearch-Modal .DocSearch-Clear::before,
 .DocSearch-Modal .DocSearch-Clear::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 12px;
     height: 2px;
@@ -1053,8 +1305,12 @@ html[data-theme="dark"] {
 }
 
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .DocSearch-Modal .DocSearch-Cancel {
@@ -1134,7 +1390,7 @@ html[data-theme="dark"] {
 }
 
 .DocSearch-Modal .DocSearch-Hit::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 0;
@@ -1343,8 +1599,8 @@ html[data-theme="dark"] {
     }
 
     .DocSearch-Modal .DocSearch-Clear {
-    width: 24px;
-    height: 24px;
+        width: 24px;
+        height: 24px;
     }
 
     .DocSearch-Modal .DocSearch-Clear::before,
@@ -1388,7 +1644,7 @@ html[data-theme="dark"] {
     }
 
     .DocSearch-Button .DocSearch-Search-Icon {
-    margin-right: 0;
+        margin-right: 0;
     }
 }
 
@@ -1455,20 +1711,7 @@ html[data-theme="dark"] {
     margin-top: 2rem;
 }
 
-/* Enhanced code inline */
-[data-theme="dark"] code {
-    background: rgba(128, 245, 168, 0.1);
-    border: 1px solid rgba(128, 245, 168, 0.2);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-}
-
-[data-theme="dark"] code:hover {
-    background: rgba(128, 245, 168, 0.15);
-    border-color: rgba(128, 245, 168, 0.3);
-}
+/* Enhanced code inline - removed duplicate conflicting styles that were causing excessive padding */
 
 /* Enhanced blockquotes */
 [data-theme="dark"] blockquote {
