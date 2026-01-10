@@ -157,6 +157,236 @@ async serverShutdown(): Promise<void> {
 
 ---
 
+## Error Handling in Lifecycle Hooks
+
+Each lifecycle hook has specific error handling behavior optimized for its role in the application lifecycle:
+
+### Error Behavior Summary
+
+| Hook | Error Behavior | Bootstrap Result | Use Case |
+|------|----------------|------------------|----------|
+| `globalConfiguration()` | ❌ **Throws & stops** | Bootstrap fails | Critical global settings |
+| `configureServices()` | ❌ **Throws & stops** | Bootstrap fails | Essential services setup |
+| `postServerInitialization()` | ⚠️ **Logs & continues** | Server starts | Non-critical operations |
+| `serverShutdown()` | ⚠️ **Logs & continues** | Shutdown continues | Best-effort cleanup |
+
+### `globalConfiguration()` Errors
+
+Errors in `globalConfiguration()` are **fatal** - the application will not start:
+
+```typescript
+export class App extends AppExpress {
+    globalConfiguration(): void {
+        // ❌ This error crashes bootstrap immediately
+        throw new Error("Invalid route prefix configuration");
+        
+        // Server never starts
+        // Process exits with error code
+    }
+}
+```
+
+**When to throw:**
+- Invalid configuration detected
+- Missing critical files (e.g., view templates directory)
+- Incompatible settings
+
+**Example - Validating configuration:**
+
+```typescript
+globalConfiguration(): void {
+    const prefix = process.env.API_PREFIX;
+    
+    if (!prefix || !prefix.startsWith("/")) {
+        throw new Error("API_PREFIX must start with '/'");
+    }
+    
+    this.setGlobalRoutePrefix(prefix);
+}
+```
+
+### `configureServices()` Errors
+
+Errors in `configureServices()` are **fatal** - use for critical service initialization:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // ✅ Good: Fail fast if database unavailable
+        const db = this.Provider.get(Database);
+        await db.connect(); // Throws if connection fails
+        
+        // ✅ Good: Fail if critical provider missing
+        if (!this.Provider.isBound(CacheService)) {
+            throw new Error("CacheService must be registered");
+        }
+        
+        this.Middleware.parse();
+        this.Middleware.setErrorHandler({
+            showStackTrace: await this.isDevelopment(),
+        });
+    }
+}
+```
+
+**When to throw:**
+- Critical external services unavailable (database, cache, message queue)
+- Required providers not registered
+- Middleware configuration failures
+
+**Example - Graceful vs Fatal errors:**
+
+```typescript
+async configureServices(): Promise<void> {
+    // ❌ Fatal: Database is critical
+    const db = this.Provider.get(Database);
+    await db.connect(); // Let this throw if it fails
+    
+    // ⚠️ Non-fatal: Metrics are optional
+    try {
+        const metrics = this.Provider.get(MetricsService);
+        await metrics.initialize();
+    } catch (error) {
+        console.warn("Metrics service unavailable:", error.message);
+        // App continues without metrics
+    }
+}
+```
+
+### `postServerInitialization()` Errors
+
+Errors in `postServerInitialization()` are **logged but non-fatal** - the server continues running:
+
+```typescript
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        // ⚠️ Error logged, server continues
+        throw new Error("Background job scheduler failed");
+        
+        // Server is already running and accepting requests
+        // Error is logged but doesn't stop the server
+    }
+}
+```
+
+**When to use:**
+- Background tasks that can be retried
+- Non-critical monitoring setup
+- Optional feature initialization
+
+**Example - Robust post-initialization:**
+
+```typescript
+async postServerInitialization(): Promise<void> {
+    // Environment check (non-critical)
+    if (await this.isDevelopment()) {
+        console.log("🔧 Development mode enabled");
+        console.log(`Port: ${await this.getPort()}`);
+    }
+    
+    // Background tasks (handle errors)
+    try {
+        await this.Provider.get(SchedulerService).start();
+    } catch (error) {
+        console.error("Scheduler failed to start:", error);
+        // Server continues, retry can happen later
+    }
+    
+    // External API health check (best effort)
+    try {
+        await this.Provider.get(ExternalAPI).ping();
+    } catch (error) {
+        console.warn("External API unreachable (will retry):", error);
+    }
+}
+```
+
+### `serverShutdown()` Errors
+
+Errors in `serverShutdown()` are **logged but don't prevent shutdown**:
+
+```typescript
+export class App extends AppExpress {
+    async serverShutdown(): Promise<void> {
+        // ⚠️ Best-effort cleanup
+        try {
+            await this.Provider.get(Database).disconnect();
+        } catch (error) {
+            console.error("Database disconnect error:", error);
+            // Shutdown continues anyway
+        }
+        
+        try {
+            await this.Provider.get(CacheService).close();
+        } catch (error) {
+            console.error("Cache close error:", error);
+            // Shutdown continues anyway
+        }
+    }
+}
+```
+
+**Best practices:**
+- Always use try-catch for each cleanup operation
+- Log errors but allow shutdown to continue
+- Set reasonable timeouts for cleanup operations
+- Don't throw errors (they're logged but ignored)
+
+**Example - Robust shutdown:**
+
+```typescript
+async serverShutdown(): Promise<void> {
+    console.log("Starting graceful shutdown...");
+    
+    const cleanupTasks = [
+        this.closeDatabase(),
+        this.stopBackgroundJobs(),
+        this.flushMetrics(),
+    ];
+    
+    // Run all cleanup tasks in parallel
+    const results = await Promise.allSettled(cleanupTasks);
+    
+    // Log any failures
+    results.forEach((result, index) => {
+        if (result.status === "rejected") {
+            console.error(`Cleanup task ${index} failed:`, result.reason);
+        }
+    });
+    
+    console.log("Shutdown complete");
+}
+
+private async closeDatabase(): Promise<void> {
+    const db = this.Provider.get(Database);
+    await db.disconnect();
+}
+
+private async stopBackgroundJobs(): Promise<void> {
+    const scheduler = this.Provider.get(SchedulerService);
+    await scheduler.stop();
+}
+
+private async flushMetrics(): Promise<void> {
+    const metrics = this.Provider.get(MetricsService);
+    await metrics.flush();
+}
+```
+
+:::tip Error Handling Strategy
+**Fail Fast vs Fail Safe:**
+
+| Stage | Strategy | Reasoning |
+|-------|----------|-----------|
+| `globalConfiguration()` | **Fail Fast** | Invalid config = broken app |
+| `configureServices()` | **Fail Fast** | Critical services required |
+| `postServerInitialization()` | **Fail Safe** | Server already accepting requests |
+| `serverShutdown()` | **Fail Safe** | Best-effort cleanup |
+
+:::
+
+---
+
 ## Configuration methods
 
 ### `configContainer()`
@@ -344,6 +574,215 @@ console.log(`Server is running on port ${port}`);
 ---
 
 ## Advanced configuration
+
+### Server Information
+
+Access server details and runtime information:
+
+```typescript
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        // Get actual listening port
+        const port = await this.getPort();
+        console.log(`Server listening on port ${port}`);
+        
+        // Get HTTP server instance
+        const httpServer = await this.getHttpServer();
+        const address = httpServer.address();
+        console.log(`Server address: ${address}`);
+        
+        // Check environment
+        if (await this.isDevelopment()) {
+            console.log("Development mode - debug features enabled");
+        }
+    }
+}
+```
+
+**Common use cases:**
+- WebSocket server setup
+- Custom server configuration
+- Health check endpoints
+- Monitoring integration
+
+### Server Cleanup & Testing
+
+Proper server cleanup is essential for tests and controlled shutdowns:
+
+**Basic test pattern:**
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+describe("API Tests", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+
+    beforeAll(async () => {
+        server = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        // Clean up server
+        if (server) {
+            const httpServer = await server.getHttpServer();
+            await new Promise<void>((resolve) => {
+                httpServer.close(() => resolve());
+            });
+        }
+    });
+
+    test("GET /health returns 200", async () => {
+        const port = await server.getPort();
+        const response = await fetch(`http://localhost:${port}/health`);
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+**Timeout-safe cleanup:**
+
+```typescript
+async function closeServerSafely(
+    server: Awaited<ReturnType<typeof bootstrap>>,
+    timeout: number = 5000
+): Promise<void> {
+    if (!server) return;
+
+    const httpServer = await server.getHttpServer();
+    
+    return new Promise<void>((resolve) => {
+        // Force close after timeout
+        const timer = setTimeout(() => {
+            console.warn("Force closing server after timeout");
+            httpServer.closeAllConnections?.(); // Node 18+
+            resolve();
+        }, timeout);
+
+        // Graceful close
+        httpServer.close(() => {
+            clearTimeout(timer);
+            resolve();
+        });
+
+        // Close idle connections immediately (Node 18+)
+        httpServer.closeIdleConnections?.();
+    });
+}
+
+// Usage in tests
+afterAll(async () => {
+    await closeServerSafely(server, 5000);
+});
+```
+
+**Multiple test suites pattern:**
+
+```typescript
+// test-setup.ts
+let globalServer: Awaited<ReturnType<typeof bootstrap>> | null = null;
+
+export async function getTestServer() {
+    if (!globalServer) {
+        globalServer = await bootstrap(App, { port: 0 });
+    }
+    return globalServer;
+}
+
+export async function closeTestServer() {
+    if (globalServer) {
+        const httpServer = await globalServer.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
+        globalServer = null;
+    }
+}
+
+// user.test.ts
+import { getTestServer } from "./test-setup";
+
+describe("User API", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+    let baseUrl: string;
+
+    beforeAll(async () => {
+        server = await getTestServer();
+        const port = await server.getPort();
+        baseUrl = `http://localhost:${port}`;
+    });
+
+    test("creates user", async () => {
+        const response = await fetch(`${baseUrl}/users`, {
+            method: "POST",
+            body: JSON.stringify({ name: "Test" }),
+        });
+        expect(response.status).toBe(201);
+    });
+});
+```
+
+**Cleanup best practices:**
+
+```typescript
+describe("Integration Tests", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
+
+    beforeEach(async () => {
+        // Fresh server for each test (full isolation)
+        server = await bootstrap(App, { port: 0 });
+        port = await server.getPort();
+    });
+
+    afterEach(async () => {
+        // Clean up after each test
+        if (server) {
+            const httpServer = await server.getHttpServer();
+            
+            // Close idle connections first
+            if (typeof httpServer.closeIdleConnections === "function") {
+                httpServer.closeIdleConnections();
+            }
+            
+            // Then close server
+            await new Promise<void>((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Server close timeout"));
+                }, 5000);
+                
+                httpServer.close((err) => {
+                    clearTimeout(timeout);
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+            
+            server = null;
+        }
+    });
+
+    test("isolated test", async () => {
+        // Each test has its own server instance
+        const response = await fetch(`http://localhost:${port}/test`);
+        expect(response.ok).toBe(true);
+    });
+});
+```
+
+:::warning Test Cleanup
+**Always close servers in tests to avoid:**
+- ❌ Port conflicts in subsequent tests
+- ❌ Jest/Vitest hanging ("did not exit after tests")
+- ❌ Resource leaks (connections, timers, file handles)
+- ❌ Flaky tests due to shared state
+
+**Key points:**
+- Use `port: 0` for auto-assigned ports (no conflicts)
+- Close servers in `afterEach` or `afterAll`
+- Use timeout protection for cleanup
+- Close idle connections first for faster cleanup
+:::
 
 ### `Graceful shutdown`
 

@@ -384,6 +384,218 @@ bootstrap(App, {
 
 ---
 
+## Error Handling
+
+### Lifecycle Hook Errors
+
+Bootstrap provides different error handling behaviors depending on which lifecycle hook throws an error:
+
+| Hook | Error Behavior | Impact | When to Use |
+|------|----------------|--------|-------------|
+| `globalConfiguration()` | ❌ **Fails immediately** | Bootstrap crashes | Fatal configuration errors |
+| `configureServices()` | ❌ **Fails immediately** | Bootstrap crashes | Critical service setup |
+| `postServerInitialization()` | ⚠️ **Logs error** | Server continues | Non-critical startup tasks |
+| `serverShutdown()` | ⚠️ **Logs warning** | Shutdown continues | Best-effort cleanup |
+
+**Example - globalConfiguration() error:**
+
+```typescript
+export class App extends AppExpress {
+    globalConfiguration(): void {
+        throw new Error("Invalid configuration");
+        // ❌ Bootstrap fails immediately with clear error message
+        // Server never starts
+    }
+}
+```
+
+**Example - configureServices() error:**
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        throw new Error("Service initialization failed");
+        // ❌ Bootstrap fails immediately
+        // Useful for critical dependencies (database, cache, etc.)
+    }
+}
+```
+
+**Example - postServerInitialization() error:**
+
+```typescript
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        throw new Error("Background task failed");
+        // ⚠️ Error logged but server continues
+        // Useful for non-critical operations (metrics, monitoring)
+    }
+}
+```
+
+:::tip Best Practice
+**Fail fast** for critical dependencies in `configureServices()`:
+
+```typescript
+async configureServices(): Promise<void> {
+    // Critical: Crash if database unavailable
+    const db = this.Provider.get(Database);
+    await db.connect(); // Throws if connection fails
+
+    // Non-critical: Handle gracefully
+    try {
+        await this.Provider.get(MetricsService).start();
+    } catch (error) {
+        console.warn("Metrics disabled:", error.message);
+    }
+}
+```
+:::
+
+### Bootstrap Option Errors
+
+Common bootstrap option errors and how to handle them:
+
+**Invalid port:**
+
+```typescript
+bootstrap(App, { port: -1 });
+// ❌ Error: Port must be between 0 and 65535
+```
+
+**Missing required environment variables:**
+
+```typescript
+bootstrap(App, {
+    envFileConfig: {
+        required: ["DATABASE_URL"],
+        validateValues: true,
+    },
+});
+// ❌ Error: DATABASE_URL is required but not set
+// Provides platform-specific setup instructions
+```
+
+**Invalid environment file:**
+
+```typescript
+bootstrap(App, {
+    envFileConfig: {
+        files: { production: ".env.missing" },
+    },
+});
+// ❌ Error: Missing required environment file: .env.missing
+// Suggests using autoCreateTemplate or checking file path
+```
+
+---
+
+## Server Management
+
+### Getting Server Information
+
+Access server details after bootstrap completes:
+
+```typescript
+const server = await bootstrap(App, { port: 0 });
+
+// Get actual port (useful with port: 0)
+const port = await server.getPort();
+console.log(`Server listening on port ${port}`);
+
+// Get underlying HTTP server
+const httpServer = await server.getHttpServer();
+
+// Check server address
+const address = httpServer.address();
+console.log(`Server running at ${address.address}:${address.port}`);
+```
+
+### Server Cleanup
+
+Properly close servers in tests and shutdown scenarios:
+
+**Test cleanup pattern:**
+
+```typescript
+describe("API Tests", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+
+    beforeAll(async () => {
+        server = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        // Cleanup server
+        if (server) {
+            const httpServer = await server.getHttpServer();
+            await new Promise<void>((resolve) => {
+                httpServer.close(() => resolve());
+            });
+        }
+    });
+
+    test("endpoint works", async () => {
+        const port = await server.getPort();
+        // Make request to http://localhost:${port}
+    });
+});
+```
+
+**Graceful shutdown pattern:**
+
+```typescript
+const server = await bootstrap(App);
+
+// Handle shutdown signals
+process.on("SIGTERM", async () => {
+    console.log("Shutting down gracefully...");
+    const httpServer = await server.getHttpServer();
+    
+    httpServer.close(async () => {
+        // serverShutdown() hook called automatically
+        console.log("Server closed");
+        process.exit(0);
+    });
+});
+```
+
+**Timeout-safe cleanup:**
+
+```typescript
+async function closeServerSafely(
+    server: Awaited<ReturnType<typeof bootstrap>>,
+    timeout: number = 5000
+): Promise<void> {
+    const httpServer = await server.getHttpServer();
+    
+    return new Promise<void>((resolve) => {
+        const timer = setTimeout(() => {
+            console.warn("Force closing server after timeout");
+            resolve();
+        }, timeout);
+
+        httpServer.close(() => {
+            clearTimeout(timer);
+            resolve();
+        });
+    });
+}
+
+// Usage
+await closeServerSafely(server, 5000);
+```
+
+:::warning Important
+Always close servers in tests to:
+- ✅ Avoid port conflicts in subsequent tests
+- ✅ Prevent Jest/Vitest from hanging
+- ✅ Clean up resources (connections, timers)
+- ✅ Ensure proper test isolation
+:::
+
+---
+
 ## Common Patterns by Scenario
 
 ### Development with Auto-Creation
