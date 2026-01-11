@@ -136,14 +136,11 @@ await bootstrap(App);
     <TabItem label="Minimal" value="minimal">
 
 ```typescript
-import { createMicroAPI } from "@expressots/adapter-express";
+import { micro } from "@expressots/adapter-express";
 
-const microAPI = createMicroAPI();
-const app = microAPI.build();
+const app = micro();
 
-app.Route.get("/", (req, res) => {
-    res.json({ message: "Hello from ExpressoTS!" });
-});
+app.get("/", () => ({ message: "Hello from ExpressoTS!" }));
 
 app.listen(3000);
 ```

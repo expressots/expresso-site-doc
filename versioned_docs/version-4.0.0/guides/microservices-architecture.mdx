@@ -1,0 +1,513 @@
+---
+sidebar_position: 12
+title: Microservices Architecture
+description: Build production-ready microservices with ExpressoTS v4.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Microservices Architecture with ExpressoTS
+
+This guide covers patterns, best practices, and complete examples for building distributed systems with ExpressoTS v4.
+
+## Overview
+
+ExpressoTS provides everything you need to build production-ready microservices:
+
+-   **Lightweight Services**: Micro API for focused, single-purpose services
+-   **Inter-Service Communication**: HTTP clients with circuit breakers and retries
+-   **Service Discovery**: Consul, etcd, or static registration
+-   **Event-Driven Architecture**: EventEmitter for async communication
+-   **Message Queues**: RabbitMQ, SQS, Kafka integration
+-   **Observability**: Health checks, metrics, distributed tracing
+-   **Deployment**: Docker, Kubernetes, serverless
+
+## Core Concepts
+
+### Microservice Design Patterns
+
+ExpressoTS supports these patterns out of the box:
+
+| Pattern | Description | ExpressoTS Implementation |
+|---------|-------------|---------------------------|
+| **Service per Business Capability** | Each service handles one domain | Micro API template |
+| **Database per Service** | Isolated data stores | DI-based providers |
+| **API Gateway** | Single entry point | ServiceProxy |
+| **Circuit Breaker** | Fault tolerance | CircuitBreaker class |
+| **Service Registry** | Dynamic discovery | ServiceDiscovery class |
+| **Event Sourcing** | Event-based state | EventEmitter + EventRecorder |
+| **CQRS** | Command/Query separation | Separate read/write services |
+
+## Inter-Service Communication
+
+### Synchronous (HTTP)
+
+Use `ServiceClient` for HTTP-based service-to-service communication:
+
+```typescript
+import { ServiceClient } from "@expressots/adapter-express/service-mesh";
+
+const userService = new ServiceClient({
+    name: "user-service",
+    baseUrl: "http://user-service:3001",
+    timeout: 5000,
+    retries: 3,
+    circuitBreaker: true,
+});
+
+// GET request
+const user = await userService.get<User>("/users/123");
+
+// POST request
+const newUser = await userService.post<User>("/users", {
+    name: "John",
+    email: "john@example.com",
+});
+
+// With query parameters
+const users = await userService.get<User[]>("/users", {
+    params: { page: "1", limit: "10" },
+});
+```
+
+### Asynchronous (Events)
+
+Use EventEmitter for async, decoupled communication:
+
+```typescript
+import { EventEmitter } from "@expressots/core";
+
+const events = new EventEmitter();
+
+// Service A: Publish event
+events.emit("order.created", {
+    orderId: "123",
+    userId: "user-456",
+    items: [{ productId: "prod-1", quantity: 2 }],
+});
+
+// Service B: Subscribe to event
+events.on("order.created", async (data) => {
+    // Update inventory
+    await inventoryService.reserve(data.items);
+});
+
+// Service C: Subscribe to same event
+events.on("order.created", async (data) => {
+    // Send confirmation email
+    await emailService.sendOrderConfirmation(data.userId, data.orderId);
+});
+```
+
+### Message Queues
+
+For cross-process or cross-machine communication:
+
+```typescript
+import { RabbitMQConsumer } from "@expressots/adapter-express/queue";
+
+// Producer Service
+const orderQueue = new RabbitMQConsumer({
+    url: process.env.RABBITMQ_URL,
+    queue: "orders",
+});
+
+await orderQueue.publish({
+    orderId: "123",
+    action: "process",
+});
+
+// Consumer Service
+await orderQueue.consume(async (message) => {
+    const order = message.body;
+    await processOrder(order);
+});
+```
+
+## Service Discovery
+
+### Static Registration
+
+For simple deployments:
+
+```typescript
+import { ServiceDiscovery } from "@expressots/adapter-express/service-mesh";
+
+const discovery = new ServiceDiscovery({ type: "static" });
+
+discovery.registerService({
+    id: "user-service-1",
+    name: "user-service",
+    host: "user-service",
+    port: 3001,
+    health: "healthy",
+    lastCheck: new Date(),
+});
+
+discovery.registerService({
+    id: "user-service-2",
+    name: "user-service",
+    host: "user-service-2",
+    port: 3001,
+    health: "healthy",
+    lastCheck: new Date(),
+});
+
+// Get instance (round-robin)
+const instance = discovery.getService("user-service");
+```
+
+### Consul Integration
+
+For dynamic environments:
+
+```typescript
+const discovery = new ServiceDiscovery({
+    type: "consul",
+    endpoint: "http://consul:8500",
+    refreshInterval: 30000,
+});
+
+await discovery.initialize();
+
+// Services are automatically discovered
+const instance = discovery.getService("user-service");
+```
+
+## Circuit Breaker Pattern
+
+Protect against cascading failures:
+
+```typescript
+import { CircuitBreaker } from "@expressots/adapter-express/gateway";
+
+const breaker = new CircuitBreaker({
+    failureThreshold: 5,    // Open after 5 failures
+    successThreshold: 2,    // Close after 2 successes
+    timeout: 60000,         // Reset after 60 seconds
+});
+
+async function callExternalService() {
+    return await breaker.execute(async () => {
+        const response = await fetch("https://external-api.com/data");
+        if (!response.ok) throw new Error("API failed");
+        return response.json();
+    });
+}
+
+// Monitor circuit state
+console.log(breaker.getStats());
+// { state: "CLOSED", failures: 0, successes: 10, totalCalls: 15 }
+```
+
+### Circuit States
+
+```
+    CLOSED ──(failures > threshold)──> OPEN
+       ^                                  │
+       │                           (timeout expires)
+       │                                  │
+       └──(successes > threshold)── HALF_OPEN
+```
+
+## Complete Example: E-Commerce System
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        API Gateway (:3000)                       │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+        ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│ User Service  │   │ Order Service │   │Product Service│
+│    (:3001)    │   │    (:3002)    │   │    (:3003)    │
+└───────────────┘   └───────────────┘   └───────────────┘
+        │                   │                   │
+        └───────────────────┴───────────────────┘
+                            │
+                    ┌───────────────┐
+                    │   RabbitMQ    │
+                    └───────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│   Inventory   │   │ Notification  │   │   Payment     │
+│   Service     │   │   Service     │   │   Service     │
+└───────────────┘   └───────────────┘   └───────────────┘
+```
+
+### API Gateway
+
+```typescript
+// api-gateway/src/api.ts
+import { micro, ServiceDiscovery, ServiceClient, CircuitBreaker } from "@expressots/adapter-express";
+
+const app = micro();
+
+// Service discovery
+const discovery = new ServiceDiscovery({ type: "static" });
+discovery.registerService({ id: "user-1", name: "user-service", host: "user-service", port: 3001, health: "healthy", lastCheck: new Date() });
+discovery.registerService({ id: "order-1", name: "order-service", host: "order-service", port: 3002, health: "healthy", lastCheck: new Date() });
+discovery.registerService({ id: "product-1", name: "product-service", host: "product-service", port: 3003, health: "healthy", lastCheck: new Date() });
+
+// Service clients with circuit breakers
+const userClient = new ServiceClient({ name: "user-service", baseUrl: "http://user-service:3001", circuitBreaker: { failureThreshold: 5 } });
+const orderClient = new ServiceClient({ name: "order-service", baseUrl: "http://order-service:3002", circuitBreaker: { failureThreshold: 5 } });
+const productClient = new ServiceClient({ name: "product-service", baseUrl: "http://product-service:3003", circuitBreaker: { failureThreshold: 5 } });
+
+// Proxy routes
+app.get("/api/users/:id", async (req) => userClient.get(`/users/${req.params.id}`));
+app.get("/api/orders/:id", async (req) => orderClient.get(`/orders/${req.params.id}`));
+app.get("/api/products/:id", async (req) => productClient.get(`/products/${req.params.id}`));
+
+// Health aggregation
+app.get("/health", () => ({
+    status: "healthy",
+    services: discovery.listServices(),
+}));
+
+app.listen(3000);
+```
+
+### Order Service (Event Publisher)
+
+```typescript
+// order-service/src/api.ts
+import { micro, RabbitMQConsumer } from "@expressots/adapter-express";
+
+const app = micro();
+
+// Queue for async processing
+const orderQueue = new RabbitMQConsumer({
+    url: process.env.RABBITMQ_URL!,
+    queue: "order-events",
+});
+
+app.post("/orders", async (req) => {
+    const { userId, items } = req.body;
+    
+    const order = {
+        id: Date.now().toString(),
+        userId,
+        items,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+    };
+    
+    // Save order to database
+    // await db.orders.create(order);
+    
+    // Publish event for other services
+    await orderQueue.publish({
+        type: "order.created",
+        data: order,
+    });
+    
+    return order;
+});
+
+app.listen(3002);
+```
+
+### Inventory Service (Event Consumer)
+
+```typescript
+// inventory-service/src/api.ts
+import { micro, RabbitMQConsumer } from "@expressots/adapter-express";
+
+const app = micro();
+
+const orderQueue = new RabbitMQConsumer({
+    url: process.env.RABBITMQ_URL!,
+    queue: "order-events",
+});
+
+// Consume order events
+await orderQueue.consume(async (message) => {
+    if (message.body.type === "order.created") {
+        const order = message.body.data;
+        console.log("Reserving inventory for order:", order.id);
+        
+        // Reserve inventory
+        for (const item of order.items) {
+            await reserveInventory(item.productId, item.quantity);
+        }
+    }
+});
+
+app.get("/inventory/:productId", async (req) => {
+    const { productId } = req.params;
+    const stock = await getStock(productId);
+    return { productId, stock };
+});
+
+app.listen(3004);
+```
+
+## Docker Compose for Local Development
+
+```yaml
+version: "3.8"
+
+services:
+    api-gateway:
+        build: ./api-gateway
+        ports:
+            - "3000:3000"
+        environment:
+            - NODE_ENV=development
+        depends_on:
+            - user-service
+            - order-service
+            - product-service
+
+    user-service:
+        build: ./user-service
+        ports:
+            - "3001:3001"
+        environment:
+            - NODE_ENV=development
+            - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/users
+
+    order-service:
+        build: ./order-service
+        ports:
+            - "3002:3002"
+        environment:
+            - NODE_ENV=development
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+        depends_on:
+            - rabbitmq
+
+    product-service:
+        build: ./product-service
+        ports:
+            - "3003:3003"
+        environment:
+            - NODE_ENV=development
+
+    inventory-service:
+        build: ./inventory-service
+        environment:
+            - RABBITMQ_URL=amqp://rabbitmq:5672
+        depends_on:
+            - rabbitmq
+
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+
+    postgres:
+        image: postgres:16-alpine
+        environment:
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
+```
+
+## Observability
+
+### Distributed Tracing
+
+```typescript
+import { micro } from "@expressots/adapter-express";
+import { TracingProvider } from "@expressots/micro-providers";
+
+const app = micro();
+
+const tracing = new TracingProvider({
+    serviceName: "order-service",
+    endpoint: process.env.JAEGER_ENDPOINT,
+    sampleRate: 1.0,
+});
+
+app.use(tracing.middleware());
+
+// Manual spans
+app.post("/orders", async (req) => {
+    const span = tracing.startSpan("create-order");
+    
+    try {
+        const order = { id: Date.now(), ...req.body };
+        tracing.addLog(span.spanId, "Order created");
+        tracing.endSpan(span.spanId);
+        return order;
+    } catch (error) {
+        tracing.endSpan(span.spanId, error as Error);
+        throw error;
+    }
+});
+```
+
+### Metrics
+
+```typescript
+import { micro } from "@expressots/adapter-express";
+import { MetricsProvider } from "@expressots/micro-providers";
+
+const app = micro();
+const metrics = new MetricsProvider({ prefix: "order_service_" });
+
+app.use(metrics.httpMetricsMiddleware());
+
+app.post("/orders", (req) => {
+    metrics.incrementCounter("orders_created_total");
+    return { id: Date.now(), ...req.body };
+});
+
+app.get("/metrics", metrics.prometheusHandler.bind(metrics));
+```
+
+## Best Practices
+
+### 1. Service Boundaries
+
+-   One service = one business capability
+-   Services own their data
+-   Communicate through APIs or events
+-   Avoid shared databases
+
+### 2. Failure Handling
+
+-   Use circuit breakers for external calls
+-   Implement retries with exponential backoff
+-   Design for eventual consistency
+-   Have fallback strategies
+
+### 3. Security
+
+-   Secure inter-service communication
+-   Use service-to-service authentication
+-   Validate all inputs
+-   Encrypt sensitive data
+
+### 4. Monitoring
+
+-   Health checks on all services
+-   Centralized logging
+-   Distributed tracing
+-   Alerting on anomalies
+
+### 5. Deployment
+
+-   Containerize everything
+-   Use Kubernetes for orchestration
+-   Implement CI/CD pipelines
+-   Blue-green or canary deployments
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

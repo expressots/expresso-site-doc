@@ -172,21 +172,15 @@ AppFactory.create(App).then((app) =>
 
         <TabItem label="Micro API" value="micro">
 
-    ```typescript
-const microAPI = createMicroAPI();
-microAPI.setGlobalRoutePrefix("/v1");
+```typescript
+import { micro } from "@expressots/adapter-express";
 
-const app = microAPI.build();
-app.Middleware.addBodyParser();
+const app = micro();
 
-app.Route.get("/", (req: Request, res: Response) => {
-    res.send("Hello from ExpressoTS!");
-});
+app.get("/", () => "Hello from ExpressoTS!");
 
-app.listen(3001);
-
-    bootstrap();
-    ```
+app.listen(3000);
+```
 
         </TabItem>
     </Tabs>
@@ -211,7 +205,7 @@ initEnvironment("development", {
 ```
 
 :::info
-MicroAPI project have the entire application setup in the `api.ts` file. The `createMicroAPI` function is responsible for creating the application instance.
+MicroAPI projects have the entire application setup in the `api.ts` file. The `micro()` function creates a simplified API instance with auto-JSON parsing and Express-style routing.
 :::
 
 ## Running the application
