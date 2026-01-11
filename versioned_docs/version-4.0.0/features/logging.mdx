@@ -9,22 +9,46 @@ import TabItem from "@theme/TabItem";
 
 # Logging System
 
-ExpressoTS v4 features a **production-ready logging system** with 11 comprehensive phases, providing everything from basic logging to advanced features like query/export, health monitoring, flow visualization, and sensitive data redaction.
+Production-ready logging with 11 phases.
 
 ## Overview
 
-The logging system provides:
+| Feature | Description |
+|---------|-------------|
+| Log Levels | TRACE, DEBUG, INFO, WARN, ERROR, FATAL |
+| Structured Logging | Objects with full metadata |
+| Transports | Console, File, Custom |
+| Context Management | Child loggers and context tracking |
+| Data Redaction | Automatic sensitive data protection |
+| Performance Tracking | Built-in metrics |
+| Query & Export | In-memory buffer with search |
+| Flow Visualization | Event flow tracking |
+| Error Suggestions | Helpful hints for common errors |
+| Health Monitoring | CPU, memory, system health |
 
-- **6 Log Levels**: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
-- **Structured Logging**: Log objects with full metadata
-- **Multiple Transports**: Console, File, Custom, and more
-- **Context Management**: Child loggers and context tracking
-- **Data Redaction**: Automatic sensitive data protection
-- **Performance Tracking**: Built-in metrics and monitoring
-- **Query & Export**: In-memory buffer with search and export
-- **Flow Visualization**: ASCII art event flow tracking
-- **Error Suggestions**: Helpful hints for common errors
-- **Health Monitoring**: CPU, memory, and system health tracking
+```mermaid
+flowchart LR
+    subgraph Core [Logger Core]
+        Input[Log Call] --> Level[Level Filter]
+        Level --> Context[Add Context]
+        Context --> Format[Formatter]
+    end
+
+    subgraph Transports [Transports]
+        Format --> Console[Console]
+        Format --> File[File]
+        Format --> Custom[Custom]
+    end
+
+    subgraph Features [Advanced Features]
+        Redact[Redaction]
+        Query[Query System]
+        Health[Health Monitor]
+        Flow[Flow Viz]
+    end
+
+    Transports -.-> Features
+```
 
 ---
 
@@ -64,7 +88,7 @@ export class App extends AppExpress {
 
 ## Log Levels
 
-ExpressoTS provides 6 log levels with intelligent filtering:
+Six log levels with intelligent filtering:
 
 | Level | Value | Use Case | Example |
 |-------|-------|----------|---------|
@@ -196,7 +220,7 @@ export class UserService {
 
 ## Transport System
 
-Transports control where logs are written (console, files, databases, etc.).
+Transports control log destinations.
 
 ### Console Transport
 
@@ -408,9 +432,9 @@ this.logger.configure({
 
 ---
 
-## Phase 4: Sensitive Data Redaction
+## Sensitive Data Redaction
 
-Automatically redact sensitive data from logs (passwords, API keys, credit cards, etc.).
+Automatically redact sensitive data (passwords, API keys, credit cards).
 
 ### Automatic Redaction
 
@@ -526,9 +550,9 @@ this.logger.configure({
 
 ---
 
-## Phase 5: Performance Monitoring
+## Performance Monitoring
 
-Track operation duration and performance metrics:
+Track operation duration and metrics:
 
 ### Basic Performance Tracking
 
@@ -571,9 +595,9 @@ await this.logger.withPerformance("Heavy Operation", async () => {
 
 ---
 
-## Phase 6: Log Grouping
+## Log Grouping
 
-Group related logs together:
+Group related logs:
 
 ```typescript
 this.logger.group("User Registration Flow", () => {
@@ -611,9 +635,9 @@ this.logger.group("Order Processing", () => {
 
 ---
 
-## Phase 7: Flow Visualization
+## Flow Visualization
 
-Visualize event flow through your application:
+Visualize event flow:
 
 ### Enable Flow Tracking
 
@@ -652,9 +676,9 @@ console.log(flowData.totalDuration);
 
 ---
 
-## Phase 8: Error Suggestions
+## Error Suggestions
 
-Get helpful suggestions for common errors:
+Helpful suggestions for common errors:
 
 ### Route Suggestions
 
@@ -699,9 +723,9 @@ this.logger.configure({
 
 ---
 
-## Phase 9: Health Monitoring
+## Health Monitoring
 
-Monitor system health continuously:
+Continuous system health monitoring:
 
 ### Enable Health Monitoring
 
@@ -746,9 +770,9 @@ console.log(health.uptime);                      // 3600 (seconds)
 
 ---
 
-## Phase 11: Query & Export
+## Query & Export
 
-Query logs from in-memory buffer and export to various formats:
+Query and export logs from in-memory buffer:
 
 ### Enable Query System
 
@@ -1347,77 +1371,8 @@ describe("Logger E2E", () => {
 });
 ```
 
-## Troubleshooting
-
-### Logs Not Appearing
-
-**Problem:** Logs are not being output
-
-**Solutions:**
-
-1. **Check log level configuration:**
-```typescript
-// Ensure level is low enough
-this.logger.configure({ level: LogLevel.DEBUG });
-```
-
-2. **Verify transports are configured:**
-```typescript
-this.logger.configure({
-    transports: [ConsoleTransport.forDevelopment()]
-});
-```
-
-3. **Check environment:**
-```typescript
-// Production might have higher log level
-const level = process.env.NODE_ENV === "production" 
-    ? LogLevel.WARN 
-    : LogLevel.DEBUG;
-```
-
-### Redaction Not Working
-
-**Problem:** Sensitive data is not being redacted
-
-**Solution:**
-```typescript
-configureGlobalRedactor({
-    enabled: true,  // Ensure redaction is enabled
-    customFieldPatterns: ["mySecret", "apiKey"],
-});
-```
-
-### Performance Issues
-
-**Problem:** Logging is slow
-
-**Solutions:**
-
-1. **Use async transports:**
-```typescript
-this.logger.configure({
-    transports: [
-        ConsoleTransport.forProduction(),  // JSON is faster
-    ]
-});
-```
-
-2. **Reduce log level in production:**
-```typescript
-this.logger.configure({ level: LogLevel.WARN });
-```
-
-3. **Limit buffer size:**
-```typescript
-this.logger.configure({
-    query: { bufferSize: 100 }  // Smaller buffer
-});
-```
-
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

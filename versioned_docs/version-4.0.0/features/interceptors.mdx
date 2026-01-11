@@ -9,18 +9,37 @@ import TabItem from "@theme/TabItem";
 
 # Interceptors
 
-Interceptors provide a way to add cross-cutting concerns to your application without modifying controller code. They follow the **Aspect-Oriented Programming (AOP)** pattern, allowing you to intercept requests and responses to add functionality like logging, caching, transformation, timing, and more.
+Aspect-Oriented Programming (AOP) for cross-cutting concerns.
 
 ## Overview
 
-Interceptors in ExpressoTS provide:
+| Feature | Description |
+|---------|-------------|
+| Pre/Post Processing | Execute code before and after handlers |
+| Priority-Based | Control execution order |
+| Dependency Injection | Full DI support |
+| One-Liner Setup | `setupInterceptorsForExpress()` |
+| Built-In | Performance tracking included |
+| Type-Safe | Full TypeScript generics |
 
-- **Pre/Post Processing**: Execute code before and after route handlers
-- **Priority-Based Execution**: Control interceptor execution order
-- **Dependency Injection**: Full DI support for interceptors
-- **One-Liner Setup**: Simple setup with `setupInterceptorsForExpress()`
-- **Built-In Interceptors**: Performance tracking out of the box
-- **Type-Safe**: Full TypeScript support with generics
+```mermaid
+sequenceDiagram
+    participant Client
+    participant I1 as Interceptor 1
+    participant I2 as Interceptor 2
+    participant Handler
+
+    Client->>I1: Request
+    I1->>I1: beforeRequest()
+    I1->>I2: Next
+    I2->>I2: beforeRequest()
+    I2->>Handler: Execute
+    Handler->>I2: Response
+    I2->>I2: afterResponse()
+    I2->>I1: Response
+    I1->>I1: afterResponse()
+    I1->>Client: Final Response
+```
 
 ---
 
@@ -1256,7 +1275,6 @@ setupInterceptorsForExpress(
 
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

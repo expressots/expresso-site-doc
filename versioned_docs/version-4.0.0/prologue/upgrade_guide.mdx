@@ -7,14 +7,16 @@ description: Upgrade guide for ExpressoTS 4.0.0.
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Upgrade guide
+# Upgrade Guide
 
-This guide will help you upgrade your ExpressoTS application from version 3.x to version 4.0.0.
+Upgrade from ExpressoTS 3.x to 4.0.0.
 
 ## Prerequisites
 
--   Node.js version 20.18.0 or higher
--   ExpressoTS 3.x application
+| Requirement | Version |
+|-------------|---------|
+| Node.js | 20.18.0+ |
+| Current app | ExpressoTS 3.x |
 
 ## Step 1: Update Dependencies
 
@@ -71,9 +73,9 @@ node --version
 
 ### Bootstrap Function (Optional)
 
-v4 introduces a simplified `bootstrap()` function. While the existing `AppFactory.create()` pattern still works, you can optionally migrate to the new pattern:
+v4 introduces a simplified `bootstrap()` function. The `AppFactory.create()` pattern still works.
 
-**Before (v3 - still works in v4):**
+**Before (v3):**
 
 ```ts
 import { AppFactory } from "@expressots/core";
@@ -98,17 +100,11 @@ await bootstrap(App, {
 });
 ```
 
-### No Breaking Changes in Core APIs
+### Core APIs (No Changes)
 
-The core APIs remain backward compatible:
+All core APIs remain backward compatible: `configContainer()`, `globalConfiguration()`, `configureServices()`, `postServerInitialization()`, `serverShutdown()`.
 
--   `configContainer()` works the same
--   `globalConfiguration()` works the same
--   `configureServices()` works the same
--   `postServerInitialization()` works the same
--   `serverShutdown()` works the same
-
-## Step 4: Using New Features (Optional)
+## Step 4: New Features (Optional)
 
 ### Interceptors
 
@@ -252,11 +248,11 @@ If you encounter issues during the upgrade:
 
 ## Summary
 
-ExpressoTS 4.0.0 is designed to be backward compatible with v3.x applications. The upgrade process should be straightforward:
+| Step | Action |
+|------|--------|
+| 1 | Update dependencies to v4.0.0 |
+| 2 | Ensure Node.js 20.18.0+ |
+| 3 | Run tests |
+| 4 | Adopt new features (optional) |
 
-1. Update dependencies to v4.0.0
-2. Ensure Node.js 20.18.0+
-3. Run tests
-4. Optionally adopt new features (interceptors, events, testing module, etc.)
-
-The new features are additive and don't require changes to existing code. You can gradually adopt them as needed.
+v4.0.0 is backward compatible. New features are additive and can be adopted gradually.

@@ -6,80 +6,60 @@ description: Introduction to ExpressoTS.
 
 # EXPRESSO<span class="span-table">TS</span>
 
-ExpressoTS is a TypeScript framework for building server-side applications on Node.js. It provides an abstraction layer over Express.js, offering dependency injection, decorators, and architectural patterns to help structure scalable applications.
+ExpressoTS is a TypeScript framework for building server-side applications on Node.js. It provides dependency injection, decorators, and architectural patterns over Express.js.
 
 ## Version 4.0
 
-This documentation covers ExpressoTS version 4.0.0. Here are just some of the features we are releasing in this version:
+Key features in version 4.0.0:
 
-1. **Interceptors System**: AOP-based interceptor system for cross-cutting concerns
-2. **Testing Module**: Comprehensive testing utilities for unit, integration, and E2E testing
-3. **Event System**: Type-safe event system with auto-discovery and replay capabilities
-4. **Lazy-Loading Modules**: Performance optimization for large applications
-5. **Enhanced Configuration**: Type-safe configuration with validation and environment switching
+| Feature | Description |
+|---------|-------------|
+| Interceptors | AOP-based system for cross-cutting concerns |
+| Testing Module | Unit, integration, and E2E testing utilities |
+| Event System | Type-safe events with auto-discovery and replay |
+| Lazy-Loading | On-demand module loading for large applications |
+| Configuration | Type-safe config with validation |
 
-:::note
-ExpressoTS 4.0 achieves feature parity with other major TypeScript frameworks and extends beyond them with unique capabilities, making it more performant and professional-grade than alternatives.
-:::
+For details, see [release notes](./release.mdx) or [upgrade guide](./upgrade_guide.mdx).
 
 ## ExpressoTS Studio
 
-ExpressoTS Studio provides a unified platform for backend development, deployment, and management. It offers:
+ExpressoTS Studio is a unified platform for backend development and management:
 
--   **Application Visualization**: Full view of your backend application architecture and structure
--   **Observability**: Real-time monitoring and insights into application behavior
--   **AI Capabilities**: Intelligent assistance for development and debugging
--   **Visual Interaction**: Visual interface for interacting with and managing backend components
--   **Performance Monitoring**: Track and optimize application performance metrics
--   **Security Management**: Security monitoring and vulnerability assessment
--   **Package Store**: Centralized store with all available adapters and extensions to extend framework capabilities
--   **Deployment Tools**: Streamlined deployment workflows and management
-
-ExpressoTS Studio consolidates these capabilities in one place, making development more efficient, deployment easier, and applications more performant and professional-grade.
-
-For detailed release information, see the [release notes](./release.mdx). For upgrading from version 3.x, see the [upgrade guide](./upgrade_guide.mdx).
+| Capability | Description |
+|------------|-------------|
+| Visualization | Application architecture overview |
+| Observability | Real-time monitoring |
+| AI Assistance | Development and debugging support |
+| Performance | Metrics tracking and optimization |
+| Security | Vulnerability assessment |
+| Package Store | Adapters and extensions |
 
 ## Requirements
 
--   **Node.js**: Version 20.18.0 or higher
--   **TypeScript**: Version 5.0 or higher
--   **Package Manager**: npm, yarn, or pnpm
+| Requirement | Version |
+|-------------|---------|
+| Node.js | 20.18.0+ |
+| TypeScript | 5.0+ |
+| Package Manager | npm, yarn, or pnpm |
 
 ## Documentation Structure
 
-This documentation is organized into the following sections:
+| Section | Content |
+|---------|---------|
+| PROLOGUE | Release notes, upgrade guides |
+| CORE | Framework building blocks (API reference) |
+| FEATURES | Feature documentation (configuration, usage) |
+| CLI | Command-line interface |
+| GUIDES | Step-by-step tutorials and use cases |
+| ROADMAP | Future development plans |
+| GOVERNANCE | Contribution guidelines |
 
-> **PROLOGUE**: Release notes and upgrade guides.
-
-> **CORE**: Core building blocks and concepts.
-
-> **FEATURES**: Framework features and capabilities.
-
-> **CLI**: Command-line interface documentation.
-
-> **GUIDES**: Step-by-step guides and tutorials.
-
-> **ROADMAP**: Future development plans.
-
-> **GOVERNANCE**: Project governance and contribution guidelines.
-
-> **SUPPORT US ❤️**: How to support and contribute to the project.
-
-## Documentation Conventions
-
-### Links
-
-Bold green text indicates hyperlinks to other documentation pages or external resources:
-
-**[[Links](https://doc.expresso-ts.com)](https://doc.expresso-ts.com)**
+## Conventions
 
 ### Code Examples
 
-Code snippets use TypeScript syntax highlighting:
-
 ```ts
-import { controller, Get } from "@expressots/core";
-
 @controller("/users")
 export class UserController {
     @Get("/")
@@ -89,34 +69,26 @@ export class UserController {
 }
 ```
 
-### Alert Types
-
-The following alert types are used throughout the documentation:
+### Alerts
 
 :::note
-General information or reminders.
+General information.
 :::
 
 :::tip
-Helpful suggestions or best practices.
-:::
-
-:::info
-Additional, non-critical information.
+Best practices.
 :::
 
 :::caution
-Potential issues or problems that could arise.
+Potential issues.
 :::
 
 :::danger
-Critical issues or problems that could arise.
+Critical issues.
 :::
 
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

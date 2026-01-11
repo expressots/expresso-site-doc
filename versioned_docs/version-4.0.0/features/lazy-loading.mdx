@@ -9,18 +9,31 @@ import TabItem from "@theme/TabItem";
 
 # Lazy Loading
 
-ExpressoTS v4 features a **zero-configuration lazy loading system** that automatically detects routes and loads modules on-demand, dramatically reducing application startup time and memory usage.
+Zero-config module loading with automatic route detection.
 
 ## Overview
 
-The lazy loading system provides:
+| Feature | Description |
+|---------|-------------|
+| Zero-Config | Routes auto-detected from `@controller()` |
+| One-Liner Setup | `setupLazyLoadingForExpress()` |
+| Warmup Strategies | Idle, immediate, manual |
+| Preload Hints | Low, medium, high, never |
+| Performance Metrics | Built-in tracking |
+| Auto Middleware | Loads middleware for lazy routes |
 
-- **Zero-Config Auto-Detection**: Routes automatically detected from `@controller()` decorators
-- **One-Liner Setup**: Simple `setupLazyLoadingForExpress()` function
-- **Warmup Strategies**: Idle, immediate, or manual warmup
-- **Preload Hints**: Low, medium, high, or never priority
-- **Performance Metrics**: Built-in tracking and monitoring
-- **Automatic Middleware**: Auto-load middleware for lazy routes
+```mermaid
+flowchart TD
+    Request[HTTP Request] --> Check{Module Loaded?}
+    Check -->|Yes| Execute[Execute Handler]
+    Check -->|No| Load[Load Module]
+    Load --> Bind[Bind to Container]
+    Bind --> Register[Register Routes]
+    Register --> Execute
+    Execute --> Response[Return Response]
+    
+    Warmup[Warmup Strategy] -.->|Idle/Immediate| Load
+```
 
 ---
 
@@ -738,7 +751,6 @@ interface LazyLoadingManager {
 
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

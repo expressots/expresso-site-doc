@@ -7,19 +7,31 @@ description: Release notes for ExpressoTS.
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Release notes
+# Release Notes
 
-For full details on the changes for each release, please refer to the [upgrade guide](./upgrade_guide.mdx).
+See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 
-## Versioning scheme
+## What's New in 4.0
 
-ExpressoTS follows the [Semantic Versioning](https://semver.org/) scheme. Major versions are reserved for breaking changes, minor versions for new features, and patch versions for bug fixes.
-Major versions are released yearly, we strive to release on Q4 or Q1 of each year. Minor and patch versions are released as needed, usually on by-weekly or monthly basis.
+| Feature | Description |
+|---------|-------------|
+| Interceptors | AOP system with conditional execution |
+| Testing Module | Zero-config test utilities |
+| Event System | Type-safe events with auto-discovery |
+| Lazy-Loading | On-demand module loading |
+| Configuration | Type-safe config with validation |
+| Logging | 11-phase logging system with transports |
+| Authorization | Guards with permission hierarchy |
 
-The releases from now on will be done in bundles. This is to make it easier to keep track of the changes and to avoid having to release a new version for every small change.
-The packages part of the bundle will be released at the same time, and the version number will be the same for all of them. This is to avoid any compatibility issues between the packages.
+## Versioning Scheme
 
-The packages part of the bundle will be:
+ExpressoTS follows [Semantic Versioning](https://semver.org/):
+
+- **Major**: Breaking changes (yearly, Q4/Q1)
+- **Minor**: New features (bi-weekly/monthly)
+- **Patch**: Bug fixes (as needed)
+
+Releases are bundled. All packages share the same version number:
 
 -   `@expressots/core`
 -   `@expressots/adapter-express`
@@ -27,10 +39,9 @@ The packages part of the bundle will be:
 -   `@expressots/templates`
 -   `@expressots/cli`
 
-## Support policy
+## Support Policy
 
-For all ExpressoTS releases, bug fixes and security patches will be provided for 18 months after the release date. After that period, the release will be considered end-of-life and no further support will be provided except
-for `Enterprise customers` or `individuals` with `valid support contracts`.
+Bug fixes and security patches are provided for 18 months after release. Enterprise customers with support contracts receive extended support.
 
 | Version | Node.js    | Release              | Bug & Security fixed until | Status |
 | ------- | ---------- | -------------------- | -------------------------- | ------ |
@@ -40,30 +51,24 @@ for `Enterprise customers` or `individuals` with `valid support contracts`.
 
 🟢 Active support 🟡 Bug & Security fixes only 🔴 End-of-life
 
-## ExpressoTS 4.0 🎉
+## ExpressoTS 4.0
 
-ExpressoTS v4.0.0 is a major milestone in our journey toward providing a faster, more scalable, and developer-friendly Node.js framework.
-With this release, we've implemented significant features, optimizations, and architectural changes to enhance your development experience.
-
-Here's everything you need to know about what's new in ExpressoTS v4.0.0!
+Version 4.0.0 introduces significant features and architectural improvements.
 
 ### Nodejs version
 
 ExpressoTS v4.0.0 requires Node.js version 20.18.0 or higher.
 
-### What's New in v4.0.0
-
-ExpressoTS 4.0 introduces **5 major core features** that make it one of the most comprehensive TypeScript frameworks available:
+### Core Features
 
 #### 1. Interceptors System
 
-A complete AOP (Aspect-Oriented Programming) interceptor system for cross-cutting concerns:
+AOP system for cross-cutting concerns:
 
--   **Conditional Interceptors**: `whenInterceptor()`, `unlessInterceptor()` for conditional execution
--   **Auto-Discovery**: Interceptors are automatically discovered via `@provide()` + `@UseInterceptors()`
--   **Composition Utilities**: `pipeInterceptors()`, `combineInterceptors()` for semantic grouping
--   **Built-in Interceptors**: `PerformanceInterceptor`, `LoggingInterceptor`, `TimeoutInterceptor`
--   **Type-Safe**: Full TypeScript inference on response transformations
+- `whenInterceptor()`, `unlessInterceptor()` for conditional execution
+- Auto-discovery via `@provide()` + `@UseInterceptors()`
+- Composition: `pipeInterceptors()`, `combineInterceptors()`
+- Built-in: `PerformanceInterceptor`, `LoggingInterceptor`, `TimeoutInterceptor`
 
 ```ts
 import {
@@ -90,14 +95,14 @@ export class UserController {
 
 #### 2. Testing Module
 
-Comprehensive testing utilities for unit, integration, and E2E testing:
+Testing utilities for unit, integration, and E2E:
 
--   **Zero-Config Setup**: `createTestApp()` for instant test app creation
--   **Smart Mocks**: `mockProvider()` with auto-suggestion of dependencies
--   **Fluent HTTP Testing**: Chainable, readable API better than supertest
--   **Snapshot Testing**: API snapshot testing with `snapshotRequest()`
--   **Load Testing**: Built-in load testing utilities with percentile metrics
--   **Database Testing**: `createTestDatabase()` with fixtures support
+- `createTestApp()` for zero-config test setup
+- `mockProvider()` with dependency auto-suggestion
+- Fluent HTTP testing API
+- Snapshot testing with `snapshotRequest()`
+- Load testing with percentile metrics
+- Database fixtures with `createTestDatabase()`
 
 ```ts
 import { createTestApp, request } from "@expressots/core";
@@ -117,14 +122,14 @@ describe("UserController", () => {
 
 #### 3. Event System
 
-Type-safe, auto-discovered event system for decoupled architecture:
+Type-safe events for decoupled architecture:
 
--   **Type-Safe Events**: Event classes instead of strings for full TypeScript inference
--   **Auto-Discovery**: Event handlers discovered via `@OnEvent()` decorator
--   **Priority Execution**: Multiple handlers with execution priority
--   **Conditional Handlers**: `@When()` decorator for conditional execution
--   **Event Replay**: Built-in event recording and replay for debugging
--   **Flow Visualization**: Terminal visualization of event propagation
+- Event classes with full TypeScript inference
+- Auto-discovery via `@OnEvent()` decorator
+- Priority-based handler execution
+- Conditional handlers with `@When()`
+- Event recording and replay
+- Flow visualization
 
 ```ts
 // Type-safe event class
@@ -152,10 +157,10 @@ export class SendWelcomeEmailHandler
 
 Performance optimization for large applications:
 
--   **On-Demand Loading**: Modules loaded only when first accessed
--   **Auto-Detection**: Framework detects which modules can be lazy-loaded
--   **Preloading Hints**: Configure preloading for critical modules
--   **Progressive Loading**: Spread startup cost over time
+- On-demand module loading
+- Auto-detection of lazy-loadable modules
+- Preloading hints for critical modules
+- Progressive startup cost distribution
 
 ```ts
 import { LazyModule } from "@expressots/core";
@@ -169,12 +174,12 @@ export class AdminModule {
 
 #### 5. Enhanced Configuration
 
-Type-safe configuration with helpful validation:
+Type-safe configuration with validation:
 
--   **Type-Safe Config**: Full TypeScript inference on configuration
--   **Helpful Validation**: Detailed error messages with examples
--   **Environment Switching**: Automatic config switching based on environment
--   **Secret Management**: `SecretValue` class for secure handling
+- Full TypeScript inference
+- Detailed validation error messages
+- Automatic environment switching
+- `SecretValue` for secure handling
 
 ```ts
 import { defineConfig, env } from "@expressots/core";
@@ -192,19 +197,19 @@ export default defineConfig({
 
 ### Enhanced Logging System
 
-Comprehensive logging capabilities with advanced features:
+11-phase production logging:
 
--   **Multiple Log Levels**: TRACE, DEBUG, INFO, WARN, ERROR, FATAL with color-coded output
--   **Structured Logging**: Log objects and metadata with automatic formatting
--   **Context Management**: `withContext()` and `child()` for contextual logging
--   **File Transport**: Daily rotating log files with JSON format in production
--   **Log Querying**: In-memory log buffer with query API for filtering and searching
--   **Log Export**: Export logs to Markdown format with grouping and statistics
--   **Performance Metrics**: Built-in performance tracking in log entries
--   **Log Redaction**: Automatic sensitive data redaction (passwords, tokens, etc.)
--   **Flow Visualization**: Visual representation of log flow and context
--   **Production Format**: Automatic JSON format in production, formatted output in development
--   **Transport System**: Pluggable transports (Console, File, Custom)
+| Feature | Description |
+|---------|-------------|
+| Log Levels | TRACE, DEBUG, INFO, WARN, ERROR, FATAL |
+| Structured Logging | Objects and metadata with formatting |
+| Context Management | `withContext()` and `child()` |
+| File Transport | Daily rotating files, JSON in production |
+| Log Querying | In-memory buffer with query API |
+| Export | Markdown export with statistics |
+| Redaction | Automatic sensitive data masking |
+| Flow Visualization | Visual log flow representation |
+| Transports | Console, File, Custom |
 
 ```ts
 import { Logger, LogLevel, FileTransport } from "@expressots/core";
@@ -231,15 +236,12 @@ const report = logger.exportLogsToMarkdown({
 
 ### Content Negotiation
 
-RFC 7231 compliant content negotiation system:
+RFC 7231 compliant format negotiation:
 
--   **Multiple Formats**: JSON, XML, CSV, YAML, Plain Text support
--   **Quality Values**: RFC 7231 compliant quality value negotiation
--   **Wildcard Support**: `*/*` and `application/*` Accept header handling
--   **Format-Specific Options**: Custom formatting options per format type
--   **Request/Response Negotiation**: `@Consumes()` and `@Produces()` decorators
--   **Default Fallback**: Graceful fallback when no Accept header provided
--   **Zero Boilerplate**: Automatic format selection based on Accept headers
+- Formats: JSON, XML, CSV, YAML, Plain Text
+- Quality value support
+- `@Consumes()` and `@Produces()` decorators
+- Automatic format selection from Accept headers
 
 ```ts
 import { controller, Get, Produces } from "@expressots/core";
@@ -256,14 +258,12 @@ export class UserController {
 
 ### Smart Validation System
 
-TypeScript-first validation with intelligent detection:
+TypeScript-first validation:
 
--   **Class-Validator Support**: Built-in support for class-validator decorators
--   **TypeScript Auto-Detection**: Automatic schema detection from TypeScript types
--   **Smart Field Detection**: Automatic validation based on field names (email, phone, URL, UUID, etc.)
--   **Helpful Error Messages**: Detailed errors with examples, hints, and expected values
--   **Plugin Architecture**: Support for Zod, Yup, Joi via adapters
--   **Zero-Config**: Works out of the box with sensible defaults
+- Class-validator support with auto-detection
+- Smart field detection (email, phone, URL, UUID)
+- Helpful error messages with examples
+- Plugin support for Zod, Yup, Joi
 
 ```ts
 import { controller, Post, validatedBody } from "@expressots/core";
@@ -292,15 +292,13 @@ export class UserController {
 
 ### Health Monitoring
 
-Built-in application health monitoring and reporting:
+Application health monitoring:
 
--   **Startup Health Display**: System health shown in startup banner
--   **Periodic Health Checks**: Automatic health checks at configurable intervals
--   **Memory Monitoring**: Real-time memory usage tracking with thresholds
--   **CPU Monitoring**: CPU usage tracking and alerts
--   **Health API Endpoints**: RESTful endpoints for health status
--   **Threshold Alerts**: Configurable alerts for memory and CPU thresholds
--   **Service Health**: Support for custom service health checks
+- Startup health display in banner
+- Periodic health checks
+- Memory and CPU monitoring with thresholds
+- RESTful health endpoints
+- Custom service health checks
 
 ```ts
 import { configureHealthMonitoring } from "@expressots/core";
@@ -316,14 +314,11 @@ configureHealthMonitoring({
 
 ### Custom Scopes
 
-Advanced dependency injection with custom scopes:
+Advanced DI scopes:
 
--   **Tenant Scopes**: Service instances scoped to tenant context
--   **Transaction Scopes**: Services shared within transaction boundaries
--   **Workflow Scopes**: State management across workflow execution
--   **Session Scopes**: Services persisting across multiple requests
--   **Scope Isolation**: Complete isolation between different scope contexts
--   **Lifecycle Management**: Manual scope lifecycle control
+- Tenant, Transaction, Workflow, Session scopes
+- Complete isolation between contexts
+- Manual lifecycle control
 
 ```ts
 import { provideInScope } from "@expressots/core";
@@ -336,44 +331,34 @@ export class TenantConfigService {
 
 ### API Versioning
 
-Built-in support for API versioning:
-
--   **URL Versioning**: Version in URL path (`/v1/users`, `/v2/users`)
--   **Header Versioning**: Version via custom headers
--   **Query Parameter Versioning**: Version via query parameters
--   **Multiple Versions**: Support for multiple active versions simultaneously
+- URL versioning (`/v1/users`, `/v2/users`)
+- Header and query parameter versioning
+- Multiple active versions
 
 ### Route Constraints
 
-Advanced route parameter constraints:
-
--   **Type Constraints**: UUID, integer, string pattern matching
--   **Custom Constraints**: Define custom constraint validators
--   **Automatic Validation**: Route parameters validated before handler execution
+- Type constraints: UUID, integer, string patterns
+- Custom constraint validators
+- Automatic validation before handler execution
 
 ### Enhanced Middleware System
 
-Building on v3's middleware system, v4 adds:
-
--   **Middleware Presets**: Pre-configured bundles (`api`, `production`, `development`)
--   **Performance Profiling**: Built-in middleware profiler with metrics
--   **Pipeline Introspection**: Query middleware pipeline at runtime
--   **Conditional Middleware**: `when()` and `unless()` for conditional execution
--   **Smart Validation**: Zero-config validation with `@validatedBody()`
+- Presets: `api`, `production`, `development`
+- Built-in profiler with metrics
+- Pipeline introspection at runtime
+- Conditional execution with `when()` and `unless()`
+- Zero-config validation with `@validatedBody()`
 
 ### Enhanced Authorization System
 
-Comprehensive guard system with advanced access control:
+Guard system with advanced access control:
 
--   **Built-in Guards**: `AuthenticatedGuard`, `RoleGuard`, `PermissionGuard`, `ResourceOwnerGuard`
--   **ABAC Support**: Attribute-Based Access Control with `RequirePolicy()`
--   **Guard Composition**: `combineGuards()`, `sequenceGuards()`, `whenGuard()`
--   **Guard Caching**: Request-scoped guard result caching for performance
--   **Permission Hierarchy**: Role/permission inheritance support
--   **Multi-Tenant Support**: Tenant-scoped permissions and isolation
--   **Scope-Aware Services**: Request-scoped and tenant-scoped security context
--   **Convenience Decorators**: `@RequireAuthentication()`, `@RequireRoles()`, `@RequirePermissions()`, `@RequireOwnership()`
--   **Permission Preloading**: Automatic permission preloading middleware
+- Built-in: `AuthenticatedGuard`, `RoleGuard`, `PermissionGuard`, `ResourceOwnerGuard`
+- ABAC with `RequirePolicy()`
+- Composition: `combineGuards()`, `sequenceGuards()`, `whenGuard()`
+- Request-scoped caching for performance
+- Permission hierarchy and multi-tenant support
+- Decorators: `@RequireAuthentication()`, `@RequireRoles()`, `@RequirePermissions()`
 
 ```ts
 import {
@@ -396,26 +381,19 @@ export class DocumentController {
 
 ### Enhanced Error Handling
 
-RFC 7807 compliant error handling with helpful diagnostics:
+RFC 7807 compliant error handling:
 
--   **Exception Filters**: Auto-discovered via `@Catch()` decorator
--   **Route-Specific Filters**: `@UseFilters()` at controller and method level
--   **Enhanced AppError**: Static helpers like `badRequest()`, `notFound()`, `validationFailed()`
--   **Problem Details**: RFC 7807 compliant error responses
--   **Route Suggestions**: Automatic route suggestions for 404 errors with typo correction
--   **Error Hints**: Context-aware error hints for common issues (database, port conflicts, etc.)
--   **Helpful Diagnostics**: Detailed error messages with examples and hints
--   **Production-Safe**: Error hints disabled by default in production
+- Exception filters via `@Catch()` decorator
+- `@UseFilters()` at controller and method level
+- `AppError` helpers: `badRequest()`, `notFound()`, `validationFailed()`
+- Route suggestions for 404 errors
+- Context-aware error hints (disabled in production)
 
 ### Application Lifecycle Hooks
 
-Comprehensive lifecycle management:
-
--   **Startup Hooks**: `onStartup()`, `onReady()`, `onShutdown()`
--   **Request Lifecycle**: Per-request lifecycle hooks
--   **Application Lifecycle**: Application-wide lifecycle management
--   **Async Support**: All hooks support async operations
--   **Error Handling**: Lifecycle hooks with error handling
+- Startup: `onStartup()`, `onReady()`, `onShutdown()`
+- Per-request and application-wide lifecycle management
+- Async support with error handling
 
 ```ts
 export class App extends AppExpress {
@@ -435,35 +413,31 @@ export class App extends AppExpress {
 
 ### Zero Decorator Support
 
-Write controllers without decorators:
-
--   **Functional Controllers**: Define routes using function-based syntax
--   **Type-Safe**: Full TypeScript support without decorators
--   **Flexible**: Mix decorator and non-decorator patterns
+- Functional controllers with function-based syntax
+- Mix decorator and non-decorator patterns
 
 ### Smart Response System
 
-Intelligent response handling:
-
--   **Automatic Formatting**: Smart response formatting based on content type
--   **Response Transformation**: Transform responses via interceptors
--   **Status Code Inference**: Automatic status code based on response type
+- Automatic formatting based on content type
+- Response transformation via interceptors
+- Status code inference
 
 ### CLI Improvements
 
--   **Micro API Template**: Lightweight template for quick prototyping
--   **Plugin Management**: `ex add` and `ex remove` for packages
--   **Script Runner**: `ex scripts` for interactive script execution
--   **Improved Performance**: Using `tsx` for development and `tsc` for production
--   **Code Generation**: Enhanced code generation with templates
+- Micro API template for quick prototyping
+- `ex add` / `ex remove` for package management
+- `ex scripts` for interactive script execution
+- `tsx` for development, `tsc` for production
 
 ### Breaking Changes
 
--   Minimum Node.js version: 20.18.0
--   Updated dependency injection patterns
--   Enhanced lifecycle hooks in `app.ts`
+| Change | Impact |
+|--------|--------|
+| Node.js 20.18.0+ | Update runtime |
+| DI patterns | Review injection syntax |
+| Lifecycle hooks | Update `app.ts` |
 
-For migration instructions, see the [upgrade guide](./upgrade_guide.mdx).
+See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 
 ---
 

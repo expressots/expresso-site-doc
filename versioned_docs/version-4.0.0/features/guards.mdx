@@ -9,20 +9,35 @@ import TabItem from "@theme/TabItem";
 
 # Guards & Authorization
 
-ExpressoTS v4 includes a comprehensive guard system for implementing authentication and authorization. Guards determine whether a request should be handled by the route handler based on conditions like roles, permissions, or custom logic.
+Guard system for authentication and authorization.
 
 ## Overview
 
-The guard system provides:
+| Feature | Description |
+|---------|-------------|
+| Built-in Guards | Ready-to-use auth, role, permission guards |
+| RBAC | `@RequireRoles()` decorator |
+| Permissions | `@RequirePermissions()` decorator |
+| ABAC | `RequirePolicy()` for complex rules |
+| Ownership | `@RequireOwnership()` for user resources |
+| Composition | `combineGuards()`, `sequenceGuards()` |
+| Conditional | `whenGuard()` for conditional execution |
+| Caching | Request-scoped result caching |
 
--   **Built-in Guards**: Ready-to-use guards for common patterns
--   **Role-Based Access Control (RBAC)**: `@RequireRoles()` decorator
--   **Permission-Based Access**: `@RequirePermissions()` decorator
--   **Attribute-Based Access Control (ABAC)**: `RequirePolicy()` for complex rules
--   **Resource Ownership**: `@RequireOwnership()` for user-owned resources
--   **Guard Composition**: Combine guards with `combineGuards()`, `sequenceGuards()`
--   **Conditional Guards**: `whenGuard()` for conditional execution
--   **Guard Caching**: Request-scoped caching for performance
+```mermaid
+flowchart TD
+    Request[HTTP Request] --> Auth[Auth Provider]
+    Auth --> Extract[Extract Token]
+    Extract --> Validate[Validate Credentials]
+    Validate -->|Valid| CheckPerm{Check Permission}
+    Validate -->|Invalid| Deny[401 Unauthorized]
+    CheckPerm -->|Has Permission| Allow[Execute Handler]
+    CheckPerm -->|No Permission| Deny403[403 Forbidden]
+    CheckPerm -->|Check Cache| Cache{Cached?}
+    Cache -->|Hit| Allow
+    Cache -->|Miss| Hierarchy[Check Hierarchy]
+    Hierarchy --> Allow
+```
 
 ## Basic Usage
 
@@ -933,7 +948,6 @@ getReports() {
 
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.
