@@ -312,6 +312,153 @@ ExpressoTS will prevent you from initializing the Application without a controll
 **_No controllers have been found! Please ensure that you have register at least one Controller._**
 :::
 
+## Advanced Patterns
+
+This section covers advanced controller patterns and best practices for building production-ready APIs.
+
+### REST API Best Practices
+
+When building RESTful APIs, follow these conventions:
+
+```typescript title="Complete REST controller with proper status codes"
+import { controller, Get, Post, Put, Patch, Delete, Http, param, body, query } from "@expressots/adapter-express";
+
+@controller("/api/v1/products")
+export class ProductController {
+    @Get("/")
+    list(@query("page") page: string, @query("limit") limit: string) {
+        const pageNum = parseInt(page) || 1;
+        const limitNum = Math.min(parseInt(limit) || 10, 100);
+        return {
+            data: [],
+            pagination: { page: pageNum, limit: limitNum, total: 0 }
+        };
+    }
+
+    @Get("/:id")
+    get(@param("id") id: string) {
+        return { data: { id, name: "Product" } };
+    }
+
+    @Post("/")
+    @Http(201)
+    create(@body() payload: any) {
+        return { data: { id: Date.now(), ...payload } };
+    }
+
+    @Put("/:id")
+    replace(@param("id") id: string, @body() payload: any) {
+        return { data: { id, ...payload } };
+    }
+
+    @Patch("/:id")
+    update(@param("id") id: string, @body() updates: any) {
+        return { data: { id, ...updates } };
+    }
+
+    @Delete("/:id")
+    @Http(204)
+    delete(@param("id") id: string) {
+        return;
+    }
+}
+```
+
+### API Versioning
+
+ExpressoTS supports path-based versioning for APIs:
+
+```typescript title="Versioned API controllers"
+@controller("/api/v1/users")
+export class UsersV1Controller {
+    @Get("/")
+    list() {
+        return { version: "v1", users: [] };
+    }
+}
+
+@controller("/api/v2/users")
+export class UsersV2Controller {
+    @Get("/")
+    list() {
+        return { version: "v2", data: [], meta: { total: 0 } };
+    }
+}
+```
+
+### Controller with Middleware Stack
+
+Apply multiple middleware for authentication, logging, and validation:
+
+```typescript title="Controller with middleware stack"
+import { ExpressoMiddleware, provide } from "@expressots/core";
+
+@provide(AuthMiddleware)
+class AuthMiddleware extends ExpressoMiddleware {
+    use(req: Request, res: Response, next: NextFunction): void {
+        const token = req.headers.authorization;
+        if (!token) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+        next();
+    }
+}
+
+function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
+    console.log(`${req.method} ${req.path}`);
+    next();
+}
+
+@controller("/api/secure", AuthMiddleware)
+export class SecureController {
+    @Get("/data", loggingMiddleware)
+    getData() {
+        return { secure: true };
+    }
+}
+```
+
+### Input Validation Pattern
+
+Implement validation logic in controllers:
+
+```typescript title="Controller with validation"
+@controller("/api/users")
+export class UserController {
+    @Post("/")
+    create(@body() data: any) {
+        const errors: string[] = [];
+
+        if (!data.name || data.name.length < 2) {
+            errors.push("Name must be at least 2 characters");
+        }
+        if (!data.email || !data.email.includes("@")) {
+            errors.push("Valid email is required");
+        }
+        if (!data.password || data.password.length < 8) {
+            errors.push("Password must be at least 8 characters");
+        }
+
+        if (errors.length > 0) {
+            return { success: false, errors };
+        }
+
+        return { success: true, user: { id: Date.now(), name: data.name, email: data.email } };
+    }
+}
+```
+
+### Performance Tips
+
+1. **Use appropriate scopes**: Use `@scope("Singleton")` for stateless services and `@scope("Request")` for request-specific data.
+
+2. **Minimize middleware**: Only apply middleware where needed - use route-level middleware instead of controller-level when possible.
+
+3. **Keep controllers thin**: Controllers should delegate business logic to services/use-cases.
+
+4. **Use proper status codes**: Return appropriate HTTP status codes for better client communication.
+
 ---
 
 ## Support us ❤️

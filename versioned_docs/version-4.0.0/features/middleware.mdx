@@ -19,21 +19,30 @@ ExpressoTS integrates smoothly with Express middleware, allowing you to leverage
 
 ExpressoTS application supports adding middleware globally to the application as well as per route. It offers all the middleware supported by [Expressjs](https://expressjs.com/en/resources/middleware.html) team out-of-the-box.
 
-In the `app.ts` file, you can add middleware to the application using the `this.Middleware` property. The `this.Middleware` property is
-an instance of the `Middleware` class, which provides a list of out-of-the-box Expressjs middlewares supported by ExpressoTS.
+In the `app.ts` file, you can add middleware to the application using the `this.Middleware` property. The `this.Middleware` property is an instance of the `Middleware` class, which provides a unified API for configuring middleware.
 
-```ts title="Adding middleware globally to the application in app.provider.ts"
-@provide(App)
+```ts title="Adding middleware globally in app.ts (v4 API)"
 export class App extends AppExpress {
-    protected configureServices(): void {
-        this.Middleware.addBodyParser();
-        this.Middleware.addCors();
-        this.Middleware.addHelmet();
+    async configureServices(): Promise<void> {
+        // Unified body parsing (JSON, URL encoded, cookies)
+        this.Middleware.parse({
+            json: { limit: "10mb" },
+            urlencoded: { extended: true },
+            cookies: true,
+        });
+
+        // Unified security (CORS, Helmet, rate limiting)
+        this.Middleware.security("api");
+
+        // Error handling
+        this.Middleware.setErrorHandler({
+            showStackTrace: await this.isDevelopment(),
+        });
     }
 }
 ```
 
-In ExpressoTS, middleware options are available to be added as needed, but the actual middleware packages are not pre-installed to keep the application lightweight. When you choose to add one of the available out-of-the-box middleware options, such as CORS, the system checks if the necessary package is installed.
+In ExpressoTS, middleware options are available to be added as needed, but the actual middleware packages are not pre-installed to keep the application lightweight. When you choose to add middleware, the system checks if the necessary package is installed.
 
 If the middleware package isn't installed, the application will warn you with a message, but will continue running.
 
@@ -41,69 +50,220 @@ If the middleware package isn't installed, the application will warn you with a 
 🖥️ Middleware [cors] not installed. Please install it using your package manager.
 ```
 
-Once you install the required middleware, the warning will disappear on hot reload, and the middleware will be ready for use with its interface integrated into your application.
+Once you install the required middleware, the warning will disappear on hot reload, and the middleware will be ready for use.
 
-## Out-of-the-box middleware
+## Unified Middleware API (v4)
 
-Expressjs middlewares supported by ExpressoTS:
+ExpressoTS v4 introduces a unified, intuitive middleware API:
 
-| Middleware Name     | Description                                           |
-| ------------------- | ----------------------------------------------------- |
-| addBodyParser       | Add body parser middleware to the application.        |
-| addCompression      | Add compression middleware to the application.        |
-| addCookieParser     | Add cookie parser middleware to the application.      |
-| addCookieSession    | Add cookie session middleware to the application.     |
-| addCors             | Add cors middleware to the application.               |
-| addHelmet           | Add helmet middleware to the application.             |
-| addMorgan           | Add morgan middleware to the application.             |
-| addRateLimiter      | Add rate limit middleware to the application.         |
-| addServeFavicon     | Add serve favicon middleware to the application.      |
-| addSession          | Add session middleware to the application.            |
-| addUrlEncodedParser | Add url encoded parser middleware to the application. |
-| serverStatic        | Add static middleware to the application.             |
-| setupMulter         | Create a multer instance for file upload.             |
-| setErrorHandler     | Add error handler middleware to the application.      |
+| Method              | Description                                                    |
+| ------------------- | -------------------------------------------------------------- |
+| `parse()`           | Unified body parsing (JSON, URL encoded, cookies)              |
+| `security()`        | Unified security (CORS, Helmet, rate limiting) with presets    |
+| `compress()`        | Auto-detect compression (shrink-ray or compression)            |
+| `static()`          | Enhanced static file serving with SPA support                  |
+| `logger()`          | Pluggable logging (auto-detects pino, winston, morgan)         |
+| `register()`        | Middleware registry for route-level use                        |
+| `when()`            | Conditional middleware execution                               |
+| `applyPreset()`     | Apply built-in presets (api, production, development, minimal) |
+| `definePreset()`    | Define custom middleware presets                               |
+| `add()`             | Add custom middleware                                          |
+| `setErrorHandler()` | Configure error handling                                       |
+| `addValidation()`   | Smart validation with auto-detection                           |
+| `addContentNegotiation()` | Content negotiation with multiple formatters             |
+
+### parse() - Unified Body Parsing
+
+Replaces individual body parsers with one unified method:
+
+```typescript
+// Before (v3)
+this.Middleware.addBodyParser();
+this.Middleware.addUrlEncodedParser();
+this.Middleware.addCookieParser();
+
+// After (v4) - One unified call
+this.Middleware.parse({
+    json: { limit: "10mb" },
+    urlencoded: { extended: true },
+    cookies: true,
+});
+
+// Or with defaults
+this.Middleware.parse();
+```
+
+### security() - Unified Security
+
+Replaces individual security middleware with presets:
+
+```typescript
+// Before (v3)
+this.Middleware.addCors();
+this.Middleware.addHelmet();
+this.Middleware.addRateLimiter();
+
+// After (v4) - Use security presets
+this.Middleware.security("standard");  // Balanced security
+this.Middleware.security("strict");    // Maximum security
+this.Middleware.security("api");       // API-optimized
+this.Middleware.security("minimal");   // Development-friendly
+this.Middleware.security("relaxed");   // Minimal restrictions
+```
+
+### compress() - Auto-Detect Compression
+
+```typescript
+// Auto-detects shrink-ray or compression
+this.Middleware.compress({ threshold: 1024 });
+```
+
+### static() - Enhanced Static Files
+
+```typescript
+// Basic static file serving
+this.Middleware.static({
+    path: path.join(process.cwd(), "public"),
+    prefix: "/static",
+    maxAge: "1d",
+    etag: true,
+});
+
+// SPA mode with fallback
+this.Middleware.static({
+    path: "./dist",
+    spaMode: true,
+    fallback: "index.html",
+});
+```
+
+### logger() - Pluggable Logging
+
+```typescript
+// Auto-detects pino → winston → morgan → console
+this.Middleware.logger();
+
+// Or specify implementation
+this.Middleware.logger({ implementation: "pino" });
+```
 
 :::caution
 If you add a middleware that is not installed as dependency, the application will throw a warning message and continue to run.
 :::
 
-## Using `addMiddleware` method
+## Middleware Registry
 
-For any other middleware, or a custom middleware, you can add it using the `this.middleware.addMiddleware()` method. Using the `addMiddleware` method, you can add any middleware from NPM Registry, custom Expressjs middleware or a ExpressoTS class-based middleware.
+The middleware registry allows you to register named middleware for use at the route level:
 
-NPM Registry middleware:
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
 
-```typescript title="Adding NPM Registry cors middleware"
-this.Middleware.addMiddleware(cors());
-```
+        // Register individual middleware
+        this.Middleware.register("verify-jwt", verifyJwtMiddleware);
+        this.Middleware.register("require-auth", requireAuthMiddleware);
+        this.Middleware.register("request-id", requestIdMiddleware);
 
-Custom Expressjs middleware:
-
-```typescript title="Adding custom expressjs middleware"
-function myMiddleware(req: Request, res: Response, next: NextFunction) {
-    next();
-}
-
-this.Middleware.addMiddleware(myMiddleware);
-```
-
-Custom ExpressoTS middleware:
-
-```typescript title="Adding custom expressots middleware"
-class CustomMiddleware extends ExpressoMiddleware {
-    use(req: Request, res: Response, next: NextFunction): void | Promise<void> {
-        next();
+        // Register middleware chains
+        this.Middleware.register("auth-chain", [verifyJwt, requireAuth]);
+        this.Middleware.register("admin", [verifyJwt, requireAuth, requireAdmin]);
     }
 }
-
-this.Middleware.addMiddleware(new CustomMiddleware());
 ```
 
-You can also add middleware to a specific route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom middleware.
+Then use in controllers with the `@middleware()` decorator:
 
-```typescript title="Adding middleware to a specific route"
-this.Middleware.addMiddleware({ path: "/api", middlewares: [] });
+```typescript
+@controller("/admin")
+@middleware("admin")  // Use registered chain
+export class AdminController {
+    @Get("/dashboard")
+    @middleware("verify-jwt")  // Use single middleware
+    dashboard() {
+        return { admin: true };
+    }
+}
+```
+
+## Conditional Middleware
+
+Execute middleware based on conditions:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
+
+        // Only in development
+        this.Middleware.when(process.env.NODE_ENV === "development", () => {
+            console.log("🔧 Development mode: Extra logging enabled");
+            this.Middleware.logger();
+        });
+
+        // Only in production
+        this.Middleware.when(process.env.NODE_ENV === "production", () => {
+            this.Middleware.compress();
+            this.Middleware.security("strict");
+        });
+    }
+}
+```
+
+## Middleware Presets
+
+Pre-configured middleware bundles for common scenarios:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // Built-in presets
+        this.Middleware.applyPreset("api");         // JSON, CORS, security, compression
+        this.Middleware.applyPreset("production");  // All security + compression
+        this.Middleware.applyPreset("development"); // Logging + relaxed security
+        this.Middleware.applyPreset("minimal");     // Just body parsing
+    }
+}
+```
+
+### Custom Presets
+
+Define your own presets for reuse:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // Define a custom preset
+        this.Middleware.definePreset("my-company-api", {
+            parse: { json: { limit: "5mb" }, urlencoded: true },
+            logger: { implementation: "auto" },
+            security: "api",
+            compress: true,
+        });
+
+        // Apply your custom preset
+        this.Middleware.applyPreset("my-company-api");
+    }
+}
+```
+
+## Adding Custom Middleware
+
+Use the `add()` method for custom middleware:
+
+```typescript
+// Function middleware
+this.Middleware.add((req, res, next) => {
+    req.requestTime = Date.now();
+    next();
+});
+
+// Express middleware from NPM
+import cors from "cors";
+this.Middleware.add(cors({ origin: "https://example.com" }));
+
+// Class-based middleware
+this.Middleware.add(new CustomMiddleware());
 ```
 
 :::note Each route can have multiple middlewares.
@@ -351,6 +511,120 @@ createUser(@validatedBody() dto: CreateUserDto) {
     // TypeScript types are inferred
     return this.userService.create(dto);
 }
+```
+
+## Advanced Patterns
+
+### Production-Ready Middleware Stacks
+
+Create reusable middleware stacks for different scenarios:
+
+```typescript
+import { combine, sequence, when } from "@expressots/adapter-express";
+
+// Define reusable stacks
+const apiStack = combine(CorsMiddleware, LoggingMiddleware, CompressionMiddleware);
+const authStack = combine(JwtMiddleware, RoleMiddleware);
+const validationStack = sequence(ValidateMiddleware, TransformMiddleware);
+
+// Use in controllers
+@controller("/api/v1")
+class ApiController {
+    @Get("/public", apiStack)
+    publicEndpoint() { /* ... */ }
+
+    @Get("/protected", combine(apiStack, authStack))
+    protectedEndpoint() { /* ... */ }
+
+    @Post("/data", combine(apiStack, authStack, validationStack))
+    dataEndpoint() { /* ... */ }
+}
+```
+
+### Error Handling Best Practices
+
+Handle errors at different points in the middleware chain:
+
+```typescript
+@provide(ErrorBoundaryMiddleware)
+class ErrorBoundaryMiddleware extends ExpressoMiddleware {
+    use(req: Request, res: Response, next: NextFunction): void {
+        try {
+            next();
+        } catch (error) {
+            // Handle sync errors
+            next(error);
+        }
+    }
+}
+
+// Global error handler configuration
+async configureServices(): Promise<void> {
+    this.Middleware.setErrorHandler({
+        showStackTrace: await this.isDevelopment(),
+        logErrors: true,
+        customHandler: (error, req, res, next) => {
+            // Custom error formatting
+        },
+    });
+}
+```
+
+### Performance Optimization Tips
+
+1. **Order matters** - Put frequently-skipped conditional middleware early
+2. **Use combine()** for parallel-safe middleware groups
+3. **Use sequence()** when middleware has dependencies
+4. **Avoid deep nesting** - Flatten composition when possible
+
+```typescript
+// Good: Flat and efficient
+@Get("/api", combine(
+    CorsMiddleware,
+    when(() => process.env.NODE_ENV === "production", CompressionMiddleware),
+    AuthMiddleware,
+    LoggingMiddleware
+))
+
+// Avoid: Deeply nested
+@Get("/api", combine(
+    CorsMiddleware,
+    combine(
+        when(() => true, combine(AuthMiddleware, LoggingMiddleware)),
+        CompressionMiddleware
+    )
+))
+```
+
+### Real-World Recipes
+
+#### REST API with Full Security
+
+```typescript
+const secureApiStack = combine(
+    CorsMiddleware,
+    HelmetMiddleware,
+    RateLimitMiddleware,
+    JwtAuthMiddleware,
+    AuditLogMiddleware
+);
+
+@controller("/api/v1/users", secureApiStack)
+class UserController {
+    @Get("/") listUsers() { /* ... */ }
+    @Post("/", ValidationMiddleware) createUser() { /* ... */ }
+    @Get("/:id") getUser() { /* ... */ }
+}
+```
+
+#### Conditional Feature Flags
+
+```typescript
+@Get("/feature",
+    when(() => featureFlags.isEnabled("new-feature"), NewFeatureMiddleware),
+    unless(() => featureFlags.isEnabled("new-feature"), LegacyMiddleware)
+)
+featureEndpoint() { /* ... */ }
 ```
 
 ---

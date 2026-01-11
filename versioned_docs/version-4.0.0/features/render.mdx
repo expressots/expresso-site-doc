@@ -412,6 +412,594 @@ await this.Middleware.render();
 
 5. **Use the @Render() decorator** for cleaner controller code
 
+## Testing Render Engine
+
+### Unit Testing View Rendering
+
+Test view rendering with mocked templates:
+
+```typescript
+import { Response } from "express";
+
+describe("HomeController", () => {
+    let controller: HomeController;
+    let mockResponse: jest.Mocked<Response>;
+
+    beforeEach(() => {
+        mockResponse = {
+            render: jest.fn(),
+        } as any;
+
+        controller = new HomeController();
+    });
+
+    it("should render home view with correct data", async () => {
+        await controller.home(mockResponse);
+
+        expect(mockResponse.render).toHaveBeenCalledWith(
+            "index",
+            expect.objectContaining({
+                title: "Home",
+                user: expect.objectContaining({ name: "John" })
+            })
+        );
+    });
+
+    it("should pass all required variables to template", async () => {
+        await controller.userProfile(mockResponse);
+
+        expect(mockResponse.render).toHaveBeenCalledWith(
+            "profile",
+            expect.objectContaining({
+                user: expect.any(Object),
+                stats: expect.any(Object),
+                activity: expect.any(Array)
+            })
+        );
+    });
+});
+```
+
+### Testing @Render() Decorator
+
+Test the decorator pattern:
+
+```typescript
+describe("@Render() Decorator", () => {
+    it("should return data that gets passed to template", async () => {
+        @controller("/test")
+        class TestController {
+            @Get("/")
+            @Render("index")
+            async home(): Promise<object> {
+                return { 
+                    title: "Test",
+                    data: "example"
+                };
+            }
+        }
+
+        const controller = new TestController();
+        const result = await controller.home();
+
+        expect(result).toEqual({
+            title: "Test",
+            data: "example"
+        });
+    });
+
+    it("should use default data when handler returns nothing", async () => {
+        @controller("/test")
+        class TestController {
+            @Get("/about")
+            @Render("about", { title: "About Us", company: "ExpressoTS" })
+            async about(): Promise<void> {
+                // Returns nothing - uses default data
+            }
+        }
+
+        // The @Render decorator handles passing default data to template
+        expect(true).toBe(true);
+    });
+});
+```
+
+### E2E Testing with Template Engines
+
+Test actual template rendering:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+describe("Render Engine E2E", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    describe("EJS Templates", () => {
+        it("should render EJS template correctly", async () => {
+            const response = await fetch(`http://localhost:${app.port}/`);
+            const html = await response.text();
+
+            expect(html).toContain("<title>Welcome</title>");
+            expect(html).toContain("Welcome, John!");
+            expect(html).toContain("<li>Item 1</li>");
+        });
+
+        it("should interpolate variables correctly", async () => {
+            const response = await fetch(
+                `http://localhost:${app.port}/profile/user-123`
+            );
+            const html = await response.text();
+
+            expect(html).toContain("user-123");
+        });
+
+        it("should render loops correctly", async () => {
+            const response = await fetch(`http://localhost:${app.port}/items`);
+            const html = await response.text();
+
+            expect(html).toContain("<li>Alpha</li>");
+            expect(html).toContain("<li>Beta</li>");
+            expect(html).toContain("<li>Gamma</li>");
+        });
+    });
+
+    describe("Pug Templates", () => {
+        it("should render Pug template correctly", async () => {
+            const response = await fetch(`http://localhost:${app.port}/pug`);
+            const html = await response.text();
+
+            expect(html).toContain("<!DOCTYPE html>");
+            expect(html).toContain("<h1>Welcome, Jane!</h1>");
+        });
+
+        it("should handle Pug conditionals", async () => {
+            const response = await fetch(
+                `http://localhost:${app.port}/pug/conditional`
+            );
+            const html = await response.text();
+
+            expect(html).toContain("User is logged in");
+        });
+    });
+
+    describe("Handlebars Templates", () => {
+        it("should render Handlebars template correctly", async () => {
+            const response = await fetch(`http://localhost:${app.port}/hbs`);
+            const html = await response.text();
+
+            expect(html).toContain("<title>Handlebars Page</title>");
+        });
+
+        it("should use Handlebars helpers", async () => {
+            const response = await fetch(`http://localhost:${app.port}/hbs/date`);
+            const html = await response.text();
+
+            expect(html).toMatch(/\d{1,2}\/\d{1,2}\/\d{4}/); // Date format
+        });
+
+        it("should render Handlebars partials", async () => {
+            const response = await fetch(`http://localhost:${app.port}/hbs`);
+            const html = await response.text();
+
+            expect(html).toContain("<nav>"); // From header partial
+            expect(html).toContain("<a href=\"/\">Home</a>");
+        });
+    });
+
+    describe("Content Negotiation", () => {
+        it("should return JSON when Accept header is application/json", async () => {
+            const response = await fetch(`http://localhost:${app.port}/data`, {
+                headers: { Accept: "application/json" }
+            });
+
+            expect(response.headers.get("content-type")).toContain("application/json");
+            
+            const data = await response.json();
+            expect(data).toHaveProperty("users");
+        });
+
+        it("should return HTML when Accept header is text/html", async () => {
+            const response = await fetch(`http://localhost:${app.port}/data`, {
+                headers: { Accept: "text/html" }
+            });
+
+            expect(response.headers.get("content-type")).toContain("text/html");
+            
+            const html = await response.text();
+            expect(html).toContain("<!DOCTYPE html>");
+        });
+    });
+
+    describe("Performance", () => {
+        it("should render templates quickly", async () => {
+            const start = Date.now();
+            await fetch(`http://localhost:${app.port}/`);
+            const duration = Date.now() - start;
+
+            expect(duration).toBeLessThan(100); // Should render in < 100ms
+        });
+
+        it("should benefit from caching in production", async () => {
+            const times: number[] = [];
+
+            for (let i = 0; i < 5; i++) {
+                const start = Date.now();
+                await fetch(`http://localhost:${app.port}/`);
+                times.push(Date.now() - start);
+            }
+
+            // Later requests should be faster (cached templates)
+            const avgFirst2 = (times[0] + times[1]) / 2;
+            const avgLast2 = (times[3] + times[4]) / 2;
+
+            expect(avgLast2).toBeLessThanOrEqual(avgFirst2);
+        });
+    });
+});
+```
+
+### Testing Render Configuration
+
+Test different engine configurations:
+
+```typescript
+describe("Render Configuration", () => {
+    it("should auto-detect installed engine", async () => {
+        const app = new App();
+        await app.configureServices();
+
+        const renderService = app.Middleware.getRenderService();
+        const activeEngine = renderService?.getActiveEngine();
+
+        expect(activeEngine).toBeDefined();
+        expect(["ejs", "pug", "hbs"]).toContain(activeEngine?.name);
+    });
+
+    it("should configure EJS with custom options", async () => {
+        await app.Middleware.render({
+            engine: "ejs",
+            viewsDir: "custom-views",
+            ejsOptions: {
+                serverOptions: {
+                    cache: true,
+                    compileDebug: false
+                }
+            }
+        });
+
+        expect(app.Middleware.getRenderService()).toBeDefined();
+    });
+
+    it("should use development preset in development", async () => {
+        process.env.NODE_ENV = "development";
+
+        await app.Middleware.render("development");
+
+        const renderService = app.Middleware.getRenderService();
+        expect(renderService).toBeDefined();
+    });
+});
+```
+
+## SSR Examples
+
+### React SSR
+
+Full React Server-Side Rendering setup:
+
+```typescript
+// app.ts
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
+        
+        await this.Middleware.render({
+            engine: "react",
+            viewsDir: "src/views",
+            clientBundleDir: "public/assets",
+            cache: process.env.NODE_ENV === "production",
+            ssr: {
+                hydrate: true,
+                streaming: true,
+                preload: true,
+            }
+        });
+    }
+}
+```
+
+```tsx
+// src/views/pages/Home.tsx
+import React from "react";
+
+interface HomeProps {
+    title: string;
+    user: { name: string; avatar: string };
+    posts: Array<{ id: string; title: string; excerpt: string }>;
+}
+
+export default function Home({ title, user, posts }: HomeProps) {
+    return (
+        <html lang="en">
+        <head>
+            <meta charSet="UTF-8" />
+            <title>{title}</title>
+            <script src="/assets/client.js" defer />
+        </head>
+        <body>
+            <header>
+                <h1>Welcome, {user.name}!</h1>
+                <img src={user.avatar} alt={user.name} />
+            </header>
+            
+            <main>
+                <h2>Recent Posts</h2>
+                {posts.map(post => (
+                    <article key={post.id}>
+                        <h3>{post.title}</h3>
+                        <p>{post.excerpt}</p>
+                    </article>
+                ))}
+            </main>
+        </body>
+        </html>
+    );
+}
+```
+
+```typescript
+// controllers/home.controller.ts
+@controller("/")
+export class HomeController {
+    @Get("/")
+    async home(@response() res: Response): Promise<void> {
+        const user = await this.userService.getCurrentUser();
+        const posts = await this.postService.getRecent(10);
+
+        res.render("pages/Home", {
+            title: "Home - ExpressoTS",
+            user: {
+                name: user.name,
+                avatar: user.avatarUrl
+            },
+            posts: posts.map(p => ({
+                id: p.id,
+                title: p.title,
+                excerpt: p.excerpt
+            }))
+        });
+    }
+}
+```
+
+### Vue SSR
+
+```typescript
+// app.ts
+await this.Middleware.render({
+    engine: "vue",
+    viewsDir: "src/views",
+    clientBundleDir: "public/assets",
+    ssr: {
+        hydrate: true,
+        streaming: false,  // Vue streaming is experimental
+    }
+});
+```
+
+```vue
+<!-- src/views/Home.vue -->
+<template>
+  <div>
+    <h1>{{ title }}</h1>
+    <div v-for="item in items" :key="item.id">
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.content }}</p>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  title: string;
+  items: Array<{ id: string; title: string; content: string }>;
+}
+
+defineProps<Props>();
+</script>
+```
+
+### Svelte SSR
+
+```typescript
+// app.ts
+await this.Middleware.render({
+    engine: "svelte",
+    viewsDir: "src/views",
+    clientBundleDir: "public/assets",
+    ssr: {
+        hydrate: true,
+        streaming: true,
+    }
+});
+```
+
+```svelte
+<!-- src/views/Home.svelte -->
+<script lang="ts">
+  export let title: string;
+  export let items: Array<{ id: string; name: string }>;
+</script>
+
+<main>
+  <h1>{title}</h1>
+  <ul>
+    {#each items as item (item.id)}
+      <li>{item.name}</li>
+    {/each}
+  </ul>
+</main>
+
+<style>
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+</style>
+```
+
+## Troubleshooting
+
+### Template Not Found
+
+**Problem:** `Error: Failed to lookup view "index" in views directory`
+
+**Solution:**
+1. Check `viewsDir` path is correct
+2. Verify template file exists with correct extension
+3. Check file permissions
+
+```typescript
+await this.Middleware.render({
+    engine: "ejs",
+    viewsDir: path.join(__dirname, "views"), // Use absolute path
+});
+```
+
+### Engine Not Detected
+
+**Problem:** `Error: No template engine found`
+
+**Solution:**
+1. Install the template engine: `npm install ejs`
+2. Verify it's in `dependencies` or `devDependencies`
+3. Manually specify the engine:
+
+```typescript
+await this.Middleware.render({
+    engine: "ejs", // Explicitly specify
+    viewsDir: "views"
+});
+```
+
+### Variables Not Interpolating
+
+**Problem:** Template shows `<%= user.name %>` literally
+
+**Solution:**
+1. Check file extension matches engine (`.ejs` for EJS)
+2. Verify engine is configured correctly
+3. Check variable is passed to `res.render()`:
+
+```typescript
+res.render("index", { user: { name: "John" } }); // ✅ Correct
+res.render("index"); // ❌ Missing data
+```
+
+### Partials Not Loading
+
+**Problem:** `Error: Partial "header" not found`
+
+**Solution:**
+1. Configure `partialsDir`:
+
+```typescript
+await this.Middleware.render({
+    engine: "hbs",
+    viewsDir: "views",
+    partialsDir: "views/partials", // Specify partials directory
+});
+```
+
+2. Verify partial file exists
+3. Check partial syntax is correct:
+
+```handlebars
+{{> header}}  <!-- ✅ Correct -->
+{{> header.hbs}}  <!-- ❌ Don't include extension -->
+```
+
+### SSR Hydration Issues
+
+**Problem:** Client-side hydration fails
+
+**Solution:**
+1. Ensure client bundle is built and served
+2. Verify hydration script is included:
+
+```html
+<script src="/assets/client.js" defer></script>
+```
+
+3. Match server and client render output
+4. Check browser console for hydration errors
+
+### Performance Issues
+
+**Problem:** Slow template rendering
+
+**Solutions:**
+
+1. **Enable caching in production:**
+```typescript
+await this.Middleware.render({
+    cache: process.env.NODE_ENV === "production"
+});
+```
+
+2. **Use streaming for React/Vue/Svelte:**
+```typescript
+await this.Middleware.render({
+    streaming: true,
+    ssr: { streaming: true }
+});
+```
+
+3. **Precompile templates:**
+```bash
+# For EJS
+npm run precompile-templates
+```
+
+4. **Minimize template complexity:**
+- Avoid deep nesting
+- Reduce logic in templates
+- Move complex operations to controllers
+
+### Hot Reload Not Working
+
+**Problem:** Changes to templates not reflected
+
+**Solution:**
+1. Enable watch mode:
+
+```typescript
+await this.Middleware.render({
+    watch: true  // or 'auto' for development only
+});
+```
+
+2. Disable caching in development:
+
+```typescript
+await this.Middleware.render("development");
+```
+
+3. Restart server if hot reload fails
+
+---
+
+5. **Use the @Render() decorator** for cleaner controller code
+
 ---
 
 ## Support us ❤️

@@ -376,6 +376,229 @@ export class App extends AppExpress {
 }
 ```
 
+## Testing Events
+
+### Testing Event Emission
+
+Test that events are emitted correctly:
+
+```typescript
+import { EventEmitter } from "@expressots/core";
+import { UserService } from "./user.service";
+import { UserCreatedEvent } from "../events/user.events";
+
+describe("UserService", () => {
+    let service: UserService;
+    let mockEventEmitter: jest.Mocked<EventEmitter>;
+
+    beforeEach(() => {
+        mockEventEmitter = {
+            emit: jest.fn(),
+        } as any;
+
+        service = new UserService(mockEventEmitter, mockUserRepository);
+    });
+
+    it("should emit UserCreatedEvent when user is created", async () => {
+        const dto = { email: "test@example.com", name: "Test User" };
+
+        await service.createUser(dto);
+
+        expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+            expect.any(UserCreatedEvent)
+        );
+        
+        const emittedEvent = mockEventEmitter.emit.mock.calls[0][0];
+        expect(emittedEvent.email).toBe(dto.email);
+    });
+});
+```
+
+### Testing Event Handlers
+
+Test handlers in isolation:
+
+```typescript
+import { SendWelcomeEmailHandler } from "./send-welcome-email.handler";
+import { UserCreatedEvent } from "../events/user.events";
+
+describe("SendWelcomeEmailHandler", () => {
+    let handler: SendWelcomeEmailHandler;
+    let mockEmailService: jest.Mocked<EmailService>;
+
+    beforeEach(() => {
+        mockEmailService = {
+            sendWelcome: jest.fn().mockResolvedValue(true),
+        } as any;
+
+        handler = new SendWelcomeEmailHandler(mockEmailService);
+    });
+
+    it("should send welcome email when user is created", async () => {
+        const event = new UserCreatedEvent("123", "test@example.com");
+
+        await handler.handle(event);
+
+        expect(mockEmailService.sendWelcome).toHaveBeenCalledWith(
+            "test@example.com"
+        );
+    });
+
+    it("should handle email service errors", async () => {
+        mockEmailService.sendWelcome.mockRejectedValue(
+            new Error("Email service down")
+        );
+
+        const event = new UserCreatedEvent("123", "test@example.com");
+
+        await expect(handler.handle(event)).rejects.toThrow(
+            "Email service down"
+        );
+    });
+});
+```
+
+### Testing Multiple Handlers
+
+Test that all handlers execute in priority order:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+describe("Event Handler Priority", () => {
+    let app: any;
+    let executionLog: string[] = [];
+
+    beforeAll(async () => {
+        // Spy on handlers to track execution order
+        jest.spyOn(SendWelcomeEmailHandler.prototype, "handle")
+            .mockImplementation(async (event) => {
+                executionLog.push("email");
+            });
+        
+        jest.spyOn(CreateUserProfileHandler.prototype, "handle")
+            .mockImplementation(async (event) => {
+                executionLog.push("profile");
+            });
+        
+        jest.spyOn(LogAnalyticsHandler.prototype, "handle")
+            .mockImplementation(async (event) => {
+                executionLog.push("analytics");
+            });
+
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should execute handlers in priority order", async () => {
+        executionLog = [];
+
+        const response = await fetch(`http://localhost:${app.port}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: "test@example.com" }),
+        });
+
+        expect(response.ok).toBe(true);
+        expect(executionLog).toEqual(["email", "profile", "analytics"]);
+    });
+});
+```
+
+### Testing Conditional Handlers
+
+Test `@When()` conditions:
+
+```typescript
+import { PremiumFeatureHandler } from "./premium-feature.handler";
+import { UserCreatedEvent } from "../events/user.events";
+
+describe("PremiumFeatureHandler", () => {
+    let handler: PremiumFeatureHandler;
+    let mockPremiumService: jest.Mocked<PremiumService>;
+
+    beforeEach(() => {
+        mockPremiumService = {
+            activateFeatures: jest.fn().mockResolvedValue(true),
+        } as any;
+
+        handler = new PremiumFeatureHandler(mockPremiumService);
+    });
+
+    it("should activate features for premium users", async () => {
+        const event = new UserCreatedEvent("123", "test@example.com", true); // isPremium = true
+
+        await handler.handle(event);
+
+        expect(mockPremiumService.activateFeatures).toHaveBeenCalledWith("123");
+    });
+
+    it("should not activate features for non-premium users", async () => {
+        const event = new UserCreatedEvent("123", "test@example.com", false); // isPremium = false
+
+        // Handler should not be called due to @When() condition
+        // This would be tested via E2E tests
+    });
+});
+```
+
+### E2E Event Testing
+
+Test events in a real application:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+describe("User Events E2E", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should trigger all event handlers when user is created", async () => {
+        const response = await fetch(`http://localhost:${app.port}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email: "test@example.com",
+                name: "Test User",
+            }),
+        });
+
+        expect(response.ok).toBe(true);
+
+        // Verify side effects
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait for async handlers
+
+        // Check that email was sent (via test email service)
+        const sentEmails = await testEmailService.getSentEmails();
+        expect(sentEmails).toContainEqual(
+            expect.objectContaining({ to: "test@example.com" })
+        );
+
+        // Check that profile was created
+        const profile = await profileService.findByUserId("123");
+        expect(profile).toBeDefined();
+
+        // Check that analytics was logged
+        const events = await analyticsService.getEvents();
+        expect(events).toContainEqual(
+            expect.objectContaining({ type: "user_created" })
+        );
+    });
+});
+```
+
 ## Best Practices
 
 1. **Use Descriptive Event Names**: `UserCreatedEvent` is better than `Event1`
@@ -384,6 +607,17 @@ export class App extends AppExpress {
 4. **Use Priority Wisely**: Reserve low numbers for critical handlers
 5. **Handle Errors**: Wrap handler logic in try/catch
 6. **Test Events**: Test event emission and handling separately
+7. **Test Priority Order**: Verify handlers execute in the expected sequence
+8. **Test Conditions**: Verify conditional handlers execute only when appropriate
+
+## Performance Tips
+
+1. **Use Async Handlers**: Enable `async: true` for non-critical handlers to avoid blocking
+2. **Minimize Handler Count**: Too many handlers per event can slow down requests
+3. **Cache Expensive Operations**: Use caching in handlers that make expensive calls
+4. **Use Priority Effectively**: Put fast, critical handlers first
+5. **Avoid Synchronous Operations**: Never block the event loop in handlers
+6. **Monitor Handler Performance**: Track execution time of handlers in production
 
 ## Comparison with Other Frameworks
 

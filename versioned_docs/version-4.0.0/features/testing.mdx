@@ -408,6 +408,396 @@ describe("API Tests", () => {
 5. **Performance baselines**: Use load testing to establish baselines
 6. **Snapshot judiciously**: Snapshot critical API structures
 
+## Advanced Patterns
+
+### Testing with Guards and Interceptors
+
+Test applications with full guard and interceptor stacks:
+
+```typescript
+import { bootstrap, setupInterceptorsForExpress, setupAuthorizationForExpress } from "@expressots/core";
+import { App } from "./app";
+
+describe("Full Stack Testing", () => {
+    let app: any;
+    let authToken: string;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+        
+        // Get test authentication token
+        authToken = await getTestAuthToken({ roles: ["admin"] });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should execute interceptors and guards in correct order", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/api/admin/dashboard`,
+            {
+                headers: { 
+                    Authorization: `Bearer ${authToken}`,
+                    "X-Request-ID": "test-123"
+                }
+            }
+        );
+
+        expect(response.status).toBe(200);
+        
+        // Verify interceptor added timing header
+        expect(response.headers.get("X-Response-Time")).toBeDefined();
+        
+        // Verify response was transformed by interceptor
+        const data = await response.json();
+        expect(data).toHaveProperty("success", true);
+        expect(data).toHaveProperty("data");
+        expect(data).toHaveProperty("timestamp");
+    });
+
+    it("should block unauthorized requests before hitting handler", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/api/admin/dashboard`
+        );
+
+        expect(response.status).toBe(401);
+        
+        // Interceptors should still run
+        expect(response.headers.get("X-Response-Time")).toBeDefined();
+    });
+});
+```
+
+### Integration Testing Patterns
+
+Test multiple components working together:
+
+```typescript
+describe("User Workflow Integration", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should complete full user registration flow", async () => {
+        // Step 1: Register user
+        const registerResponse = await fetch(
+            `http://localhost:${app.port}/auth/register`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "newuser@test.com",
+                    password: "SecurePass123!",
+                    name: "New User"
+                })
+            }
+        );
+
+        expect(registerResponse.status).toBe(201);
+        const registerData = await registerResponse.json();
+        expect(registerData).toHaveProperty("token");
+
+        // Step 2: Login with credentials
+        const loginResponse = await fetch(
+            `http://localhost:${app.port}/auth/login`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "newuser@test.com",
+                    password: "SecurePass123!"
+                })
+            }
+        );
+
+        expect(loginResponse.status).toBe(200);
+        const loginData = await loginResponse.json();
+        expect(loginData).toHaveProperty("token");
+
+        // Step 3: Access protected resource
+        const profileResponse = await fetch(
+            `http://localhost:${app.port}/users/profile`,
+            {
+                headers: { 
+                    Authorization: `Bearer ${loginData.token}`
+                }
+            }
+        );
+
+        expect(profileResponse.status).toBe(200);
+        const profile = await profileResponse.json();
+        expect(profile.email).toBe("newuser@test.com");
+    });
+});
+```
+
+### Load Testing Integration
+
+Test performance under load:
+
+```typescript
+describe("Load Testing", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should handle 100 concurrent requests", async () => {
+        const promises = Array.from({ length: 100 }, (_, i) => 
+            fetch(`http://localhost:${app.port}/users`)
+        );
+
+        const responses = await Promise.all(promises);
+
+        // All requests should succeed
+        responses.forEach(response => {
+            expect(response.status).toBe(200);
+        });
+    });
+
+    it("should maintain response times under load", async () => {
+        const times: number[] = [];
+
+        for (let i = 0; i < 50; i++) {
+            const start = Date.now();
+            await fetch(`http://localhost:${app.port}/users`);
+            times.push(Date.now() - start);
+        }
+
+        // Calculate percentiles
+        times.sort((a, b) => a - b);
+        const p50 = times[Math.floor(times.length * 0.5)];
+        const p95 = times[Math.floor(times.length * 0.95)];
+        const p99 = times[Math.floor(times.length * 0.99)];
+
+        expect(p50).toBeLessThan(50);   // 50th percentile < 50ms
+        expect(p95).toBeLessThan(200);  // 95th percentile < 200ms
+        expect(p99).toBeLessThan(500);  // 99th percentile < 500ms
+    });
+
+    it("should not leak memory under sustained load", async () => {
+        const initialMemory = process.memoryUsage().heapUsed;
+
+        // Make 1000 requests
+        for (let i = 0; i < 1000; i++) {
+            await fetch(`http://localhost:${app.port}/users`);
+            
+            if (i % 100 === 0) {
+                global.gc?.(); // Force garbage collection if available
+            }
+        }
+
+        const finalMemory = process.memoryUsage().heapUsed;
+        const memoryIncrease = (finalMemory - initialMemory) / 1024 / 1024;
+
+        // Memory increase should be reasonable (< 50MB)
+        expect(memoryIncrease).toBeLessThan(50);
+    });
+});
+```
+
+### Database Testing Patterns
+
+Test with database fixtures:
+
+```typescript
+describe("Database Integration", () => {
+    let app: any;
+    let db: Database;
+
+    beforeAll(async () => {
+        // Set up test database
+        db = await createTestDatabase({
+            type: "postgres",
+            url: process.env.TEST_DATABASE_URL,
+        });
+
+        await db.migrate();
+    });
+
+    beforeEach(async () => {
+        // Reset database state between tests
+        await db.reset();
+        
+        // Load fixtures
+        await db.fixtures([
+            { table: "users", data: testUsers },
+            { table: "posts", data: testPosts }
+        ]);
+    });
+
+    afterAll(async () => {
+        await db.close();
+        await app.close();
+    });
+
+    it("should create user and persist to database", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/users`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "test@example.com",
+                    name: "Test User"
+                })
+            }
+        );
+
+        expect(response.status).toBe(201);
+        const user = await response.json();
+
+        // Verify in database
+        const dbUser = await db.query(
+            "SELECT * FROM users WHERE id = $1",
+            [user.id]
+        );
+
+        expect(dbUser).toMatchObject({
+            email: "test@example.com",
+            name: "Test User"
+        });
+    });
+});
+```
+
+## Testing Troubleshooting
+
+### Tests Timing Out
+
+**Problem:** Tests hang and timeout
+
+**Solutions:**
+
+1. **Always close servers in afterAll:**
+```typescript
+afterAll(async () => {
+    await app.close();
+});
+```
+
+2. **Use dynamic ports (port 0):**
+```typescript
+const server = await bootstrap(App, { port: 0 });
+```
+
+3. **Increase timeout for slow operations:**
+```typescript
+beforeAll(async () => {
+    app = await bootstrap(App, { port: 0 });
+}, 30000); // 30 second timeout
+```
+
+### Port Already in Use
+
+**Problem:** `Error: EADDRINUSE: address already in use`
+
+**Solution:**
+```typescript
+// Always use port 0 for dynamic allocation
+const server = await bootstrap(App, { port: 0 });
+const port = await server.getPort();
+```
+
+### Memory Leaks in Tests
+
+**Problem:** Tests consume increasing memory
+
+**Solutions:**
+
+1. **Clean up properly:**
+```typescript
+afterEach(async () => {
+    await clearCache();
+    await closeConnections();
+});
+
+afterAll(async () => {
+    await app.close();
+    await database.disconnect();
+});
+```
+
+2. **Use Jest's detectOpenHandles:**
+```bash
+npm test -- --detectOpenHandles
+```
+
+3. **Force garbage collection:**
+```typescript
+afterEach(() => {
+    global.gc?.(); // Requires --expose-gc flag
+});
+```
+
+### Flaky Tests
+
+**Problem:** Tests pass sometimes, fail other times
+
+**Solutions:**
+
+1. **Add delays for async operations:**
+```typescript
+await createUser();
+await new Promise(resolve => setTimeout(resolve, 100)); // Wait for events
+const result = await checkResult();
+```
+
+2. **Use retry logic:**
+```typescript
+async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fetch(url);
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+}
+```
+
+3. **Isolate test state:**
+```typescript
+beforeEach(async () => {
+    await resetDatabase();
+    await clearCache();
+});
+```
+
+### Mock Service Issues
+
+**Problem:** Mocks not working as expected
+
+**Solution:**
+```typescript
+// ✅ Good: Create fresh mocks for each test
+beforeEach(() => {
+    mockService = {
+        method: jest.fn().mockResolvedValue(result)
+    } as any;
+});
+
+// ❌ Bad: Reuse mocks across tests
+const mockService = { method: jest.fn() }; // Declared once
+```
+
+---
+
+6. **Snapshot judiciously**: Snapshot critical API structures
+
 ## Example: Complete Test Suite
 
 ```typescript
