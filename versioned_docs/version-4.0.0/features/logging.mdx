@@ -1257,6 +1257,166 @@ this.logger.info("User created", { userId, email });
 
 ---
 
+## Testing Logger
+
+### Unit Testing
+
+Test logger in isolation with mocked transports:
+
+```typescript
+describe("LoggerService", () => {
+    let logger: Logger;
+    let mockTransport: jest.Mocked<Transport>;
+
+    beforeEach(() => {
+        mockTransport = {
+            write: jest.fn().mockResolvedValue(undefined),
+        } as any;
+
+        logger = new Logger();
+        logger.configure({
+            transports: [mockTransport],
+        });
+    });
+
+    it("should log info messages", () => {
+        logger.info("Test message", { data: 123 });
+
+        expect(mockTransport.write).toHaveBeenCalledWith(
+            expect.objectContaining({
+                level: "INFO",
+                message: "Test message",
+            })
+        );
+    });
+
+    it("should respect log level filtering", () => {
+        logger.configure({ level: LogLevel.WARN });
+
+        logger.debug("Debug message"); // Should not log
+        logger.warn("Warning message"); // Should log
+
+        expect(mockTransport.write).toHaveBeenCalledTimes(1);
+    });
+});
+```
+
+### Testing Redaction
+
+```typescript
+describe("Data Redaction", () => {
+    it("should redact sensitive fields", () => {
+        const capture = captureLogOutput();
+
+        logger.info("User login", {
+            email: "user@example.com",
+            password: "secret123",
+        });
+
+        const log = capture.logs[0];
+        expect(log).toContain("user@example.com");
+        expect(log).not.toContain("secret123");
+        expect(log).toContain("••••••••");
+    });
+});
+```
+
+### E2E Testing
+
+```typescript
+describe("Logger E2E", () => {
+    let app: IWebServerPublic;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should log request/response cycle", async () => {
+        const capture = captureLogOutput();
+
+        await fetch(`http://localhost:${await app.getPort()}/users`);
+
+        expect(capture.logs).toContainEqual(
+            expect.objectContaining({ context: "RequestLogger" })
+        );
+    });
+});
+```
+
+## Troubleshooting
+
+### Logs Not Appearing
+
+**Problem:** Logs are not being output
+
+**Solutions:**
+
+1. **Check log level configuration:**
+```typescript
+// Ensure level is low enough
+this.logger.configure({ level: LogLevel.DEBUG });
+```
+
+2. **Verify transports are configured:**
+```typescript
+this.logger.configure({
+    transports: [ConsoleTransport.forDevelopment()]
+});
+```
+
+3. **Check environment:**
+```typescript
+// Production might have higher log level
+const level = process.env.NODE_ENV === "production" 
+    ? LogLevel.WARN 
+    : LogLevel.DEBUG;
+```
+
+### Redaction Not Working
+
+**Problem:** Sensitive data is not being redacted
+
+**Solution:**
+```typescript
+configureGlobalRedactor({
+    enabled: true,  // Ensure redaction is enabled
+    customFieldPatterns: ["mySecret", "apiKey"],
+});
+```
+
+### Performance Issues
+
+**Problem:** Logging is slow
+
+**Solutions:**
+
+1. **Use async transports:**
+```typescript
+this.logger.configure({
+    transports: [
+        ConsoleTransport.forProduction(),  // JSON is faster
+    ]
+});
+```
+
+2. **Reduce log level in production:**
+```typescript
+this.logger.configure({ level: LogLevel.WARN });
+```
+
+3. **Limit buffer size:**
+```typescript
+this.logger.configure({
+    query: { bufferSize: 100 }  // Smaller buffer
+});
+```
+
+---
+
 ## Support us ❤️
 
 ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
