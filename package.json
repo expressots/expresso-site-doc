@@ -17,7 +17,7 @@
         "typecheck": "tsc"
     },
     "dependencies": {
-        "@docusaurus/core": "^3.6.3",
+        "@docusaurus/core": "^3.9.2",
         "@docusaurus/preset-classic": "^3.6.3",
         "@docusaurus/remark-plugin-npm2yarn": "^3.6.3",
         "@docusaurus/theme-mermaid": "^3.6.3",
