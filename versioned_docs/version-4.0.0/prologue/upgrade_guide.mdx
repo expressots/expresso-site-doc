@@ -18,6 +18,52 @@ Upgrade from ExpressoTS 3.x to 4.0.0.
 | Node.js | 20.18.0+ |
 | Current app | ExpressoTS 3.x |
 
+## Breaking changes summary
+
+There is exactly **one** breaking change in v4.0.0; everything else is additive or opt-in.
+
+### `.env` files are now opt-in (ADR-001)
+
+In v3.x the framework called `dotenv.config()` automatically. In v4 you opt in by passing `envFileConfig` to `bootstrap()`. This was changed because containerised deployments (Docker, Kubernetes, serverless) inject env vars via `process.env` and a missing `.env` file used to trip alarms in production.
+
+**v3.x (implicit):**
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "./app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+// .env was always loaded
+```
+
+**v4 (explicit):**
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+await bootstrap(App, {
+  envFileConfig: {
+    files: { development: ".env", production: ".env.prod" },
+    autoCreateTemplate: true,
+  },
+});
+```
+
+If you do **nothing**, v4 will silently skip `.env` loading and rely on `process.env` only. CI environments are auto-detected (GitHub Actions, GitLab CI, Jenkins, generic `CI=true`).
+
+For the full rationale see ADR-001 in [`expressots/packages/core/src/application/.docs/decision-log.md`](https://github.com/expressots/expressots/blob/main/packages/core/src/application/.docs/decision-log.md).
+
+### Studio ships as preview
+
+`@expressots/studio` is published under the npm `preview` dist-tag for the v4.0.0 line. The full release ships with **v4.1.0**. To install the preview:
+
+```bash
+npm install -D @expressots/studio@preview
+```
+
+When you launch it, the CLI prints a banner listing the known limitations.
+
 ## Step 1: Update Dependencies
 
 Update your `package.json` dependencies to the latest versions:

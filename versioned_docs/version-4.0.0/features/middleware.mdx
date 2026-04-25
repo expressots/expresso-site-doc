@@ -515,6 +515,62 @@ createUser(@validatedBody() dto: CreateUserDto) {
 
 ## Advanced Patterns
 
+### Async response handling with callback-based middleware
+
+ExpressoTS v4 has a smart-response handler: when your controller method returns `undefined`, the framework calls `res.end()` automatically (or returns a 404 for `GET`, or a 204 for `DELETE`/`PUT`/`PATCH`). This is great for clean handlers - until you mix it with **callback-based async middleware** like `multer`, `busboy`, or anything that does its own `req`/`res` work via a continuation.
+
+The trap:
+
+```typescript
+@Post("upload")
+single(req: Request, res: Response) {
+    upload.single("file")(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({ ok: true });   // <- runs async, AFTER the handler returns
+    });
+    // handler returns `undefined` here, BEFORE multer finishes
+}
+```
+
+What happens:
+1. Multer kicks off async file parsing.
+2. Your handler returns `undefined`.
+3. Framework sees `undefined` + `res.headersSent === false` -> calls `res.end()`. Headers now sent.
+4. Multer finishes, callback runs, `res.json(...)` -> "Cannot set headers after they are sent" crash.
+
+The fix: make your handler `async` and `await` the middleware via a Promise wrapper.
+
+```typescript
+function runMulter(
+    req: Request,
+    res: Response,
+    middleware: ReturnType<multer.Multer["single"]>,
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        middleware(req, res, (err) => (err ? reject(err) : resolve()));
+    });
+}
+
+@controller("/upload")
+class UploadController {
+    @Post("single")
+    async single(req: Request, res: Response) {
+        try {
+            await runMulter(req, res, upload.single("file"));
+        } catch (err) {
+            res.status(400).json({ success: false, error: (err as Error).message });
+            return;
+        }
+
+        res.json({ success: true, file: req.file });
+    }
+}
+```
+
+Now the framework awaits your handler's promise, which resolves only after multer has fully responded. No double-write.
+
+The same pattern applies to any callback-style middleware that holds the response: `busboy`, custom file pipelines, raw stream consumers, third-party body parsers.
+
 ### Production-Ready Middleware Stacks
 
 Create reusable middleware stacks for different scenarios:
