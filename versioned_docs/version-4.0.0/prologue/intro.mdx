@@ -24,16 +24,18 @@ For details, see [release notes](./release.mdx) or [upgrade guide](./upgrade_gui
 
 ## ExpressoTS Studio
 
-ExpressoTS Studio is a unified platform for backend development and management:
+ExpressoTS Studio is a local developer experience platform that runs alongside your application during development. It records every request, captures every log line, snapshots your DI graph, and scans your dependencies for vulnerabilities — all on your machine, never off-box.
 
-| Capability | Description |
-|------------|-------------|
-| Visualization | Application architecture overview |
-| Observability | Real-time monitoring |
-| AI Assistance | Development and debugging support |
-| Performance | Metrics tracking and optimization |
-| Security | Vulnerability assessment |
-| Package Store | Adapters and extensions |
+| Capability      | Description                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| Status          | App health, runtime info, top routes, and aggregate security grade                                           |
+| Architecture    | Read-only graph of controllers, use-cases, providers, and middleware with DI scope badges                    |
+| Observability   | Live request timeline, OpenTelemetry trace detail, per-route P50/P95/P99, live logs, error inspector         |
+| Replay          | Replays any recorded request against the running app and diffs status/duration/body                          |
+| Security        | `npm audit` + OSV.dev advisories with root-cause chains, reachability scoring, one-click fixes, and OWASP API Top 10 runtime posture |
+| AI Assistance   | MCP server exposing CRUD / DTO / middleware / test generators to Claude Desktop, Cursor, and other editors   |
+
+See the dedicated [Studio section](../studio/overview.mdx) for the full tour.
 
 ## Requirements
 

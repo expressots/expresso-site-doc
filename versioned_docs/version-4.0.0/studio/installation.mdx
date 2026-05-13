@@ -1,0 +1,181 @@
+---
+sidebar_position: 2
+title: Installation
+description: Install and run ExpressoTS Studio against a v4 application.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Installation
+
+Studio requires an existing ExpressoTS v4 application. If you don't have one yet, scaffold it with the CLI:
+
+```bash
+expressots new my-app
+```
+
+## Step 1: Install the packages
+
+Studio ships as two preview packages. Install both as **dev dependencies**:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm install -D @expressots/studio@preview @expressots/studio-agent@preview
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add -D @expressots/studio@preview @expressots/studio-agent@preview
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm add -D @expressots/studio@preview @expressots/studio-agent@preview
+```
+
+</TabItem>
+</Tabs>
+
+| Package                       | Why                                                              |
+| ----------------------------- | ---------------------------------------------------------------- |
+| `@expressots/studio`          | The CLI, orchestrator, and bundled web UI you run on your laptop |
+| `@expressots/studio-agent`    | Loaded into your app process — instruments routes, records, scans |
+
+The agent is a peer dependency of `@expressots/adapter-express`. The adapter auto-detects it at startup; no `app.ts` changes are required.
+
+## Step 2: Run your app
+
+Start your app the way you normally do:
+
+```bash
+npm run dev
+```
+
+When the app boots in development mode, the adapter dynamically imports `@expressots/studio-agent` and you should see:
+
+```text
+[ExpressoTS] Studio Agent listening on ws://localhost:3334
+```
+
+If you don't see that line, jump to [Troubleshooting](#troubleshooting).
+
+## Step 3: Launch the Studio UI
+
+In a second terminal:
+
+```bash
+npx expressots-studio
+```
+
+The UI opens automatically at [http://localhost:3333](http://localhost:3333). It connects to the agent over Socket.IO and immediately starts showing recorded traffic, logs, and the architecture map.
+
+## Activation rules
+
+The studio-agent only loads when **all** of the following are true:
+
+1. `@expressots/studio-agent` is installed in `node_modules`.
+2. `NODE_ENV === "development"` **or** `NODE_ENV` is not set.
+3. `EXPRESSOTS_STUDIO` is not equal to `"false"`.
+
+Production deployments (`NODE_ENV=production`) never import the agent module, so there is zero runtime overhead in production.
+
+To force-enable Studio in a non-dev `NODE_ENV` (e.g. a staging probe), pass `enabled: true` to `bootstrap()`:
+
+```ts
+await bootstrap(App, {
+  studio: {
+    enabled: true,
+    port: 3334,
+    dbPath: ".studio/studio.db",
+  },
+});
+```
+
+## Environment variables
+
+| Variable                       | Default              | Description                                                                  |
+| ------------------------------ | -------------------- | ---------------------------------------------------------------------------- |
+| `EXPRESSOTS_STUDIO`            | `(unset)`            | Set to `false` to force-disable the agent even in development.               |
+| `EXPRESSOTS_STUDIO_PORT`       | `3334`               | WebSocket port the agent listens on. Must match the UI's agent port.         |
+| `EXPRESSOTS_STUDIO_DB`         | `.studio/studio.db`  | Path to the SQLite recording file. Add `.studio/` to your `.gitignore`.       |
+| `EXPRESSOTS_STUDIO_DEBUG`      | `(unset)`            | Set to `true` to print verbose `[Studio] ...` startup logs.                  |
+
+## CLI commands
+
+```bash
+npx expressots-studio [command] [options]
+```
+
+| Command  | Description                                                |
+| -------- | ---------------------------------------------------------- |
+| `start`  | Default. Starts the UI and probes the agent.               |
+| `info`   | Prints discovered routes and DI bindings from your `src/`. |
+| `clean`  | Deletes the SQLite recording.                              |
+
+### Common options
+
+| Option                        | Default              | Description                                |
+| ----------------------------- | -------------------- | ------------------------------------------ |
+| `-p, --port <port>`           | `3333`               | UI port.                                   |
+| `-a, --agent-port <port>`     | `3334`               | Agent WebSocket port.                      |
+| `-d, --db-path <path>`        | `.studio/studio.db`  | Path to the SQLite recording.              |
+| `--src <path>`                | `./src`              | Source directory to scan.                  |
+| `--no-browser`                | `false`              | Don't open the browser automatically.      |
+
+## .gitignore
+
+The agent writes a SQLite file and a security cache under `.studio/`. Add the folder to your `.gitignore`:
+
+```text
+# ExpressoTS Studio (local-only)
+.studio/
+```
+
+## Troubleshooting
+
+### "Studio Agent listening" line never appears
+
+1. Confirm `@expressots/studio-agent` is in `node_modules`:
+
+    ```bash
+    ls node_modules/@expressots/studio-agent
+    ```
+
+2. Confirm you're running in development mode:
+
+    ```bash
+    echo $NODE_ENV   # should be "development" or empty
+    ```
+
+3. Run with debug logs:
+
+    ```bash
+    EXPRESSOTS_STUDIO_DEBUG=true npm run dev
+    ```
+
+    You should see `[Studio] Resolved studio-agent at: ...` followed by `[Studio] Attempting dynamic import...`.
+
+### "EADDRINUSE" on the agent port
+
+The agent retries the port a few times, then logs a warning. Either kill the old process or change the port:
+
+```bash
+EXPRESSOTS_STUDIO_PORT=3344 npm run dev
+```
+
+…and start the UI with the matching port:
+
+```bash
+npx expressots-studio --agent-port 3344
+```
+
+### Peer dependency warning
+
+If you see `npm WARN ... @expressots/adapter-express` complaining about `@expressots/studio-agent` peer dependency, ensure both `adapter-express` and `studio-agent` are on the same v4 line. Studio v4.0.x preview pairs with adapter-express v4.0.x.

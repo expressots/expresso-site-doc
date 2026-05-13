@@ -22,6 +22,7 @@ See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 | Configuration | Type-safe config with validation |
 | Logging | 11-phase logging system with transports |
 | Authorization | Guards with permission hierarchy |
+| Studio (preview) | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view, MCP server |
 
 ## Versioning Scheme
 
@@ -38,6 +39,9 @@ Releases are bundled. All packages share the same version number:
 -   `@expressots/shared`
 -   `@expressots/templates`
 -   `@expressots/cli`
+-   `@expressots/studio` (preview)
+-   `@expressots/studio-agent` (preview)
+-   `@expressots/mcp-server` (preview)
 
 ## Support Policy
 
@@ -428,6 +432,25 @@ export class App extends AppExpress {
 - `ex add` / `ex remove` for package management
 - `ex scripts` for interactive script execution
 - `tsx` for development, `tsc` for production
+
+### Studio (Preview)
+
+ExpressoTS Studio adds a local developer experience platform on top of any v4 application. Everything runs on your machine; nothing is sent off the box.
+
+- **Status Dashboard**: app health, runtime info, DI scope counts, top routes, aggregate security grade.
+- **Architecture Map**: read-only graph of controllers / use-cases / providers / middleware with DI scope badges and active-path highlighting.
+- **Request Timeline + Trace Detail**: live recording of every HTTP request with OpenTelemetry spans, headers/body diff, and one-click Replay.
+- **Live Logs**: in-memory buffer of every framework + app log line, filterable by level, route, and context.
+- **Error Inspector**: aggregated runtime errors with stack frames and deep-links to source.
+- **Security View**: `npm audit` + OSV.dev advisories with transitive root-cause chains, reachability scoring (confirmed / likely / unreachable / unknown), and one-click fixes. OWASP API Top 10 runtime posture findings derived from recorded traffic.
+- **MCP Server**: stdio MCP server exposing CRUD / DTO / middleware / test generators to Claude Desktop, Cursor, and other AI editors.
+
+```bash
+npm install -D @expressots/studio@preview @expressots/studio-agent@preview
+npx expressots-studio
+```
+
+The studio-agent dynamically loads only when `NODE_ENV=development` and the package is installed — production deployments pay zero runtime cost. See the [Studio section](../studio/overview.mdx) for the full tour.
 
 ### Breaking Changes
 

@@ -1,0 +1,179 @@
+---
+sidebar_position: 4
+title: MCP Server
+description: Use ExpressoTS Studio's MCP server to generate controllers, DTOs, middleware, and tests from Claude Desktop, Cursor, and other AI editors.
+---
+
+# MCP Server
+
+`@expressots/mcp-server` is a stdio [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes ExpressoTS-aware code generation and analysis tools to AI editors (Claude Desktop, Cursor, Continue, etc.).
+
+It's installed and runs separately from the Studio UI and agent, so you can use it without the full Studio stack — but it understands ExpressoTS idioms, so the generated code drops cleanly into a Studio-instrumented app.
+
+:::note Preview status
+The MCP server is published under the npm `preview` dist-tag, and is **parallel to** rather than **integrated with** the Studio UI in v4.0.0. The integration that exposes Studio recordings as MCP resources is on the [v4.1.0 roadmap](../roadmap.mdx).
+:::
+
+## Installation
+
+```bash
+npm install -D @expressots/mcp-server@preview
+```
+
+Or, if you only want it as a global CLI:
+
+```bash
+npm install -g @expressots/mcp-server@preview
+```
+
+## Configure your editor
+
+### Claude Desktop
+
+Edit `claude_desktop_config.json` (the path is shown in Claude Desktop → Settings → Developer):
+
+```json
+{
+  "mcpServers": {
+    "expressots": {
+      "command": "npx",
+      "args": ["@expressots/mcp-server", "/absolute/path/to/your/project"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop. The ExpressoTS tools should now appear in the tools menu.
+
+### Cursor
+
+Add to `~/.cursor/mcp.json` (or use the Cursor UI):
+
+```json
+{
+  "mcpServers": {
+    "expressots": {
+      "command": "npx",
+      "args": ["@expressots/mcp-server", "/absolute/path/to/your/project"]
+    }
+  }
+}
+```
+
+### Run standalone
+
+For debugging or scripting, you can run the server directly over stdio:
+
+```bash
+npx expressots-mcp /path/to/your/project
+```
+
+## Available tools
+
+| Tool                    | Description                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| `generate_crud`         | Full CRUD for an entity (controller + use case + DTOs + tests).                                    |
+| `generate_dto`          | Type-safe DTO with validation decorators.                                                          |
+| `add_middleware`        | Auth, CORS, rate limiting, logging, validation, or custom middleware.                              |
+| `generate_test`         | Unit / integration / e2e test scaffold for a file.                                                 |
+| `analyze_code`          | Static analysis: issues, security smells, improvement suggestions.                                 |
+| `get_project_context`   | Project structure summary the AI uses to make idiomatic suggestions.                               |
+| `read_file` / `write_file` / `list_files` | Sandboxed file system access, scoped to the project root.                      |
+
+### `generate_crud`
+
+```json
+{
+  "entity": "User",
+  "withValidation": true,
+  "withTests": true,
+  "basePath": "/users"
+}
+```
+
+Generates `user.controller.ts`, `create-user.usecase.ts`, `update-user.usecase.ts`, etc., wired through DI with `@provide()`.
+
+### `generate_dto`
+
+```json
+{
+  "name": "CreateUser",
+  "fields": [
+    { "name": "email",    "type": "string", "validation": { "email": true } },
+    { "name": "password", "type": "string", "validation": { "minLength": 8 } },
+    { "name": "name",     "type": "string", "required": true }
+  ]
+}
+```
+
+### `add_middleware`
+
+Supported `type` values: `auth`, `cors`, `rate-limit`, `logging`, `validation`, `custom`.
+
+```json
+{
+  "type": "auth",
+  "options": { "strategy": "jwt" }
+}
+```
+
+### `analyze_code`
+
+```json
+{ "filePath": "src/useCases/user/user.usecase.ts" }
+```
+
+Returns a list of detected issues (security smells, anti-patterns, performance hints).
+
+## Programmatic usage
+
+You can also call the tools directly from your own code:
+
+```ts
+import { generateCrud, generateDto, analyzeCode } from "@expressots/mcp-server";
+
+const crud = generateCrud({
+  entity: "Product",
+  withValidation: true,
+  withTests: true,
+});
+
+const dto = generateDto({
+  name: "CreateProduct",
+  fields: [
+    { name: "name", type: "string", required: true },
+    { name: "price", type: "number", validation: { min: 0 } },
+  ],
+});
+
+const analysis = analyzeCode("src/services/product.service.ts");
+```
+
+## Security model
+
+| Concern              | Behavior                                                              |
+| -------------------- | --------------------------------------------------------------------- |
+| File system access   | Limited to the project root passed on the command line.               |
+| Path traversal       | All paths are resolved and rejected if they escape the project root.  |
+| Network access       | The MCP server does not make outbound network calls.                  |
+| Process spawning     | The MCP server does not spawn subprocesses.                           |
+
+## Troubleshooting
+
+### The tools don't appear in Claude / Cursor
+
+1. Confirm the `command` in your config points to a Node-resolvable `npx`. On Windows you may need to use `npx.cmd`.
+2. Confirm the project path is **absolute**, not relative.
+3. Watch the editor's MCP log (Claude Desktop → Settings → Developer → Open MCP Logs).
+
+### "Cannot find module @expressots/mcp-server"
+
+Install the package globally or use the absolute path to its `bin`:
+
+```bash
+npm install -g @expressots/mcp-server@preview
+which expressots-mcp     # on macOS / Linux
+where expressots-mcp     # on Windows
+```
+
+Then use that absolute path as `command` in the MCP config.

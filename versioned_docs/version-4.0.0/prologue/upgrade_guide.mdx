@@ -56,13 +56,13 @@ For the full rationale see ADR-001 in [`expressots/packages/core/src/application
 
 ### Studio ships as preview
 
-`@expressots/studio` is published under the npm `preview` dist-tag for the v4.0.0 line. The full release ships with **v4.1.0**. To install the preview:
+`@expressots/studio` and `@expressots/studio-agent` are published under the npm `preview` dist-tag for the v4.0.0 line. The polished GA ships with **v4.1.0**. To install the preview:
 
 ```bash
-npm install -D @expressots/studio@preview
+npm install -D @expressots/studio@preview @expressots/studio-agent@preview
 ```
 
-When you launch it, the CLI prints a banner listing the known limitations.
+The agent auto-activates in development; no `app.ts` changes are needed. When you launch the UI, the CLI prints a banner listing the known limitations. See the [Studio section](../studio/overview.mdx) for the full tour and the [Security view](../studio/security.mdx) for the new supply-chain + runtime posture analysis.
 
 ## Step 1: Update Dependencies
 
