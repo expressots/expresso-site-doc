@@ -118,7 +118,7 @@ handleData() {}
 ```typescript
 import { setupAuthorizationForExpress } from "@expressots/adapter-express";
 
-setupAuthorizationForExpress(this.app, this.container.Container, {
+setupAuthorizationForExpress(this.container.Container, {
     permissionHierarchy: {
         "super-admin": ["admin", "moderator", "user"],
         "admin": ["moderator", "user"],

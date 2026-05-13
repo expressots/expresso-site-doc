@@ -226,10 +226,18 @@ export class App extends AppExpress {
     private container: AppContainer = this.configContainer([AppModule]);
 
     protected configureServices(): void {
-        // Setup authorization with your auth provider
-        setupAuthorizationForExpress(this.app, this.container.Container, {
-            authProvider: AuthProvider,
-        });
+        // Setup authorization with your auth provider.
+        // The auth provider is passed as the 4th argument; the 3rd is an
+        // optional Middleware instance for permission preloading.
+        setupAuthorizationForExpress(
+            this.container.Container,
+            {
+                enablePreloading: true,
+                enableCaching: true,
+            },
+            this.Middleware,
+            AuthProvider,
+        );
     }
 }
 ```

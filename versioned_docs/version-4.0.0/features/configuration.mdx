@@ -104,6 +104,51 @@ Env.json("VAR_NAME")
 // VAR_NAME='{"key":"value"}' → { key: "value" }
 ```
 
+### URL Values
+
+```typescript
+Env.url("VAR_NAME", {
+    protocols: ["http", "https"],
+    noTrailingSlash: true,
+    development: "http://localhost:4000",
+    production: "https://api.example.com",
+    description: "External service base URL",
+})
+```
+
+### Port Values
+
+```typescript
+Env.port("PORT", {
+    default: 3000,
+    description: "HTTP server port",
+})
+// Range-validated (1-65535) and type-cast to number.
+```
+
+### Enum Values
+
+```typescript
+Env.enum("LOG_LEVEL", ["debug", "info", "warn", "error"], {
+    development: "debug",
+    production: "warn",
+})
+// Inferred as "debug" | "info" | "warn" | "error".
+```
+
+### Secret Values
+
+```typescript
+Env.secret("JWT_SECRET", {
+    minLength: 32,
+    description: "Secret key for signing JWTs",
+    hint: "Generate with: openssl rand -base64 32",
+})
+// Returns a SecretValue, automatically redacted in logs.
+```
+
+See [SecretValue Features](#secretvalue-features) for the full API surface.
+
 ## Using Configuration
 
 ### In Services
@@ -224,6 +269,65 @@ export default defineConfig({
     },
 });
 ```
+
+### Inline multi-environment defaults
+
+Every `Env.*` builder also accepts per-environment defaults directly in its options object. This is the most concise way to express "use one default in dev, another in production":
+
+```typescript
+import { defineConfig, Env } from "@expressots/core";
+
+export const config = defineConfig({
+    server: {
+        port: Env.port("PORT", { default: 3000 }),
+        host: Env.string("HOST", {
+            development: "localhost",
+            staging: "0.0.0.0",
+            production: "0.0.0.0",
+            description: "Server bind address",
+        }),
+    },
+    database: {
+        url: Env.url("DATABASE_URL", {
+            development: "postgresql://localhost:5432/dev_db",
+            staging: undefined,    // Must be set explicitly
+            production: undefined, // Must be set explicitly
+            description: "PostgreSQL connection URL",
+            hint: "Format: postgresql://user:password@host:port/database",
+        }),
+        poolSize: Env.number("DB_POOL_SIZE", {
+            development: 5,
+            staging: 20,
+            production: 50,
+            min: 1,
+            max: 100,
+        }),
+    },
+    auth: {
+        jwtSecret: Env.secret("JWT_SECRET", {
+            minLength: 32,
+            description: "Secret key for signing JWTs",
+            hint: "Generate with: openssl rand -base64 32",
+        }),
+    },
+    features: {
+        allowedOrigins: Env.array("ALLOWED_ORIGINS", {
+            default: ["http://localhost:3000"],
+            delimiter: ",",
+            description: "Allowed CORS origins (comma-separated)",
+        }),
+        enableRateLimit: Env.boolean("ENABLE_RATE_LIMIT", {
+            development: false,
+            staging: true,
+            production: true,
+        }),
+    },
+});
+
+export type AppConfig = typeof config.values;
+```
+
+The resolved environment is picked from `NODE_ENV`. Passing `undefined` for a given environment means "no default, must be provided explicitly", which makes the field required for that environment.
 
 ### Alternative: Multiple Config Files
 
