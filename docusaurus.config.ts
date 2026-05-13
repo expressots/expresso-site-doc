@@ -16,7 +16,7 @@ const config: Config = {
     deploymentBranch: "gh-pages",
     trailingSlash: false,
 
-    onBrokenLinks: "ignore", // 'throw' | 'warn' | 'ignore'
+    onBrokenLinks: "warn", // 'throw' | 'warn' | 'ignore'
 
     i18n: {
         defaultLocale: "en",
@@ -61,6 +61,14 @@ const config: Config = {
                 content: "expressots, framework, nodejs, typescript, javascript",
             },
         ],
+        announcementBar: {
+            id: "v4_launch",
+            content:
+                'ExpressoTS v4.0 is here — interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
+            backgroundColor: "#80f5a8",
+            textColor: "#1f1f22",
+            isCloseable: true,
+        },
         colorMode: {
             defaultMode: "dark",
             disableSwitch: true,
@@ -83,9 +91,31 @@ const config: Config = {
             items: [
                 {
                     type: "doc",
+                    docId: "core/first-steps",
+                    position: "left",
+                    label: "Getting Started",
+                },
+                {
+                    type: "doc",
+                    docId: "cli/overview",
+                    position: "left",
+                    label: "CLI",
+                },
+                {
+                    type: "doc",
+                    docId: "studio/overview",
+                    position: "left",
+                    label: "Studio",
+                },
+                {
+                    type: "doc",
                     docId: "governance",
-                    position: "right",
+                    position: "left",
                     label: "Governance",
+                },
+                {
+                    type: "search",
+                    position: "left",
                 },
                 {
                     type: "docsVersionDropdown",
@@ -105,27 +135,35 @@ const config: Config = {
                     "aria-label": "LinkedIn profile",
                     className: "header-linkedin-link",
                 },
-                {
-                    type: "search",
-                    position: "left",
-                },
             ],
         },
-        stylesheets: [
-            {
-                href: "/css/custom.css",
-                type: "text/css",
-            },
-        ],
         footer: {
             style: "light",
+            logo: {
+                alt: "ExpressoTS",
+                src: "img/logo.png",
+                href: "https://www.expresso-ts.com",
+                height: 48,
+            },
             links: [
                 {
                     title: "Docs",
                     items: [
                         {
-                            label: "Tutorial",
-                            to: "docs/category/guides",
+                            label: "Getting Started",
+                            to: "/docs/core/first-steps",
+                        },
+                        {
+                            label: "CLI",
+                            to: "/docs/cli/overview",
+                        },
+                        {
+                            label: "Studio",
+                            to: "/docs/studio/overview",
+                        },
+                        {
+                            label: "Upgrade Guide",
+                            to: "/docs/prologue/upgrade_guide",
                         },
                     ],
                 },
@@ -133,16 +171,20 @@ const config: Config = {
                     title: "Community",
                     items: [
                         {
-                            label: "LinkedIn",
-                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                            label: "Discord",
+                            href: "https://discord.gg/PyPJfGK",
                         },
                         {
                             label: "X (Twitter)",
                             href: "https://twitter.com/expressots",
                         },
                         {
-                            label: "Discord",
-                            href: "https://discord.gg/PyPJfGK",
+                            label: "LinkedIn",
+                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                        },
+                        {
+                            label: "YouTube",
+                            href: "https://www.youtube.com/@expressots",
                         },
                     ],
                 },
@@ -150,16 +192,20 @@ const config: Config = {
                     title: "Code",
                     items: [
                         {
-                            label: "NPM Core",
+                            label: "GitHub",
+                            href: "https://github.com/expressots",
+                        },
+                        {
+                            label: "@expressots/core",
                             href: "https://www.npmjs.com/package/@expressots/core",
                         },
                         {
-                            label: "NPM CLI",
+                            label: "@expressots/cli",
                             href: "https://www.npmjs.com/package/@expressots/cli",
                         },
                         {
-                            label: "GitHub",
-                            href: "https://github.com/expressots",
+                            label: "@expressots/studio",
+                            href: "https://www.npmjs.com/package/@expressots/studio",
                         },
                     ],
                 },

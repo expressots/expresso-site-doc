@@ -1747,3 +1747,68 @@ details summary strong {
 [data-theme="dark"] table tr:hover {
     background: rgba(128, 245, 168, 0.05);
 }
+
+/* Footer logo — keep aspect ratio crisp and prevent distortion */
+.footer__logo {
+    height: 48px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    margin: 0 auto 1rem;
+    display: block;
+}
+
+/* Footer column alignment / tidiness */
+.footer .footer__col {
+    margin-bottom: 1.5rem;
+}
+
+.footer .footer__title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.footer .footer__item {
+    margin-top: 0.4rem;
+}
+
+.footer .footer__copyright {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.3px;
+}
+
+/* v4 launch announcement bar */
+div[class*="announcementBar"] {
+    --site-announcement-bar-stripe-color1: var(--expressots-brand);
+    --site-announcement-bar-stripe-color2: var(--expressots-brand-dark);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+div[class*="announcementBar"] a {
+    color: #1f1f22;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    transition: opacity 0.2s ease;
+}
+
+div[class*="announcementBar"] a:hover {
+    opacity: 0.75;
+    color: #1f1f22;
+}
+
+div[class*="announcementBar"] button[class*="closeButton"] svg {
+    fill: #1f1f22;
+}
+
+div[class*="announcementBar"] button[class*="closeButton"]:hover {
+    background: rgba(0, 0, 0, 0.08);
+}

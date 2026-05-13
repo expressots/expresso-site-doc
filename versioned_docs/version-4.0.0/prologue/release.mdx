@@ -13,16 +13,16 @@ See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 
 ## What's New in 4.0
 
-| Feature | Description |
-|---------|-------------|
-| Interceptors | AOP system with conditional execution |
-| Testing Module | Zero-config test utilities |
-| Event System | Type-safe events with auto-discovery |
-| Lazy-Loading | On-demand module loading |
-| Configuration | Type-safe config with validation |
-| Logging | 11-phase logging system with transports |
-| Authorization | Guards with permission hierarchy |
-| Studio | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view, MCP server |
+| Feature        | Description                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Interceptors   | AOP system with conditional execution                                                                                          |
+| Testing Module | Zero-config test utilities                                                                                                     |
+| Event System   | Type-safe events with auto-discovery                                                                                           |
+| Lazy-Loading   | On-demand module loading                                                                                                       |
+| Configuration  | Type-safe config with validation                                                                                               |
+| Logging        | 11-phase logging system with transports                                                                                        |
+| Authorization  | Guards with permission hierarchy                                                                                               |
+| Studio         | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view, MCP server |
 
 ## Versioning Scheme
 
@@ -34,24 +34,23 @@ ExpressoTS follows [Semantic Versioning](https://semver.org/):
 
 Releases are bundled. All packages share the same version number:
 
--   `@expressots/core`
--   `@expressots/adapter-express`
--   `@expressots/shared`
--   `@expressots/templates`
--   `@expressots/cli`
--   `@expressots/studio`
--   `@expressots/studio-agent`
--   `@expressots/mcp-server`
+- `@expressots/core`
+- `@expressots/adapter-express`
+- `@expressots/shared`
+- `@expressots/templates`
+- `@expressots/cli`
+- `@expressots/studio`
+- `@expressots/studio-agent`
 
 ## Support Policy
 
 Starting with **v4.0.0**, every major release receives **24 months** of bug fixes and security patches from its release date. Releases on the v3.x line and earlier follow the prior 18-month policy. Enterprise customers with support contracts receive extended support.
 
-| Version | Node.js    | Release              | Bug & Security fixed until | Status |
-| ------- | ---------- | -------------------- | -------------------------- | ------ |
-| 4.0.0   | >= 20.18.0 | May 2026             | May 2028                   | 🟢     |
-| 3.0.0   | >= 20.18.0 | December 4th, 2024   | December 4th, 2026         | 🟡     |
-| 2.0.0   | >= 18.10.0 | September 14th, 2023 | March 14th, 2025           | 🔴     |
+| Version | Node.js    | Release        | Bug & Security fixed until | Status |
+| ------- | ---------- | -------------- | -------------------------- | ------ |
+| 4.0.0   | >= 20.18.0 | May 2026       | May 2028                   | 🟢     |
+| 3.0.0   | >= 20.18.0 | December 2024  | December 2026              | 🟡     |
+| 2.0.0   | >= 18.10.0 | September 2023 | March 2025                 | 🔴     |
 
 🟢 Active support 🟡 Bug & Security fixes only 🔴 End-of-life
 
@@ -90,8 +89,8 @@ export class UserController {
         PerformanceInterceptor,
         whenInterceptor(
             (ctx) => ctx.request.headers["x-cache"] === "true",
-            CacheInterceptor
-        )
+            CacheInterceptor,
+        ),
     )
     getUsers() {
         return this.userService.findAll();
@@ -142,16 +141,14 @@ Type-safe events for decoupled architecture:
 export class UserCreatedEvent {
     constructor(
         public readonly userId: string,
-        public readonly email: string
+        public readonly email: string,
     ) {}
 }
 
 // Auto-discovered handler
 @provide(SendWelcomeEmailHandler)
 @OnEvent(UserCreatedEvent, { priority: 1 })
-export class SendWelcomeEmailHandler
-    implements IEventHandler<UserCreatedEvent>
-{
+export class SendWelcomeEmailHandler implements IEventHandler<UserCreatedEvent> {
     handle(event: UserCreatedEvent) {
         // Full TypeScript inference on event payload
         this.emailService.sendWelcome(event.email);
@@ -205,17 +202,17 @@ export default defineConfig({
 
 11-phase production logging:
 
-| Feature | Description |
-|---------|-------------|
-| Log Levels | TRACE, DEBUG, INFO, WARN, ERROR, FATAL |
-| Structured Logging | Objects and metadata with formatting |
-| Context Management | `withContext()` and `child()` |
-| File Transport | Daily rotating files, JSON in production |
-| Log Querying | In-memory buffer with query API |
-| Export | Markdown export with statistics |
-| Redaction | Automatic sensitive data masking |
-| Flow Visualization | Visual log flow representation |
-| Transports | Console, File, Custom |
+| Feature            | Description                              |
+| ------------------ | ---------------------------------------- |
+| Log Levels         | TRACE, DEBUG, INFO, WARN, ERROR, FATAL   |
+| Structured Logging | Objects and metadata with formatting     |
+| Context Management | `withContext()` and `child()`            |
+| File Transport     | Daily rotating files, JSON in production |
+| Log Querying       | In-memory buffer with query API          |
+| Export             | Markdown export with statistics          |
+| Redaction          | Automatic sensitive data masking         |
+| Flow Visualization | Visual log flow representation           |
+| Transports         | Console, File, Custom                    |
 
 ```ts
 import { Logger, LogLevel, FileTransport } from "@expressots/core";
@@ -456,11 +453,11 @@ The studio-agent dynamically loads only when `NODE_ENV=development` and the pack
 
 ### Breaking Changes
 
-| Change | Impact |
-|--------|--------|
-| Node.js 20.18.0+ | Update runtime |
-| DI patterns | Review injection syntax |
-| Lifecycle hooks | Update `app.ts` |
+| Change           | Impact                  |
+| ---------------- | ----------------------- |
+| Node.js 20.18.0+ | Update runtime          |
+| DI patterns      | Review injection syntax |
+| Lifecycle hooks  | Update `app.ts`         |
 
 See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 
@@ -470,5 +467,5 @@ See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 
 For information about previous releases, please see:
 
--   [ExpressoTS 3.0.0 Release Notes](/docs/3.0.0/prologue/release)
--   [ExpressoTS 2.16.2 Release Notes](/docs/2.16.2/prologue/release)
+- [ExpressoTS 3.0.0 Release Notes](/docs/3.0.0/prologue/release)
+- [ExpressoTS 2.16.2 Release Notes](/docs/2.16.2/prologue/release)

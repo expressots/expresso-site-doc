@@ -6,33 +6,79 @@
         "message": "ExpressoTS",
         "description": "Title for the homepage"
     },
+    "homepageTagline": {
+        "message": "A TypeScript framework for building scalable, type-safe server-side applications on Node.js. Dependency injection, interceptors, events, and a local developer experience platform built for v4.",
+        "description": "Hero subtitle on the homepage"
+    },
+    "homepageVersionBadge": {
+        "message": "v4.0 — Now Available",
+        "description": "Pill-shaped badge above the hero logo"
+    },
+    "homepageGetStarted": {
+        "message": "Get Started",
+        "description": "Primary CTA in the hero"
+    },
+    "homepageWhatsNew": {
+        "message": "What's New in v4",
+        "description": "Secondary CTA in the hero"
+    },
     "homepageDocumentation": {
         "message": "Documentation"
     },
     "homepageSourceCode": {
         "message": "Source code"
     },
-    "featuresEasyToUse": {
-        "message": "Easy to Use"
+    "featuresSectionTitle": {
+        "message": "Everything you need to ship",
+        "description": "Title for the features section on the homepage"
     },
-    "featuresEasyToUseDesc": {
-        "message": "Built on a modular architecture and designed with simplicity in mind, it empowers developers to quickly create powerful applications."
+    "featuresSectionSubtitle": {
+        "message": "v4 brings a modern runtime, AOP, type-safe events, lazy loading, guards, a powerful CLI, and Studio — a local developer experience platform.",
+        "description": "Subtitle for the features section on the homepage"
     },
-    "featuresFocusOnWhatMatters": {
-        "message": "Focus on What Matters"
+    "featureExploreCta": {
+        "message": "Explore",
+        "description": "CTA label on richer feature cards"
     },
-    "featuresFocusOnWhatMattersDesc": {
-        "message": "You can stop worrying about repetitive boilerplate tasks and focus on what really matters - coding your business logic and delivering a high-quality product."
+    "featureLearnCta": {
+        "message": "Learn more",
+        "description": "CTA label on feature cards"
     },
-    "featuresExtensible": {
-        "message": "Extensible"
+    "featureStudioTitle": {
+        "message": "ExpressoTS Studio"
     },
-    "featuresExtensibleDesc": {
-        "message": "Ability to easily create adapters/providers that seamlessly integrate with the rest of the application.",
-        "description": "Description for the Extensible feature"
+    "featureStudioDesc": {
+        "message": "Local developer experience platform: request timeline, architecture map, live logs, error inspector, security dashboard, and an MCP server for AI editors."
     },
-    "Ability to easily create adapters/providers that seamlessly integrate with the rest of the application.": {
-        "message": "Ability to easily create adapters/providers that seamlessly integrate with the rest of the application."
+    "featureInterceptorsTitle": {
+        "message": "Interceptors"
+    },
+    "featureInterceptorsDesc": {
+        "message": "AOP-based system for cross-cutting concerns with conditional execution — caching, retries, transformations, and more."
+    },
+    "featureEventsTitle": {
+        "message": "Typed Event System"
+    },
+    "featureEventsDesc": {
+        "message": "Type-safe events with auto-discovery and replay. Decouple your domain from delivery and react to system changes with confidence."
+    },
+    "featureLazyTitle": {
+        "message": "Lazy Loading"
+    },
+    "featureLazyDesc": {
+        "message": "On-demand module loading for large applications. Pay for what you load and keep cold starts fast."
+    },
+    "featureCliTitle": {
+        "message": "Powerful CLI"
+    },
+    "featureCliDesc": {
+        "message": "Scaffold projects, generate controllers, providers, and DTOs, containerize, run CI/CD pipelines, and estimate cloud costs — all from one tool."
+    },
+    "featureGuardsTitle": {
+        "message": "Guards & Authorization"
+    },
+    "featureGuardsDesc": {
+        "message": "Declarative guards with a permission hierarchy. Protect routes, validate roles, and keep your authorization logic close to the controllers it defends."
     },
     "theme.ErrorPageContent.title": {
         "message": "This page crashed.",

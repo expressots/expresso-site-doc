@@ -1,49 +1,154 @@
 .features {
-  display: flex;
-  align-items: center;
-  padding: 4rem 0;
-  width: 100%;
-  background: linear-gradient(180deg, transparent 0%, rgba(128, 245, 168, 0.02) 50%, transparent 100%);
+    padding: 5rem 0 6rem;
+    width: 100%;
+    background:
+        linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(128, 245, 168, 0.02) 50%,
+            transparent 100%
+        );
 }
 
-.featureSvg {
-  height: 200px;
-  width: 200px;
-  transition: all 0.4s ease;
-  filter: drop-shadow(0 4px 10px rgba(128, 245, 168, 0.2));
+.sectionHeader {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.featureSvg:hover {
-  transform: translateY(-10px) scale(1.05);
-  filter: drop-shadow(0 8px 20px rgba(128, 245, 168, 0.4));
+.sectionTitle {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #ffffff;
+    letter-spacing: -0.5px;
 }
 
-/* Feature card enhancements */
-.features .col {
-  transition: all 0.3s ease;
-  padding: 1.5rem;
-  border-radius: 12px;
+.sectionSubtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0;
 }
 
-.features .col:hover {
-  transform: translateY(-8px);
-  background: rgba(128, 245, 168, 0.05);
-  box-shadow: 0 8px 30px rgba(128, 245, 168, 0.15);
+.featureCol {
+    display: flex;
+    margin-bottom: 1.5rem;
 }
 
-.features h3 {
-  transition: color 0.3s ease;
-  margin-top: 1rem;
+.featureCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1.75rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(128, 245, 168, 0.12);
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+    text-decoration: none !important;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
 }
 
-.features .col:hover h3 {
-  color: #80f5a8;
+.featureCard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--expressots-brand) 50%,
+        transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.features p {
-  transition: color 0.3s ease;
+.featureCard:hover {
+    transform: translateY(-6px);
+    background: rgba(128, 245, 168, 0.04);
+    border-color: rgba(128, 245, 168, 0.4);
+    box-shadow: 0 12px 32px rgba(128, 245, 168, 0.12);
+    text-decoration: none !important;
 }
 
-.features .col:hover p {
-  color: rgba(255, 255, 255, 0.9);
+.featureCard:hover::before {
+    opacity: 1;
+}
+
+.featureIconWrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(128, 245, 168, 0.1);
+    color: var(--expressots-brand);
+    margin-bottom: 1.25rem;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.featureCard:hover .featureIconWrapper {
+    background: rgba(128, 245, 168, 0.18);
+    transform: scale(1.05);
+}
+
+.featureTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.6rem;
+    transition: color 0.3s ease;
+}
+
+.featureCard:hover .featureTitle {
+    color: var(--expressots-brand);
+}
+
+.featureDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.featureCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--expressots-brand);
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    transition: gap 0.3s ease;
+}
+
+.featureCard:hover .featureCta {
+    gap: 0.7rem;
+}
+
+@media screen and (max-width: 996px) {
+    .features {
+        padding: 3rem 0 4rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.75rem;
+    }
+
+    .sectionSubtitle {
+        font-size: 1rem;
+    }
 }
