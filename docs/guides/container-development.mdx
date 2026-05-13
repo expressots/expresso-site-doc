@@ -1,0 +1,130 @@
+---
+sidebar_position: 6
+title: Container Development
+description: Develop your ExpressoTS app inside Docker containers with hot reload.
+---
+
+# Container Development
+
+For teams that need parity between dev and prod (database engines,
+OS-level deps, exact Node version), ExpressoTS ships a
+`container-dev` command that runs your dev loop **inside** a
+container with hot reload, debug-port forwarding, and a one-shot
+shell into the running service.
+
+## Prerequisites
+
+```bash
+expressots containerize docker development
+```
+
+This generates `Dockerfile.development` and
+`docker-compose.development.yml`. The container-dev command uses
+those by default.
+
+You also need Docker Engine + the Compose plugin (or the legacy
+`docker-compose` binary — both are detected automatically).
+
+## Start
+
+```bash
+expressots container-dev start
+# alias:
+ex cdev
+```
+
+What happens:
+
+1. The CLI looks for `docker-compose.development.yml` in the
+   project root.
+2. It runs `docker compose -f docker-compose.development.yml up`
+   in the foreground (`-d` to detach).
+3. Your `./src` folder is bind-mounted into the container, so
+   `tsx --watch` reloads the moment you save a file on the host.
+4. Port `3000` (or your configured port) and debug port `9229`
+   are forwarded to localhost.
+
+## Subcommands
+
+| Subcommand                             | What it does                                                  |
+| -------------------------------------- | ------------------------------------------------------------- |
+| `expressots container-dev start`       | Build (if needed) and start the dev compose stack.            |
+| `expressots container-dev status`      | Show running container status.                                |
+| `expressots container-dev logs`        | Tail container logs.                                          |
+| `expressots container-dev shell`       | Open a shell inside the running container.                    |
+| `expressots container-dev stop`        | Bring the stack down.                                         |
+| `expressots container-dev attach`      | Re-attach stdout/stderr to a detached container.              |
+
+Aliases: `cdev`, `docker-dev`.
+
+## Flags
+
+| Flag                  | Default                                | Description                                          |
+| --------------------- | -------------------------------------- | ---------------------------------------------------- |
+| `--service / -s`      | `app`                                  | Compose service name.                                |
+| `--compose-file / -f` | `docker-compose.development.yml`       | Path to the compose file.                            |
+| `--build / -b`        | `false`                                | Rebuild the image before `up`.                       |
+| `--detach / -d`       | `false`                                | Run in background.                                   |
+| `--port / -p`         | (compose default)                      | Override the application port.                       |
+| `--debug-port`        | `9229`                                 | Debug port for the Node inspector.                   |
+
+## Common workflows
+
+### Iterate with hot reload
+
+```bash
+expressots container-dev start
+# edit files in ./src — they are reflected immediately
+expressots container-dev logs           # in another terminal
+```
+
+### Rebuild after changing the Dockerfile
+
+```bash
+expressots container-dev start --build
+```
+
+### Debug from VS Code
+
+The container exposes port `9229`. Add an `Attach` config to
+`.vscode/launch.json`:
+
+```json
+{
+  "type": "node",
+  "request": "attach",
+  "name": "Attach to container",
+  "address": "localhost",
+  "port": 9229,
+  "skipFiles": ["<node_internals>/**"]
+}
+```
+
+Then start the container with the inspector enabled (the generated
+`Dockerfile.development` sets `EXPOSE 9229` for you).
+
+### Inspect the container
+
+```bash
+expressots container-dev shell
+# inside the container:
+node --version
+ls /app
+```
+
+### Stop everything
+
+```bash
+expressots container-dev stop
+```
+
+## When to use this vs `expressots dev`
+
+| Use `expressots dev`                 | Use `expressots container-dev`                |
+| ------------------------------------ | --------------------------------------------- |
+| Quick iteration on the host machine. | You need exact prod parity (Linux, Postgres). |
+| You want zero Docker overhead.       | Multiple devs need identical environments.    |
+| You don't care about OS-level deps.  | You depend on system libs (e.g. `libpq`).     |
+
+Both commands honor the `sourceRoot` and `entryPoint` settings in
+your `expressots.config.ts`.

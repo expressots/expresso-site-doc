@@ -1,0 +1,112 @@
+---
+sidebar_position: 3
+title: CI/CD
+description: Generate continuous integration pipelines for your ExpressoTS app.
+---
+
+# CI/CD
+
+The `cicd` command (aliases: `ci`, `pipeline`) generates a CI
+workflow tailored to your project: lint, unit tests, coverage,
+optional security scans, and (optionally) a deploy step.
+
+It is the **CI half** of ExpressoTS' pipeline tooling. Use it
+together with [`containerize --include-ci`](./containerize.mdx#cd-vs-ci-pipelines)
+when you want a separate Docker CD workflow on GitHub Actions.
+
+## Quick start
+
+```bash
+expressots cicd init github
+```
+
+That writes `.github/workflows/ci.yml` with lint → test → coverage
+→ build → docker (build only — no push).
+
+```bash
+expressots cicd init github --deploy-target kubernetes
+```
+
+Adds a `deploy` job that runs `kubectl set image` against your
+cluster after a successful build on `main`.
+
+## Synopsis
+
+```bash
+expressots cicd <action> [platform] [flags]
+```
+
+### Actions
+
+| Action     | Description                                                             |
+| ---------- | ----------------------------------------------------------------------- |
+| `init`     | Generate pipeline file(s) for the chosen platform.                      |
+| `generate` | Same as `init`, but does not bootstrap surrounding files.               |
+| `list`     | Print the supported platforms with a short description of each.         |
+| `validate` | Inspect existing pipeline files in the project and report issues.       |
+
+### Platforms
+
+`github`, `gitlab`, `circleci`, `jenkins`, `bitbucket`, `azure`, or
+`all`. Each writes to its canonical config path:
+
+| Platform   | Output path                          |
+| ---------- | ------------------------------------ |
+| GitHub     | `.github/workflows/ci.yml`           |
+| GitLab     | `.gitlab-ci.yml`                     |
+| CircleCI   | `.circleci/config.yml`               |
+| Jenkins    | `Jenkinsfile`                        |
+| Bitbucket  | `bitbucket-pipelines.yml`            |
+| Azure      | `azure-pipelines.yml`                |
+
+## Flags
+
+| Flag                  | Default          | Description                                                                                  |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
+| `--strategy / -s`     | `comprehensive`  | One of `basic`, `comprehensive`, `security-focused`. Controls which jobs get included.       |
+| `--include-security`  | `true`           | Add Trivy / Snyk scanning jobs.                                                              |
+| `--include-coverage`  | `true`           | Add a coverage upload step (Codecov on GitHub).                                              |
+| `--include-e2e`       | `false`          | Add an end-to-end test job that runs the built artifact.                                     |
+| `--docker-registry / -r` | `ghcr.io`     | Image registry for the Docker build job.                                                     |
+| `--deploy-target`     | `none`           | One of `kubernetes`, `ecs`, `cloudrun`, `railway`, `render`, `fly`, `none`. Adds a deploy job. |
+| `--branch / -b`       | `main`           | Branch that triggers the pipeline.                                                           |
+| `--node-version`      | `20`             | Node.js version pinned in the workflow.                                                      |
+| `--output-dir / -o`   | `.` (cwd)        | Override the project root.                                                                   |
+
+## What gets detected
+
+`cicd init` reads the same project signals as `containerize`:
+
+- **Package manager** from the lock file → all `install`, `test`,
+  `build`, and `lint` steps use that runner (`pnpm install
+  --frozen-lockfile`, `yarn install --frozen-lockfile`, etc.).
+- **Node version** from `engines.node` (overridable with
+  `--node-version`).
+- **Project name** from `package.json` → embedded into job names and
+  image tags.
+
+## Examples
+
+```bash
+expressots cicd list                          # see supported platforms
+expressots cicd init github                   # CI workflow only
+expressots cicd init github --deploy-target kubernetes
+expressots cicd init gitlab --strategy security-focused
+expressots cicd init all                      # write configs for every platform
+expressots cicd validate                      # lint existing pipeline files
+```
+
+## Pairing with `containerize`
+
+On GitHub Actions, both files coexist:
+
+| File                                    | Owner                                                         |
+| --------------------------------------- | ------------------------------------------------------------- |
+| `.github/workflows/ci.yml`              | `expressots cicd init github`                                 |
+| `.github/workflows/cd-docker.yml`       | `expressots containerize --include-ci --ci-platform github`   |
+
+For platforms that only allow a single canonical config file
+(GitLab, Jenkins, CircleCI, Bitbucket, Azure), prefer **just**
+`cicd init` — its output already includes the Docker build/push
+stages, so a separate CD file is unnecessary (and would be
+overwritten by `containerize --include-ci` if you tried).

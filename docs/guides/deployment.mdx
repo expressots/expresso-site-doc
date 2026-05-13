@@ -1,0 +1,263 @@
+---
+sidebar_position: 5
+title: Deployment
+description: Deploy an ExpressoTS app with Docker, Docker Compose, or Kubernetes.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Deployment
+
+ExpressoTS aims to make deployment a one-command experience. The
+[`expressots containerize`](../cli/containerize.mdx) command
+inspects your project and writes production-ready container
+artifacts; the [`expressots cicd init`](../cli/cicd.mdx) command
+writes a matching CI pipeline. This guide stitches them together
+into an end-to-end workflow.
+
+## TL;DR
+
+```bash
+# 1. Generate Docker artifacts (Dockerfile, compose, .dockerignore).
+expressots containerize
+
+# 2. Build and run locally to validate.
+docker build -t myapp .
+docker run -p 3000:3000 myapp
+
+# 3. Generate a CI workflow (lint, test, coverage, image build).
+expressots cicd init github
+
+# 4. Push to your registry / deploy from CI.
+git push origin main
+```
+
+The rest of this page expands on what each step does and how to
+customize the output.
+
+## Step 1 — Generate container artifacts
+
+Run from the root of your ExpressoTS project:
+
+```bash
+expressots containerize
+```
+
+This emits, in your project root:
+
+- `Dockerfile` — multi-stage production image. Stage 1 installs
+  every dependency and runs `<package-manager> run build`; stage 2
+  copies only the compiled output and pruned production
+  `node_modules`.
+- `Dockerfile.development` — single-stage image with the
+  hot-reload `dev` script as `CMD`, plus debug port `9229`.
+- `docker-compose.yml` — orchestrates your app and (when detected)
+  Postgres / Redis services.
+- `.dockerignore` — excludes `node_modules/`, `dist/`, build
+  artifacts, and IDE metadata from the build context.
+
+The CLI **detects your package manager** (npm / pnpm / yarn / bun)
+from your lock file and uses the right install/build/dev commands
+in every generated file. There is no need to edit the Dockerfile
+just to get pnpm or yarn working.
+
+### Targeting a specific environment
+
+<Tabs>
+<TabItem value="prod" label="Production">
+
+```bash
+expressots containerize docker production
+# → Dockerfile (multi-stage, NODE_ENV=production)
+# → docker-compose.yml
+```
+
+</TabItem>
+<TabItem value="staging" label="Staging">
+
+```bash
+expressots containerize docker staging
+# → Dockerfile.staging (multi-stage shape, NODE_ENV=staging)
+# → docker-compose.yml
+```
+
+Staging shares the production multi-stage shape so the artifacts
+are byte-comparable; only `NODE_ENV` differs.
+
+</TabItem>
+<TabItem value="dev" label="Development">
+
+```bash
+expressots containerize docker development
+# → Dockerfile.development (hot reload + debug port)
+# → Dockerfile (also written, for parity)
+# → docker-compose.development.yml + docker-compose.yml
+```
+
+</TabItem>
+</Tabs>
+
+### Presets
+
+Presets tune the base image and security posture:
+
+| Preset         | Highlights                                                            |
+| -------------- | --------------------------------------------------------------------- |
+| `minimal`      | `node:<v>-alpine`, single-stage, smallest image.                      |
+| `standard`     | Multi-stage, healthcheck, conservative defaults. **Default.**         |
+| `secure`       | Non-root user (`uid=1001`), file ownership tightened, healthcheck on. |
+| `fast-startup` | Trims healthcheck timing and unused steps.                            |
+| `multi-arch`   | Adds `--platform` build args for amd64/arm64.                         |
+| `dev`          | Optimized for development image rebuilds.                             |
+
+```bash
+expressots containerize --preset secure
+```
+
+## Step 2 — Validate locally
+
+```bash
+docker build -t myapp .
+docker run -p 3000:3000 myapp
+# or
+docker compose up
+```
+
+If your project uses local `file:` dependencies (monorepo style),
+the CLI also wrote `docker-setup.js` and added a
+`docker:setup` / `docker:build` script pair to `package.json` that
+you can use:
+
+```bash
+npm run docker:build       # or pnpm/yarn/bun, matching your project
+```
+
+## Step 3 — Generate a CI pipeline
+
+```bash
+expressots cicd init github       # or gitlab / circleci / jenkins / bitbucket / azure
+```
+
+This writes `.github/workflows/ci.yml` (or the canonical config
+file for the chosen platform) with lint → test → coverage → build
+jobs already wired to your detected package manager and Node
+version.
+
+Need a deploy step too?
+
+```bash
+expressots cicd init github --deploy-target kubernetes
+expressots cicd init github --deploy-target railway
+expressots cicd init github --deploy-target fly
+expressots cicd init github --deploy-target ecs
+expressots cicd init github --deploy-target cloudrun
+```
+
+For an **additional CD-only Docker workflow** on GitHub (kept
+separate so reviewers can see CI vs CD plainly):
+
+```bash
+expressots containerize --include-ci --ci-platform github
+# → .github/workflows/cd-docker.yml
+```
+
+See [CD vs CI pipelines](../cli/containerize.mdx#cd-vs-ci-pipelines)
+for the rationale.
+
+## Step 4 — Deploy
+
+### Docker host (single node)
+
+```bash
+docker push <registry>/myapp:latest
+ssh deploy@host 'docker pull <registry>/myapp:latest && docker compose up -d'
+```
+
+### Kubernetes
+
+Generate manifests:
+
+```bash
+expressots containerize k8s production
+```
+
+This writes:
+
+- `k8s/deployment.yaml` — 3-replica `Deployment` with
+  liveness/readiness probes hitting `/health` (or whichever paths
+  the analyzer found in your controllers).
+- `k8s/service.yaml` — `LoadBalancer` Service routing port 80 to
+  the analyzed app port.
+- `k8s/configmap.yaml` — placeholder `ConfigMap` with
+  `NODE_ENV=production`.
+
+Apply:
+
+```bash
+kubectl apply -f k8s/
+kubectl rollout status deployment/expressots-app
+```
+
+### Managed PaaS
+
+The deploy targets that ship with `cicd init --deploy-target` cover
+the most common platforms (Railway, Render, Fly.io, AWS ECS, Google
+Cloud Run, Kubernetes). The generated workflow contains the
+recommended deploy steps plus the secrets you need to add to your
+repository.
+
+## Step 5 — Customize freely
+
+Every generated file is **owned by you** once written. Re-running
+`containerize` or `cicd init` overwrites them, so commit your
+customizations or copy them out before regenerating.
+
+Common customizations:
+
+- Adjust `replicas`, resource limits, and probe thresholds in the
+  Kubernetes manifests.
+- Add private registry login secrets to the CI workflow.
+- Swap the base image in `Dockerfile` to a distroless variant for a
+  smaller attack surface.
+- Add post-build scans (Cosign signature, SBOM generation) to
+  `cd-docker.yml` after the `Build and push` step.
+
+## Bootstrap config and env files
+
+If your `main.ts` calls `envFileConfig({...})`, `containerize
+--analyze` will:
+
+- Detect which `.env.<environment>` files exist on disk.
+- Print a warning when a file the bootstrap requires is missing
+  (the container would crash on startup otherwise).
+- Copy the right env file into the image and add it to
+  `.dockerignore`'s allow-list so it ships with the build.
+
+For a **cleaner** container build, prefer
+`envFileConfig({ skipFileLoading: true })` and inject env vars at
+runtime via Docker / Kubernetes Secrets / your PaaS dashboard. The
+analyzer recommends this when it detects you're already
+container-bound.
+
+## Troubleshooting
+
+**`docker compose up --build` fails with "no such file or
+directory"** — re-run `expressots containerize compose` so the
+referenced `Dockerfile` is generated alongside the compose file.
+The CLI has done this automatically since v4.
+
+**`cicd init` overwrote my custom GitHub Actions** — `cicd init` is
+a generator; it always overwrites. Keep your hand-edited files
+under different names (e.g. `release.yml`) so they aren't touched.
+
+**The container runs as root** — switch to the `secure` preset:
+`expressots containerize --preset secure`. It generates a non-root
+user (`uid=1001`) and chowns the app directory.
+
+**Image is huge** — the default multi-stage build copies
+`node_modules` from the builder. For an even smaller image,
+combine `--preset secure` (which uses Alpine) with a `node`
+runtime stage that only contains the compiled JS, or extend the
+generated Dockerfile to use `npm ci --omit=dev` for the runtime
+stage.
