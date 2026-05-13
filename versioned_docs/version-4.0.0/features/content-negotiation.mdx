@@ -1,7 +1,7 @@
 ---
 sidebar_position: 19
 title: Content Negotiation
-description: RFC 7231-compliant content negotiation in ExpressoTS v4 — Accept / Consumes / Produces decorators, built-in JSON / XML / CSV / YAML / plain-text formatters, and streaming responses.
+description: RFC 7231-compliant content negotiation in ExpressoTS v4. Accept / Consumes / Produces decorators, built-in JSON / XML / CSV / YAML / plain-text formatters, and streaming responses.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 
 # Content Negotiation
 
-ExpressoTS v4 ships with a content-negotiation engine that automatically selects the right response format based on the `Accept` header — and the right request parser based on `Content-Type` — without any explicit code in your handlers. Five formatters are bundled (JSON, XML, CSV, YAML, plain text) and you can register your own.
+ExpressoTS v4 ships with a content-negotiation engine that automatically selects the right response format based on the `Accept` header, and the right request parser based on `Content-Type`, without any explicit code in your handlers. Five formatters are bundled (JSON, XML, CSV, YAML, plain text) and you can register your own.
 
 ## Quick start
 
@@ -53,7 +53,7 @@ export class UserController {
 | `@Accept(...types)`    | `@expressots/adapter-express`     | Restrict the handler to specific incoming `Content-Type`s.                              |
 | `@Consumes(...types)`  | `@expressots/adapter-express`     | Alias of `@Accept`. Declares what the **request body** must be.                          |
 | `@Produces(...types)`  | `@expressots/adapter-express`     | Declares what the **response** can be. Drives `Accept` negotiation.                      |
-| `@Version("v1")`       | `@expressots/adapter-express`     | URL / header / query versioning — orthogonal to negotiation but often paired.            |
+| `@Version("v1")`       | `@expressots/adapter-express`     | URL / header / query versioning, orthogonal to negotiation but often paired.            |
 
 ### `@Produces`
 
@@ -83,11 +83,11 @@ Requests with any other `Content-Type` are rejected with **415 Unsupported Media
 
 | Formatter | Default Content-Types          | Options interface                  | Notes                                                          |
 | --------- | ------------------------------ | ---------------------------------- | -------------------------------------------------------------- |
-| `json`    | `application/json`             | —                                  | Pretty-prints in development; compact in production.            |
+| `json`    | `application/json`             | (none)                             | Pretty-prints in development; compact in production.            |
 | `xml`     | `application/xml`, `text/xml`  | [`XmlOptions`](#xmloptions)        | Element-based; attribute mapping available via options.         |
 | `csv`     | `text/csv`                     | [`CsvOptions`](#csvoptions)        | Header row, custom delimiter, custom quoting.                   |
 | `yaml`    | `text/yaml`, `application/yaml`| [`YamlOptions`](#yamloptions)      | Indent and line-width control.                                  |
-| `text`    | `text/plain`                   | —                                  | Calls `.toString()` on the response body.                       |
+| `text`    | `text/plain`                   | (none)                             | Calls `.toString()` on the response body.                       |
 
 ### XmlOptions
 
@@ -166,7 +166,7 @@ Accept: text/csv;q=0.9, application/xml;q=0.5, application/json;q=1.0
 | 1. Parse          | `[{json, q=1.0}, {csv, q=0.9}, {xml, q=0.5}]` |
 | 2. Sort by `q`    | Already sorted.                             |
 | 3. Match handler  | Handler `@Produces`d JSON, CSV, XML.        |
-| 4. Pick best      | **JSON** — first match with highest `q`.    |
+| 4. Pick best      | **JSON**, first match with highest `q`.    |
 
 ## Custom formatters
 
@@ -188,12 +188,12 @@ Once registered, the formatter participates in `Accept` negotiation exactly like
 
 | Other system                | Interaction                                                                                  |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
-| [Interceptors](./interceptors.mdx) | Negotiation runs **after** interceptors return — they see the raw return value.       |
+| [Interceptors](./interceptors.mdx) | Negotiation runs **after** interceptors return, so they see the raw return value.       |
 | [Validation](./dto-validator.mdx)  | Validation runs on the **request body**, before content negotiation parses the response. |
 | [Render engines](./render.mdx)     | HTML responses route to the render engine, not the formatter registry.                 |
 | [Studio](../studio/overview.mdx)   | The Studio Request Timeline records the negotiated response Content-Type.              |
 
 ## See also
 
-- [`@Version` decorator](../why-expressots/routing.mdx) — combine versioning with negotiation.
-- [Streaming + observability](../studio/overview.mdx#feature-tour) — Studio surfaces stream sizes per request.
+- [`@Version` decorator](../why-expressots/routing.mdx): combine versioning with negotiation.
+- [Streaming + observability](../studio/overview.mdx#feature-tour): Studio surfaces stream sizes per request.

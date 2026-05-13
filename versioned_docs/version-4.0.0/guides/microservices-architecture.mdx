@@ -510,7 +510,7 @@ app.get("/metrics", metrics.prometheusHandler.bind(metrics));
 
 ---
 
-## ServiceProxy — declarative HTTP gateway
+## ServiceProxy: declarative HTTP gateway
 
 Where `ServiceClient` is imperative (`await userClient.get("/...")`), **`ServiceProxy`** is declarative: it builds a reverse proxy that forwards inbound requests to a downstream service based on routing rules.
 
@@ -549,7 +549,7 @@ app.use("/api/orders", orderProxy);
 | `changeOrigin`    | Set the `Host` header of the upstream request to match `target`. Recommended.         |
 | `timeout`         | Per-request timeout in ms.                                                            |
 | `retries`         | Number of retries on transient failure (`ECONNRESET`, 5xx with idempotent verbs).     |
-| `circuitBreaker`  | Same shape as `ServiceClient.circuitBreaker` — wraps the proxy so persistent downstream failures fail fast. |
+| `circuitBreaker`  | Same shape as `ServiceClient.circuitBreaker`. Wraps the proxy so persistent downstream failures fail fast. |
 | `onError`         | Hook that runs when the upstream call fails after retries / breaker.                  |
 
 The `createProxy` factory returns an Express middleware. Mount it under any path or on the root.

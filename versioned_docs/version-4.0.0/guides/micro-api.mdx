@@ -424,8 +424,8 @@ The Lambda adapter handles request and response bodies according to API Gateway 
 | Direction | Behaviour                                                                                                                                                                                                                                                |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Incoming body** | If `event.isBase64Encoded` is `true`, the body is decoded with `Buffer.from(body, "base64")` first. When `Content-Type` includes `application/json`, the body is then `JSON.parse()`d (with a fallback to the raw value if parsing fails). Other types pass through as a string or `Buffer`. |
-| **Outgoing body — text** | Strings come back as UTF-8 with `isBase64Encoded: false`. `app.get(...) => "<h1>...</h1>"` returns `text/html`; `=> { ... }` returns `application/json` via the response helper.                                                                |
-| **Outgoing body — binary** | If the `Content-Type` matches one of `config.binaryContentTypes`, the body is base64-encoded and `isBase64Encoded: true` is set. Wildcards like `image/*` are supported.                                                                       |
+| **Outgoing body (text)** | Strings come back as UTF-8 with `isBase64Encoded: false`. `app.get(...) => "<h1>...</h1>"` returns `text/html`; `=> { ... }` returns `application/json` via the response helper.                                                                |
+| **Outgoing body (binary)** | If the `Content-Type` matches one of `config.binaryContentTypes`, the body is base64-encoded and `isBase64Encoded: true` is set. Wildcards like `image/*` are supported.                                                                       |
 
 Configure the binary types the adapter should encode:
 
@@ -459,8 +459,8 @@ app.get("/", (req, res) => {
 
 The adapter also injects two request headers automatically:
 
-- `x-lambda-request-id` — `context.awsRequestId`.
-- `x-lambda-function` — `context.functionName`.
+- `x-lambda-request-id`: `context.awsRequestId`.
+- `x-lambda-function`: `context.functionName`.
 
 #### Cold start tips
 
@@ -703,7 +703,7 @@ If you have legacy code using the v3-era `createMicroAPI()` API, here are the ke
 | v3 (`createMicroAPI`) | v4 (`micro`) |
 |----------------------|--------------|
 | `createMicroAPI()` | `micro()` |
-| `microAPI.build()` | Not needed — `micro()` returns the app directly |
+| `microAPI.build()` | Not needed. `micro()` returns the app directly |
 | `app.Middleware.parse()` | Auto-enabled |
 | `app.Route.get(path, handler, ...middleware)` | `app.get(path, ...middleware, handler)` |
 | `microAPI.Container.addSingleton()` | Use the full framework (`@expressots/core`) for DI |

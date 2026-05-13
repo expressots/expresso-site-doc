@@ -35,7 +35,7 @@ Presets only apply to the `application` template. They prefill `src/app.ts` with
 
 | Preset         | What it pre-applies                                                            |
 | -------------- | ------------------------------------------------------------------------------ |
-| `api`          | `Middleware.applyPreset("api")` — JSON body parsing, security headers, CORS    |
+| `api`          | `Middleware.applyPreset("api")`: JSON body parsing, security headers, CORS    |
 | `web`          | Web app defaults (parse, security, static, render engine slot)                 |
 | `graphql`      | Adapter slot prepared for an Apollo / Yoga plug-in                             |
 | `microservice` | Minimal middleware, optimized for service-to-service traffic                   |
@@ -76,13 +76,13 @@ expressots new my-api
 # ? Choose a preset (Application only) ›
 ```
 
-With the flags above it runs silently and never blocks for input — ideal for CI scripts and template generators.
+With the flags above it runs silently and never blocks for input, ideal for CI scripts and template generators.
 
 ## What happens after `new`
 
 1. **`degit expressots/templates/<template>#v4.0.0`** into the project folder (or local copy if `USE_LOCAL_TEMPLATES` is set, useful for contributors).
 2. **`changePackageName`** rewrites `package.json` name to the project folder name.
-3. **Middleware placeholder rewrite** (Application only) — `__MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` is replaced with the selected preset's `Middleware.applyPreset(...)` call.
+3. **Middleware placeholder rewrite** (Application only). `__MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` is replaced with the selected preset's `Middleware.applyPreset(...)` call.
 4. **`<pm> install`** runs in the project folder.
 
 ## After it finishes
@@ -106,6 +106,6 @@ The dev server starts with `tsx --watch` and your app is reachable on the port r
 
 ## See also
 
-- [`generate`](./generate.mdx) — scaffold resources inside the new project.
-- [`running`](./running.mdx) — boot the dev server.
-- [Configuration File](../features/expressots-config.mdx) — the `expressots.config.ts` the CLI writes for you.
+- [`generate`](./generate.mdx): scaffold resources inside the new project.
+- [`running`](./running.mdx): boot the dev server.
+- [Configuration File](../features/expressots-config.mdx): the `expressots.config.ts` the CLI writes for you.

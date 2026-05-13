@@ -64,7 +64,7 @@ const config: Config = {
         announcementBar: {
             id: "v4_launch",
             content:
-                'ExpressoTS v4.0 is here — interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
+                'ExpressoTS v4.0 is here! Interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
             backgroundColor: "#80f5a8",
             textColor: "#1f1f22",
             isCloseable: true,

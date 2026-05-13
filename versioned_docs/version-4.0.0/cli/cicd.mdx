@@ -52,7 +52,7 @@ expressots pipeline ...
 | `--include-security`    |       | `true`           | Add security scan jobs (Trivy, npm audit).                                  |
 | `--include-e2e`         |       | `false`          | Add an E2E test stage.                                                      |
 | `--include-coverage`    |       | `true`           | Upload coverage reports (codecov / coveralls).                              |
-| `--docker-registry`     | `-r`  | —                | Image registry URL for the publish stage (e.g. `ghcr.io/acme`).             |
+| `--docker-registry`     | `-r`  | (none)           | Image registry URL for the publish stage (e.g. `ghcr.io/acme`).             |
 | `--deploy-target`       |       | `none`           | `kubernetes` / `ecs` / `cloudrun` / `railway` / `render` / `fly` / `none`.  |
 | `--branch`              | `-b`  | `main`           | Branch that triggers the pipeline.                                          |
 | `--node-version`        |       | `20`             | Node version used in CI.                                                    |
@@ -102,6 +102,6 @@ The exact job list depends on the strategy, but a `comprehensive` GitHub Actions
 
 ## See also
 
-- [`containerize`](./containerize.mdx) — produce the Docker artifacts the pipeline builds.
-- [`migrate`](./migrate.mdx) — generate platform-migration scaffolds.
-- [`templates`](./templates.mdx) — manage the underlying template cache.
+- [`containerize`](./containerize.mdx): produce the Docker artifacts the pipeline builds.
+- [`migrate`](./migrate.mdx): generate platform-migration scaffolds.
+- [`templates`](./templates.mdx): manage the underlying template cache.

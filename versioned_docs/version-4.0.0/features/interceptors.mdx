@@ -1269,7 +1269,7 @@ The framework ships four helpers that let you compose interceptors **at the poin
 | Helper                       | Purpose                                                                       |
 | ---------------------------- | ----------------------------------------------------------------------------- |
 | `whenInterceptor(cond, i)`   | Apply `i` only when `cond(ctx)` returns `true`.                                |
-| `unlessInterceptor(cond, i)` | Apply `i` only when `cond(ctx)` returns `false` — the inverse of `when`.       |
+| `unlessInterceptor(cond, i)` | Apply `i` only when `cond(ctx)` returns `false`, the inverse of `when`.       |
 | `pipeInterceptors(...i)`     | Run interceptors **in order**; each `next.handle()` chains to the following.   |
 | `combineInterceptors(...i)`  | Run interceptors **in parallel** for side-effect-only work (logging, metrics). |
 
@@ -1304,7 +1304,7 @@ export class UserController {
 
 `whenInterceptor` / `unlessInterceptor` evaluate their condition lazily at request time. The condition receives the `ExecutionContext` and can be sync or async.
 
-### `pipeInterceptors` — sequential composition
+### `pipeInterceptors`: sequential composition
 
 ```ts
 import { pipeInterceptors, UseInterceptors } from "@expressots/core";
@@ -1314,9 +1314,9 @@ import { pipeInterceptors, UseInterceptors } from "@expressots/core";
 heavy() {}
 ```
 
-Each interceptor's `next.handle()` resolves the next item in the pipe. Short-circuit by returning early — the rest of the pipe is skipped.
+Each interceptor's `next.handle()` resolves the next item in the pipe. Short-circuit by returning early, and the rest of the pipe is skipped.
 
-### `combineInterceptors` — parallel composition
+### `combineInterceptors`: parallel composition
 
 ```ts
 import { combineInterceptors, UseInterceptors } from "@expressots/core";
@@ -1347,7 +1347,7 @@ if (isConditionalInterceptor(x))  { /* it's a when or unless */ }
 | Interceptor                  | Purpose                                                                                  |
 | ---------------------------- | ---------------------------------------------------------------------------------------- |
 | `LoggingInterceptor`         | Structured request/response logging.                                                     |
-| `PerformanceInterceptor`     | Per-request timing — feeds the Studio "slow routes" view.                                |
+| `PerformanceInterceptor`     | Per-request timing that feeds the Studio "slow routes" view.                                |
 | `PerformanceInterceptorService` | Aggregated metrics service (P50/P95/P99 per route).                                  |
 | `TimeoutInterceptor`         | Aborts handlers that exceed `TimeoutOptions.ms`.                                          |
 

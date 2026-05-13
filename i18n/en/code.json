@@ -11,7 +11,7 @@
         "description": "Hero subtitle on the homepage"
     },
     "homepageVersionBadge": {
-        "message": "v4.0 — Now Available",
+        "message": "v4.0 Now Available",
         "description": "Pill-shaped badge above the hero logo"
     },
     "homepageGetStarted": {
@@ -33,7 +33,7 @@
         "description": "Title for the features section on the homepage"
     },
     "featuresSectionSubtitle": {
-        "message": "v4 brings a modern runtime, AOP, type-safe events, lazy loading, guards, a powerful CLI, and Studio — a local developer experience platform.",
+        "message": "v4 brings a modern runtime, AOP, type-safe events, lazy loading, guards, a powerful CLI, and Studio, a local developer experience platform.",
         "description": "Subtitle for the features section on the homepage"
     },
     "featureExploreCta": {
@@ -48,13 +48,13 @@
         "message": "ExpressoTS Studio"
     },
     "featureStudioDesc": {
-        "message": "Local developer experience platform: request timeline, architecture map, live logs, error inspector, security dashboard, and an MCP server for AI editors."
+        "message": "Local developer experience platform: request timeline, architecture map, live logs, error inspector, and security dashboard. All running locally."
     },
     "featureInterceptorsTitle": {
         "message": "Interceptors"
     },
     "featureInterceptorsDesc": {
-        "message": "AOP-based system for cross-cutting concerns with conditional execution — caching, retries, transformations, and more."
+        "message": "AOP-based system for cross-cutting concerns with conditional execution. Think caching, retries, transformations, and more."
     },
     "featureEventsTitle": {
         "message": "Typed Event System"
@@ -72,7 +72,7 @@
         "message": "Powerful CLI"
     },
     "featureCliDesc": {
-        "message": "Scaffold projects, generate controllers, providers, and DTOs, containerize, run CI/CD pipelines, and estimate cloud costs — all from one tool."
+        "message": "Scaffold projects, generate controllers, providers, and DTOs, containerize, run CI/CD pipelines, and estimate cloud costs. All from one tool."
     },
     "featureGuardsTitle": {
         "message": "Guards & Authorization"

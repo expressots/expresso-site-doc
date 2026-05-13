@@ -1748,7 +1748,7 @@ details summary strong {
     background: rgba(128, 245, 168, 0.05);
 }
 
-/* Footer logo — keep aspect ratio crisp and prevent distortion */
+/* Footer logo: keep aspect ratio crisp and prevent distortion */
 .footer__logo {
     height: 48px;
     width: auto;

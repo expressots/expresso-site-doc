@@ -14,9 +14,9 @@ Smaller features and improvements that are too narrow to plan publicly are track
 
 Working packages group related tasks so they can be planned and shipped together. Each package eventually maps to a minor or major release.
 
-> -   **Enhanced** — the area was reworked or significantly improved.
-> -   **Support** — the area is supported with first-class APIs and documentation.
-> -   **Non-existent** — the area is on the radar but not yet shipped.
+> -   **Enhanced**: the area was reworked or significantly improved.
+> -   **Support**: the area is supported with first-class APIs and documentation.
+> -   **Non-existent**: the area is on the radar but not yet shipped.
 
 ## Timeline
 
@@ -43,25 +43,25 @@ The timeline is a rough estimate of when we expect to complete the work. It is n
 | Q1      | v4 design + architecture             | Lifecycle hooks, interceptors / events / lazy-loading designs landed; new logger architecture started; Smart Validation prototype.                                          | ✔️     |
 | Q2      | Authorization + middleware overhaul  | Guards system, permission hierarchy, middleware registry, presets, profiler.                                                                                                | ✔️     |
 | Q3      | Studio agent + UI alpha              | First end-to-end agent / UI pair: request timeline, live logs, architecture map. Internal-only builds.                                                                      | ✔️     |
-| Q4      | Studio Security + MCP                | Studio Security view (npm audit + OSV + reachability) and the standalone `@expressots/mcp-server` for Claude Desktop / Cursor / Continue. Public dogfooding inside the org. | ✔️     |
+| Q4      | Studio Security                      | Studio Security view (npm audit + OSV + reachability). Public dogfooding inside the org.                                                                                    | ✔️     |
 
 ## 2026
 
 | Quarter | Theme                              | Highlights                                                                                                                                                                                | Status         |
 | ------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | Q1      | v4 hardening                       | Adapter-express v4 line stabilised; Studio packages rebuilt against the new APIs; full doc rewrite for the v4 surface.                                                                    | ✔️             |
-| Q2      | **v4.0.0 GA — May 2026**           | Release of `@expressots/core`, `@expressots/adapter-express`, `@expressots/shared`, `@expressots/cli`, `@expressots/templates`, `@expressots/studio`, `@expressots/studio-agent`, `@expressots/mcp-server`. | 🟢 In Progress |
+| Q2      | **v4.0.0 GA, May 2026**            | Release of `@expressots/core`, `@expressots/adapter-express`, `@expressots/shared`, `@expressots/cli`, `@expressots/templates`, `@expressots/studio`, `@expressots/studio-agent`. | 🟢 In Progress |
 | Q2      | Provider Store v1                  | Curated registry of community providers, discoverable from the CLI and documentation.                                                                                                     | In Progress    |
-| Q3      | v4.1 — Studio + MCP integration    | Expose Studio recordings as MCP resources; security findings as MCP resources; route-aware code-generation grounded in the live DI graph.                                                  | Planned        |
+| Q3      | v4.1, Studio enhancements          | Route-aware code generation grounded in the live DI graph; deeper Studio + CLI integration.                                                                                                | Planned        |
 | Q3      | API documentation                  | First-class OpenAPI generation from `@controller()` + DTOs + interceptors + content negotiation metadata, with Swagger UI mounting.                                                       | Planned        |
-| Q4      | v4.2 — Real-time                   | Native WebSocket / SSE primitives, room/topic patterns wired into the DI container, Studio timeline support for socket frames.                                                            | Planned        |
+| Q4      | v4.2, Real-time                    | Native WebSocket / SSE primitives, room/topic patterns wired into the DI container, Studio timeline support for socket frames.                                                            | Planned        |
 | Q4      | QA Framework                       | Test-orchestration tooling around `createTestApp` + load testing + snapshotting; published as `@expressots/qa`.                                                                            | Planned        |
 
 ## 2027
 
 | Quarter | Theme                  | Highlights                                                                                                                       | Status      |
 | ------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Q1      | v4.3 — Observability   | First-party OpenTelemetry exporter for adapter-express; Studio-to-Datadog / Sentry / Honeycomb bridges; Prometheus metrics out-of-the-box. | Planned     |
+| Q1      | v4.3, Observability    | First-party OpenTelemetry exporter for adapter-express; Studio-to-Datadog / Sentry / Honeycomb bridges; Prometheus metrics out-of-the-box. | Planned     |
 | Q2-Q3   | v5 design              | Public RFCs for the v5 line: streaming-first responses, edge-runtime targets, Fastify adapter, runtime-agnostic core split.       | Planned     |
 | Q4      | v5 preview             | Pre-release builds of v5.0.0 with an explicit deprecation list for v4 APIs that move or change.                                  | Planned     |
 
@@ -78,15 +78,15 @@ The timeline is a rough estimate of when we expect to complete the work. It is n
 
 See [Release notes → Support policy](./prologue/release.mdx#support-policy) for the source of truth. Highlights:
 
-- **v4.0.0** — released **May 2026**, supported through **May 2028** (24 months).
-- **v3.0.0** — released December 2024, support extended to **December 2026** alongside the v4 launch.
-- **v2.0.0** — end-of-life since March 2025.
+- **v4.0.0**: released **May 2026**, supported through **May 2028** (24 months).
+- **v3.0.0**: released December 2024, support extended to **December 2026** alongside the v4 launch.
+- **v2.0.0**: end-of-life since March 2025.
 
 ## How to influence the roadmap
 
 1. **Open a discussion** at [github.com/expressots/expressots/discussions](https://github.com/expressots/expressots/discussions).
 2. **File an RFC**: for anything cross-cutting (new module, new package, breaking change). See [Governance → Decision making](./governance.mdx#decision-making).
-3. **Pick up a planned item**: any "Planned" row above can be claimed — comment on the tracking issue or open one if it doesn't exist yet.
+3. **Pick up a planned item**: any "Planned" row above can be claimed. Comment on the tracking issue or open one if it doesn't exist yet.
 
 ---
 

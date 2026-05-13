@@ -687,7 +687,7 @@ featureEndpoint() { /* ... */ }
 
 ## Named middleware registry (v4)
 
-`@expressots/core/middleware` exposes a **named middleware registry** — a separate composition story from the route-level decorators above. Use the registry when you want to declare middleware once under a name and reference it by string in many places.
+`@expressots/core/middleware` exposes a **named middleware registry**, a separate composition story from the route-level decorators above. Use the registry when you want to declare middleware once under a name and reference it by string in many places.
 
 ### Lifecycle
 
@@ -706,7 +706,7 @@ registry.register("audit-log", AuditLogMiddleware);
 resetMiddlewareRegistry();
 ```
 
-### `use(...names)` — resolve registered middleware
+### `use(...names)`: resolve registered middleware
 
 ```ts
 import { use } from "@expressots/core";
@@ -717,7 +717,7 @@ listUsers() {}
 
 `use()` returns an array of `RequestHandler`s **looked up at request time**, so the registry can be mutated between bootstrap and request without recompiling routes.
 
-### `compose(...middlewares)` — sequential composition
+### `compose(...middlewares)`: sequential composition
 
 ```ts
 import { compose } from "@expressots/core";
@@ -726,7 +726,7 @@ const apiChain = compose(corsMw, helmetMw, ...use("auth"));
 app.use(apiChain);
 ```
 
-### `when(condition, middleware)` — conditional execution
+### `when(condition, middleware)`: conditional execution
 
 ```ts
 import { when } from "@expressots/core";
@@ -736,7 +736,7 @@ app.use(when((req) => req.headers["x-debug"] === "1", debugMw));
 
 This is the **core** `when` (matches `RequestHandler`, runs at request time). The `when()` exported from `@expressots/adapter-express` is the **decorator-level** equivalent for `@Get`/`@Post` etc.
 
-### `parallel(middleware)` — fire-and-forget
+### `parallel(middleware)`: fire-and-forget
 
 ```ts
 import { parallel } from "@expressots/core";
@@ -744,7 +744,7 @@ import { parallel } from "@expressots/core";
 app.use(parallel(metricsMw));   // runs via setImmediate, never blocks the response
 ```
 
-### `timeout(ms, middleware)` — hard timeout wrapper
+### `timeout(ms, middleware)`: hard timeout wrapper
 
 ```ts
 import { timeout } from "@expressots/core";
@@ -808,7 +808,7 @@ Combined with the [Studio Request Timeline](../studio/overview.mdx#feature-tour)
 
 ## Optional-package resolver
 
-`@expressots/core` does not bundle Express middleware packages — it loads them on demand. Inspect what's available:
+`@expressots/core` does not bundle Express middleware packages. It loads them on demand. Inspect what's available:
 
 ```ts
 import {

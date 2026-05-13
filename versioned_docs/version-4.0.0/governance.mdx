@@ -1,7 +1,7 @@
 ---
 sidebar_position: 9
 title: GOVERNANCE
-description: How ExpressoTS is governed — decision-making, contribution paths, maintainers, releases, and the security disclosure process.
+description: How ExpressoTS is governed. Decision-making, contribution paths, maintainers, releases, and the security disclosure process.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -13,7 +13,7 @@ ExpressoTS is an independent, MIT-licensed open-source project maintained by a s
 
 ## Mission
 
-> Make TypeScript backend development on Node.js fast to start, easy to scale, and pleasant to maintain — with a developer experience that respects your time.
+> Make TypeScript backend development on Node.js fast to start, easy to scale, and pleasant to maintain, with a developer experience that respects your time.
 
 Every change to the framework is evaluated against three principles:
 
@@ -47,7 +47,7 @@ Architecture decisions are recorded as ADRs under `packages/core/src/**/.docs/de
 
 ## Contribution paths
 
-**"This path is arduous but it's very rewarding — you can help shape the future of backend development."**
+**"This path is arduous but it's very rewarding. You can help shape the future of backend development."**
 
 The framework has serious global traction, with parallel development efforts from many talented contributors. We're always looking for passionate new ones, and unlike many open-source projects, there's a clear, well-defined path to join the core team.
 
@@ -66,23 +66,23 @@ The framework has serious global traction, with parallel development efforts fro
 
 ### How to become a core developer
 
-To become a core developer, you'll need to deliver at least **three major contributions** — new functionality, significant improvements, or sustained, high-quality work in an area of the framework.
+To become a core developer, you'll need to deliver at least **three major contributions**: new functionality, significant improvements, or sustained, high-quality work in an area of the framework.
 
 Steps to start contributing:
 
-1. **Explore ExpressoTS** — create a project, exercise the Core, Adapter-Express, CLI, and Studio. Take notes on potential improvements.
-2. **Read the documentation** — understanding the project's philosophy and technical details is crucial.
-3. **Dive into the codebase** — clone the repo and walk through the package structure.
+1. **Explore ExpressoTS**: create a project, exercise the Core, Adapter-Express, CLI, and Studio. Take notes on potential improvements.
+2. **Read the documentation**: understanding the project's philosophy and technical details is crucial.
+3. **Dive into the codebase**: clone the repo and walk through the package structure.
 
     ```bash
     git clone https://github.com/expressots/expressots.git
     ```
 
-4. **Identify your interest area** — reach out with what you want to work on. We can schedule a call to discuss the design or implementation.
-5. **Contribute and grow** — your work will be reviewed, and based on its quality and impact you may be invited to join the core team.
-6. **Engage with the community** — join Discord or the project channels to interact with contributors and core developers.
+4. **Identify your interest area**: reach out with what you want to work on. We can schedule a call to discuss the design or implementation.
+5. **Contribute and grow**: your work will be reviewed, and based on its quality and impact you may be invited to join the core team.
+6. **Engage with the community**: join Discord or the project channels to interact with contributors and core developers.
 7. **Star the project on GitHub**: [`expressots/expressots`](https://github.com/expressots/expressots).
-8. **Stay updated** — follow the roadmap and open issues to find high-impact areas.
+8. **Stay updated**: follow the roadmap and open issues to find high-impact areas.
 
 :::info
 We're excited to have you on board and look forward to your contributions to ExpressoTS!
@@ -99,8 +99,8 @@ The release captain runs the following workflow for every major and minor:
 1. **Cut a `feature/<major>.<minor>` branch** in each repo (e.g. `feature/v4.0`).
 2. **Land everything for the release** on that branch, with conventional commits.
 3. **Update site docs** in `expressots/expresso-site-doc` on the matching branch.
-4. **Run release validation** — the `tests/test-op`, `tests/_app-demo`, `tests/e2e-validation`, and `tests/full-studio-test` smoke suites all green against the locally packed tarballs.
-5. **Publish to npm** in this order: `@expressots/shared` → `@expressots/core` → `@expressots/adapter-express` → `@expressots/cli` → `@expressots/templates` → `@expressots/studio-agent` → `@expressots/studio` → `@expressots/mcp-server`.
+4. **Run release validation**: the `tests/test-op`, `tests/_app-demo`, `tests/e2e-validation`, and `tests/full-studio-test` smoke suites all green against the locally packed tarballs.
+5. **Publish to npm** in this order: `@expressots/shared` → `@expressots/core` → `@expressots/adapter-express` → `@expressots/cli` → `@expressots/templates` → `@expressots/studio-agent` → `@expressots/studio`.
 6. **Cut a GitHub release** in each repo with the same tag.
 7. **Deploy the site** to `expresso-ts.com` and the versioned doc set.
 8. **Announce** on Discord, LinkedIn, and the README.

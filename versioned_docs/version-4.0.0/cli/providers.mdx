@@ -6,7 +6,7 @@ description: Install, uninstall, and scaffold ExpressoTS providers from the CLI.
 
 # Providers
 
-ExpressoTS providers are npm packages that drop pluggable functionality into your app — auth strategies, database adapters, log transports, message queues, etc. The CLI gives you three commands to work with them:
+ExpressoTS providers are npm packages that drop pluggable functionality into your app: auth strategies, database adapters, log transports, message queues, and more. The CLI gives you three commands to work with them:
 
 | Command   | Purpose                                                                       |
 | --------- | ----------------------------------------------------------------------------- |
@@ -70,7 +70,7 @@ expressots remove @expressots/provider-jwt
 
 ## create
 
-Scaffold a brand-new provider package — a standalone npm-publishable library that follows the ExpressoTS provider conventions (dual CJS/ESM, `lib/` output, GitHub workflows, husky hooks, Jest test scaffold).
+Scaffold a brand-new provider package: a standalone npm-publishable library that follows the ExpressoTS provider conventions (dual CJS/ESM, `lib/` output, GitHub workflows, husky hooks, Jest test scaffold).
 
 ```bash
 expressots create <provider-name>
@@ -78,7 +78,7 @@ expressots create <provider-name>
 expressots create --provider <provider-name>
 ```
 
-`create` clones the [`expressots/templates/provider#v4.0.0`](https://github.com/expressots/templates/tree/v4.0.0/provider) tree via `degit` into a folder named after the provider, and rewrites `package.json` `name`. It **does not** run `npm install` — that's your call.
+`create` clones the [`expressots/templates/provider#v4.0.0`](https://github.com/expressots/templates/tree/v4.0.0/provider) tree via `degit` into a folder named after the provider, and rewrites `package.json` `name`. It **does not** run `npm install`. That's your call.
 
 ### After `create`
 
@@ -90,12 +90,12 @@ npm install
 
 The starter ships with:
 
-- `src/index.ts` — empty barrel, ready for `export * from "./your-provider"`.
-- `src/your-provider.ts` — `@provide(YourProvider)` class with health/metrics/configurable capability hooks.
-- `tsconfig.json` + `tsconfig.build.json` — TypeScript ESM + CJS dual-build setup.
-- `test/example.spec.ts` — Jest scaffold.
-- `.github/workflows/*` — release + CI jobs.
-- `scripts/` — release helpers.
+- `src/index.ts`: empty barrel, ready for `export * from "./your-provider"`.
+- `src/your-provider.ts`: `@provide(YourProvider)` class with health/metrics/configurable capability hooks.
+- `tsconfig.json` + `tsconfig.build.json`: TypeScript ESM + CJS dual-build setup.
+- `test/example.spec.ts`: Jest scaffold.
+- `.github/workflows/*`: release + CI jobs.
+- `scripts/`: release helpers.
 
 Build, test, and publish with the usual npm workflow:
 
@@ -107,5 +107,5 @@ npm publish --access public
 
 ## See also
 
-- [Providers](../core/providers.mdx) — the runtime provider API your package will implement.
-- [Provider Ecosystem](../guides/provider-ecosystem.mdx) — discovery + publishing tips.
+- [Providers](../core/providers.mdx): the runtime provider API your package will implement.
+- [Provider Ecosystem](../guides/provider-ecosystem.mdx): discovery + publishing tips.

@@ -15,7 +15,7 @@ expressots cost ...
 expressots pricing ...
 ```
 
-The pricing data behind these commands is updated independently from the CLI — see [Pricing Data Management](./pricing.mdx) for sources and overrides.
+The pricing data behind these commands is updated independently from the CLI. See [Pricing Data Management](./pricing.mdx) for sources and overrides.
 
 ## Actions
 
@@ -36,7 +36,7 @@ The pricing data behind these commands is updated independently from the CLI —
 
 | Option            | Alias | Default        | Description                                       |
 | ----------------- | ----- | -------------- | ------------------------------------------------- |
-| `--provider`      | `-p`  | —              | One of the providers above.                       |
+| `--provider`      | `-p`  | (none)         | One of the providers above.                       |
 | `--service`       | `-s`  | (auto)         | Specific service tier (e.g. `aws-fargate`).        |
 | `--instances`     | `-i`  | `1`            | Number of instances.                              |
 | `--cpu`           | `-c`  | `1`            | CPU cores per instance.                           |
@@ -87,10 +87,10 @@ heroku         Performance-M          $250.00     $0.00      $0.00      $250.00
 ```
 
 :::caution Pricing accuracy
-Cloud pricing changes constantly. Run `expressots costs update` regularly, and treat the output as an estimate — always verify in the provider's calculator before committing to a deployment.
+Cloud pricing changes constantly. Run `expressots costs update` regularly, and treat the output as an estimate. Always verify in the provider's calculator before committing to a deployment.
 :::
 
 ## See also
 
-- [Pricing Data Management](./pricing.mdx) — sources, cascading fallback, and contributing pricing corrections.
-- [`migrate`](./migrate.mdx) — once you've chosen a target, generate the migration scaffold.
+- [Pricing Data Management](./pricing.mdx): sources, cascading fallback, and contributing pricing corrections.
+- [`migrate`](./migrate.mdx): once you've chosen a target, generate the migration scaffold.

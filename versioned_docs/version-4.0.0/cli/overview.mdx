@@ -11,7 +11,7 @@ The ExpressoTS CLI (`@expressots/cli`) is a single binary that covers the full l
 | Binary names      | Description                                            |
 | ----------------- | ------------------------------------------------------ |
 | `expressots`      | Primary command                                         |
-| `ex`              | Short alias — interchangeable with `expressots`         |
+| `ex`              | Short alias, interchangeable with `expressots`         |
 
 ## Requirements
 
@@ -36,17 +36,17 @@ The CLI is grouped by what stage of the app's life it serves.
 
 | Command | Alias | Purpose                                              | Page |
 | ------- | ----- | ---------------------------------------------------- | ---- |
-| `new`   | —     | Create a new project from a template (`application` / `micro`) | [new](./new.mdx) |
+| `new`   | (none) | Create a new project from a template (`application` / `micro`) | [new](./new.mdx) |
 | `generate` | `g` | Scaffold a single resource (controller, use case, DTO, interceptor, event handler, guard, etc.) | [generate](./generate.mdx) |
-| `create` | —    | Scaffold a standalone provider package skeleton      | [providers](./providers.mdx#create) |
+| `create` | (none) | Scaffold a standalone provider package skeleton      | [providers](./providers.mdx#create) |
 
 ### Running
 
 | Command | Alias  | Purpose                                                  | Page |
 | ------- | ------ | -------------------------------------------------------- | ---- |
-| `dev`   | —      | Local dev server with `tsx --watch`. Optional `--container` flag for the Docker flow. | [running](./running.mdx#dev) |
-| `build` | —      | Compile to JavaScript with `tsc`. Rewrites alias imports in opinionated projects. | [running](./running.mdx#build) |
-| `prod`  | —      | Run the compiled output with `node`                      | [running](./running.mdx#prod) |
+| `dev`   | (none)  | Local dev server with `tsx --watch`. Optional `--container` flag for the Docker flow. | [running](./running.mdx#dev) |
+| `build` | (none)  | Compile to JavaScript with `tsc`. Rewrites alias imports in opinionated projects. | [running](./running.mdx#build) |
+| `prod`  | (none)  | Run the compiled output with `node`                      | [running](./running.mdx#prod) |
 | `container-dev` | `cdev`, `docker-dev` | Compose-based dev workflow (start, stop, attach, shell, status, logs). | [running](./running.mdx#container-dev) |
 
 ### Dependencies
@@ -75,7 +75,7 @@ The CLI is grouped by what stage of the app's life it serves.
 | ----------- | ----- | ------------------------------------------------------------------ | ---- |
 | `info`      | `i`   | Print OS, Node, CLI bundle version, and project info from `package.json` | [info](./info.mdx#info) |
 | `resources` | `r`   | Print the table of all commands and `generate` schematics (cheat sheet) | [info](./info.mdx#resources) |
-| `--help`    | —     | yargs-generated help; works on every command (`expressots <cmd> --help`) | — |
+| `--help`    | (none) | yargs-generated help; works on every command (`expressots <cmd> --help`) | (none) |
 
 ## Conventions
 
@@ -86,10 +86,10 @@ These apply across the CLI:
 | **No global `--version`**                   | The CLI deliberately does not expose `expressots --version`. Use `expressots info` or `npm list -g @expressots/cli`. |
 | **`expressots.config.ts` is required**      | For `dev`, `build`, `prod`, and `generate`. The CLI walks up from `cwd` until it finds the file. |
 | **`tsconfig.build.json` with `outDir`**     | Required for `build` and `prod`. The CLI creates `outDir` if it doesn't exist.            |
-| **Strict yargs mode**                       | Unknown flags or commands fail fast — no silent typos.                                    |
+| **Strict yargs mode**                       | Unknown flags or commands fail fast, no silent typos.                                    |
 | **A subcommand is always required**         | Running `expressots` with no arguments prints the help and exits.                         |
 | **The `run` command was removed**           | Use `dev`, `build`, or `prod` directly.                                                   |
-| **Path positional, not `--module=`**        | `expressots g controller auth/user post` — *not* `expressots g controller --module=auth user`. |
+| **Path positional, not `--module=`**        | `expressots g controller auth/user post`, *not* `expressots g controller --module=auth user`. |
 
 ## `expressots.config.ts`
 
@@ -181,9 +181,9 @@ expressots build && expressots prod
 
 ## Next
 
-- [`new`](./new.mdx) — create a project from a template.
-- [`generate`](./generate.mdx) — scaffold a resource.
-- [`running`](./running.mdx) — `dev`, `build`, `prod`, and the Docker container workflow.
-- [`providers`](./providers.mdx) — `add`, `remove`, `create`.
-- [`studio`](./studio.mdx) — launch the Studio UI from the CLI.
-- [`containerize`](./containerize.mdx), [`cicd`](./cicd.mdx), [`migrate`](./migrate.mdx), [`costs`](./costs.mdx) — production-ready DevOps artifacts.
+- [`new`](./new.mdx): create a project from a template.
+- [`generate`](./generate.mdx): scaffold a resource.
+- [`running`](./running.mdx): `dev`, `build`, `prod`, and the Docker container workflow.
+- [`providers`](./providers.mdx): `add`, `remove`, `create`.
+- [`studio`](./studio.mdx): launch the Studio UI from the CLI.
+- [`containerize`](./containerize.mdx), [`cicd`](./cicd.mdx), [`migrate`](./migrate.mdx), [`costs`](./costs.mdx): production-ready DevOps artifacts.

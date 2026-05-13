@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Running the app
-description: dev, build, prod, and container-dev — every way the CLI runs your ExpressoTS application.
+description: dev, build, prod, and container-dev: every way the CLI runs your ExpressoTS application.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -41,7 +41,7 @@ Under the hood it shells out to:
 npx tsx --watch [-r tsconfig-paths/register] ./src/<entryPoint>.ts
 ```
 
-- `tsx --watch` is **tsx's built-in watch mode** — no `nodemon`, no `SIGTERM` quirks on Windows.
+- `tsx --watch` is **tsx's built-in watch mode** with no `nodemon`, no `SIGTERM` quirks on Windows.
 - `tsconfig-paths/register` is added for opinionated projects so `@useCases/...`, `@providers/...` etc. resolve at dev time.
 - The process inherits stdio; press `Ctrl+C` to stop. Saved files trigger a fast restart.
 
@@ -79,7 +79,7 @@ Then, **for opinionated projects only**, the CLI post-processes every emitted `.
 - Copies `package.json` into `outDir` so production tooling (`npm prune --production`, `npm start`, etc.) can resolve dependencies.
 
 :::note Why the rewrite
-v3 required `register-path.js` at runtime. v4 removed that — alias resolution is baked into `build` time, so production startup has zero path-mapping cost.
+v3 required `register-path.js` at runtime. v4 removed that. Alias resolution is baked into `build` time, so production startup has zero path-mapping cost.
 :::
 
 ## prod
@@ -135,7 +135,7 @@ expressots container-dev stop
 | `--tail`          |       | `100`                                | `logs` tail line count.                           |
 
 :::tip dev or container-dev?
-- `expressots dev` is **faster** — `tsx --watch` reload is sub-second and there is no Docker layer.
+- `expressots dev` is **faster**. `tsx --watch` reload is sub-second and there is no Docker layer.
 - `expressots dev --container` is a one-shot containerized dev.
 - `expressots container-dev` is the **structured** Compose workflow when you need multiple services and a long-lived dev environment.
 :::
@@ -191,6 +191,6 @@ pnpm prod
 | Problem                                              | Fix                                                                                              |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `tsconfig.build.json: outDir missing`                | Add `"outDir": "build"` (or any folder name) under `compilerOptions`.                            |
-| `Cannot find module '@useCases/...'` in production   | You ran `node` directly. Use `expressots prod` so the alias rewrite is applied — or rebuild first. |
+| `Cannot find module '@useCases/...'` in production   | You ran `node` directly. Use `expressots prod` so the alias rewrite is applied, or rebuild first. |
 | Port already in use (`EADDRINUSE`)                   | Stop the previous process or change the port via env / `bootstrap({ port })`.                    |
-| `--container` first run is very slow                 | Expected — it generates `Dockerfile.development`, builds the image, and pulls base layers. Subsequent runs are cached. |
+| `--container` first run is very slow                 | Expected. It generates `Dockerfile.development`, builds the image, and pulls base layers. Subsequent runs are cached. |

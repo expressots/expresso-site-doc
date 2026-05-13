@@ -8,8 +8,8 @@ description: ExpressoTS Studio Security View - supply-chain advisories with reac
 
 Studio's Security view is a local, always-on security analyst for your application. It combines two complementary lenses:
 
-1. **Supply-chain analysis** — every dependency in your lockfile, cross-referenced against the npm registry advisory database and OSV.dev, with transitive root-cause chains, reachability scoring, and one-click fixes.
-2. **Runtime posture analysis** — your recorded HTTP traffic, routes, logs, and DI graph scored against the OWASP API Security Top 10.
+1. **Supply-chain analysis**: every dependency in your lockfile, cross-referenced against the npm registry advisory database and OSV.dev, with transitive root-cause chains, reachability scoring, and one-click fixes.
+2. **Runtime posture analysis**: your recorded HTTP traffic, routes, logs, and DI graph scored against the OWASP API Security Top 10.
 
 The result is a single score letter (A–F) on the Status dashboard, and a drill-down view with copy-pasteable remediation commands.
 
@@ -20,23 +20,23 @@ Studio never sends your `package.json`, your `package-lock.json`, your code, or 
 ## Screenshots
 
 <figure>
-  <img src="/img/studio/security-overview.png" alt="Security view — overview" />
-  <figcaption><code>security-overview.png</code> — supply-chain advisories grouped by severity with reachability badges and the aggregate grade.</figcaption>
+  <img src="/img/studio/security-overview.png" alt="Security view: overview" />
+  <figcaption><code>security-overview.png</code>: supply-chain advisories grouped by severity with reachability badges and the aggregate grade.</figcaption>
 </figure>
 
 <figure>
-  <img src="/img/studio/security-finding-detail.png" alt="Security view — single finding" />
-  <figcaption><code>security-finding-detail.png</code> — expanded advisory with GHSA / CVE / OSV links and the full root-cause chain.</figcaption>
+  <img src="/img/studio/security-finding-detail.png" alt="Security view: single finding" />
+  <figcaption><code>security-finding-detail.png</code>: expanded advisory with GHSA / CVE / OSV links and the full root-cause chain.</figcaption>
 </figure>
 
 <figure>
-  <img src="/img/studio/security-recommended-fixes.png" alt="Security view — recommended fixes panel" />
-  <figcaption><code>security-recommended-fixes.png</code> — grouped FixGroups with one-click <strong>Apply fix</strong>.</figcaption>
+  <img src="/img/studio/security-recommended-fixes.png" alt="Security view: recommended fixes panel" />
+  <figcaption><code>security-recommended-fixes.png</code>: grouped FixGroups with one-click <strong>Apply fix</strong>.</figcaption>
 </figure>
 
 <figure>
-  <img src="/img/studio/security-runtime-posture.png" alt="Security view — runtime posture" />
-  <figcaption><code>security-runtime-posture.png</code> — OWASP API Top 10 findings drawn from recorded traffic.</figcaption>
+  <img src="/img/studio/security-runtime-posture.png" alt="Security view: runtime posture" />
+  <figcaption><code>security-runtime-posture.png</code>: OWASP API Top 10 findings drawn from recorded traffic.</figcaption>
 </figure>
 
 To refresh these images, follow the [capture guide on the Overview page](./overview.mdx#capture-guide). The Security view in particular benefits from running [`tests/test-op`](https://github.com/expressots/expressots/tree/feature/v4.0/tests/test-op) for a few minutes first so the recorder has realistic traffic to flag.
@@ -102,7 +102,7 @@ expressots-app
         └── send@0.18.0              ← vulnerable
 ```
 
-When a fix requires upgrading `@nestjs/swagger`, the Security view says so explicitly — instead of leaving you to figure out why `npm audit fix` keeps saying "force" is required.
+When a fix requires upgrading `@nestjs/swagger`, the Security view says so explicitly, instead of leaving you to figure out why `npm audit fix` keeps saying "force" is required.
 
 ### Recommended fixes
 
@@ -132,7 +132,7 @@ Clicking **Apply fix** in the UI:
 3. Re-runs `npm audit` + OSV automatically when the run finishes, so the report updates without a manual refresh.
 4. Reports success/failure plus the exit code in the UI.
 
-The fix runner uses an **allow-listed argv** — only `npm install <pkg>@<version>` and `npm audit fix [--force]` are accepted. There is no shell interpolation.
+The fix runner uses an **allow-listed argv**: only `npm install <pkg>@<version>` and `npm audit fix [--force]` are accepted. There is no shell interpolation.
 
 ## Runtime posture analysis
 
@@ -140,15 +140,15 @@ Recording HTTP traffic gives Studio something `npm audit` can't see: how your ap
 
 | OWASP category                     | What Studio looks for                                                                                  |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| API1 — BOLA                        | Routes with `:id`-style params that respond without an `AuthenticatedGuard` or owner check in the DI graph |
-| API2 — Broken Authentication       | Sensitive routes hit with no `Authorization` header in the recording                                   |
-| API3 — Excessive Data Exposure     | Response bodies that leak fields with sensitive-looking names (`password`, `apiKey`, `token`)          |
-| API4 — Unrestricted Resource Use   | Routes that respond > 2 s or that have no `TimeoutInterceptor` in their pipeline                       |
-| API5 — Broken Function Authz       | Routes with `admin`-shaped paths that don't require an admin role                                      |
-| API7 — Server-Side Misconfig       | `app.use()` middleware mistakes (e.g. CORS `*`, missing helmet)                                        |
-| API8 — Injection                   | Error logs that contain raw SQL / shell / NoSQL exception patterns                                     |
-| API9 — Improper Inventory          | Routes detected by source-scan that never appear in recordings (zombie routes)                         |
-| API10 — Unsafe Consumption of APIs | Outgoing HTTP calls captured in logs without TLS verification                                          |
+| API1: BOLA                         | Routes with `:id`-style params that respond without an `AuthenticatedGuard` or owner check in the DI graph |
+| API2: Broken Authentication        | Sensitive routes hit with no `Authorization` header in the recording                                   |
+| API3: Excessive Data Exposure      | Response bodies that leak fields with sensitive-looking names (`password`, `apiKey`, `token`)          |
+| API4: Unrestricted Resource Use    | Routes that respond > 2 s or that have no `TimeoutInterceptor` in their pipeline                       |
+| API5: Broken Function Authz        | Routes with `admin`-shaped paths that don't require an admin role                                      |
+| API7: Server-Side Misconfig        | `app.use()` middleware mistakes (e.g. CORS `*`, missing helmet)                                        |
+| API8: Injection                    | Error logs that contain raw SQL / shell / NoSQL exception patterns                                     |
+| API9: Improper Inventory           | Routes detected by source-scan that never appear in recordings (zombie routes)                         |
+| API10: Unsafe Consumption of APIs  | Outgoing HTTP calls captured in logs without TLS verification                                          |
 
 Each finding has a severity, an explanation, and a deep link into the recorded exchange that triggered it.
 

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: generate
-description: expressots generate scaffolds resources — controllers, use cases, DTOs, interceptors, events, handlers, guards, config files — wired into your DI container.
+description: expressots generate scaffolds resources (controllers, use cases, DTOs, interceptors, events, handlers, guards, config files) wired into your DI container.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -21,7 +21,7 @@ expressots g <schematic-alias> [path] [method] [options]
 
 | Schematic       | Alias  | Emits                                                                                   | v4 |
 | --------------- | ------ | --------------------------------------------------------------------------------------- | -- |
-| `service`       | `s`    | Controller + use case + DTO + module wiring — a full vertical slice for one HTTP route. |    |
+| `service`       | `s`    | Controller + use case + DTO + module wiring, a full vertical slice for one HTTP route. |    |
 | `controller`    | `c`    | One `*.controller.ts`                                                                   |    |
 | `usecase`       | `u`    | One `*.usecase.ts`                                                                      |    |
 | `dto`           | `d`    | One `*.dto.ts`                                                                          |    |
@@ -31,7 +31,7 @@ expressots g <schematic-alias> [path] [method] [options]
 | `module`        | `mo`   | One `*.module.ts`                                                                       |    |
 | `interceptor`   | `i`    | One `*.interceptor.ts` (`@Interceptor` + `IInterceptor`)                                | ✅ |
 | `event`         | `ev`   | One `*.event.ts` (type-safe event class)                                                | ✅ |
-| `handler`       | `h`    | One `*.handler.ts` (`@OnEvent(...)` handler) — pair with `--event`                      | ✅ |
+| `handler`       | `h`    | One `*.handler.ts` (`@OnEvent(...)` handler). Pair with `--event`                      | ✅ |
 | `guard`         | `gu`   | One `*.guard.ts` (Express `canActivate` guard)                                          | ✅ |
 | `config`        | `cfg`  | One `*.config.ts` (`defineConfig` + `Env` + `loadEnvSync` + `bootstrap.envFileConfig`)  | ✅ |
 
@@ -39,15 +39,15 @@ expressots g <schematic-alias> [path] [method] [options]
 
 | Flag         | Applies to                | Default | Description                                                                                   |
 | ------------ | ------------------------- | ------- | --------------------------------------------------------------------------------------------- |
-| `path`       | every schematic           | —       | The resource path. Two forms: `folder/name` or shorthand `folder-name`. See [Path forms](#path-forms). |
+| `path`       | every schematic           | (none)  | The resource path. Two forms: `folder/name` or shorthand `folder-name`. See [Path forms](#path-forms). |
 | `method`     | `controller`, `service`   | `get`   | HTTP method: `get` / `post` / `put` / `patch` / `delete`. Drives the controller template body. |
 | `--event`    | `handler`                 | `MyEvent` | The event class name the handler subscribes to.                                              |
-| `--priority` | `interceptor`, `handler`  | `10`    | Numeric priority — **lower runs earlier**.                                                    |
-| `--method` `-m` | `controller`, `service`| —       | Shorthand for the `method` positional, e.g. `-m post`.                                       |
+| `--priority` | `interceptor`, `handler`  | `10`    | Numeric priority. **Lower runs earlier**.                                                    |
+| `--method` `-m` | `controller`, `service`| (none)  | Shorthand for the `method` positional, e.g. `-m post`.                                       |
 
 ## Path forms
 
-The path argument is the **positional path** (the option is also named `-d`). There is no `--module=` flag — the resource's module is derived from the path.
+The path argument is the **positional path** (the option is also named `-d`). There is no `--module=` flag. The resource's module is derived from the path.
 
 ### Folder / subfolder / resource
 
@@ -89,7 +89,7 @@ src/useCases/users/create/
 ```
 
 :::info Why three forms
-The folder form is great for **explicit organization**. The shorthand is great for **opinionated projects** where every resource ends up in its own folder. The trailing slash is the middle ground — use it when you want a leaf folder without renaming the file.
+The folder form is great for **explicit organization**. The shorthand is great for **opinionated projects** where every resource ends up in its own folder. The trailing slash is the middle ground. Use it when you want a leaf folder without renaming the file.
 :::
 
 ## Opinionated vs non-opinionated
@@ -289,6 +289,6 @@ yes | expressots g c users/create
 
 ## See also
 
-- [Configuration File](../features/expressots-config.mdx) — `expressots.config.ts` schema.
-- [Interceptors](../features/interceptors.mdx), [Events](../features/events.mdx), [Guards](../features/guards.mdx), [Authorization](../features/authorization.mdx), [Configuration](../features/configuration.mdx) — the runtime features the new schematics target.
-- [`new`](./new.mdx) — create the project scaffold this command writes into.
+- [Configuration File](../features/expressots-config.mdx): `expressots.config.ts` schema.
+- [Interceptors](../features/interceptors.mdx), [Events](../features/events.mdx), [Guards](../features/guards.mdx), [Authorization](../features/authorization.mdx), [Configuration](../features/configuration.mdx): the runtime features the new schematics target.
+- [`new`](./new.mdx): create the project scaffold this command writes into.

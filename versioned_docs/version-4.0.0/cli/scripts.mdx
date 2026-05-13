@@ -40,7 +40,7 @@ Pass one or more script names to run them in sequence:
 expressots scripts lint test build
 ```
 
-Unknown names are reported and skipped — the rest still run.
+Unknown names are reported and skipped, and the rest still run.
 
 ## Package manager detection
 
@@ -53,7 +53,7 @@ The CLI runs `<pm> run <script>` for each entry, where `<pm>` is detected from t
 | `pnpm-lock.yaml`     | `pnpm run`   |
 
 :::caution Lockfile required
-`expressots scripts` requires a lockfile to choose a runner. If none is present, install dependencies first (`npm install`, `yarn`, or `pnpm install`) — that creates the lockfile.
+`expressots scripts` requires a lockfile to choose a runner. If none is present, install dependencies first (`npm install`, `yarn`, or `pnpm install`), which creates the lockfile.
 :::
 
 :::note bun not supported

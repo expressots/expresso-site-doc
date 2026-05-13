@@ -67,7 +67,7 @@ export default function Home(): JSX.Element {
     return (
         <Layout
             title={siteConfig.title}
-            description="ExpressoTS — a TypeScript framework for building scalable server-side applications on Node.js. Dependency injection, interceptors, events, lazy loading, and Studio."
+            description="ExpressoTS: a TypeScript framework for building scalable server-side applications on Node.js. Dependency injection, interceptors, events, lazy loading, and Studio."
         >
             <HomepageHeader />
             <main>
