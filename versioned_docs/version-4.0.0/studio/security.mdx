@@ -17,6 +17,30 @@ The result is a single score letter (A–F) on the Status dashboard, and a drill
 Studio never sends your `package.json`, your `package-lock.json`, your code, or your traffic anywhere. `npm audit` and OSV lookups happen from your machine.
 :::
 
+## Screenshots
+
+<figure>
+  <img src="/img/studio/security-overview.png" alt="Security view — overview" />
+  <figcaption><code>security-overview.png</code> — supply-chain advisories grouped by severity with reachability badges and the aggregate grade.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/security-finding-detail.png" alt="Security view — single finding" />
+  <figcaption><code>security-finding-detail.png</code> — expanded advisory with GHSA / CVE / OSV links and the full root-cause chain.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/security-recommended-fixes.png" alt="Security view — recommended fixes panel" />
+  <figcaption><code>security-recommended-fixes.png</code> — grouped FixGroups with one-click <strong>Apply fix</strong>.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/security-runtime-posture.png" alt="Security view — runtime posture" />
+  <figcaption><code>security-runtime-posture.png</code> — OWASP API Top 10 findings drawn from recorded traffic.</figcaption>
+</figure>
+
+To refresh these images, follow the [capture guide on the Overview page](./overview.mdx#capture-guide). The Security view in particular benefits from running [`tests/test-op`](https://github.com/expressots/expressots/tree/feature/v4.0/tests/test-op) for a few minutes first so the recorder has realistic traffic to flag.
+
 ## At a glance
 
 | Pillar              | Source                                    | What you see                                                                   |

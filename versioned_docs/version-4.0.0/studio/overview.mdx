@@ -50,6 +50,43 @@ flowchart LR
 
 `@expressots/adapter-express` dynamically imports `@expressots/studio-agent` **only when it is installed and `NODE_ENV=development`**, so production deployments never load the agent code and never pay the runtime cost.
 
+## Screenshots
+
+The shipped UI lives at [`static/img/studio/`](https://github.com/expressots/expresso-site-doc/tree/feature/v4.0/static/img/studio) inside the [`expresso-site-doc`](https://github.com/expressots/expresso-site-doc) repository. The placeholders below are the canonical filenames the docs expect — if you are working on Studio and want the docs to reflect the latest UI, run through the [capture guide](#capture-guide) and drop the new PNGs into that folder.
+
+<figure>
+  <img src="/img/studio/status-dashboard.png" alt="Studio status dashboard" />
+  <figcaption><code>status-dashboard.png</code> — landing view with health, top routes, security grade.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/architecture-map.png" alt="Studio architecture map" />
+  <figcaption><code>architecture-map.png</code> — DI graph rendered from <code>AppContainer.introspect()</code>.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/request-timeline.png" alt="Studio request timeline" />
+  <figcaption><code>request-timeline.png</code> — live recording of HTTP requests with replay.</figcaption>
+</figure>
+
+<figure>
+  <img src="/img/studio/security-overview.png" alt="Studio security overview" />
+  <figcaption><code>security-overview.png</code> — supply-chain advisories + runtime posture. See the dedicated <a href="./security.mdx">Security page</a> for deeper screenshots.</figcaption>
+</figure>
+
+### Capture guide
+
+To refresh the screenshots above (and the ones embedded in [Security](./security.mdx)):
+
+1. From the `tests/test-op` north-star app, run `npm run dev` so the studio agent has real traffic, controllers, and a non-empty DI graph to render.
+2. In a second terminal, run `npx expressots studio` and let the UI open on `http://localhost:3333`.
+3. Use the Settings drawer to switch to the **dark** theme — that is the canonical look used in the docs.
+4. Capture each view at **1440 × 900** (the docs theme renders at this width) using any screenshot tool.
+5. Save the result as `static/img/studio/<view>.png` in the [`expresso-site-doc`](https://github.com/expressots/expresso-site-doc) repository, replacing the previous file.
+6. Open a docs PR against the `feature/v4.0` branch and tag the docs maintainer for review.
+
+If you add a brand-new view to Studio, add a new `<figure>` here, a matching capture step above, and a row to the [Feature tour](#feature-tour) table.
+
 ## Feature tour
 
 | View                  | Highlights                                                                                                                         |
