@@ -29,7 +29,7 @@ The testing module provides:
 The testing module is included in `@expressots/core`:
 
 ```typescript
-import { createTestApp, request, mockProvider } from "@expressots/testing";
+import { createTestApp, request, mockProvider } from "@expressots/core";
 ```
 
 ### Zero-Config Test Setup
@@ -37,7 +37,7 @@ import { createTestApp, request, mockProvider } from "@expressots/testing";
 Create a fully functional test application with a single function call:
 
 ```typescript
-import { createTestApp } from "@expressots/testing";
+import { createTestApp } from "@expressots/core";
 import { App } from "./app";
 
 describe("UserController", () => {
@@ -78,7 +78,7 @@ The fluent request API provides a chainable, readable interface for HTTP testing
 ### Basic Requests
 
 ```typescript
-import { request } from "@expressots/testing";
+import { request } from "@expressots/core";
 
 // GET request
 await request(app).get("/users").expectStatus(200);
@@ -160,7 +160,7 @@ await request(app)
 The `mockProvider` function provides intelligent mocking with TypeScript auto-completion:
 
 ```typescript
-import { mockProvider } from "@expressots/testing";
+import { mockProvider } from "@expressots/core";
 
 describe("UserService", () => {
     test("createUser calls repository", async () => {
@@ -208,7 +208,7 @@ test("handles repository error", async () => {
 Test API response structures with snapshots:
 
 ```typescript
-import { snapshotRequest } from "@expressots/testing";
+import { snapshotRequest } from "@expressots/core";
 
 describe("API Snapshots", () => {
     test("GET /users matches snapshot", async () => {
@@ -239,7 +239,7 @@ describe("API Snapshots", () => {
 Built-in load testing utilities for performance testing:
 
 ```typescript
-import { loadTest } from "@expressots/testing";
+import { loadTest } from "@expressots/core";
 
 describe("Performance Tests", () => {
     test("handles concurrent requests", async () => {
@@ -300,7 +300,7 @@ test("maintains performance under load", async () => {
 Utilities for testing with databases:
 
 ```typescript
-import { createTestDatabase } from "@expressots/testing";
+import { createTestDatabase } from "@expressots/core";
 
 describe("Database Tests", () => {
     const db = createTestDatabase({
@@ -330,7 +330,7 @@ describe("Database Tests", () => {
 Mock the entire request context for testing guards and middleware:
 
 ```typescript
-import { mockContext } from "@expressots/testing";
+import { mockContext } from "@expressots/core";
 
 describe("Guards", () => {
     test("admin guard allows admin users", async () => {
@@ -367,7 +367,7 @@ The testing module integrates seamlessly with Jest:
 
 ```typescript
 // jest.setup.ts
-import { registerMatchers } from "@expressots/testing";
+import { registerMatchers } from "@expressots/core";
 
 registerMatchers();
 
@@ -380,7 +380,7 @@ expect(response).toBeValidUser();
 ### Lifecycle Hooks
 
 ```typescript
-import { createTestApp } from "@expressots/testing";
+import { createTestApp } from "@expressots/core";
 
 describe("API Tests", () => {
     let testApp: Awaited<ReturnType<typeof createTestApp>>;
@@ -415,7 +415,8 @@ describe("API Tests", () => {
 Test applications with full guard and interceptor stacks:
 
 ```typescript
-import { bootstrap, setupInterceptorsForExpress, setupAuthorizationForExpress } from "@expressots/core";
+import { bootstrap } from "@expressots/core";
+import { setupInterceptorsForExpress, setupAuthorizationForExpress } from "@expressots/adapter-express";
 import { App } from "./app";
 
 describe("Full Stack Testing", () => {
@@ -801,7 +802,7 @@ const mockService = { method: jest.fn() }; // Declared once
 ## Example: Complete Test Suite
 
 ```typescript
-import { createTestApp, request, mockProvider } from "@expressots/testing";
+import { createTestApp, request, mockProvider } from "@expressots/core";
 import { App } from "./app";
 import { UserService } from "./user.service";
 

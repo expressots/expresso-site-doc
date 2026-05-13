@@ -1,0 +1,96 @@
+---
+sidebar_position: 11
+title: costs
+description: Estimate and compare cloud deployment costs across AWS, GCP, Azure, Railway, Render, Fly.io, Heroku, and DigitalOcean.
+---
+
+# `expressots costs`
+
+Estimate, compare, and optimize cloud deployment costs across major providers.
+
+```bash
+expressots costs <action> [options]
+# aliases
+expressots cost ...
+expressots pricing ...
+```
+
+The pricing data behind these commands is updated independently from the CLI — see [Pricing Data Management](./pricing.mdx) for sources and overrides.
+
+## Actions
+
+| Action       | Purpose                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| `estimate`   | Estimate monthly cost for a single provider.                                              |
+| `compare`    | Compare every supported provider for the same workload.                                   |
+| `optimize`   | Recommend cost-saving changes (right-sizing, region selection, reserved instances).       |
+| `pricing`    | Print the underlying per-resource prices for a provider.                                  |
+| `update`     | Refresh the local pricing cache from the remote pricing index.                            |
+| `info`       | Show the active pricing data version and where it came from (API / remote JSON / local).  |
+
+## Supported providers
+
+`aws`, `gcp`, `azure`, `railway`, `render`, `fly`, `digitalocean`, `heroku`.
+
+## Options
+
+| Option            | Alias | Default        | Description                                       |
+| ----------------- | ----- | -------------- | ------------------------------------------------- |
+| `--provider`      | `-p`  | —              | One of the providers above.                       |
+| `--service`       | `-s`  | (auto)         | Specific service tier (e.g. `aws-fargate`).        |
+| `--instances`     | `-i`  | `1`            | Number of instances.                              |
+| `--cpu`           | `-c`  | `1`            | CPU cores per instance.                           |
+| `--memory`        | `-m`  | `1`            | Memory in GB per instance.                        |
+| `--storage`      |       | `10`           | Storage in GB.                                    |
+| `--bandwidth`    |       | `100`          | Outbound bandwidth in GB / month.                 |
+| `--region`        | `-r`  | `us-east-1`    | Region (provider-specific names).                  |
+| `--hours`        |       | `720`          | Hours per month (use 730 for full month).          |
+| `--format`       |       | `text`         | `text` / `json`.                                  |
+| `--output`        | `-o`  | stdout         | Write the report to a file.                       |
+
+## Examples
+
+```bash
+# Estimate AWS Fargate for a small app
+expressots costs estimate aws --cpu 1 --memory 2
+
+# Compare every provider for the same workload
+expressots costs compare --cpu 2 --memory 4 --bandwidth 250
+
+# Optimize my current setup
+expressots costs optimize --provider aws
+
+# Print AWS pricing detail
+expressots costs pricing aws
+
+# Refresh pricing data
+expressots costs update
+```
+
+## Output
+
+`compare` produces a side-by-side cost table:
+
+```text
+Workload: 2 vCPU / 4 GB / 250 GB egress / us-east-1 / 730 h
+
+Provider       Service                Compute     Storage    Egress     Total
+-------------- ---------------------- ----------- ---------- ---------- ----------
+railway        Pro                    $40.00      $0.25      $9.00      $49.25
+render         Standard               $42.00      $0.50      $9.00      $51.50
+fly            shared-cpu-2x          $50.40      $0.15      $5.00      $55.55
+digitalocean   App Platform Pro       $58.00      $0.10      $0.00      $58.10
+gcp            Cloud Run              $61.00      $0.20      $12.00     $73.20
+azure          Container Apps         $68.00      $0.18      $11.00     $79.18
+aws            Fargate                $72.00      $0.23      $22.50     $94.73
+heroku         Performance-M          $250.00     $0.00      $0.00      $250.00
+```
+
+:::caution Pricing accuracy
+Cloud pricing changes constantly. Run `expressots costs update` regularly, and treat the output as an estimate — always verify in the provider's calculator before committing to a deployment.
+:::
+
+## See also
+
+- [Pricing Data Management](./pricing.mdx) — sources, cascading fallback, and contributing pricing corrections.
+- [`migrate`](./migrate.mdx) — once you've chosen a target, generate the migration scaffold.

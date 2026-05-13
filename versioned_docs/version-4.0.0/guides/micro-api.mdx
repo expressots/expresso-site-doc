@@ -639,24 +639,25 @@ interface MicroConfig {
 Micro API is designed for simplicity without DI. If you need dependency injection, decorators, and enterprise features, use the full ExpressoTS framework:
 
 ```bash
-expressots new my-app --template opinionated
+expressots new my-app --template application
 ```
 
-## Migration from v4
+## Migrating from v3 `createMicroAPI()`
 
-If you're migrating from the old `createMicroAPI()` API, here are the key changes:
+If you have legacy code using the v3-era `createMicroAPI()` API, here are the key changes for v4:
 
-| Before (v4) | After (v5) |
-|-------------|------------|
+| v3 (`createMicroAPI`) | v4 (`micro`) |
+|----------------------|--------------|
 | `createMicroAPI()` | `micro()` |
-| `microAPI.build()` | Not needed |
+| `microAPI.build()` | Not needed — `micro()` returns the app directly |
 | `app.Middleware.parse()` | Auto-enabled |
 | `app.Route.get(path, handler, ...middleware)` | `app.get(path, ...middleware, handler)` |
-| `microAPI.Container.addSingleton()` | Use full framework for DI |
+| `microAPI.Container.addSingleton()` | Use the full framework (`@expressots/core`) for DI |
 
-### Quick Migration Example
+### Quick migration example
 
-**Before:**
+**v3 (legacy `createMicroAPI`):**
+
 ```typescript
 import { createMicroAPI } from "@expressots/adapter-express";
 
@@ -669,7 +670,8 @@ app.Route.get("/", (req, res) => {
 app.listen(3000);
 ```
 
-**After:**
+**v4 (current `micro()`):**
+
 ```typescript
 import { micro } from "@expressots/adapter-express";
 
@@ -677,6 +679,10 @@ const app = micro();
 app.get("/", () => ({ message: "Hello" }));
 app.listen(3000);
 ```
+
+:::caution `createMicroAPI` is removed in v4
+The legacy `createMicroAPI()` factory is not exported from `@expressots/adapter-express` v4. Use `micro()` instead.
+:::
 
 ---
 

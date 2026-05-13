@@ -1,0 +1,107 @@
+---
+sidebar_position: 9
+title: cicd
+description: Generate CI/CD pipelines for GitHub Actions, GitLab CI, CircleCI, Jenkins, Bitbucket, and Azure Pipelines.
+---
+
+# `expressots cicd`
+
+Generate, list, and validate CI/CD pipelines for six platforms.
+
+```bash
+expressots cicd <action> [platform] [options]
+# aliases
+expressots ci ...
+expressots pipeline ...
+```
+
+## Actions
+
+| Action      | Purpose                                                                    |
+| ----------- | -------------------------------------------------------------------------- |
+| `init`      | Interactive setup. Asks for platform, strategy, deploy target, etc.        |
+| `generate`  | Non-interactive generation for a specific platform.                        |
+| `list`      | Show every supported platform and strategy.                                |
+| `validate`  | Lint an existing pipeline file against the official template.              |
+
+## Platforms
+
+| Platform     | Generated file(s)                                              |
+| ------------ | -------------------------------------------------------------- |
+| `github`     | `.github/workflows/ci.yml` (+ optional release / deploy jobs)  |
+| `gitlab`     | `.gitlab-ci.yml`                                               |
+| `circleci`   | `.circleci/config.yml`                                         |
+| `jenkins`    | `Jenkinsfile`                                                  |
+| `bitbucket`  | `bitbucket-pipelines.yml`                                      |
+| `azure`      | `azure-pipelines.yml`                                          |
+| `all`        | Generate every platform in one pass.                           |
+
+## Strategies
+
+| Strategy          | What it includes                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| `basic`           | Install → Lint → Test → Build.                                                                      |
+| `comprehensive`   | (default) Adds matrix Node versions, coverage upload, Docker build, and a publish stage.            |
+| `security-focused`| Adds Trivy image scan, `npm audit --audit-level=high`, secret scanning, SBOM upload.                |
+
+## Options
+
+| Option                  | Alias | Default          | Description                                                                |
+| ----------------------- | ----- | ---------------- | -------------------------------------------------------------------------- |
+| `--strategy`            | `-s`  | `comprehensive`  | One of the strategies above.                                                |
+| `--include-security`    |       | `true`           | Add security scan jobs (Trivy, npm audit).                                  |
+| `--include-e2e`         |       | `false`          | Add an E2E test stage.                                                      |
+| `--include-coverage`    |       | `true`           | Upload coverage reports (codecov / coveralls).                              |
+| `--docker-registry`     | `-r`  | —                | Image registry URL for the publish stage (e.g. `ghcr.io/acme`).             |
+| `--deploy-target`       |       | `none`           | `kubernetes` / `ecs` / `cloudrun` / `railway` / `render` / `fly` / `none`.  |
+| `--branch`              | `-b`  | `main`           | Branch that triggers the pipeline.                                          |
+| `--node-version`        |       | `20`             | Node version used in CI.                                                    |
+| `--output-dir`          | `-o`  | platform default | Override the directory the pipeline file lands in.                          |
+
+## Examples
+
+```bash
+# Interactive
+expressots cicd init
+
+# Generate a GitHub Actions pipeline with security + e2e jobs
+expressots cicd generate github --include-e2e --strategy security-focused
+
+# Multi-platform output in one pass
+expressots cicd generate all --docker-registry ghcr.io/myorg
+
+# Generate with a deployment target
+expressots cicd generate github --deploy-target kubernetes
+
+# What strategies are supported?
+expressots cicd list
+
+# Validate an existing pipeline
+expressots cicd validate
+```
+
+## Generated job catalogue
+
+The exact job list depends on the strategy, but a `comprehensive` GitHub Actions pipeline includes:
+
+| Job                  | Steps                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| `install`            | Checkout, Node setup with cache, install dependencies (npm ci / yarn / pnpm).          |
+| `lint`               | `npm run lint`.                                                                         |
+| `test`               | `npm test` with matrix Node versions (e.g. 20, 22).                                     |
+| `coverage`           | (when `--include-coverage`) Upload to Codecov.                                          |
+| `security`           | (when `--include-security`) `npm audit --audit-level=high`, Trivy scan.                 |
+| `e2e`                | (when `--include-e2e`) Spin up the app + run E2E suite.                                 |
+| `build`              | `npm run build`.                                                                        |
+| `docker`             | (when `--docker-registry`) Build + push image.                                          |
+| `deploy`             | (when `--deploy-target`) Apply manifests / call platform API.                           |
+
+## Templates
+
+`cicd` uses the [`expressots/templates`](https://github.com/expressots/templates) repository on its `main` branch. Customize them with [`expressots templates repo set <url>`](./templates.mdx#custom-template-repository).
+
+## See also
+
+- [`containerize`](./containerize.mdx) — produce the Docker artifacts the pipeline builds.
+- [`migrate`](./migrate.mdx) — generate platform-migration scaffolds.
+- [`templates`](./templates.mdx) — manage the underlying template cache.

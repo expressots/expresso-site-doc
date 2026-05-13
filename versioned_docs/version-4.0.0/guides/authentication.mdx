@@ -219,7 +219,7 @@ Configure the auth provider in your application:
 
 ```typescript title="src/app.ts"
 import { AppExpress, AppContainer, Scope } from "@expressots/adapter-express";
-import { setupAuthorizationForExpress } from "@expressots/core";
+import { setupAuthorizationForExpress } from "@expressots/adapter-express";
 import { AuthProvider } from "./auth/auth.provider";
 
 export class App extends AppExpress {
@@ -455,7 +455,7 @@ export const AuthModule = CreateModule([
 ## Testing Authentication
 
 ```typescript title="test/auth.spec.ts"
-import { createTestApp, request } from "@expressots/testing";
+import { createTestApp, request } from "@expressots/core";
 import { App } from "../src/app";
 
 describe("Authentication", () => {

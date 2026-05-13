@@ -230,7 +230,7 @@ Integration tests verify multiple components working together.
 ### Testing Controllers
 
 ```typescript title="test/integration/user.controller.spec.ts"
-import { createTestApp, request, mockProvider } from "@expressots/testing";
+import { createTestApp, request, mockProvider } from "@expressots/core";
 import { App } from "../../src/app";
 import { UserRepository } from "../../src/modules/users/repositories/user.repository";
 
@@ -330,7 +330,7 @@ describe("UserController", () => {
 ### Testing with Database
 
 ```typescript title="test/integration/user.repository.spec.ts"
-import { createTestDatabase } from "@expressots/testing";
+import { createTestDatabase } from "@expressots/core";
 import { UserRepository } from "../../src/modules/users/repositories/user.repository";
 import { User } from "../../src/modules/users/entities/user.entity";
 
@@ -400,7 +400,7 @@ describe("UserRepository", () => {
 E2E tests verify the complete application flow.
 
 ```typescript title="test/e2e/auth.e2e.spec.ts"
-import { createTestApp, request } from "@expressots/testing";
+import { createTestApp, request } from "@expressots/core";
 import { App } from "../../src/app";
 
 describe("Auth E2E", () => {
@@ -503,7 +503,7 @@ describe("Auth E2E", () => {
 ### Provider Mocking
 
 ```typescript
-import { mockProvider } from "@expressots/testing";
+import { mockProvider } from "@expressots/core";
 
 // Automatic mock with jest.fn() for all methods
 const autoMock = mockProvider(UserRepository);
@@ -523,7 +523,7 @@ const spyMock = mockProvider(UserRepository, {
 ### Request Mocking
 
 ```typescript
-import { createMockRequest, createMockResponse } from "@expressots/testing";
+import { mockReqRes } from "@expressots/core";
 
 it("should handle request", () => {
     const req = createMockRequest({
@@ -547,7 +547,7 @@ it("should handle request", () => {
 ## Performance Testing
 
 ```typescript title="test/performance/user.perf.spec.ts"
-import { createTestApp, loadTest } from "@expressots/testing";
+import { createTestApp, loadTest } from "@expressots/core";
 import { App } from "../../src/app";
 
 describe("Performance", () => {
@@ -585,7 +585,7 @@ describe("Performance", () => {
 ## Snapshot Testing
 
 ```typescript title="test/snapshot/user.snapshot.spec.ts"
-import { createTestApp, request } from "@expressots/testing";
+import { createTestApp, request } from "@expressots/core";
 import { App } from "../../src/app";
 
 describe("API Snapshots", () => {
@@ -685,7 +685,7 @@ export function createUser(overrides: Partial<User> = {}): User {
 ### Test Helpers
 
 ```typescript title="test/helpers/auth.helper.ts"
-import { request } from "@expressots/testing";
+import { request } from "@expressots/core";
 
 export async function loginAsUser(app: any): Promise<string> {
     const response = await request(app)

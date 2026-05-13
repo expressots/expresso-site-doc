@@ -1,0 +1,111 @@
+---
+sidebar_position: 1
+title: new
+description: expressots new creates a project from a v4 template (application or micro), runs the install, and pre-applies a middleware preset.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# `expressots new`
+
+Create a new ExpressoTS v4 project from one of the official templates.
+
+```bash
+expressots new <project-name> [options]
+```
+
+The command clones the [`expressots/templates`](https://github.com/expressots/templates) repository at the `v4.0.0` tag via `degit`, then installs dependencies with the chosen package manager and (for Application templates) rewrites the middleware placeholder in `src/app.ts` according to the selected preset.
+
+## Templates
+
+| Template      | When to pick it                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| `application` | Standard ExpressoTS application: `AppExpress` + `AppContainer` + a sample controller and Jest test. Boots through `bootstrap(App)` with the DI container and lifecycle hooks ready to extend. |
+| `micro`       | Lightweight micro API for serverless or low-overhead use cases. Uses the adapter's `micro()` fluent factory in a single `src/api.ts` and ships circuit breaker / service discovery / service client / Lambda examples in `examples/`. |
+
+```bash
+expressots new my-api --template application --package-manager pnpm
+expressots new my-edge --template micro       --package-manager npm
+```
+
+## Presets
+
+Presets only apply to the `application` template. They prefill `src/app.ts` with a middleware preset call so the new project starts with sensible defaults.
+
+| Preset         | What it pre-applies                                                            |
+| -------------- | ------------------------------------------------------------------------------ |
+| `api`          | `Middleware.applyPreset("api")` — JSON body parsing, security headers, CORS    |
+| `web`          | Web app defaults (parse, security, static, render engine slot)                 |
+| `graphql`      | Adapter slot prepared for an Apollo / Yoga plug-in                             |
+| `microservice` | Minimal middleware, optimized for service-to-service traffic                   |
+| `minimal`      | No preset call; you wire middleware manually                                   |
+
+```bash
+expressots new my-api --template application --package-manager pnpm --preset api
+```
+
+## Package managers
+
+Choices: `npm`, `yarn`, `pnpm`, `bun`. **`bun` is unavailable on Windows** for `expressots new`.
+
+```bash
+expressots new my-app -p npm
+expressots new my-app -p yarn
+expressots new my-app -p pnpm
+expressots new my-app -p bun   # not on Windows
+```
+
+## Options
+
+| Flag                | Alias | Description                                                                            |
+| ------------------- | ----- | -------------------------------------------------------------------------------------- |
+| `--template`        | `-t`  | `application` or `micro`. **Implies `--package-manager`** (you must pass both).        |
+| `--package-manager` | `-p`  | `npm` / `yarn` / `pnpm` / `bun`. **Implies `--template`** (you must pass both).        |
+| `--preset`          | `-s`  | `api` / `web` / `graphql` / `microservice` / `minimal`. **Implies `--template`**.       |
+| `--directory`       | `-d`  | Parent directory in which to create the project.                                       |
+
+## Interactive vs silent
+
+Without any flags, the CLI prompts for every choice:
+
+```bash
+expressots new my-api
+# ? Choose a template ›
+# ? Choose a package manager ›
+# ? Choose a preset (Application only) ›
+```
+
+With the flags above it runs silently and never blocks for input — ideal for CI scripts and template generators.
+
+## What happens after `new`
+
+1. **`degit expressots/templates/<template>#v4.0.0`** into the project folder (or local copy if `USE_LOCAL_TEMPLATES` is set, useful for contributors).
+2. **`changePackageName`** rewrites `package.json` name to the project folder name.
+3. **Middleware placeholder rewrite** (Application only) — `__MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` is replaced with the selected preset's `Middleware.applyPreset(...)` call.
+4. **`<pm> install`** runs in the project folder.
+
+## After it finishes
+
+```bash
+cd my-api
+expressots dev
+```
+
+The dev server starts with `tsx --watch` and your app is reachable on the port returned by `bootstrap()` (default 3000 unless overridden by env or config).
+
+## Troubleshooting
+
+| Problem                                          | Fix                                                                                          |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `Node version not supported`                     | Install Node `>= 20.18.0`. The CLI warns outside the `20–24` tested range.                   |
+| `bun` not in choices on Windows                  | Expected. Use `npm`, `yarn`, or `pnpm`. Bun support is available on macOS / Linux.            |
+| degit `permission denied`                        | Network or auth issue; rerun, or set `GIT_SSH_COMMAND` if you're behind a corporate proxy.    |
+| Need a fully offline scaffold                    | Set `USE_LOCAL_TEMPLATES=1` and clone `expressots/templates` next to `expressots-cli`.        |
+| Existing folder with the same name               | `degit` refuses to overwrite. Remove or rename the folder first.                              |
+
+## See also
+
+- [`generate`](./generate.mdx) — scaffold resources inside the new project.
+- [`running`](./running.mdx) — boot the dev server.
+- [Configuration File](../features/expressots-config.mdx) — the `expressots.config.ts` the CLI writes for you.

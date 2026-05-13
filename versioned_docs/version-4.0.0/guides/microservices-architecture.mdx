@@ -46,7 +46,7 @@ ExpressoTS supports these patterns out of the box:
 Use `ServiceClient` for HTTP-based service-to-service communication:
 
 ```typescript
-import { ServiceClient } from "@expressots/adapter-express/service-mesh";
+import { ServiceClient } from "@expressots/adapter-express";
 
 const userService = new ServiceClient({
     name: "user-service",
@@ -105,7 +105,7 @@ events.on("order.created", async (data) => {
 For cross-process or cross-machine communication:
 
 ```typescript
-import { RabbitMQConsumer } from "@expressots/adapter-express/queue";
+import { RabbitMQConsumer } from "@expressots/adapter-express";
 
 // Producer Service
 const orderQueue = new RabbitMQConsumer({
@@ -132,7 +132,7 @@ await orderQueue.consume(async (message) => {
 For simple deployments:
 
 ```typescript
-import { ServiceDiscovery } from "@expressots/adapter-express/service-mesh";
+import { ServiceDiscovery } from "@expressots/adapter-express";
 
 const discovery = new ServiceDiscovery({ type: "static" });
 
@@ -180,7 +180,7 @@ const instance = discovery.getService("user-service");
 Protect against cascading failures:
 
 ```typescript
-import { CircuitBreaker } from "@expressots/adapter-express/gateway";
+import { CircuitBreaker } from "@expressots/adapter-express";
 
 const breaker = new CircuitBreaker({
     failureThreshold: 5,    // Open after 5 failures

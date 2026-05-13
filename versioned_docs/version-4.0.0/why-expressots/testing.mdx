@@ -32,7 +32,7 @@ Compare ExpressoTS's testing utilities with other major frameworks.
 ### Zero-Config Setup
 
 ```typescript
-import { TestingModule } from "@expressots/testing";
+import { TestingModule } from "@expressots/core";
 
 describe("UserController", () => {
     let testModule: TestingModule;
@@ -112,7 +112,7 @@ it("should match API snapshot", async () => {
 ### Built-in Load Testing
 
 ```typescript
-import { LoadTester } from "@expressots/testing";
+import { LoadTester } from "@expressots/core";
 
 describe("Performance", () => {
     it("should handle load", async () => {
@@ -133,7 +133,7 @@ describe("Performance", () => {
 ### Database Testing
 
 ```typescript
-import { DatabaseTestUtils } from "@expressots/testing";
+import { DatabaseTestUtils } from "@expressots/core";
 
 describe("User Repository", () => {
     let dbUtils: DatabaseTestUtils;

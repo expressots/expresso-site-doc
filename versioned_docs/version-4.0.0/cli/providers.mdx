@@ -1,0 +1,111 @@
+---
+sidebar_position: 4
+title: Providers (add / remove / create)
+description: Install, uninstall, and scaffold ExpressoTS providers from the CLI.
+---
+
+# Providers
+
+ExpressoTS providers are npm packages that drop pluggable functionality into your app — auth strategies, database adapters, log transports, message queues, etc. The CLI gives you three commands to work with them:
+
+| Command   | Purpose                                                                       |
+| --------- | ----------------------------------------------------------------------------- |
+| `add`     | Install an existing provider into the current project.                        |
+| `remove`  | Uninstall a provider.                                                         |
+| `create`  | Scaffold a new provider package from the official `provider` template.        |
+
+## add
+
+Install an ExpressoTS provider (or any npm package) into the current project.
+
+```bash
+expressots add <provider> [version]
+```
+
+| Flag                | Alias | Default | Description                                                                       |
+| ------------------- | ----- | ------- | --------------------------------------------------------------------------------- |
+| `--version <range>` | `-v`  | `latest` | Explicit version range (e.g. `^4.1.0`, `4.0.0-beta.1`).                          |
+| `--dev`             | `-d`  | `false` | Install as a devDependency.                                                       |
+
+The CLI detects the active package manager from your project's lockfile:
+
+| Lockfile present            | Package manager used |
+| --------------------------- | -------------------- |
+| `package-lock.json`         | `npm`                |
+| `yarn.lock`                 | `yarn`               |
+| `pnpm-lock.yaml`            | `pnpm`               |
+
+If no lockfile is present, `add` falls back to `npm`.
+
+### Examples
+
+```bash
+# Install the latest version
+expressots add @expressots/provider-jwt
+
+# Install a specific version range
+expressots add @expressots/provider-jwt --version "^4.0.0"
+
+# Install as a dev dependency
+expressots add @expressots/provider-fake-mailer --dev
+```
+
+:::tip Watch for the provider App Store
+The provider catalogue is curated at [`expressots/providers`](https://github.com/expressots/providers). `expressots add` works with any npm package, but ExpressoTS-aware providers ship with idiomatic `@provide()` bindings and DI tokens.
+:::
+
+## remove
+
+Uninstall a provider.
+
+```bash
+expressots remove <provider>
+```
+
+Like `add`, the CLI uses the package manager detected from your lockfile.
+
+```bash
+expressots remove @expressots/provider-jwt
+```
+
+## create
+
+Scaffold a brand-new provider package — a standalone npm-publishable library that follows the ExpressoTS provider conventions (dual CJS/ESM, `lib/` output, GitHub workflows, husky hooks, Jest test scaffold).
+
+```bash
+expressots create <provider-name>
+# or
+expressots create --provider <provider-name>
+```
+
+`create` clones the [`expressots/templates/provider#v4.0.0`](https://github.com/expressots/templates/tree/v4.0.0/provider) tree via `degit` into a folder named after the provider, and rewrites `package.json` `name`. It **does not** run `npm install` — that's your call.
+
+### After `create`
+
+```bash
+expressots create expressots-provider-redis
+cd expressots-provider-redis
+npm install
+```
+
+The starter ships with:
+
+- `src/index.ts` — empty barrel, ready for `export * from "./your-provider"`.
+- `src/your-provider.ts` — `@provide(YourProvider)` class with health/metrics/configurable capability hooks.
+- `tsconfig.json` + `tsconfig.build.json` — TypeScript ESM + CJS dual-build setup.
+- `test/example.spec.ts` — Jest scaffold.
+- `.github/workflows/*` — release + CI jobs.
+- `scripts/` — release helpers.
+
+Build, test, and publish with the usual npm workflow:
+
+```bash
+npm run build
+npm test
+npm publish --access public
+```
+
+## See also
+
+- [Providers](../core/providers.mdx) — the runtime provider API your package will implement.
+- [Provider Ecosystem](../guides/provider-ecosystem.mdx) — discovery + publishing tips.
