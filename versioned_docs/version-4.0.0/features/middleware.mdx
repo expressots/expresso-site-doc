@@ -685,6 +685,151 @@ featureEndpoint() { /* ... */ }
 
 ---
 
+## Named middleware registry (v4)
+
+`@expressots/core/middleware` exposes a **named middleware registry** — a separate composition story from the route-level decorators above. Use the registry when you want to declare middleware once under a name and reference it by string in many places.
+
+### Lifecycle
+
+```ts
+import {
+  getMiddlewareRegistry,
+  resetMiddlewareRegistry,
+} from "@expressots/core";
+
+// Register
+const registry = getMiddlewareRegistry();
+registry.register("auth", AuthMiddleware);
+registry.register("audit-log", AuditLogMiddleware);
+
+// Clear (typically only in tests)
+resetMiddlewareRegistry();
+```
+
+### `use(...names)` — resolve registered middleware
+
+```ts
+import { use } from "@expressots/core";
+
+@Get("/", ...use("auth", "audit-log"))
+listUsers() {}
+```
+
+`use()` returns an array of `RequestHandler`s **looked up at request time**, so the registry can be mutated between bootstrap and request without recompiling routes.
+
+### `compose(...middlewares)` — sequential composition
+
+```ts
+import { compose } from "@expressots/core";
+
+const apiChain = compose(corsMw, helmetMw, ...use("auth"));
+app.use(apiChain);
+```
+
+### `when(condition, middleware)` — conditional execution
+
+```ts
+import { when } from "@expressots/core";
+
+app.use(when((req) => req.headers["x-debug"] === "1", debugMw));
+```
+
+This is the **core** `when` (matches `RequestHandler`, runs at request time). The `when()` exported from `@expressots/adapter-express` is the **decorator-level** equivalent for `@Get`/`@Post` etc.
+
+### `parallel(middleware)` — fire-and-forget
+
+```ts
+import { parallel } from "@expressots/core";
+
+app.use(parallel(metricsMw));   // runs via setImmediate, never blocks the response
+```
+
+### `timeout(ms, middleware)` — hard timeout wrapper
+
+```ts
+import { timeout } from "@expressots/core";
+
+app.use(timeout(2000, externalApiMw));    // emits a 504-style error after 2s
+```
+
+## Preset API
+
+Middleware presets are catalogued in code; you can read them and create your own without touching `this.Middleware.applyPreset(...)`.
+
+```ts
+import {
+  MIDDLEWARE_PRESETS,
+  getPreset,
+  getPresetNames,
+  getPresetsByTag,
+  createPreset,
+  mergePresets,
+} from "@expressots/core";
+
+const apiPreset       = getPreset("api");
+const presetNames     = getPresetNames();             // ["api", "production", "development", ...]
+const securityPresets = getPresetsByTag("security");  // every preset tagged "security"
+
+const customPreset = createPreset({
+  name: "edge",
+  description: "Optimized for serverless edge runtimes",
+  middleware: [
+    { name: "cors", options: { origin: true } },
+    { name: "json", options: { limit: "1mb" } },
+  ],
+  tags: ["serverless"],
+});
+
+const apiPlusEdge = mergePresets(apiPreset, customPreset);
+```
+
+You can then apply a custom preset via `this.Middleware.applyPreset(customPreset.name)` once registered.
+
+## Profiler & introspection
+
+The middleware profiler tracks per-middleware timing and can produce a pipeline analysis at runtime.
+
+```ts
+import { MiddlewareProfiler } from "@expressots/core";
+
+const profiler = new MiddlewareProfiler();
+profiler.enable();
+
+app.use(profiler.wrap("cors", corsMw));
+app.use(profiler.wrap("auth", authMw));
+
+// Later:
+const stats = profiler.getStats();
+console.log(stats.totals);            // { count, totalMs, p95Ms }
+console.log(stats.byMiddleware);      // per-name aggregate metrics
+```
+
+Combined with the [Studio Request Timeline](../studio/overview.mdx#feature-tour), the profiler is the source of the "Top slow middleware" chart.
+
+## Optional-package resolver
+
+`@expressots/core` does not bundle Express middleware packages — it loads them on demand. Inspect what's available:
+
+```ts
+import {
+  isMiddlewareAvailable,
+  getAvailableMiddleware,
+  getRegisteredMiddleware,
+  MIDDLEWARE_REGISTRY,
+} from "@expressots/core";
+
+if (!isMiddlewareAvailable("cors")) {
+  console.warn("Install 'cors' to enable CORS support.");
+}
+
+const present  = getAvailableMiddleware();      // ["cors", "helmet", "morgan", ...]
+const registry = getRegisteredMiddleware();     // Names of every middleware backed by a known package
+```
+
+The `MIDDLEWARE_REGISTRY` constant is the static catalog of optional packages the framework knows how to import.
+
+---
+
 ## Support the Project
 
 ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

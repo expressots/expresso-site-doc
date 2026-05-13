@@ -186,15 +186,15 @@ Type-safe configuration with validation:
 - `SecretValue` for secure handling
 
 ```ts
-import { defineConfig, env } from "@expressots/core";
+import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     database: {
-        url: env.string("DATABASE_URL").required(),
-        pool: env.number("DB_POOL_SIZE").default(10),
+        url: Env.string("DATABASE_URL").required(),
+        pool: Env.number("DB_POOL_SIZE").default(10),
     },
     features: {
-        caching: env.boolean("ENABLE_CACHE").default(true),
+        caching: Env.boolean("ENABLE_CACHE").default(true),
     },
 });
 ```

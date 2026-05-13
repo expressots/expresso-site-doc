@@ -27,26 +27,26 @@ Use `defineConfig` to create a type-safe configuration:
 
 ```typescript
 // config/app.config.ts
-import { defineConfig, env } from "@expressots/core";
+import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     app: {
-        name: env.string("APP_NAME").default("My API"),
-        port: env.number("PORT").default(3000),
-        environment: env.string("NODE_ENV").default("development"),
+        name: Env.string("APP_NAME").default("My API"),
+        port: Env.number("PORT").default(3000),
+        environment: Env.string("NODE_ENV").default("development"),
     },
     database: {
-        url: env.string("DATABASE_URL").required(),
-        pool: env.number("DB_POOL_SIZE").default(10),
-        ssl: env.boolean("DB_SSL").default(false),
+        url: Env.string("DATABASE_URL").required(),
+        pool: Env.number("DB_POOL_SIZE").default(10),
+        ssl: Env.boolean("DB_SSL").default(false),
     },
     features: {
-        caching: env.boolean("ENABLE_CACHE").default(true),
-        rateLimit: env.number("RATE_LIMIT").default(100),
+        caching: Env.boolean("ENABLE_CACHE").default(true),
+        rateLimit: Env.number("RATE_LIMIT").default(100),
     },
     api: {
-        version: env.string("API_VERSION").default("v1"),
-        prefix: env.string("API_PREFIX").default("/api"),
+        version: Env.string("API_VERSION").default("v1"),
+        prefix: Env.string("API_PREFIX").default("/api"),
     },
 });
 ```
@@ -58,7 +58,7 @@ The `env` object provides type-safe builders for environment variables:
 ### String Values
 
 ```typescript
-env.string("VAR_NAME")
+Env.string("VAR_NAME")
     .required()           // Make required
     .default("fallback")  // Set default value
     .enum(["a", "b", "c"]) // Restrict to specific values
@@ -68,7 +68,7 @@ env.string("VAR_NAME")
 ### Number Values
 
 ```typescript
-env.number("VAR_NAME")
+Env.number("VAR_NAME")
     .required()
     .default(100)
     .min(1)      // Minimum value
@@ -79,7 +79,7 @@ env.number("VAR_NAME")
 ### Boolean Values
 
 ```typescript
-env.boolean("VAR_NAME")
+Env.boolean("VAR_NAME")
     .required()
     .default(false)
 // Accepts: true, false, "true", "false", "1", "0", "yes", "no"
@@ -88,7 +88,7 @@ env.boolean("VAR_NAME")
 ### Array Values
 
 ```typescript
-env.array("VAR_NAME")
+Env.array("VAR_NAME")
     .required()
     .default(["item1", "item2"])
     .separator(",")  // Custom separator (default: ",")
@@ -98,7 +98,7 @@ env.array("VAR_NAME")
 ### Object Values
 
 ```typescript
-env.json("VAR_NAME")
+Env.json("VAR_NAME")
     .required()
     .default({ key: "value" })
 // VAR_NAME='{"key":"value"}' → { key: "value" }
@@ -176,21 +176,21 @@ When configuration is invalid, ExpressoTS provides detailed error messages:
 
 ```typescript
 // Required field missing
-env.string("API_KEY").required()
+Env.string("API_KEY").required()
 // ❌ Missing required environment variable: API_KEY
 
 // Invalid number
-env.number("PORT").min(1).max(65535)
+Env.number("PORT").min(1).max(65535)
 // PORT=99999
 // ❌ PORT must be between 1 and 65535, got: 99999
 
 // Invalid enum
-env.string("LOG_LEVEL").enum(["debug", "info", "warn", "error"])
+Env.string("LOG_LEVEL").enum(["debug", "info", "warn", "error"])
 // LOG_LEVEL=verbose
 // ❌ LOG_LEVEL must be one of: debug, info, warn, error, got: verbose
 
 // Pattern mismatch
-env.string("SLUG").pattern(/^[a-z0-9-]+$/)
+Env.string("SLUG").pattern(/^[a-z0-9-]+$/)
 // SLUG=My Slug
 // ❌ SLUG does not match pattern: /^[a-z0-9-]+$/
 ```
@@ -200,23 +200,23 @@ env.string("SLUG").pattern(/^[a-z0-9-]+$/)
 Define different configurations per environment:
 
 ```typescript
-import { defineConfig, env, when } from "@expressots/core";
+import { defineConfig, Env, when } from "@expressots/core";
 
 export default defineConfig({
     database: {
-        url: when(env.string("NODE_ENV"), {
+        url: when(Env.string("NODE_ENV"), {
             development: "postgresql://localhost:5432/dev",
             test: "postgresql://localhost:5432/test",
-            production: env.string("DATABASE_URL").required(),
+            production: Env.string("DATABASE_URL").required(),
         }),
-        pool: when(env.string("NODE_ENV"), {
+        pool: when(Env.string("NODE_ENV"), {
             development: 5,
             test: 2,
             production: 20,
         }),
     },
     logging: {
-        level: when(env.string("NODE_ENV"), {
+        level: when(Env.string("NODE_ENV"), {
             development: "debug",
             test: "warn",
             production: "error",
@@ -236,7 +236,7 @@ export default defineConfig({
 
 // config/production.ts
 export default defineConfig({
-    database: { url: env.string("DATABASE_URL").required() },
+    database: { url: Env.string("DATABASE_URL").required() },
     logging: { level: "error" },
 });
 
@@ -244,7 +244,7 @@ export default defineConfig({
 import development from "./development";
 import production from "./production";
 
-export default env.string("NODE_ENV").value === "production"
+export default Env.string("NODE_ENV").value === "production"
     ? production
     : development;
 ```
@@ -254,12 +254,12 @@ export default env.string("NODE_ENV").value === "production"
 Use `SecretValue` for sensitive data:
 
 ```typescript
-import { defineConfig, env, SecretValue } from "@expressots/core";
+import { defineConfig, Env, SecretValue } from "@expressots/core";
 
 export default defineConfig({
     auth: {
-        jwtSecret: new SecretValue(env.string("JWT_SECRET").required()),
-        apiKey: new SecretValue(env.string("API_KEY").required()),
+        jwtSecret: new SecretValue(Env.string("JWT_SECRET").required()),
+        apiKey: new SecretValue(Env.string("API_KEY").required()),
     },
 });
 ```
@@ -310,7 +310,7 @@ export default config;
 Define a schema for configuration validation:
 
 ```typescript
-import { defineConfig, defineSchema, env } from "@expressots/core";
+import { defineConfig, defineSchema, Env } from "@expressots/core";
 
 const schema = defineSchema({
     database: {
@@ -332,15 +332,15 @@ const schema = defineSchema({
 
 export default defineConfig(schema, {
     database: {
-        url: env.string("DATABASE_URL"),
-        pool: env.number("DB_POOL_SIZE"),
+        url: Env.string("DATABASE_URL"),
+        pool: Env.number("DB_POOL_SIZE"),
     },
 });
 ```
 
 ## Best Practices
 
-1. **Use Type-Safe Builders**: Always use `env.string()`, `env.number()`, etc.
+1. **Use Type-Safe Builders**: Always use `Env.string()`, `Env.number()`, etc.
 2. **Provide Defaults**: Use `.default()` for optional configuration
 3. **Mark Required Fields**: Use `.required()` for essential config
 4. **Use SecretValue**: Wrap sensitive data in `SecretValue`

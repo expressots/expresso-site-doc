@@ -508,6 +508,62 @@ app.get("/metrics", metrics.prometheusHandler.bind(metrics));
 
 ---
 
+---
+
+## ServiceProxy — declarative HTTP gateway
+
+Where `ServiceClient` is imperative (`await userClient.get("/...")`), **`ServiceProxy`** is declarative: it builds a reverse proxy that forwards inbound requests to a downstream service based on routing rules.
+
+```ts
+import { createProxy } from "@expressots/adapter-express";
+
+const userProxy = createProxy({
+  target: "http://user-service:3001",
+  pathRewrite: { "^/api/users": "" },         // strips /api/users prefix downstream
+  changeOrigin: true,
+  timeout: 5000,
+  retries: 2,
+  circuitBreaker: {
+    failureThreshold: 5,
+    resetTimeout: 30_000,
+  },
+  onError: (err, req, res) => {
+    res.status(502).json({ error: "Upstream user-service unavailable" });
+  },
+});
+
+const orderProxy = createProxy({
+  target: "http://order-service:3002",
+  pathRewrite: { "^/api/orders": "" },
+  changeOrigin: true,
+});
+
+app.use("/api/users", userProxy);
+app.use("/api/orders", orderProxy);
+```
+
+| Option            | Purpose                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `target`          | Downstream base URL.                                                                  |
+| `pathRewrite`     | Map of regex → replacement applied to the incoming path before forwarding.            |
+| `changeOrigin`    | Set the `Host` header of the upstream request to match `target`. Recommended.         |
+| `timeout`         | Per-request timeout in ms.                                                            |
+| `retries`         | Number of retries on transient failure (`ECONNRESET`, 5xx with idempotent verbs).     |
+| `circuitBreaker`  | Same shape as `ServiceClient.circuitBreaker` — wraps the proxy so persistent downstream failures fail fast. |
+| `onError`         | Hook that runs when the upstream call fails after retries / breaker.                  |
+
+The `createProxy` factory returns an Express middleware. Mount it under any path or on the root.
+
+### When to choose Proxy vs Client
+
+| Use case                                                              | Choose         |
+| --------------------------------------------------------------------- | -------------- |
+| Aggregate / shape downstream responses, fan-out, custom error mapping | `ServiceClient` |
+| Plain pass-through (HTTP gateway pattern)                              | `ServiceProxy`  |
+| Streaming binary payloads (file downloads, video)                      | `ServiceProxy`  |
+| Long-poll / SSE pass-through                                           | `ServiceProxy`  |
+| Per-request transformation of body or headers                          | `ServiceClient` |
+
 ## Support the Project
 
 ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

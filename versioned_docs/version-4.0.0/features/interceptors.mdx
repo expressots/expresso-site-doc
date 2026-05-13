@@ -1262,6 +1262,110 @@ setupInterceptorsForExpress(
 
 ---
 
+## Composition helpers
+
+The framework ships four helpers that let you compose interceptors **at the point of attachment** without writing a wrapper class:
+
+| Helper                       | Purpose                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `whenInterceptor(cond, i)`   | Apply `i` only when `cond(ctx)` returns `true`.                                |
+| `unlessInterceptor(cond, i)` | Apply `i` only when `cond(ctx)` returns `false` — the inverse of `when`.       |
+| `pipeInterceptors(...i)`     | Run interceptors **in order**; each `next.handle()` chains to the following.   |
+| `combineInterceptors(...i)`  | Run interceptors **in parallel** for side-effect-only work (logging, metrics). |
+
+### `whenInterceptor` / `unlessInterceptor`
+
+```ts
+import {
+  UseInterceptors,
+  whenInterceptor,
+  unlessInterceptor,
+  PerformanceInterceptor,
+  CacheInterceptor,
+} from "@expressots/core";
+
+@controller("/users")
+export class UserController {
+  @Get("/")
+  @UseInterceptors(
+    PerformanceInterceptor,
+    whenInterceptor(
+      (ctx) => ctx.request.headers["x-cache"] === "true",
+      CacheInterceptor,
+    ),
+    unlessInterceptor(
+      (ctx) => ctx.request.method === "POST",
+      LoggingInterceptor,
+    ),
+  )
+  list() {}
+}
+```
+
+`whenInterceptor` / `unlessInterceptor` evaluate their condition lazily at request time. The condition receives the `ExecutionContext` and can be sync or async.
+
+### `pipeInterceptors` — sequential composition
+
+```ts
+import { pipeInterceptors, UseInterceptors } from "@expressots/core";
+
+@Get("/heavy")
+@UseInterceptors(pipeInterceptors(AuthCheckInterceptor, RateLimitInterceptor, CacheInterceptor))
+heavy() {}
+```
+
+Each interceptor's `next.handle()` resolves the next item in the pipe. Short-circuit by returning early — the rest of the pipe is skipped.
+
+### `combineInterceptors` — parallel composition
+
+```ts
+import { combineInterceptors, UseInterceptors } from "@expressots/core";
+
+@Get("/")
+@UseInterceptors(combineInterceptors(MetricsInterceptor, AuditInterceptor))
+list() {}
+```
+
+`combineInterceptors` fires every member side-by-side and waits for all of them to finish before resolving. Use it for **observation-only** interceptors that don't mutate the response.
+
+### Type guards
+
+When inspecting interceptors at runtime (rare, but useful in testing helpers):
+
+```ts
+import {
+  isComposedInterceptor,
+  isConditionalInterceptor,
+} from "@expressots/core";
+
+if (isComposedInterceptor(x))     { /* it's a pipe or combine */ }
+if (isConditionalInterceptor(x))  { /* it's a when or unless */ }
+```
+
+## Built-in interceptors
+
+| Interceptor                  | Purpose                                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `LoggingInterceptor`         | Structured request/response logging.                                                     |
+| `PerformanceInterceptor`     | Per-request timing — feeds the Studio "slow routes" view.                                |
+| `PerformanceInterceptorService` | Aggregated metrics service (P50/P95/P99 per route).                                  |
+| `TimeoutInterceptor`         | Aborts handlers that exceed `TimeoutOptions.ms`.                                          |
+
+```ts
+import {
+  UseInterceptors,
+  PerformanceInterceptor,
+  TimeoutInterceptor,
+} from "@expressots/core";
+
+@controller("/api")
+export class ApiController {
+  @Get("/slow")
+  @UseInterceptors(TimeoutInterceptor({ ms: 5000 }), PerformanceInterceptor)
+  slow() {}
+}
+```
+
 ## Comparison with Other Frameworks
 
 | Feature | ExpressoTS | NestJS | Fastify |

@@ -417,6 +417,60 @@ functions:
             - httpApi: "*"
 ```
 
+#### Body, base64, and binary content types
+
+The Lambda adapter handles request and response bodies according to API Gateway / ALB / Function URL conventions:
+
+| Direction | Behaviour                                                                                                                                                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Incoming body** | If `event.isBase64Encoded` is `true`, the body is decoded with `Buffer.from(body, "base64")` first. When `Content-Type` includes `application/json`, the body is then `JSON.parse()`d (with a fallback to the raw value if parsing fails). Other types pass through as a string or `Buffer`. |
+| **Outgoing body — text** | Strings come back as UTF-8 with `isBase64Encoded: false`. `app.get(...) => "<h1>...</h1>"` returns `text/html`; `=> { ... }` returns `application/json` via the response helper.                                                                |
+| **Outgoing body — binary** | If the `Content-Type` matches one of `config.binaryContentTypes`, the body is base64-encoded and `isBase64Encoded: true` is set. Wildcards like `image/*` are supported.                                                                       |
+
+Configure the binary types the adapter should encode:
+
+```ts
+export const handler = awsLambdaAdapter(app, {
+  binaryContentTypes: [
+    "application/octet-stream",
+    "application/pdf",
+    "image/*",
+    "video/*",
+    "audio/*",
+  ],
+});
+```
+
+Make sure your API Gateway or Function URL configuration **also** lists these types as binary media types, otherwise the gateway will mangle the response.
+
+#### Lambda-only fields
+
+Each request handler receives the original Lambda event and context attached to `req`:
+
+```ts
+import type { LambdaEvent, LambdaContext } from "@expressots/adapter-express";
+
+app.get("/", (req, res) => {
+  const { event, context } = req.lambda as { event: LambdaEvent; context: LambdaContext };
+  res.set("x-lambda-request-id", context.awsRequestId);
+  return { region: process.env.AWS_REGION, requestId: context.awsRequestId };
+});
+```
+
+The adapter also injects two request headers automatically:
+
+- `x-lambda-request-id` — `context.awsRequestId`.
+- `x-lambda-function` — `context.functionName`.
+
+#### Cold start tips
+
+| Tip                                                              | Why                                                                                       |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Build a single bundle (`esbuild` / `tsup`) and ship it as the function handler. | Saves ~80–150 ms of Node `require()` walking through `node_modules`.                  |
+| Use `micro()` rather than the full `AppExpress`.                 | Skips DI container initialization. Bring DI back only if you need it.                     |
+| Prefer Lambda extensions for log shipping rather than `HttpTransport`. | Avoids blocking the response on log network I/O.                                      |
+| Set `binaryContentTypes` precisely.                              | The fewer wildcards, the faster the per-request content-type lookup.                      |
+
 ### Vercel
 
 ```typescript
