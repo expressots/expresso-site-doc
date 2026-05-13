@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
 title: GOVERNANCE
+description: How ExpressoTS is governed — decision-making, contribution paths, maintainers, releases, and the security disclosure process.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -8,76 +9,127 @@ import TabItem from "@theme/TabItem";
 
 # Governance
 
-ExpressoTS is built by its community. We welcome and appreciate contributions of all kinds. There are many ways to help, from reporting issues, contributing code, and helping us improve our community.
+ExpressoTS is an independent, MIT-licensed open-source project maintained by a small core team and a growing community of contributors. This page documents how decisions are made, who can make them, how releases happen, and how to report security issues.
+
+## Mission
+
+> Make TypeScript backend development on Node.js fast to start, easy to scale, and pleasant to maintain — with a developer experience that respects your time.
+
+Every change to the framework is evaluated against three principles:
+
+1. **Stay small at the core.** ExpressoTS keeps a tight, opinionated kernel and pushes optional behaviour into modules and the Studio.
+2. **Optimise for the common case.** Defaults must make the 80% case effortless, with explicit escape hatches for the 20%.
+3. **Make the runtime introspectable.** Every feature should be observable in Studio without changing application code.
 
 ## Decision making
 
-Each major decision in ExpressoTS starts with a proposal. Proposals can be written by anyone in the community. The core team will review the proposal and decide whether to accept it, reject it, or ask for more information.
+Each material decision in ExpressoTS starts with a **proposal**. Anyone in the community can write one. The core team reviews proposals and decides whether to accept, reject, ask for revisions, or defer.
 
-## How to contribute?
+| Kind of change                                                  | Path                                                                        |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Bug fix, doc fix, small refactor, additive helper               | Pull request directly against the relevant repo                             |
+| New feature inside an existing package                          | Issue first → discussion → PR (label `proposal`)                            |
+| New package, new module, anything cross-cutting                 | RFC (issue with label `rfc`) → ADR landed in the repo → PR                  |
+| Breaking change                                                 | RFC + targeted to the next major (currently v5); never to a minor          |
+| Security-sensitive change                                       | Private disclosure first (see [Security](#security-disclosures)), then RFC  |
 
-**"This path is arduous but it's very rewarding, you can help to shape the future of backend development!**
+Architecture decisions are recorded as ADRs under `packages/core/src/**/.docs/decision-log.md` and `adapter-express/src/**/.docs/decision-log.md`. The release notes link back to the ADRs that drove each change.
 
-The framework is gaining traction globally, and I'm currently managing parallel development efforts from various talented developers like yourself. Apologies if my responses are sometimes delayed!
-We’re always looking for passionate contributors, and there’s a straightforward, well-defined process to become part of our selective core development team—a unique aspect compared to many open-source projects.
+## Roles
 
-#### Types of contributors:
+| Role                          | Responsibilities                                                                                                        | How to get there                                                                            |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Community contributor**     | Open issues, file PRs, help in Discord, review other PRs.                                                               | Just start. No formal step.                                                                  |
+| **Trusted contributor**       | Triage rights on issues; reviewer credit; counted in the release notes.                                                  | At least 3 merged non-trivial PRs and a track record of helpful reviews.                     |
+| **Core developer**            | Merge rights on assigned packages; can land RFCs; speaks for the project at events.                                      | At least 3 major contributions (new features or significant improvements) + sustained activity. Apply via the form below. |
+| **Release captain**           | Owns a release window end-to-end: PR triage, doc parity, changelog, npm publish, GitHub release notes, site deploy.      | Nominated by the core team for a specific release.                                          |
+| **BDFL / Project Lead**       | Tiebreaker on contested decisions, final call on security disclosures, owns the project's roadmap and brand.             | Currently held by the founder. Succession is documented in the team handbook.                |
+
+## Contribution paths
+
+**"This path is arduous but it's very rewarding — you can help shape the future of backend development."**
+
+The framework has serious global traction, with parallel development efforts from many talented contributors. We're always looking for passionate new ones, and unlike many open-source projects, there's a clear, well-defined path to join the core team.
+
+### Types of contributors
 
 <Tabs>
-    <TabItem label="Ocassional Contributor" value="ocasional">
+    <TabItem label="Occasional contributor" value="occasional">
         Developers who suggest improvements or implement a change and contribute on a one-off basis.
-        For those who want to contribute occasionally, you can start by fixing a bug or submitting a
-        proposal. We appreciate all contributions, no matter how small!
+        Start by fixing a bug or submitting a proposal. We appreciate every contribution, no matter how small.
     </TabItem>
-    <TabItem label="Core Developer" value="core">
+    <TabItem label="Core developer" value="core">
         A dedicated group of developers who not only code but also act as DevRel for the platform.
-        As a core developer, you’ll join a team of skilled individuals driving the future of
-        ExpressoTS and helping to shape the backend development landscape.
+        As a core developer, you'll join a team driving the future of ExpressoTS and helping shape the backend development landscape.
     </TabItem>
 </Tabs>
 
-#### How to become a core developer:
+### How to become a core developer
 
-To become a core developer, you’ll need to deliver at least three major contributions to the framework, focusing on new functionalities or significant improvements.
+To become a core developer, you'll need to deliver at least **three major contributions** — new functionality, significant improvements, or sustained, high-quality work in an area of the framework.
 
-Steps to Start Contributing:
+Steps to start contributing:
 
-1. Explore ExpressoTS: Create a project using ExpressoTS and explore its functionalities, including the Core, Adapter, and CLI.
-   Take notes on potential improvements or features you think could be added.
+1. **Explore ExpressoTS** — create a project, exercise the Core, Adapter-Express, CLI, and Studio. Take notes on potential improvements.
+2. **Read the documentation** — understanding the project's philosophy and technical details is crucial.
+3. **Dive into the codebase** — clone the repo and walk through the package structure.
 
-2. Read the Documentation: Understanding the project’s philosophy and technical details is crucial. Make sure to thoroughly read the documentation.
+    ```bash
+    git clone https://github.com/expressots/expressots.git
+    ```
 
-3. Dive into the Codebase: Clone the repository and start familiarizing yourself with the code.
-
-```bash
-git clone https://github.com/expressots/expressots.git
-```
-
-4. Identify Your Interest Area: Once you're comfortable with the framework, reach out to me with the area you'd like to contribute to. We can schedule a meeting to discuss how to implement or improve that part of the framework.
-
-5. Contribute and Grow: After our discussion, I'll assign you a task. Your contributions will be reviewed, and based on the quality and impact, you may be invited to join the core development team.
-
-6. Additional Tips: Engage with the Community: Join our Discord or other community channels to interact with other contributors and core developers.
-
-7. Star the project on GitHub: expressots/expressots
-
-8. Stay Updated: Keep an eye on the project’s roadmap and open issues on GitHub to find areas where your contributions can make the most impact.
+4. **Identify your interest area** — reach out with what you want to work on. We can schedule a call to discuss the design or implementation.
+5. **Contribute and grow** — your work will be reviewed, and based on its quality and impact you may be invited to join the core team.
+6. **Engage with the community** — join Discord or the project channels to interact with contributors and core developers.
+7. **Star the project on GitHub**: [`expressots/expressots`](https://github.com/expressots/expressots).
+8. **Stay updated** — follow the roadmap and open issues to find high-impact areas.
 
 :::info
-We’re excited to have you on board and look forward to your contributions to ExpressoTS!
+We're excited to have you on board and look forward to your contributions to ExpressoTS!
 
 **[Fix a bug or submit a proposal](https://github.com/expressots/expressots/issues/new/choose)**
 :::
 
+## Release process
+
+ExpressoTS follows **Semantic Versioning** and ships releases as **bundles**: every package in the bundle gets the same version on every release, so users never have to debug cross-package version drift.
+
+The release captain runs the following workflow for every major and minor:
+
+1. **Cut a `feature/<major>.<minor>` branch** in each repo (e.g. `feature/v4.0`).
+2. **Land everything for the release** on that branch, with conventional commits.
+3. **Update site docs** in `expressots/expresso-site-doc` on the matching branch.
+4. **Run release validation** — the `tests/test-op`, `tests/_app-demo`, `tests/e2e-validation`, and `tests/full-studio-test` smoke suites all green against the locally packed tarballs.
+5. **Publish to npm** in this order: `@expressots/shared` → `@expressots/core` → `@expressots/adapter-express` → `@expressots/cli` → `@expressots/templates` → `@expressots/studio-agent` → `@expressots/studio` → `@expressots/mcp-server`.
+6. **Cut a GitHub release** in each repo with the same tag.
+7. **Deploy the site** to `expresso-ts.com` and the versioned doc set.
+8. **Announce** on Discord, LinkedIn, and the README.
+
+For patch releases inside an active line we skip steps 1 and 7 (no branch fork, no version-set change in the site).
+
+See [`prologue/release.mdx`](./prologue/release.mdx) for the actual support window for each release.
+
+## Code of conduct
+
+We follow the [Contributor Covenant](https://www.contributor-covenant.org/). Unacceptable behaviour can be reported privately to the maintainers via [Discord DM](https://discord.com/invite/PyPJfGK) or by emailing the security alias (below). All reports are confidential.
+
+## Security disclosures
+
+Please **do not** open public issues for security vulnerabilities.
+
+- **Private disclosure**: use [GitHub Security Advisories](https://github.com/expressots/expressots/security/advisories/new) on the relevant repo.
+- **Acknowledgement**: we respond within 7 days.
+- **Coordinated disclosure**: we agree on a fix window with the reporter, ship a patch on every supported line (see [Support policy](./prologue/release.mdx#support-policy)), then publish the advisory.
+
 ## Core Team
 
-Currently we have a small core team of constant contributors. We are looking to expand this team to include more people from the community with a wide range of skills and interests.
+We currently have a small core team of constant contributors. We are looking to expand the team with more people from the community across a wide range of skills and interests.
 
-Submit your application to become a core developer when you feel ready to contribute to the project.
+Submit your application when you feel ready:
 
-**[Start my application](https://docs.google.com/forms/d/e/1FAIpQLSdL-IYrnndkzHF2THxgOP1lrmFiUKSVegysz5iVVrtyFUVB7g/viewform?usp=sf_link)**.
+**[Start my application](https://docs.google.com/forms/d/e/1FAIpQLSdL-IYrnndkzHF2THxgOP1lrmFiUKSVegysz5iVVrtyFUVB7g/viewform?usp=sf_link)**
 
-Meet the team of regular and past contributors: **[Team](https://expresso-ts.com/team)**
+Meet the regular and past contributors: **[Team](https://expresso-ts.com/team)**
 
 ---
 

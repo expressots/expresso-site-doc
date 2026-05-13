@@ -22,14 +22,14 @@ See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
 | Configuration | Type-safe config with validation |
 | Logging | 11-phase logging system with transports |
 | Authorization | Guards with permission hierarchy |
-| Studio (preview) | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view, MCP server |
+| Studio | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view, MCP server |
 
 ## Versioning Scheme
 
 ExpressoTS follows [Semantic Versioning](https://semver.org/):
 
-- **Major**: Breaking changes (yearly, Q4/Q1)
-- **Minor**: New features (bi-weekly/monthly)
+- **Major**: Breaking changes (roughly yearly)
+- **Minor**: New features (bi-weekly / monthly)
 - **Patch**: Bug fixes (as needed)
 
 Releases are bundled. All packages share the same version number:
@@ -39,21 +39,23 @@ Releases are bundled. All packages share the same version number:
 -   `@expressots/shared`
 -   `@expressots/templates`
 -   `@expressots/cli`
--   `@expressots/studio` (preview)
--   `@expressots/studio-agent` (preview)
--   `@expressots/mcp-server` (preview)
+-   `@expressots/studio`
+-   `@expressots/studio-agent`
+-   `@expressots/mcp-server`
 
 ## Support Policy
 
-Bug fixes and security patches are provided for 18 months after release. Enterprise customers with support contracts receive extended support.
+Starting with **v4.0.0**, every major release receives **24 months** of bug fixes and security patches from its release date. Releases on the v3.x line and earlier follow the prior 18-month policy. Enterprise customers with support contracts receive extended support.
 
 | Version | Node.js    | Release              | Bug & Security fixed until | Status |
 | ------- | ---------- | -------------------- | -------------------------- | ------ |
-| 4.0.0   | >= 20.18.0 | January 2026         | July 2027                  | 🟢     |
-| 3.0.0   | >= 20.18.0 | December 4th, 2024   | June 4th, 2026             | 🟡     |
+| 4.0.0   | >= 20.18.0 | May 2026             | May 2028                   | 🟢     |
+| 3.0.0   | >= 20.18.0 | December 4th, 2024   | December 4th, 2026         | 🟡     |
 | 2.0.0   | >= 18.10.0 | September 14th, 2023 | March 14th, 2025           | 🔴     |
 
 🟢 Active support 🟡 Bug & Security fixes only 🔴 End-of-life
+
+> v3.0.0 was originally on the 18-month policy. With v4.0.0 we extended the v3 window by 6 months so users have a smooth transition runway through the rest of 2026.
 
 ## ExpressoTS 4.0
 
@@ -433,9 +435,9 @@ export class App extends AppExpress {
 - `ex scripts` for interactive script execution
 - `tsx` for development, `tsc` for production
 
-### Studio (Preview)
+### Studio
 
-ExpressoTS Studio adds a local developer experience platform on top of any v4 application. Everything runs on your machine; nothing is sent off the box.
+ExpressoTS Studio is the local developer experience platform that ships as part of v4.0.0. Everything runs on your machine; nothing is sent off the box.
 
 - **Status Dashboard**: app health, runtime info, DI scope counts, top routes, aggregate security grade.
 - **Architecture Map**: read-only graph of controllers / use-cases / providers / middleware with DI scope badges and active-path highlighting.
@@ -446,7 +448,7 @@ ExpressoTS Studio adds a local developer experience platform on top of any v4 ap
 - **MCP Server**: stdio MCP server exposing CRUD / DTO / middleware / test generators to Claude Desktop, Cursor, and other AI editors.
 
 ```bash
-npm install -D @expressots/studio@preview @expressots/studio-agent@preview
+npm install -D @expressots/studio @expressots/studio-agent
 npx expressots-studio
 ```
 

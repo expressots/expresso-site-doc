@@ -17,27 +17,27 @@ expressots new my-app
 
 ## Step 1: Install the packages
 
-Studio ships as two preview packages. Install both as **dev dependencies**:
+Studio ships as two packages. Install both as **dev dependencies**:
 
 <Tabs>
 <TabItem value="npm" label="npm">
 
 ```bash
-npm install -D @expressots/studio@preview @expressots/studio-agent@preview
+npm install -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
 <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add -D @expressots/studio@preview @expressots/studio-agent@preview
+yarn add -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
 <TabItem value="pnpm" label="pnpm">
 
 ```bash
-pnpm add -D @expressots/studio@preview @expressots/studio-agent@preview
+pnpm add -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
@@ -178,4 +178,4 @@ npx expressots-studio --agent-port 3344
 
 ### Peer dependency warning
 
-If you see `npm WARN ... @expressots/adapter-express` complaining about `@expressots/studio-agent` peer dependency, ensure both `adapter-express` and `studio-agent` are on the same v4 line. Studio v4.0.x preview pairs with adapter-express v4.0.x.
+If you see `npm WARN ... @expressots/adapter-express` complaining about `@expressots/studio-agent` peer dependency, ensure both `adapter-express` and `studio-agent` are on the same v4 line. Studio v4.0.x pairs with adapter-express v4.0.x.

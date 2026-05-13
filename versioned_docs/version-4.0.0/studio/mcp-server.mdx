@@ -10,20 +10,20 @@ description: Use ExpressoTS Studio's MCP server to generate controllers, DTOs, m
 
 It's installed and runs separately from the Studio UI and agent, so you can use it without the full Studio stack — but it understands ExpressoTS idioms, so the generated code drops cleanly into a Studio-instrumented app.
 
-:::note Preview status
-The MCP server is published under the npm `preview` dist-tag, and is **parallel to** rather than **integrated with** the Studio UI in v4.0.0. The integration that exposes Studio recordings as MCP resources is on the [v4.1.0 roadmap](../roadmap.mdx).
+:::note Companion to the Studio UI
+The MCP server runs **parallel to** the Studio UI in v4.0.0: code-generation flows through the MCP server; runtime observability flows through the agent + UI. Exposing Studio recordings as MCP resources is tracked on the [v4.1 roadmap](../roadmap.mdx).
 :::
 
 ## Installation
 
 ```bash
-npm install -D @expressots/mcp-server@preview
+npm install -D @expressots/mcp-server
 ```
 
 Or, if you only want it as a global CLI:
 
 ```bash
-npm install -g @expressots/mcp-server@preview
+npm install -g @expressots/mcp-server
 ```
 
 ## Configure your editor
@@ -171,7 +171,7 @@ const analysis = analyzeCode("src/services/product.service.ts");
 Install the package globally or use the absolute path to its `bin`:
 
 ```bash
-npm install -g @expressots/mcp-server@preview
+npm install -g @expressots/mcp-server
 which expressots-mcp     # on macOS / Linux
 where expressots-mcp     # on Windows
 ```

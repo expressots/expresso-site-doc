@@ -54,15 +54,23 @@ If you do **nothing**, v4 will silently skip `.env` loading and rely on `process
 
 For the full rationale see ADR-001 in [`expressots/packages/core/src/application/.docs/decision-log.md`](https://github.com/expressots/expressots/blob/main/packages/core/src/application/.docs/decision-log.md).
 
-### Studio ships as preview
+## New in v4.0.0 (non-breaking)
 
-`@expressots/studio` and `@expressots/studio-agent` are published under the npm `preview` dist-tag for the v4.0.0 line. The polished GA ships with **v4.1.0**. To install the preview:
+Nothing in this section requires code changes — these are additive features you can adopt incrementally after the upgrade.
+
+### Studio is part of v4.0.0
+
+`@expressots/studio` and `@expressots/studio-agent` ship alongside `@expressots/core` in the v4.0.0 release. Install both as **dev dependencies**:
 
 ```bash
-npm install -D @expressots/studio@preview @expressots/studio-agent@preview
+npm install -D @expressots/studio @expressots/studio-agent
 ```
 
-The agent auto-activates in development; no `app.ts` changes are needed. When you launch the UI, the CLI prints a banner listing the known limitations. See the [Studio section](../studio/overview.mdx) for the full tour and the [Security view](../studio/security.mdx) for the new supply-chain + runtime posture analysis.
+The agent auto-activates when `NODE_ENV=development` and the package is installed; no `app.ts` changes are needed. Production deployments pay zero runtime cost. See the [Studio section](../studio/overview.mdx) for the full tour and the [Security view](../studio/security.mdx) for the supply-chain + runtime posture analysis.
+
+### Interceptors, events, lazy loading, content negotiation, advanced authorization
+
+These are all new in v4.0.0. None of them require changes to a v3 app; you opt in when you want them. See the dedicated pages under **Features** and **Guides**.
 
 ## Step 1: Update Dependencies
 
