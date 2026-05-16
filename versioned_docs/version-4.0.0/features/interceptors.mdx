@@ -102,17 +102,18 @@ export class LoggingInterceptor implements IInterceptor {
 
 ### 3. Apply to Routes
 
-Interceptors are automatically applied to all routes. You can also apply specific interceptors to controllers or methods:
+Registration via `setupInterceptorsForExpress()` makes interceptors available in the DI container, but does **not** apply them to routes. Use `@UseInterceptors()` to apply them at the controller or method level:
 
 ```typescript
-import { controller, Get, useInterceptor } from "@expressots/adapter-express";
+import { controller, Get } from "@expressots/adapter-express";
+import { UseInterceptors } from "@expressots/core";
 
 @controller("/users")
-@useInterceptor(CacheInterceptor)  // Apply to all routes in controller
+@UseInterceptors(CacheInterceptor)  // Apply to all routes in controller
 export class UserController {
     
     @Get("/:id")
-    @useInterceptor(LoggingInterceptor)  // Apply to specific route
+    @UseInterceptors(LoggingInterceptor)  // Apply to specific route
     getUser() {
         return { id: 1, name: "John" };
     }
@@ -127,20 +128,17 @@ export class UserController {
 
 Every interceptor must:
 1. Implement `IInterceptor` interface
-2. Have `@Interceptor()` decorator
-3. Have `@provide()` decorator for DI
-4. Define a `priority` property
-5. Implement `intercept()` method
+2. Have `@Interceptor()` decorator (for auto-discovery and priority)
+3. Have `@injectable()` decorator (for DI)
+4. Implement `intercept()` method
 
 ```typescript
-import { provide, Interceptor } from "@expressots/core";
+import { injectable, Interceptor } from "@expressots/core";
 import type { IInterceptor, ExecutionContext, CallHandler } from "@expressots/core";
 
 @Interceptor({ priority: 10 })
-@provide(MyInterceptor)
+@injectable()
 export class MyInterceptor implements IInterceptor {
-    readonly priority = 10;
-
     async intercept<T>(context: ExecutionContext, next: CallHandler<T>): Promise<T> {
         // Before handler execution
         console.log("Before");
@@ -568,9 +566,12 @@ export class ErrorHandlerInterceptor implements IInterceptor {
 
 ## Applying Interceptors
 
-### Global (All Routes)
+Two steps are required to activate an interceptor:
 
-Registered via `setupInterceptorsForExpress()`, automatically applied to all routes:
+1. **Register** — `setupInterceptorsForExpress({ customInterceptors: [...] })` in `app.ts` binds the class in the DI container and the `InterceptorRegistry`.
+2. **Apply** — `@UseInterceptors(...)` on a controller (all routes) or on a single method (one route).
+
+### Register (app.ts)
 
 ```typescript
 setupInterceptorsForExpress(container, {
@@ -581,13 +582,17 @@ setupInterceptorsForExpress(container, {
 });
 ```
 
+This makes the interceptors resolvable but does **not** apply them to any route.
+
 ### Controller-Level
 
 Apply to all routes in a controller:
 
 ```typescript
+import { UseInterceptors } from "@expressots/core";
+
+@UseInterceptors(CacheInterceptor)
 @controller("/users")
-@useInterceptor(CacheInterceptor)
 export class UserController {
     // All routes use CacheInterceptor
 }
@@ -595,14 +600,15 @@ export class UserController {
 
 ### Method-Level
 
-Apply to specific route:
+Apply to a specific route:
 
 ```typescript
+import { UseInterceptors } from "@expressots/core";
+
 @controller("/users")
 export class UserController {
     @Get("/:id")
-    @useInterceptor(CacheInterceptor)
-    @useInterceptor(LoggingInterceptor)
+    @UseInterceptors(CacheInterceptor, LoggingInterceptor)
     getUser() {
         // Only this route uses both interceptors
     }
@@ -615,9 +621,7 @@ Apply multiple interceptors (execute in priority order):
 
 ```typescript
 @Get("/data")
-@useInterceptor(AuthInterceptor)      // Priority: 1
-@useInterceptor(LoggingInterceptor)   // Priority: 5
-@useInterceptor(CacheInterceptor)     // Priority: 10
+@UseInterceptors(AuthInterceptor, LoggingInterceptor, CacheInterceptor)
 getData() {
     return { data: "example" };
 }
@@ -1169,17 +1173,24 @@ function getInterceptor(key: string, factory: () => IInterceptor): IInterceptor 
 
 ### Interceptor Not Running
 
-**Check registration**:
+**Check registration** in `app.ts`:
 ```typescript
 setupInterceptorsForExpress(container, {
     customInterceptors: [MyInterceptor]  // Must be in array
 });
 ```
 
-**Check decorator**:
+**Check application** on the controller or method:
+```typescript
+@UseInterceptors(MyInterceptor)  // Required to apply to routes
+@controller("/users")
+export class UserController { }
+```
+
+**Check class decorators**:
 ```typescript
 @Interceptor({ priority: 10 })  // Required
-@provide(MyInterceptor)         // Required
+@injectable()                    // Required
 ```
 
 ### Wrong Execution Order
