@@ -38,7 +38,7 @@ Compare ExpressoTS's middleware system with other major frameworks.
 | **Error Handler** | ✅ `addErrorHandler()` | ✅ `@ExceptionHandler` | ✅ Exception middleware | ✅ Exception filters | ✅ Middleware | ✅ Exception handler |
 | **Content Negotiation** | ✅ `addContentNegotiation()` | ✅ Built-in | ✅ Built-in | ⚠️ Plugin | ✅ REST framework | ⚠️ Via packages |
 | **Health Check** | ✅ `addHealthCheck()` | ✅ Actuator | ✅ Health checks | ⚠️ Terminus | ⚠️ Manual | ⚠️ Manual |
-| **Middleware Presets** | ✅ **UNIQUE** - `usePreset()` | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
+| **Middleware Presets** | ✅ **UNIQUE** - `applyPreset()` | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
 | **Performance Profiling** | ✅ **UNIQUE** - Built-in profiler | ⚠️ Via Actuator | ⚠️ Via Application Insights | ⚠️ Plugin | ⚠️ Via packages | ⚠️ Via packages |
 | **Pipeline Introspection** | ✅ **UNIQUE** - `getMiddlewarePipeline()` | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available | ❌ Not available |
 
@@ -100,16 +100,18 @@ async dataHandler() {}
 
 ### Middleware Presets
 
-Pre-configured middleware bundles for common scenarios:
+Pre-configured middleware bundles for common scenarios. Apply with `applyPreset(name, overrides?)`:
 
-- **`api`** - CORS, Helmet, Body Parser, Compression, Rate Limiting
-- **`production`** - All security middleware, compression, rate limiting  
-- **`development`** - Development-friendly configuration with detailed logging
+- **`api`** - JSON 10mb, Helmet, strict CORS, rate limit 100/min, compression
+- **`web`** - JSON 5mb with cookies, Helmet, permissive CORS, compression
+- **`production`** - Hardened defaults, strict security, rate limit 60/min
+- **`development`** - Relaxed security, morgan logging, large body limit
+- Plus `spa`, `microservice`, `graphql`, `minimal`
 
 ```typescript
 export class App extends AppExpress {
     async configureServices(): Promise<void> {
-        this.Middleware.usePreset("api");
+        this.Middleware.applyPreset("api");
     }
 }
 ```

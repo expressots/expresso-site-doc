@@ -65,7 +65,7 @@ ExpressoTS v4 introduces a unified, intuitive middleware API:
 | `logger()`          | Pluggable logging (auto-detects pino, winston, morgan)         |
 | `register()`        | Middleware registry for route-level use                        |
 | `when()`            | Conditional middleware execution                               |
-| `applyPreset()`     | Apply built-in presets (api, production, development, minimal) |
+| `applyPreset()`     | Apply built-in presets (api, web, spa, microservice, graphql, minimal, development, production) |
 | `definePreset()`    | Define custom middleware presets                               |
 | `add()`             | Add custom middleware                                          |
 | `setErrorHandler()` | Configure error handling                                       |
@@ -212,28 +212,219 @@ export class App extends AppExpress {
 
 ## Middleware Presets
 
-Pre-configured middleware bundles for common scenarios:
+Pre-configured middleware bundles for common scenarios. Pick the one that matches your workload and override any category if needed.
 
 ```typescript
 export class App extends AppExpress {
     async configureServices(): Promise<void> {
-        // Built-in presets
-        this.Middleware.applyPreset("api");         // JSON, CORS, security, compression
-        this.Middleware.applyPreset("production");  // All security + compression
-        this.Middleware.applyPreset("development"); // Logging + relaxed security
-        this.Middleware.applyPreset("minimal");     // Just body parsing
+        this.Middleware.applyPreset("api");
     }
 }
 ```
 
-### Custom Presets
+### Built-in presets
 
-Define your own presets for reuse:
+| Preset         | Parse                                  | Security                                        | Compression | Logger | Best for                              |
+| -------------- | -------------------------------------- | ----------------------------------------------- | ----------- | ------ | ------------------------------------- |
+| `api`          | JSON 10mb, urlencoded 10mb             | Helmet + CORS (methods/headers/credentials) + rate limit 100/min | level 6     | auto   | REST APIs, mobile/SPA backends        |
+| `web`          | JSON 5mb, urlencoded 5mb, cookies      | Helmet + permissive CORS, no rate limit         | default     | auto   | Server-rendered web apps with sessions |
+| `spa`          | JSON 5mb, urlencoded 5mb               | Helmet + permissive CORS                        | default     | none   | SPA backends with static fallback     |
+| `microservice` | JSON 1mb, urlencoded 1mb               | None (assumes trusted internal network)         | level 6     | none   | Service-to-service communication      |
+| `graphql`      | JSON 50mb                              | Helmet + POST-only CORS                         | default     | none   | GraphQL servers (single endpoint)     |
+| `minimal`      | JSON + urlencoded defaults             | None                                            | none        | none   | Quick prototypes                      |
+| `development`  | JSON 50mb, urlencoded 50mb             | Relaxed (no Helmet, permissive CORS)            | none        | morgan | Local development                     |
+| `production`   | JSON 10mb, urlencoded 10mb             | Strict (Helmet + CORS origin: false + rate limit 60/min) | level 6 | auto (silent in test) | Shipped deployments               |
+
+### Preset default values
+
+Below is the exact configuration each built-in preset resolves to at runtime. Use this reference when overriding specific values.
+
+<details>
+<summary><strong>api</strong> — REST APIs, mobile/SPA backends</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "10mb" },
+    urlencoded: { extended: true, limit: "10mb" },
+  },
+  logger: { implementation: "auto" },
+  security: "api",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: {
+  //     origin: true,
+  //     credentials: true,
+  //     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  //     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  //   }
+  //   rateLimit: { windowMs: 60000, max: 100 }
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+<details>
+<summary><strong>web</strong> — Server-rendered web apps with sessions</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "5mb" },
+    urlencoded: { extended: true, limit: "5mb" },
+    cookies: true,
+  },
+  logger: { implementation: "auto" },
+  security: "standard",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: { origin: true }  (permissive)
+  //   rateLimit: false
+  compress: true,   // default compression level
+}
+```
+
+</details>
+
+<details>
+<summary><strong>spa</strong> — SPA backends with static fallback</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "5mb" },
+    urlencoded: { extended: true, limit: "5mb" },
+  },
+  security: "standard",   // Helmet + permissive CORS, no rate limit
+  compress: true,
+}
+```
+
+</details>
+
+<details>
+<summary><strong>microservice</strong> — Service-to-service communication</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "1mb" },
+    urlencoded: { extended: false, limit: "1mb" },
+  },
+  // No security (internal network, behind API gateway)
+  // No logger
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+<details>
+<summary><strong>graphql</strong> — GraphQL servers (single endpoint)</summary>
+
+```typescript
+{
+  parse: { json: { limit: "50mb" } },
+  security: {
+    headers: "helmet",
+    cors: { origin: true, methods: ["GET", "POST", "OPTIONS"] },
+    // No rate limit
+  },
+  compress: true,
+}
+```
+
+</details>
+
+<details>
+<summary><strong>minimal</strong> — Quick prototypes</summary>
+
+```typescript
+{
+  parse: true,   // JSON 100kb default + urlencoded { extended: true }
+  // No security, compression, or logger
+}
+```
+
+</details>
+
+<details>
+<summary><strong>development</strong> — Local development</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "50mb" },
+    urlencoded: { extended: true, limit: "50mb" },
+  },
+  logger: { implementation: "morgan", options: { format: "dev" } },
+  security: "relaxed",   // resolves to:
+  //   headers: false  (no Helmet)
+  //   cors: { origin: true }
+  //   rateLimit: false
+  // No compression
+}
+```
+
+</details>
+
+<details>
+<summary><strong>production</strong> — Shipped deployments</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "10mb" },
+    urlencoded: { extended: true, limit: "10mb" },
+  },
+  logger: { implementation: "auto", disableInTest: true },
+  security: "strict",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: { origin: false, credentials: true }
+  //   rateLimit: { windowMs: 60000, max: 60 }
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+### Security tier reference
+
+The `security` field accepts a string preset name or a full `SecurityConfig` object. Here are the five built-in security tiers:
+
+| Tier | Helmet | CORS | Rate Limit |
+| --- | --- | --- | --- |
+| `"api"` | On (defaults) | `origin: true`, `credentials: true`, explicit methods + `allowedHeaders` | 100 req / 60s |
+| `"standard"` | On (defaults) | `origin: true` (permissive) | Off |
+| `"strict"` | On (defaults) | `origin: false`, `credentials: true` | 60 req / 60s |
+| `"relaxed"` | Off | `origin: true` | Off |
+| `"minimal"` | Off | `origin: true` | Off |
+
+### Overriding a preset
+
+`applyPreset()` accepts an override object that deep-merges with the preset defaults. Set any category to `false` to disable it, or pass an options object to tune it.
 
 ```typescript
 export class App extends AppExpress {
     async configureServices(): Promise<void> {
-        // Define a custom preset
+        this.Middleware.applyPreset("api", {
+            logger: false,
+            parse: { json: { limit: "25mb" } },
+            security: {
+                cors: { origin: "https://myapp.com", credentials: true },
+                rateLimit: { windowMs: 60_000, max: 30 },
+            },
+        });
+    }
+}
+```
+
+### Custom presets
+
+Use `definePreset()` to register a reusable named preset, then apply it like any built-in.
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
         this.Middleware.definePreset("my-company-api", {
             parse: { json: { limit: "5mb" }, urlencoded: true },
             logger: { implementation: "auto" },
@@ -241,7 +432,6 @@ export class App extends AppExpress {
             compress: true,
         });
 
-        // Apply your custom preset
         this.Middleware.applyPreset("my-company-api");
     }
 }
@@ -412,17 +602,14 @@ Use class references without `new`:
 
 ### Middleware Presets
 
-Pre-configured middleware bundles:
+Pre-configured middleware bundles applied with a single call. See the [Middleware Presets](#middleware-presets) section above for the full catalog and override patterns.
 
 ```typescript
-import { usePreset } from "@expressots/adapter-express";
-
 export class App extends AppExpress {
     async configureServices(): Promise<void> {
-        // Use predefined presets
-        this.Middleware.usePreset("api");         // CORS, Helmet, Body Parser, Compression, Rate Limiting
-        this.Middleware.usePreset("production");  // All security middleware
-        this.Middleware.usePreset("development"); // Development-friendly with detailed logging
+        this.Middleware.applyPreset("api");         // REST API defaults
+        this.Middleware.applyPreset("production");  // Hardened production defaults
+        this.Middleware.applyPreset("development"); // Relaxed local-dev defaults
     }
 }
 ```
@@ -476,7 +663,7 @@ const security = this.Middleware.getMiddlewarePipeline({ category: "security" })
 | addContentNegotiation  | Add content negotiation with multiple formatters         |
 | addValidation          | Add smart validation (zero-config with @validatedBody()) |
 | addHealthCheck         | Add health check endpoint                                |
-| usePreset              | Apply middleware preset (api, production, development)   |
+| applyPreset            | Apply middleware preset (api, web, production, development, ...) |
 
 ### Content Negotiation
 
@@ -754,36 +941,38 @@ app.use(timeout(2000, externalApiMw));    // emits a 504-style error after 2s
 
 ## Preset API
 
-Middleware presets are catalogued in code; you can read them and create your own without touching `this.Middleware.applyPreset(...)`.
+Presets are applied through `this.Middleware.applyPreset(name, overrides?)`. The override object deep-merges with the preset defaults so you only need to specify what you want to change.
 
 ```ts
-import {
-  MIDDLEWARE_PRESETS,
-  getPreset,
-  getPresetNames,
-  getPresetsByTag,
-  createPreset,
-  mergePresets,
-} from "@expressots/core";
+import type { MiddlewareConfig } from "@expressots/core";
 
-const apiPreset       = getPreset("api");
-const presetNames     = getPresetNames();             // ["api", "production", "development", ...]
-const securityPresets = getPresetsByTag("security");  // every preset tagged "security"
-
-const customPreset = createPreset({
-  name: "edge",
-  description: "Optimized for serverless edge runtimes",
-  middleware: [
-    { name: "cors", options: { origin: true } },
-    { name: "json", options: { limit: "1mb" } },
-  ],
-  tags: ["serverless"],
-});
-
-const apiPlusEdge = mergePresets(apiPreset, customPreset);
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api", {
+            security: {
+                cors: { origin: "https://myapp.com", credentials: true },
+                rateLimit: { windowMs: 60_000, max: 50 },
+            },
+            compress: { level: 9 },
+            logger: false,
+        } satisfies Partial<MiddlewareConfig>);
+    }
+}
 ```
 
-You can then apply a custom preset via `this.Middleware.applyPreset(customPreset.name)` once registered.
+### Defining and reusing custom presets
+
+```ts
+this.Middleware.definePreset("edge", {
+    parse: { json: { limit: "1mb" } },
+    security: { headers: "helmet", cors: { origin: true } },
+    compress: { level: 6 },
+});
+
+this.Middleware.applyPreset("edge");
+```
+
+`definePreset()` registers the preset on the current middleware service. Once registered, it can be passed to `applyPreset()` by name with the same override semantics as built-in presets.
 
 ## Profiler & introspection
 
