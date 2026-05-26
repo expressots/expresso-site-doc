@@ -71,7 +71,7 @@ We have available a method called `getHttpServer()` in the `AppExpress` class th
 Alonside with this method, we have the `close()` method that closes the server and releases the resources.
 
 ```typescript title="GET /v1 test"
-import { AppFactory, StatusCode } from "@expressots/core";
+import { createTestApp, StatusCode } from "@expressots/core";
 import { IWebServerPublic } from "@expressots/shared";
 
 import express from "express";
@@ -84,7 +84,7 @@ describe("App Test", () => {
     let appInstance: IWebServerPublic;
 
     beforeAll(async () => {
-        appInstance = await AppFactory.create(App);
+        appInstance = await createTestApp(App);
         await appInstance.listen(3000);
 
         server = await appInstance.getHttpServer();
