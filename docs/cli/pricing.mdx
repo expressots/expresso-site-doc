@@ -1,0 +1,564 @@
+---
+sidebar_position: 13
+title: Pricing Data
+description: Sources, cascading fallback, and contributing pricing corrections for the costs command.
+---
+
+# Pricing Data Management
+
+ExpressoTS CLI provides cloud cost estimation with dynamic pricing data that can be updated independently from the CLI. This ensures pricing information is always current without requiring CLI updates.
+
+## Overview
+
+The pricing system features:
+
+- **Dynamic Pricing Data**: Fetched from remote sources
+- **Multiple Sources**: API, Remote JSON, and Local overrides
+- **Cascading Fallback**: Ensures pricing is always available
+- **Community Updates**: Anyone can submit pricing corrections
+- **Automatic Caching**: 6-hour cache for performance
+- **Offline Support**: Works without internet connection
+
+## Pricing Sources
+
+Pricing data is fetched with cascading fallback:
+
+1. **API Source** - ExpressoTS Pricing API (planned)
+2. **Remote JSON** - GitHub-hosted pricing file
+3. **Local Override** - User's custom pricing (`~/.expressots/pricing.json`)
+4. **Embedded Fallback** - Built into CLI
+
+This ensures you always get the most up-to-date pricing while maintaining offline functionality.
+
+## Cost Estimation Commands
+
+### Estimate Costs for a Provider
+
+```bash
+# Estimate for specific provider
+expressots costs estimate aws
+
+# With custom resources
+expressots costs estimate aws \
+  --instances 2 \
+  --cpu 2 \
+  --memory 4 \
+  --storage 50 \
+  --bandwidth 500
+```
+
+**Options:**
+- `--instances` - Number of instances/replicas
+- `--cpu` - CPU cores per instance
+- `--memory` - Memory in GB per instance
+- `--storage` - Storage in GB
+- `--bandwidth` - Monthly bandwidth in GB
+- `--hours` - Running hours per month (default: 720)
+
+### Compare Costs Across Providers
+
+```bash
+# Compare all providers
+expressots costs compare
+
+# With specific configuration
+expressots costs compare \
+  --cpu 2 \
+  --memory 4 \
+  --storage 50
+
+# Export as JSON
+expressots costs compare --format json
+
+# Save to file
+expressots costs compare --output costs.json
+```
+
+Output shows providers sorted by cost (cheapest first):
+
+```
+Provider         Service         Monthly Cost    Rank
+--------------------------------------------------------
+Fly             Machines        $15.23          Best
+Railway         Web Service     $18.50          +$3.27
+Render          Web Service     $21.00          +$5.77
+GCP             Cloud Run       $24.80          +$9.57
+...
+```
+
+### Get Cost Optimization Recommendations
+
+```bash
+expressots costs optimize
+```
+
+Provides recommendations for:
+- Right-sizing instances
+- Using auto-scaling
+- Reserved instances
+- Spot/preemptible instances
+- Storage optimization
+- Provider migration savings
+
+### Show Pricing Details
+
+```bash
+# Show all provider pricing
+expressots costs pricing
+
+# Show specific provider
+expressots costs pricing aws
+```
+
+Displays:
+- Service name
+- Pricing model (per-hour, per-month, usage)
+- CPU, memory, storage, bandwidth costs
+- Free tier information
+- Data source and last verification date
+
+## Managing Pricing Data
+
+### Update Pricing Data
+
+Fetch the latest pricing from remote sources:
+
+```bash
+expressots costs update
+```
+
+This command:
+1. Clears the local cache
+2. Fetches from API (if available)
+3. Falls back to Remote JSON
+4. Caches for 6 hours
+5. Shows update status and source
+
+### Show Pricing Information
+
+```bash
+expressots costs info
+```
+
+Displays:
+- Pricing data version
+- Last update timestamp
+- Data source (api/remote/local)
+- Cache age
+- Available providers
+
+### Custom Pricing File
+
+Create a local pricing override:
+
+```bash
+# Create custom pricing file
+mkdir -p ~/.expressots
+nano ~/.expressots/pricing.json
+```
+
+**File format:**
+
+```json
+{
+  "version": "1.0.0",
+  "updated": "2026-01-15T00:00:00Z",
+  "providers": {
+    "aws": {
+      "serviceName": "ECS Fargate",
+      "model": "per-hour",
+      "basePrice": 0,
+      "cpuPerHour": 0.04048,
+      "memoryPerGbHour": 0.004445,
+      "storagePerGb": 0.10,
+      "bandwidthPerGb": 0.09,
+      "freeBandwidth": 100,
+      "notes": "Custom pricing for us-west-2"
+    }
+  }
+}
+```
+
+The CLI will automatically use your custom file when available.
+
+## Supported Cloud Providers
+
+### AWS (Amazon Web Services)
+
+**Service:** ECS Fargate  
+**Model:** Per-hour  
+**Best for:** Enterprise, high-scale applications
+
+```bash
+expressots costs estimate aws
+```
+
+### GCP (Google Cloud Platform)
+
+**Service:** Cloud Run  
+**Model:** Per-hour (scales to zero)  
+**Best for:** Serverless, variable workloads
+
+```bash
+expressots costs estimate gcp
+```
+
+### Azure
+
+**Service:** Container Apps  
+**Model:** Per-hour  
+**Best for:** Enterprise, Microsoft ecosystem
+
+```bash
+expressots costs estimate azure
+```
+
+### Railway
+
+**Service:** Web Service  
+**Model:** Usage-based  
+**Best for:** Developers, simple deployments
+
+```bash
+expressots costs estimate railway
+```
+
+### Render
+
+**Service:** Web Service  
+**Model:** Per-month  
+**Best for:** Startups, predictable pricing
+
+```bash
+expressots costs estimate render
+```
+
+### Fly.io
+
+**Service:** Machines  
+**Model:** Per-hour (scales to zero)  
+**Best for:** Edge computing, global distribution
+
+```bash
+expressots costs estimate fly
+```
+
+### DigitalOcean
+
+**Service:** App Platform  
+**Model:** Per-month  
+**Best for:** Small to medium projects
+
+```bash
+expressots costs estimate digitalocean
+```
+
+### Heroku
+
+**Service:** Eco Dyno  
+**Model:** Per-month  
+**Best for:** Rapid prototyping (expensive for production)
+
+```bash
+expressots costs estimate heroku
+```
+
+## Contributing Pricing Updates
+
+### Process Overview
+
+Pricing data is stored in the `expressots/templates` repository under `cli-templates/pricing.json`.
+
+1. **Fork** the repository
+2. **Update** pricing data with sources
+3. **Verify** from official provider websites
+4. **Update** `lastVerified` date
+5. **Submit** pull request
+
+### Example: Updating AWS Pricing
+
+1. **Visit official pricing page:**  
+   https://aws.amazon.com/fargate/pricing/
+
+2. **Update pricing.json:**
+
+```json
+{
+  "providers": {
+    "aws": {
+      "serviceName": "ECS Fargate",
+      "cpuPerHour": 0.04048,
+      "memoryPerGbHour": 0.004445,
+      "source": "https://aws.amazon.com/fargate/pricing/",
+      "lastVerified": "2026-01-15"
+    }
+  }
+}
+```
+
+3. **Test locally:**
+
+```bash
+# Use your fork
+expressots templates repo set YOUR_USERNAME/templates
+expressots costs update
+expressots costs pricing aws
+```
+
+4. **Submit PR** to main repository
+
+### Pricing Data Fields
+
+**Required:**
+- `serviceName` - Name of the service
+- `model` - Pricing model: "per-hour", "per-month", or "usage"
+- `basePrice` - Base monthly price
+- `cpuPerHour` - Cost per vCPU-hour
+- `memoryPerGbHour` - Cost per GB-hour of memory
+- `storagePerGb` - Cost per GB of storage per month
+- `bandwidthPerGb` - Cost per GB of bandwidth
+- `freeBandwidth` - Free bandwidth in GB
+
+**Optional:**
+- `freeCredits` - Free credits for new users
+- `notes` - Additional pricing notes
+- `source` - URL to official pricing page
+- `lastVerified` - Date when pricing was last verified
+
+### Versioning
+
+When updating pricing data:
+
+- **Patch (1.0.1):** Minor price adjustments, corrections
+- **Minor (1.1.0):** New providers added
+- **Major (2.0.0):** Breaking changes to pricing structure
+
+Update the `version` field in `pricing.json`:
+
+```json
+{
+  "version": "1.1.0",
+  "updated": "2026-01-15T00:00:00Z"
+}
+```
+
+## Cost Calculation Examples
+
+### Basic Web Application
+
+```bash
+expressots costs compare \
+  --instances 1 \
+  --cpu 1 \
+  --memory 1 \
+  --storage 10 \
+  --bandwidth 100
+```
+
+**Typical monthly costs:**
+- Fly.io: ~$5-10
+- Railway: ~$10-15
+- Render: ~$7-14
+- GCP Cloud Run: ~$15-20
+
+### Medium Traffic Application
+
+```bash
+expressots costs compare \
+  --instances 2 \
+  --cpu 2 \
+  --memory 4 \
+  --storage 50 \
+  --bandwidth 500
+```
+
+**Typical monthly costs:**
+- Railway: ~$35-45
+- Render: ~$50-60
+- GCP Cloud Run: ~$60-70
+- AWS Fargate: ~$80-100
+
+### High-Scale Application
+
+```bash
+expressots costs compare \
+  --instances 5 \
+  --cpu 4 \
+  --memory 8 \
+  --storage 200 \
+  --bandwidth 2000
+```
+
+**Typical monthly costs:**
+- AWS Fargate: ~$400-500
+- GCP Cloud Run: ~$350-450
+- Azure Container Apps: ~$375-475
+
+## Configuration
+
+Pricing settings are stored in `~/.expressots/config.json`:
+
+```json
+{
+  "pricing": {
+    "sources": ["api", "remote", "local"],
+    "cacheTTL": 21600,
+    "customFile": null
+  }
+}
+```
+
+**Options:**
+- `sources` - Array of sources to try (in order)
+- `cacheTTL` - Cache time-to-live in seconds (default: 6 hours)
+- `customFile` - Path to custom pricing file (overrides default location)
+
+## API Reference
+
+### Pricing Data Structure
+
+```typescript
+interface PricingData {
+  version: string;
+  updated: string;
+  providers: {
+    [key: string]: ProviderPricing;
+  };
+}
+
+interface ProviderPricing {
+  serviceName: string;
+  model: "per-hour" | "per-month" | "usage";
+  basePrice: number;
+  cpuPerHour: number;
+  memoryPerGbHour: number;
+  storagePerGb: number;
+  bandwidthPerGb: number;
+  freeBandwidth: number;
+  freeCredits?: number;
+  notes?: string;
+  source?: string;
+  lastVerified?: string;
+}
+```
+
+## Troubleshooting
+
+### Pricing Data Not Updating
+
+```bash
+# Force update
+expressots costs update
+
+# Check current source
+expressots costs info
+```
+
+### Using Old Pricing
+
+If you're seeing outdated pricing:
+
+1. **Clear cache:**
+   ```bash
+   rm ~/.expressots/cache/pricing.json
+   expressots costs update
+   ```
+
+2. **Check data version:**
+   ```bash
+   expressots costs info
+   ```
+
+3. **Verify source:**
+   ```bash
+   expressots templates status
+   ```
+
+### Custom Pricing Not Loading
+
+If your custom pricing file isn't being used:
+
+1. **Check file location:** `~/.expressots/pricing.json`
+2. **Validate JSON:** Use a JSON validator
+3. **Check permissions:** File must be readable
+4. **Verify structure:** Must match schema
+
+```bash
+# Test custom pricing
+cat ~/.expressots/pricing.json
+expressots costs update
+expressots costs info
+```
+
+## Best Practices
+
+### For Cost Estimation
+
+1. **Use realistic resources:** Match your actual usage
+2. **Include bandwidth:** Often forgotten but significant
+3. **Consider free tiers:** Factor in free credits
+4. **Account for scaling:** Estimate peak usage, not average
+5. **Compare regularly:** Prices change frequently
+
+### For Pricing Contributors
+
+1. **Verify from official sources:** Always link to pricing page
+2. **Use consistent regions:** Prefer US East/West for comparisons
+3. **Update regularly:** Set reminders to check quarterly
+4. **Document assumptions:** Note what's included/excluded
+5. **Test calculations:** Verify estimates match provider calculators
+
+## Examples
+
+### Find Cheapest Provider for Your App
+
+```bash
+# Your app specs
+expressots costs compare \
+  --instances 2 \
+  --cpu 2 \
+  --memory 4 \
+  --storage 50 \
+  --bandwidth 500 \
+  --format json > costs.json
+
+# View in order
+cat costs.json | jq 'sort_by(.monthlyCost)'
+```
+
+### Calculate Migration Savings
+
+```bash
+# Current Heroku cost
+expressots costs estimate heroku --instances 4
+
+# Compare alternatives
+expressots costs compare --instances 4
+
+# Get recommendations
+expressots costs optimize
+```
+
+### Budget Planning
+
+```bash
+# Export comparison for spreadsheet
+expressots costs compare --format json > budget.json
+
+# Or markdown for documentation
+expressots costs compare --format markdown > budget.md
+```
+
+## Related Commands
+
+- [`expressots templates`](./templates.mdx) - Template management
+- [`expressots migrate`](./overview.mdx#cloud-migration) - Migration guides
+- [`expressots containerize`](./overview.mdx#containerize) - Container configurations
+
+---
+
+## Next Steps
+
+- [Learn about templates](./templates.mdx)
+- [Generate CI/CD pipelines](./overview.mdx#cicd-pipeline-generation)
+- [Explore migration options](./overview.mdx#cloud-migration)

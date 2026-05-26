@@ -1,0 +1,220 @@
+---
+sidebar_position: 26
+title: Health & Monitoring
+description: Built-in middleware health endpoint, IHealthCheck providers, and the aggregated health dashboard.
+---
+
+# Health & Monitoring
+
+ExpressoTS v4 has health monitoring **built in** at three layers:
+
+1. A drop-in **middleware health endpoint** (`Middleware.addHealthCheck()`).
+2. A provider-level **`IHealthCheck` interface** that auto-discovers checks across your DI container.
+3. An aggregated **health dashboard** (`registry.checkHealth()`) that runs every check in parallel and reports an overall verdict.
+
+You don't need a third-party library for any of this — but every layer is opt-in and composable.
+
+## A) Middleware health endpoint
+
+The fastest way to expose `GET /health` from your application:
+
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api");
+
+        this.Middleware.addHealthCheck({
+            path: "/health",          // default: "/health/middleware"
+            includeMetrics: true,     // include profiler stats
+            detailed: true,           // include per-middleware entries
+        });
+    }
+}
+```
+
+```bash
+$ curl -s localhost:3000/health | jq
+{
+  "status": "healthy",
+  "timestamp": "2026-05-26T03:15:42.118Z",
+  "middleware": {
+    "total": 7,
+    "byCategory": { "parse": 2, "security": 2, "logger": 1, "compress": 1, "health": 1 },
+    "entries": [/* ... when detailed:true ... */]
+  },
+  "metrics": { /* ... when includeMetrics:true ... */ }
+}
+```
+
+This endpoint reports the **middleware pipeline's health** — what's wired, in what order, and (with `includeMetrics`) how it's performing. It is intentionally cheap and synchronous.
+
+For *application*-level health (databases, caches, downstream services), use the next layer.
+
+## B) `IHealthCheck` providers
+
+Any provider can declare itself health-checkable by implementing `IHealthCheck`:
+
+```typescript title="src/providers/cache.provider.ts"
+import {
+    provideSingleton,
+    IProvider,
+    IHealthCheck,
+    HealthCheckResult,
+} from "@expressots/core";
+
+@provideSingleton(CacheProvider)
+export class CacheProvider implements IProvider, IHealthCheck {
+    readonly name = "cache";
+    readonly version = "1.0.0";
+
+    async healthCheck(): Promise<HealthCheckResult> {
+        const started = Date.now();
+        try {
+            await this.redis.ping();
+            return {
+                status: "healthy",
+                latency: Date.now() - started,
+                details: { connected: this.redis.status === "ready" },
+            };
+        } catch (error) {
+            return {
+                status: "unhealthy",
+                latency: Date.now() - started,
+                message: (error as Error).message,
+            };
+        }
+    }
+}
+```
+
+`HealthCheckResult` shape:
+
+```typescript
+interface HealthCheckResult {
+    status: "healthy" | "degraded" | "unhealthy";
+    latency?: number;                          // ms
+    message?: string;                          // human-readable
+    details?: Record<string, unknown>;         // anything custom
+    checkedAt?: number;                        // populated by the registry
+}
+```
+
+Three statuses keep the contract simple:
+
+- `healthy` — operating normally
+- `degraded` — running with reduced capacity (slow responses, partial outage, …)
+- `unhealthy` — broken or unreachable
+
+The framework auto-discovers every provider that implements `IHealthCheck` — there is no central register-call.
+
+## C) The aggregated dashboard
+
+`ProviderRegistry.checkHealth()` runs all `IHealthCheck` providers **in parallel** and returns:
+
+```typescript
+interface HealthDashboard {
+    overall: "healthy" | "degraded" | "unhealthy";   // worst of all
+    providers: Array<{ name: string; result: HealthCheckResult }>;
+    checkedAt: number;
+}
+```
+
+`overall` is the *worst* status across providers — one `unhealthy` provider makes the whole system `unhealthy`. This is the right default for orchestrators (k8s readiness probes, ALB target groups, etc.).
+
+Expose it as your real `/health` endpoint:
+
+```typescript title="src/app.controller.ts"
+import { provide, inject, ProviderRegistry } from "@expressots/core";
+import { controller, Get } from "@expressots/adapter-express";
+
+@provide(AppController)
+@controller("/")
+export class AppController {
+    constructor(
+        @inject(ProviderRegistry) private readonly registry: ProviderRegistry,
+    ) {}
+
+    @Get("/health")
+    async health() {
+        return this.registry.checkHealth();
+    }
+}
+```
+
+```json
+// 200 OK when everything is healthy, 503 if you map status → HTTP code
+{
+  "overall": "healthy",
+  "providers": [
+    { "name": "cache",    "result": { "status": "healthy",   "latency": 2 } },
+    { "name": "database", "result": { "status": "healthy",   "latency": 7 } }
+  ],
+  "checkedAt": 1717999542118
+}
+```
+
+For a Kubernetes-style split, expose two routes:
+
+```typescript
+@Get("/livez")
+livez() { return { status: "ok" }; }
+
+@Get("/readyz")
+async readyz(@response() res: Response) {
+    const dashboard = await this.registry.checkHealth();
+    const code = dashboard.overall === "healthy" ? 200 : 503;
+    return res.status(code).json(dashboard);
+}
+```
+
+`/livez` is cheap and process-level. `/readyz` runs the full `IHealthCheck` matrix.
+
+## Logger health monitoring
+
+The framework's logger has its own internal `HealthMonitor` that tracks throughput, dropped messages, queue saturation, and (optionally) sampled CPU usage:
+
+```typescript
+import { Logger } from "@expressots/core";
+
+const logger = new Logger({
+    health: {
+        enabled: true,
+        sampleIntervalMs: 1000,
+        cpuWarningThreshold: 80,
+    },
+});
+
+logger.startHealthMonitoring();
+// ...
+logger.stopHealthMonitoring();   // call this on shutdown
+```
+
+This is configured **per logger instance**, not via the middleware health check — they monitor different things. In a typical app you don't have to touch this; the defaults are sane and the monitor is automatically torn down on graceful shutdown.
+
+## Studio integration
+
+Both signals — middleware pipeline health and `IHealthCheck` results — are surfaced in the Studio runtime panel. Each provider shows up with a health icon (💚 / 🟡 / 🔴) and the latest latency, so you can spot degraded dependencies without curling endpoints by hand.
+
+## Recommended setup
+
+For a typical API, this is the minimum useful stack:
+
+```typescript title="src/app.ts"
+export class App extends AppExpress {
+    async configureServices() {
+        this.Middleware.applyPreset("api");
+        this.Middleware.addHealthCheck({ path: "/health/middleware" });
+        // /health and /readyz are exposed by your AppController (above)
+    }
+}
+```
+
+Then implement `IHealthCheck` on each provider that talks to the outside world (database, cache, message broker, third-party APIs). The dashboard takes care of the rest.
+
+## See also
+
+- **[Bootstrap](../core/bootstrap.mdx)** — `Middleware.addHealthCheck` configuration.
+- **[Providers](../core/providers.mdx)** — registering, scoping, and discovering providers.
+- **[Logging](../guides/logging-setup.mdx)** — the logger's own health monitor.

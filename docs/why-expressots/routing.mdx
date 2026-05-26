@@ -1,0 +1,110 @@
+---
+sidebar_position: 5
+title: Routing & Controllers
+description: Routing and controller comparison across frameworks.
+---
+
+# Routing & Controllers Comparison
+
+Compare ExpressoTS's routing system with other major frameworks.
+
+## Controller Definition
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Controller Decorator** | ✅ `@controller(path)` | ✅ `@RestController` | ✅ `[ApiController]` | ✅ `@Controller()` | ⚠️ Function-based views | ✅ Controller classes |
+| **Route Decorators** | ✅ All HTTP methods | ✅ `@GetMapping`, etc. | ✅ `[HttpGet]`, etc. | ✅ `@Get()`, etc. | ⚠️ URL patterns | ✅ Route attributes |
+| **Route Parameters** | ✅ `@param("id")` | ✅ `@PathVariable` | ✅ `[FromRoute]` | ✅ `@Param()` | ✅ Path converters | ✅ Route parameters |
+| **Query Parameters** | ✅ `@query("name")` | ✅ `@RequestParam` | ✅ `[FromQuery]` | ✅ `@Query()` | ✅ `request.GET` | ✅ `$request->query()` |
+| **Request Body** | ✅ `@body()` | ✅ `@RequestBody` | ✅ `[FromBody]` | ✅ `@Body()` | ✅ `request.body` | ✅ `$request->all()` |
+| **Headers** | ✅ `@headers("key")` | ✅ `@RequestHeader` | ✅ `[FromHeader]` | ✅ `@Headers()` | ✅ `request.headers` | ✅ `$request->header()` |
+| **Cookies** | ✅ `@cookies("name")` | ✅ `@CookieValue` | ✅ `Request.Cookies` | ✅ `@Cookies()` | ✅ `request.COOKIES` | ✅ `$request->cookie()` |
+| **Request Object** | ✅ `@request()` | ✅ `HttpServletRequest` | ✅ `HttpRequest` | ✅ `@Req()` | ✅ `request` object | ✅ `$request` |
+| **Response Object** | ✅ `@response()` | ✅ `HttpServletResponse` | ✅ `HttpResponse` | ✅ `@Res()` | ✅ `HttpResponse` | ✅ `$response` |
+| **Custom HTTP Methods** | ✅ `@Method("custom")` | ✅ `@RequestMapping` | ✅ `[HttpMethod("CUSTOM")]` | ⚠️ Via `@All()` | ✅ Via dispatch | ⚠️ Manual |
+| **Route Prefix** | ✅ `setGlobalRoutePrefix()` | ✅ `@RequestMapping` prefix | ✅ Route groups | ✅ `app.setGlobalPrefix()` | ✅ URL patterns | ✅ Route groups |
+| **Route Versioning** | ✅ **`@Version()`** decorator | ✅ Path-based | ✅ `[ApiVersion]` | ✅ `@Version()` | ⚠️ Manual | ⚠️ Manual |
+
+## Route Configuration
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Route Constraints** | ✅ **UNIQUE** - `Patterns` helpers | ✅ Regex | ✅ Route constraints | ✅ Validation pipes | ✅ Path converters | ✅ Regex patterns |
+| **Route Groups** | ✅ Controller prefixes | ✅ `@RequestMapping` prefix | ✅ Route groups | ✅ Controller groups | ✅ `include()` | ✅ Route groups |
+| **Sub-domain Routing** | ⚠️ Via middleware | ✅ Via `@RequestMapping` | ✅ Host filtering | ⚠️ Via host header | ✅ Via middleware | ✅ Built-in |
+| **Route Caching** | ✅ Built-in | ✅ Auto-optimized | ✅ Compiled routes | ✅ Optimized | ✅ `urls.py` | ✅ `route:cache` |
+
+### ExpressoTS Advantage
+
+- ✅ **Route constraints with helpers** - `Patterns.NUMERIC_ID`, `Patterns.UUID`, etc.
+- ✅ **Clean decorator syntax** - All HTTP methods with consistent API
+- ✅ **Version decorator** - Easy API versioning at controller or method level
+
+### Route Constraints Example
+
+```typescript
+import { Patterns, pattern } from "@expressots/adapter-express";
+
+// Using helper (recommended - cleaner and discoverable)
+@Get(`/users/${pattern("id", Patterns.NUMERIC_ID)}`)
+getUserById(@param("id") id: number) {
+    // Only matches /users/123, rejects /users/abc (404)
+}
+
+@Get(`/documents/${pattern("uuid", Patterns.UUID)}`)
+getDocument(@param("uuid") uuid: string) {
+    // Only matches valid UUIDs
+}
+
+// Using native Express (also supported - for flexibility)
+@Get("/items/:id(\\d+)")
+getItemById(@param("id") id: number) {
+    // Same result, different syntax
+}
+```
+
+### Route Groups Example
+
+```typescript
+// All routes in these controllers share /api/v1 prefix
+@controller("/api/v1/users")
+export class UserController {
+    @Get("/")
+    getUsers() {}
+}
+
+@controller("/api/v1/posts")
+export class PostController {
+    @Get("/")
+    getPosts() {}
+}
+// Results in: /api/v1/users/ and /api/v1/posts/
+```
+
+### API Versioning Example
+
+```typescript
+@controller("/users")
+@Version("1") // Controller-level versioning
+export class UserControllerV1 {
+    @Get("/")
+    getUsers() {
+        return { version: 1, users: [] };
+    }
+}
+
+@controller("/users")
+@Version("2") // Different version
+export class UserControllerV2 {
+    @Get("/")
+    getUsers() {
+        return { version: 2, users: [], metadata: {} };
+    }
+}
+```
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

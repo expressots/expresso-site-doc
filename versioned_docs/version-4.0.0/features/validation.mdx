@@ -1,0 +1,288 @@
+---
+sidebar_position: 22
+title: Validation
+description: ExpressoTS v4 Smart Validation — Zod, Yup, class-validator, and custom adapters via a single registry and parameter decorators.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Validation
+
+ExpressoTS v4 ships a **pluggable validation system** that decouples *what* you validate (the schema language) from *how* it runs (the registry and parameter decorators). Pick one — or several — of:
+
+- **[Zod](https://zod.dev/)** — schema-first, fully type-inferred. Highest signal-to-noise for new code.
+- **[Yup](https://github.com/jquense/yup)** — chainable schema builder, classic ergonomics.
+- **[class-validator](https://github.com/typestack/class-validator)** — decorator-based on classes (the v3 default). Great when your DTOs already exist.
+- **Custom adapter** — implement `IValidationAdapter` and register your own.
+
+The same parameter decorators (`@validatedBody`, `@validatedQuery`, `@validatedParam`, `@validatedHeaders`) work with **all** adapters.
+
+## Why a registry?
+
+Validation in v3 was hardcoded to class-validator. v4 keeps that path open but lets you mix adapters per project — or per route — without rewriting your DTOs:
+
+```typescript title="src/main.ts (one-time setup)"
+import {
+    bootstrap,
+    loadEnvSync,
+    validationRegistry,
+    createZodValidator,
+    createYupValidator,
+    ClassValidatorAdapter,
+} from "@expressots/core";
+import { App } from "./app";
+
+loadEnvSync();
+
+// Register every adapter you plan to use. The registry resolves the
+// right one at request time based on the schema you pass to @validatedBody.
+validationRegistry.register(new ClassValidatorAdapter());
+validationRegistry.register(createZodValidator());
+validationRegistry.register(createYupValidator());
+
+void bootstrap(App);
+```
+
+Out of the box the framework auto-detects the adapter from the schema type:
+
+| Schema type | Detected adapter |
+| --- | --- |
+| Class constructor with class-validator decorators | `ClassValidatorAdapter` |
+| Object with `parse` / `safeParse` | `ZodValidatorAdapter` |
+| Object with `validate(value, options)` | `YupValidatorAdapter` |
+| Anything else | First registered adapter that accepts it |
+
+## Parameter decorators
+
+All four come from `@expressots/adapter-express`. They have the same call signatures as the legacy `@body` / `@query` / `@param` / `@headers`, plus an optional schema first argument.
+
+| Decorator | Source | Optional name | Optional schema |
+| --- | --- | --- | --- |
+| `@validatedBody(schema?)` | `req.body` | — | yes |
+| `@validatedQuery(name?, schema?)` | `req.query` | yes | yes |
+| `@validatedParam(name?, schema?)` | `req.params` | yes | yes |
+| `@validatedHeaders(name?, schema?)` | `req.headers` | yes | yes |
+
+If you skip the schema, the decorator just injects the value (same as the legacy `@body` etc.). The "validated" power kicks in when you pass a schema.
+
+## End-to-end examples
+
+<Tabs>
+
+<TabItem value="zod" label="Zod">
+
+```typescript
+import { z } from "zod";
+import { provide } from "@expressots/core";
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
+
+const CreateUserSchema = z.object({
+    name: z.string().min(2),
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+type CreateUserDTO = z.infer<typeof CreateUserSchema>;
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Post("/")
+    create(@validatedBody(CreateUserSchema) dto: CreateUserDTO) {
+        // dto is fully typed AND already validated.
+        return { ok: true, ...dto };
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="yup" label="Yup">
+
+```typescript
+import * as yup from "yup";
+import { provide } from "@expressots/core";
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
+
+const CreateUserSchema = yup.object({
+    name: yup.string().min(2).required(),
+    email: yup.string().email().required(),
+    password: yup.string().min(8).required(),
+});
+type CreateUserDTO = yup.InferType<typeof CreateUserSchema>;
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Post("/")
+    create(@validatedBody(CreateUserSchema) dto: CreateUserDTO) {
+        return { ok: true, ...dto };
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="class" label="class-validator">
+
+```typescript
+import { IsEmail, IsString, MinLength } from "class-validator";
+import { provide } from "@expressots/core";
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
+
+export class CreateUserDTO {
+    @IsString()
+    @MinLength(2)
+    name!: string;
+
+    @IsEmail()
+    email!: string;
+
+    @IsString()
+    @MinLength(8)
+    password!: string;
+}
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Post("/")
+    create(@validatedBody(CreateUserDTO) dto: CreateUserDTO) {
+        return { ok: true, ...dto };
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+The behaviour is identical for every flavour: a request with an invalid body fails fast with a structured `ValidationErrorClass`, which the global exception filter turns into an RFC 7807 `application/problem+json` response (see [Error handling](./error-handling.mdx)).
+
+## Validating query / params / headers
+
+```typescript
+import { z } from "zod";
+import { controller, Get, validatedQuery, validatedParam } from "@expressots/adapter-express";
+import { provide } from "@expressots/core";
+
+const ListQuery = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+const UserId = z.string().uuid();
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Get("/")
+    list(@validatedQuery(ListQuery) query: z.infer<typeof ListQuery>) {
+        return this.users.findAll(query);
+    }
+
+    @Get("/:id")
+    getById(@validatedParam("id", UserId) id: string) {
+        return this.users.findById(id);
+    }
+}
+```
+
+`@validatedQuery` / `@validatedHeaders` accept an entire schema (no `name`) to validate the **whole** object. With a `name`, they extract a single field and validate it.
+
+## Programmatic validation
+
+When you need to validate something outside an HTTP request — a queue payload, an event, a CLI input — use `ValidationService.validate()` or a registered adapter directly:
+
+```typescript
+import { inject, ValidationService, ValidationErrorClass } from "@expressots/core";
+
+@provide(ImportService)
+export class ImportService {
+    constructor(
+        @inject(ValidationService) private readonly validator: ValidationService,
+    ) {}
+
+    async importBatch(rows: unknown[]) {
+        for (const row of rows) {
+            const result = await this.validator.validate(row, CreateUserSchema);
+            if (!result.valid) {
+                throw new ValidationErrorClass(result.errors);
+            }
+        }
+    }
+}
+```
+
+`ValidationService.validate(value, schema, options?)` returns:
+
+```typescript
+type ValidationResult<T> =
+    | { valid: true;  data: T }
+    | { valid: false; errors: ValidationFieldError[] };
+```
+
+## Smart field detection
+
+The validation system also includes a `SmartFieldDetector` that infers semantics from field names (`email`, `password`, `phone`, `url`, `apiKey`, …) so error messages can suggest fixes ("did you mean `'ada@example.com'`?"). This kicks in automatically — you don't need to wire it up.
+
+Disable it globally if you want stricter raw error messages:
+
+```typescript
+import { Logger } from "@expressots/core";
+
+Logger.configure({ /* … */ });
+validationRegistry.disableSmartDetection();
+```
+
+## Custom adapters
+
+Implement `IValidationAdapter` and register it. The adapter is consulted whenever a schema is passed to a `@validated*` decorator:
+
+```typescript
+import {
+    IValidationAdapter,
+    ValidationContext,
+    ValidationResult,
+    validationRegistry,
+} from "@expressots/core";
+
+class MyCustomAdapter implements IValidationAdapter<MyCustomSchema> {
+    name = "my-custom";
+
+    canHandle(schema: unknown): boolean {
+        return typeof schema === "object" && schema !== null && "myCustomMarker" in schema;
+    }
+
+    async validate<T>(value: unknown, schema: MyCustomSchema, ctx: ValidationContext): Promise<ValidationResult<T>> {
+        // …call your validator, normalise errors into ValidationFieldError[]
+    }
+}
+
+validationRegistry.register(new MyCustomAdapter());
+```
+
+## Validation error format
+
+`ValidationErrorClass` carries a typed `ValidationFieldError[]` and is rendered by the global exception filter (see [Error handling](./error-handling.mdx)) as:
+
+```json
+{
+  "type": "https://expresso-ts.com/errors/validation",
+  "title": "Validation failed",
+  "status": 400,
+  "detail": "Request body did not pass validation",
+  "instance": "/api/users",
+  "errors": [
+    { "field": "email",    "code": "isEmail",   "message": "must be a valid email" },
+    { "field": "password", "code": "minLength", "message": "must be at least 8 characters" }
+  ]
+}
+```
+
+## See also
+
+- **[Error handling](./error-handling.mdx)** — the RFC 7807 pipeline and how `ValidationErrorClass` is rendered.
+- **[Exception filters](./exception-filters.mdx)** — override the default validation error response.
+- **[DTO validator](./dto-validator.mdx)** — the class-validator-flavoured walkthrough.
+- **[Configuration](./configuration.mdx)** — typed environment validation with `defineConfig` + `Env.*`.

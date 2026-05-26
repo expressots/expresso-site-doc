@@ -1,0 +1,69 @@
+---
+sidebar_position: 5
+title: Scripts
+description: Run any npm script from your package.json via an interactive picker or by name.
+---
+
+# Scripts
+
+Run any script from `package.json` either by name or through an interactive multi-select.
+
+```bash
+expressots scripts [scripts...]
+```
+
+## Interactive
+
+Run without arguments to see every `package.json` script as a checkbox list:
+
+```bash
+expressots scripts
+```
+
+```text
+? Select scripts to run › (use arrow keys, space to select, enter to confirm)
+  ◯ dev
+  ◯ build
+  ◯ prod
+  ◯ test
+  ◯ test:watch
+  ◯ coverage
+  ◯ format
+  ◯ lint
+```
+
+## By name
+
+Pass one or more script names to run them in sequence:
+
+```bash
+expressots scripts lint test build
+```
+
+Unknown names are reported and skipped, and the rest still run.
+
+## Package manager detection
+
+The CLI runs `<pm> run <script>` for each entry, where `<pm>` is detected from the project's lockfile:
+
+| Lockfile present     | Runner used  |
+| -------------------- | ------------ |
+| `package-lock.json`  | `npm run`    |
+| `yarn.lock`          | `yarn`       |
+| `pnpm-lock.yaml`     | `pnpm run`   |
+
+:::caution Lockfile required
+`expressots scripts` requires a lockfile to choose a runner. If none is present, install dependencies first (`npm install`, `yarn`, or `pnpm install`), which creates the lockfile.
+:::
+
+:::note bun not supported
+The `scripts` command does not currently run scripts through `bun`. Use `bun run` directly if your project's lockfile is `bun.lockb`.
+:::
+
+## Why use it
+
+| Use case                                              | Benefit                                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| You forgot the script name                            | Interactive picker shows every script in the project.                         |
+| You want to chain a few scripts without `npm-run-all` | `expressots scripts lint test build` runs all three in order.                 |
+| You're switching between npm / yarn / pnpm projects   | One command, no need to remember the runner.                                  |

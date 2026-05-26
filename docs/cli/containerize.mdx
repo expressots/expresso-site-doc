@@ -1,155 +1,152 @@
 ---
-sidebar_position: 2
-title: Containerize
-description: Generate Dockerfiles, Docker Compose, and Kubernetes manifests for your ExpressoTS app.
+sidebar_position: 8
+title: Containerize & Profile
+description: Generate Dockerfiles, compose files, and Kubernetes manifests. Profile and optimize existing Dockerfiles or built images.
 ---
 
-# Containerize
+# Containerize & Profile
 
-The `containerize` command (alias: `c`) inspects your project and
-emits production-ready container artifacts: a multi-stage
-`Dockerfile`, a hot-reload `Dockerfile.development`, a
-`docker-compose.yml`, a `.dockerignore`, and (optionally) a Kubernetes
-manifest set or a CD GitHub Actions workflow.
+Two related commands that produce and audit your container artifacts.
 
-It is **idempotent** — re-running it overwrites the generated files
-in place, so you can keep tweaking flags until the output matches
-what you need, then customize the files freely.
+| Command         | Alias                | Purpose                                                              |
+| --------------- | -------------------- | -------------------------------------------------------------------- |
+| `containerize`  | `c`                  | Generate Dockerfile + compose + Kubernetes from a template library.  |
+| `profile`       | `prof`, `analyze`    | Lint and optimize an existing Dockerfile or built image.             |
 
-## Quick start
+## containerize
 
 ```bash
-expressots containerize
-# equivalent to:
-#   expressots containerize docker production --preset standard --analyze
-```
-
-This single command will:
-
-1. Analyze your `package.json`, `tsconfig.build.json`, lock file, and
-   bootstrap config.
-2. Write `Dockerfile` (multi-stage prod) and `Dockerfile.development`
-   (with hot reload).
-3. Write `docker-compose.yml` (and a development variant when you
-   target development).
-4. Write `.dockerignore`.
-
-```bash
-docker build -t myapp .
-docker run -p 3000:3000 myapp
-# or
-docker compose up
-```
-
-## Synopsis
-
-```bash
-expressots containerize [target] [environment] [flags]
+expressots containerize <target> [environment] [options]
 ```
 
 ### Targets
 
-| Target       | What gets generated                                                  |
-| ------------ | -------------------------------------------------------------------- |
-| `docker`     | Dockerfile(s) + (optionally) `docker-compose.yml`. **Default.**      |
-| `kubernetes` | Dockerfile(s) **plus** `k8s/deployment.yaml`, `service.yaml`, `configmap.yaml`. Alias: `k8s`. |
-| `compose`    | Dockerfile(s) **plus** `docker-compose.yml`. The Dockerfile is required because the compose file uses `build:` context. |
+| Target       | What it generates                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------- |
+| `docker`     | (default) `Dockerfile`, optionally `Dockerfile.development`, plus `.dockerignore`.                  |
+| `compose`    | `docker-compose.yml` (and `.development.yml` when applicable).                                     |
+| `kubernetes` | Deployment / Service / ConfigMap / Ingress manifests.                                              |
+| `k8s`        | Alias for `kubernetes`.                                                                            |
 
 ### Environments
 
-| Environment  | Effect                                                                |
-| ------------ | --------------------------------------------------------------------- |
-| `production` | Multi-stage build, devDeps pruned, `NODE_ENV=production`. **Default.** |
-| `staging`    | Same multi-stage shape as production, but with `NODE_ENV=staging`. Output file is `Dockerfile.staging`. |
-| `development`| Single-stage Dockerfile with hot reload, debug port `9229`, mounts `./src` into the container. **Also generates a production Dockerfile** so you have both. |
-| `all`        | Same as passing `development` — emits both dev and prod Dockerfiles.  |
+| Environment   | Purpose                                                                          |
+| ------------- | -------------------------------------------------------------------------------- |
+| `development` | Dev image with hot-reload-friendly mounts.                                       |
+| `staging`     | Production-shaped image with looser security headers and verbose logging.        |
+| `production`  | (default) Hardened production image.                                             |
+| `all`         | Generate every environment in one pass.                                          |
 
-## Flags
+### Presets
 
-| Flag                       | Default          | Description                                                                                       |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
-| `--preset`                 | `standard`       | One of `minimal`, `standard`, `secure`, `fast-startup`, `dev`, `multi-arch`. Controls base image, security hardening, and health checks. |
-| `--analyze`                | `true`           | Inspect the project before generation. Disable with `--no-analyze` to use defaults.               |
-| `--skip-compose`           | `false`          | Skip writing `docker-compose.yml` when target is `docker`.                                        |
-| `--include-ci`             | `false`          | Also write a GitHub Actions **CD** workflow (`.github/workflows/cd-docker.yml`). See [CD vs CI](#cd-vs-ci-pipelines) below. |
-| `--ci-platform`            | `github`         | Platform for `--include-ci`. One of `github`, `gitlab`, `circleci`, `jenkins`, `bitbucket`, `azure`, `all`. |
-| `--ci-strategy`            | `comprehensive`  | One of `basic`, `comprehensive`, `security-focused`. Controls which jobs are included.            |
-| `--include-security-scans` | `true`           | Add Trivy / Snyk image scanning jobs.                                                             |
-| `--include-e2e`            | `false`          | Add an E2E test job that runs against the built image.                                            |
+| Preset         | What it dials in                                                          |
+| -------------- | ------------------------------------------------------------------------- |
+| `standard`     | (default) Multi-stage build, non-root user, healthcheck.                  |
+| `minimal`      | Slim base image, single-stage, no extras.                                 |
+| `secure`       | Distroless or scratch final stage, hardened defaults.                     |
+| `fast-startup` | Trims warm-up; useful for serverless / Lambda.                            |
+| `dev`          | Optimized for local dev (volume mounts, watch).                           |
+| `multi-arch`   | Buildx-friendly Dockerfile for amd64 + arm64.                             |
 
-## What gets detected
+### Options
 
-`expressots containerize --analyze` reads the following from your
-project to drive code generation:
+| Option                       | Default                  | Description                                                                  |
+| ---------------------------- | ------------------------ | ---------------------------------------------------------------------------- |
+| `--preset`                   | `standard`               | See the preset table above.                                                  |
+| `--analyze`                  | `true`                   | Run the project analyzer to discover ports, secrets, env files.              |
+| `--skip-compose`             | `false`                  | Don't emit compose files even for environments that normally include them.   |
+| `--include-ci`               | `false`                  | Also emit a CI/CD pipeline (see [`cicd`](./cicd.mdx)).                       |
+| `--ci-platform`              | `github`                 | `github` / `gitlab` / `circleci` / `jenkins` / `bitbucket` / `azure` / `all`. |
+| `--ci-strategy`              | `comprehensive`          | `basic` / `comprehensive` / `security-focused`.                              |
+| `--include-security-scans`   | `true`                   | Add Trivy / npm audit jobs to the generated CI pipeline.                     |
+| `--include-e2e`              | `false`                  | Add an E2E test stage to the generated CI pipeline.                          |
+| `--deployment-strategy`      | `rolling`                | `rolling` / `blue-green` / `canary` / `recreate`.                            |
 
-- **Node version** — from `engines.node` in `package.json`, falling
-  back to the runtime's version.
-- **Package manager** — from the lock file. `npm`, `pnpm`, `yarn`,
-  and `bun` are all supported. The generated Dockerfile and CI
-  install/build/dev commands will match.
-- **Entry point** — from `tsconfig.build.json` (preferred) or
-  `tsconfig.json`. The `CMD` of the production Dockerfile will point
-  at the right compiled file under your `outDir`.
-- **Database / Redis dependencies** — adds matching services to
-  `docker-compose.yml`.
-- **Health check paths** — controllers exposing `/health`, `/ready`,
-  or `/live` are wired into the Dockerfile `HEALTHCHECK` and the
-  Kubernetes liveness/readiness probes.
-- **Local `file:` dependencies** — generates a `docker-setup.js`
-  helper and a `package.docker.json` so Docker builds can resolve
-  monorepo paths. Add `npm run docker:setup && docker build` (or the
-  pnpm/yarn/bun equivalent generated for you) to your release flow.
-- **Bootstrap env config** — if your `main.ts` uses
-  `envFileConfig({...})`, the `.dockerignore` and `Dockerfile` will
-  copy the right `.env.<environment>` into the image; warnings are
-  printed when required env files are missing.
-
-## Examples
+### Examples
 
 ```bash
-# Bare-minimum production Docker image (ignore project analysis):
-expressots containerize docker production --no-analyze --preset minimal
+# Minimal production Dockerfile
+expressots containerize docker production --preset minimal
 
-# Hardened image with non-root user + healthcheck:
+# Secure production image + compose
 expressots containerize docker production --preset secure
 
-# Kubernetes manifests for a 3-replica deployment:
-expressots containerize k8s production
+# Full Kubernetes set with blue-green deploy strategy
+expressots containerize kubernetes production --deployment-strategy blue-green
 
-# Staging variant (NODE_ENV=staging, multi-stage build):
-expressots containerize docker staging
+# Dev compose with development overrides
+expressots containerize compose development --preset dev
 
-# Both dev and prod Dockerfiles plus a compose file with hot reload:
-expressots containerize docker development
-
-# Add a GitHub Actions CD workflow alongside the Dockerfile:
-expressots containerize docker production --include-ci --ci-platform github
+# Everything at once, including CI
+expressots containerize docker all --include-ci --ci-platform github
 ```
 
-## CD vs CI pipelines
+### Project analyzer
 
-ExpressoTS ships **two complementary** pipeline generators:
+By default `containerize` runs an analyzer that scans `expressots.config.ts`, `package.json`, and your `src/` tree to detect:
 
-| Generator                              | Output (GitHub example)              | Scope                                   |
-| -------------------------------------- | ------------------------------------ | --------------------------------------- |
-| `expressots cicd init`                 | `.github/workflows/ci.yml`           | **CI** — lint, unit tests, coverage     |
-| `expressots containerize --include-ci` | `.github/workflows/cd-docker.yml`    | **CD** — Docker build, push, deploy     |
+- The app's listen port (falls back to **3000** today; an upcoming patch will honour the resolved port from `bootstrap()`).
+- The entry point file.
+- Required env vars and `.env` template generation.
+- Optional sidecar services (Postgres, Redis, RabbitMQ) when their providers are detected in `package.json`.
 
-On **GitHub Actions** both files coexist happily. On platforms that
-only allow a single canonical pipeline file (GitLab CI, Jenkins,
-CircleCI, Bitbucket, Azure DevOps), the CLI prints a warning when
-`containerize --include-ci` would overwrite `cicd init`'s output —
-prefer `cicd init` for those platforms.
+Pass `--analyze=false` to skip the scan and use generic defaults.
 
-## Tips
+---
 
-- The `--analyze` step prints recommendations about your bootstrap
-  config (e.g. "switch to `skipFileLoading: true` for a cleaner
-  container build"). Read them.
-- The generated files are **yours** to edit. Re-running `containerize`
-  will overwrite them, so keep customizations in version control or
-  copy them out before re-running.
-- For monorepo / `file:` dependencies, run
-  `npm run docker:setup` before `docker build`. The CLI generates
-  this script for you and writes a `docker:build` composite to
-  `package.json` that does both for the package manager you use.
+## profile
+
+Audit a Dockerfile or built image and report optimization recommendations.
+
+```bash
+expressots profile <action> [target] [options]
+```
+
+| Action     | Purpose                                                                                |
+| ---------- | -------------------------------------------------------------------------------------- |
+| `container`| Lint a Dockerfile (default: `./Dockerfile`).                                            |
+| `image`    | Inspect a built image (`profile image my-app:latest`).                                  |
+| `optimize` | Suggest concrete edits (multi-stage split, base image swap, etc.).                      |
+| `report`   | Produce a full report combining the above.                                              |
+
+### Options
+
+| Option                | Default     | Description                                                  |
+| --------------------- | ----------- | ------------------------------------------------------------ |
+| `--dockerfile` `-f`   | `Dockerfile`| Path to the Dockerfile to analyze.                            |
+| `--format`            | `text`      | `text` / `json` / `html`.                                     |
+| `--severity`          | `low`       | `low` / `medium` / `high` / `critical`. Filters the output.   |
+| `--auto-fix`          | `false`     | Apply safe fixes in-place (multi-stage split, ENV ordering).  |
+| `--output` `-o`       | stdout      | Write the report to a file instead.                           |
+| `--include-security`  | `true`      | Run security checks (non-root user, healthcheck, etc.).       |
+| `--include-size`      | `true`      | Compare layer sizes and report bloat hot-spots.               |
+
+### What `profile` checks
+
+- Base image freshness (LTS Node, distroless, slim variants).
+- Multi-stage build separation.
+- Layer ordering and cache effectiveness.
+- Non-root user.
+- Healthcheck presence.
+- `.dockerignore` coverage.
+- `npm ci` vs `npm install` (CI vs ad-hoc).
+- Known CVEs in the base image via Trivy (when installed).
+
+### Examples
+
+```bash
+# Quick lint of the default Dockerfile
+expressots profile container
+
+# Audit a built image with HTML report output
+expressots profile report --format html --output reports/docker-audit.html
+
+# Apply safe fixes in place
+expressots profile optimize --auto-fix
+```
+
+## See also
+
+- [`cicd`](./cicd.mdx): generate the CI pipeline that builds and publishes these images.
+- [`migrate`](./migrate.mdx): move from Heroku / Docker Compose to Kubernetes / Railway / Render / Fly.
+- [`templates`](./templates.mdx): manage the cached Dockerfile / compose / K8s templates.

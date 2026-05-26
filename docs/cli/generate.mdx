@@ -1,7 +1,7 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 title: Generate
-description: Scaffold ExpressoTS resources using the CLI.
+description: expressots generate scaffolds resources (controllers, use cases, DTOs, interceptors, events, handlers, guards, config files) wired into your DI container.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -9,158 +9,286 @@ import TabItem from "@theme/TabItem";
 
 # Generate
 
-In order to provide a better developer experience, the ExpressoTS CLI provides a set of commands to help you scaffold the application resources such as use cases, controllers, DTO's, providers and services.
-
-This command allows developers to stay ahead of the curve by generating the boilerplate code for the application, so they can focus on the business logic.
-
-## Command syntax
-
-One big advantage of the ExpressoTS CLI is the ability to scaffold resources using two different structures: the <span class="span-table">shorthand</span> and
-the <span class="span-table">folder/subfolder/resource</span>. The shorthand operation is a more concise way to scaffold resources (recommended to be used in the opinionated template), while
-the folder/subfolder/resource structure is more flexible and can be used in both templates.
-
-The generate command can be executed as follows:
+Scaffold ExpressoTS v4 resources from your terminal. The CLI emits the right file, places it in the folder defined by `scaffoldSchematics`, and (for `service`) automatically wires the new module into the DI container.
 
 ```bash
-expressots generate <resource> <structure> [options]
+expressots generate <schematic> [path] [method] [options]
+# or the short alias
+expressots g <schematic-alias> [path] [method] [options]
 ```
 
-Or in its short form:
+## Schematics
+
+| Schematic       | Alias  | Emits                                                                                   | v4 |
+| --------------- | ------ | --------------------------------------------------------------------------------------- | -- |
+| `service`       | `s`    | Controller + use case + DTO + module wiring, a full vertical slice for one HTTP route. |    |
+| `controller`    | `c`    | One `*.controller.ts`                                                                   |    |
+| `usecase`       | `u`    | One `*.usecase.ts`                                                                      |    |
+| `dto`           | `d`    | One `*.dto.ts`                                                                          |    |
+| `provider`      | `p`    | One `*.provider.ts`                                                                     |    |
+| `entity`        | `e`    | One `*.entity.ts`                                                                       |    |
+| `middleware`    | `mi`   | One `*.middleware.ts` (`ExpressoMiddleware` class)                                      |    |
+| `module`        | `mo`   | One `*.module.ts`                                                                       |    |
+| `interceptor`   | `i`    | One `*.interceptor.ts` (`@Interceptor` + `IInterceptor`)                                | ✅ |
+| `event`         | `ev`   | One `*.event.ts` (type-safe event class)                                                | ✅ |
+| `handler`       | `h`    | One `*.handler.ts` (`@OnEvent(...)` handler). Pair with `--event`                      | ✅ |
+| `guard`         | `gu`   | One `*.guard.ts` (Express `canActivate` guard)                                          | ✅ |
+| `config`        | `cfg`  | One `*.config.ts` (`defineConfig` + `Env` + `loadEnvSync` + `bootstrap.envFileConfig`)  | ✅ |
+
+## Options
+
+| Flag         | Applies to                | Default | Description                                                                                   |
+| ------------ | ------------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| `path`       | every schematic           | (none)  | The resource path. Two forms: `folder/name` or shorthand `folder-name`. See [Path forms](#path-forms). |
+| `method`     | `controller`, `service`   | `get`   | HTTP method: `get` / `post` / `put` / `patch` / `delete`. Drives the controller template body. |
+| `--event`    | `handler`                 | `MyEvent` | The event class name the handler subscribes to.                                              |
+| `--priority` | `interceptor`, `handler`  | `10`    | Numeric priority. **Lower runs earlier**.                                                    |
+| `--method` `-m` | `controller`, `service`| (none)  | Shorthand for the `method` positional, e.g. `-m post`.                                       |
+
+## Path forms
+
+The path argument is the **positional path** (the option is also named `-d`). There is no `--module=` flag. The resource's module is derived from the path.
+
+### Folder / subfolder / resource
+
+Slashes drive a one-to-one folder structure:
 
 ```bash
-expressots g <resource-alias> <structure> [options]
+expressots g c users/create
 ```
 
-<Tabs>
-    <TabItem label="Non Opinionated" value="non-opinionated">
-```bash title="Full form"
-expressots generate service user/create
+```text
+src/useCases/users/
+└── create.controller.ts
 ```
 
-```bash title="Short form"
-expressots g s user/create
-```
+### Shorthand
 
-    </TabItem>
-    <TabItem label="Opinionated" value="opinionated">
-
-```bash title="Full form"
-expressots generate service user-create
-```
-
-```bash title="Short form"
-expressots g s user-create
-```
-
-```bash title="Passing http parameter as option"
-expressots g s user-create -m post
-```
-
-    </TabItem>
-
-</Tabs>
-
-## Command structure
-
-We provide two different structures to scaffold the resources, the **shorthand** and the **folder/subfolder/resource**.
-These scaffold strategies work differently based on the project template used. The `opinionated` template provides a more structured project, while the `non-opinionated` template provides a more flexible project structure.
-
-#### Using single name
+Dashes collapse into a `folder/subfolder/resource` directory, with the resource file named after the full kebab-case path:
 
 ```bash
-expressots g c user
+expressots g c users-create
 ```
 
-```bash title="Output"
-src
-└── user.controller.ts
+```text
+src/useCases/users/create/
+└── users-create.controller.ts
 ```
 
-#### Using the shorthand operation
+### Trailing slash
+
+Forces the resource into a folder of the same name as the leaf:
 
 ```bash
-expressots g c user-create
+expressots g c users/create/
 ```
 
-```bash title="Output"
-src
-└── user
-    └── create
-        └── user-create.controller.ts
+```text
+src/useCases/users/create/
+└── create.controller.ts
 ```
 
-#### Using the folder/subfolder/resource structure
-
-```bash
-expressots g c user/create
-```
-
-```bash title="Output"
-src
-└── user
-    └── create.controller.ts
-```
-
-If you add `/` at the end of the structure, the CLI will create the resource inside of the folder. Example: `expressots g c user/create/`
-
-```bash title="Output"
-src
-└── user
-    └── create
-        └── create.controller.ts
-```
-
-:::info
-Opinionated templates come with predefined folder structures for each resource type, ensuring that resources are always created in the following designated folders:
-
-    -   useCases
-    -   entities
-    -   providers
-
+:::info Why three forms
+The folder form is great for **explicit organization**. The shorthand is great for **opinionated projects** where every resource ends up in its own folder. The trailing slash is the middle ground. Use it when you want a leaf folder without renaming the file.
 :::
 
-The root folder for all resources is the `src` folder. This can be changed in the `expressots.config.ts` file.
+## Opinionated vs non-opinionated
 
-## Resource types
+The CLI behaviour depends on `expressots.config.ts → opinionated`:
 
-Resources available to be scaffolded are:
+| `opinionated` | Behaviour                                                                                                            |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `true`        | Every schematic goes under its **`scaffoldSchematics` folder** (e.g. controllers under `useCases/`). Generating a `service` also patches the matching `*.module.ts` and the `AppContainer.modules` list. Custom folder names are auto-added to `tsconfig.json` `paths` and `tsconfig.build.json`. |
+| `false`       | Everything goes flat under `sourceRoot`. The `scaffoldSchematics` map is only used to override the file's middle segment (the part between the kebab name and `.ts`). No module wiring. |
 
-| Long form  | short | Command                    | Expected result                                                                          |
-| ---------- | ----- | -------------------------- | ---------------------------------------------------------------------------------------- |
-| usecase    | u     | expressots g u user/find   | Use case to be created in the folder `useCases` with this folder structure: user/find    |
-| controller | c     | expressots g c user/find   | Controller to be created in the folder `useCases` inside of user/find                    |
-| dto        | d     | expressots g d user/find   | DTO to be created in the folder `useCases` inside of user/find                           |
-| provider   | p     | expressots g p email/email | Provider to be created in the folder `providers` inside of user/find                     |
-| service    | s     | expressots g s user/find   | Service creates usecase, controller and DTO and add them in the desired folder user/find |
-| entity     | e     | expressots g e user        | Entity to be created in the folder `entities` with this folder structure: user           |
-| middleware | mi    | expressots g mi auth       | Middleware to be created in the folder `middlewares` with this folder structure: auth    |
-| module     | mo    | expressots g mo user       | Module to be created in the folder where `controllers` and `usecases` are located        |
+### Default opinionated folders
 
-For services, you can take advantage of creating the use case, controller and DTO at once.
+| Schematic                                          | Folder under `sourceRoot` |
+| -------------------------------------------------- | ------------------------- |
+| `usecase`, `controller`, `dto`, `service`, `module` | `useCases`                |
+| `provider`                                          | `providers`               |
+| `entity`                                            | `entities`                |
+| `middleware`                                        | `middleware`              |
+| `interceptor`                                       | `interceptors`            |
+| `event`, `handler`                                  | `events`                  |
+| `guard`                                             | `guards`                  |
+| `config`                                            | `config`                  |
+
+Override any of them in `expressots.config.ts → scaffoldSchematics`:
+
+```ts
+scaffoldSchematics: {
+  controller: "modules",     // instead of "useCases"
+  interceptor: "aspects",    // instead of "interceptors"
+}
+```
+
+When the folder name is non-default in an opinionated project, the CLI **adds a TS path alias** to your tsconfigs so imports like `import { MyInterceptor } from "@aspects/my.interceptor"` work.
+
+## Examples
+
+### Service slice (controller + usecase + dto + module)
 
 ```bash
-expressots g s user-create
+# Opinionated, kebab-case
+expressots g s users-create post
 ```
 
-```bash title="Output for the non opinionated template"
-src
-└── user
-    └── create
-        ├── user-create.controller.ts
-        ├── user-create.dto.ts
-        ├── user-create.usecase.ts
-        └── user-create.usecase.ts
+```text
+src/useCases/users/create/
+├── users-create.controller.ts   # @controller("/users") + @Post("/")
+├── users-create.usecase.ts      # @provide UsersCreateUseCase
+├── users-create.dto.ts          # body schema
+└── users-create.module.ts       # auto-patched / created
 ```
 
-:::info
-The `expressots.config.ts` file, located in the project root folder, defines where all resources will be created and specifies the naming conventions for each type of resource.
-:::
+```text
+# Also patches:
+src/useCases/users/users.module.ts            # adds the controller
+src/app.ts                                    # CreateModule list
+```
 
-Read more about the [ExpressoTS Config File](../features/expressots-config.mdx).
+### Controller for a single GET
 
----
+```bash
+expressots g c health
+```
 
-## Support us ❤️
+```text
+src/useCases/
+└── health.controller.ts
+```
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+### Interceptor
+
+```bash
+expressots g i Logging --priority 5
+```
+
+```text
+src/interceptors/
+└── logging.interceptor.ts
+```
+
+```ts title="logging.interceptor.ts"
+import { Interceptor, IInterceptor, ExecutionContext, CallHandler } from "@expressots/core";
+
+@Interceptor({ priority: 5 })
+export class LoggingInterceptor implements IInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): unknown {
+    return next.handle();
+  }
+}
+```
+
+See [Interceptors](../features/interceptors.mdx) for composition (`whenInterceptor`, `pipeInterceptors`, etc.).
+
+### Event class + handler
+
+```bash
+expressots g ev UserCreated
+expressots g h EmailWelcome --event UserCreated --priority 20
+```
+
+```text
+src/events/
+├── user-created.event.ts
+└── email-welcome.handler.ts
+```
+
+```ts title="user-created.event.ts"
+export class UserCreatedEvent {
+  constructor(public readonly userId: string, public readonly email: string) {}
+}
+```
+
+```ts title="email-welcome.handler.ts"
+import { provide, OnEvent, IEventHandler } from "@expressots/core";
+import { UserCreatedEvent } from "@events/user-created.event";
+
+@provide(EmailWelcomeHandler)
+@OnEvent(UserCreatedEvent, { priority: 20 })
+export class EmailWelcomeHandler implements IEventHandler<UserCreatedEvent> {
+  handle(event: UserCreatedEvent) {
+    // Full type inference on event.userId / event.email
+  }
+}
+```
+
+See [Events](../features/events.mdx) for `@When`, async handlers, replay, and flow visualization.
+
+### Guard
+
+```bash
+expressots g gu Admin
+```
+
+```text
+src/guards/
+└── admin.guard.ts
+```
+
+See [Guards](../features/guards.mdx) and [Authorization](../features/authorization.mdx).
+
+### Typed configuration
+
+```bash
+expressots g cfg app
+```
+
+```text
+src/config/
+└── app.config.ts
+```
+
+```ts title="app.config.ts"
+import { defineConfig, Env, loadEnvSync } from "@expressots/core";
+
+export const appConfig = defineConfig({
+  app: {
+    port: Env.port("PORT").default(3000),
+    name: Env.string("APP_NAME").default("expressots-app"),
+  },
+  database: {
+    url: Env.url("DATABASE_URL").required(),
+  },
+});
+
+export type AppConfig = typeof appConfig;
+```
+
+Wire it into `bootstrap`:
+
+```ts title="main.ts"
+import { bootstrap, loadEnvSync } from "@expressots/core";
+import { App } from "./app";
+
+loadEnvSync({ files: { development: ".env", production: ".env.prod" } });
+
+await bootstrap(App, { port: 3000 });
+```
+
+See [Configuration](../features/configuration.mdx) for the full `Env.*` surface.
+
+## Overwrite confirmation
+
+If the target file already exists, the CLI asks for confirmation interactively (default: **yes**). In CI, pipe `yes` or pre-delete the file:
+
+```bash
+yes | expressots g c users/create
+```
+
+## Constraints
+
+| Constraint                                  | Why                                                                                            |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `expressots.config.ts` must exist           | The CLI walks up from `cwd`; if no config is found it exits with `No config file found!`.     |
+| `sourceRoot` must be non-empty              | The CLI refuses to scaffold into an empty source root.                                         |
+| Nested path depth ≤ 4 for `service` / `controller` | Prevents accidental deep trees; the CLI errors with a clear message past four levels.   |
+| Don't combine `path` and a leading slash    | All paths are relative to `sourceRoot`.                                                        |
+
+## See also
+
+- [Configuration File](../features/expressots-config.mdx): `expressots.config.ts` schema.
+- [Interceptors](../features/interceptors.mdx), [Events](../features/events.mdx), [Guards](../features/guards.mdx), [Authorization](../features/authorization.mdx), [Configuration](../features/configuration.mdx): the runtime features the new schematics target.
+- [`new`](./new.mdx): create the project scaffold this command writes into.

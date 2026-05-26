@@ -1,0 +1,133 @@
+---
+sidebar_position: 7
+title: Error Handling
+description: Exception handling and error reporting comparison across frameworks.
+---
+
+# Error Handling Comparison
+
+Compare ExpressoTS's error handling with other major frameworks.
+
+## Exception Handling
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Custom Error Class** | ✅ `AppError` (RFC 7807) | ✅ Custom exceptions | ✅ Custom exceptions | ✅ Custom exceptions | ✅ Custom exceptions | ✅ Custom exceptions |
+| **Exception Filters** | ✅ **AUTO-DISCOVERY** | ✅ `@ExceptionHandler` | ✅ `IExceptionFilter` | ✅ `@Catch()` | ✅ Middleware | ✅ Exception Handler |
+| **Route-specific Filters** | ✅ **`@UseFilters()`** | ✅ Controller-level | ✅ `[ExceptionFilter]` | ✅ `@UseFilters()` | ⚠️ Via middleware | ⚠️ Manual |
+| **Filter Inheritance** | ✅ **AUTOMATIC** | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual | ⚠️ Manual |
+| **RFC 7807 Problem Details** | ✅ **Built-in** | ✅ Via library | ✅ Built-in | ❌ Not available | ⚠️ Via DRF | ❌ Not available |
+| **Error Response Format** | ✅ RFC 7807 | ✅ Customizable | ✅ ProblemDetails | ✅ Customizable | ✅ Customizable | ✅ Customizable |
+| **Enhanced Error Metadata** | ✅ errorCode, details, timestamp, requestId | ⚠️ Basic | ⚠️ Basic | ⚠️ Basic | ⚠️ Basic | ⚠️ Basic |
+
+## Error Reporting
+
+| Feature | ExpressoTS | Spring Boot | ASP.NET Core | NestJS | Django | Laravel |
+|---------|-----------|-------------|--------------|--------|--------|---------|
+| **Error Reporting** | ✅ `Report` provider (Enhanced) | ⚠️ Manual logging | ✅ `ILogger` | ⚠️ Manual logging | ⚠️ Manual logging | ⚠️ Manual logging |
+| **Error Logging** | ✅ `Logger` provider | ✅ SLF4J/Logback | ✅ `ILogger` | ✅ `Logger` service | ✅ logging module | ✅ Log facade |
+| **Error Context** | ✅ Via `AppError` (Enhanced metadata) | ✅ Exception context | ✅ Exception data | ✅ Exception context | ✅ Exception context | ✅ Exception context |
+| **Problem Details** | ✅ RFC 7807 compliant | ✅ Via library | ✅ Built-in | ❌ Not available | ⚠️ Via DRF | ❌ Not available |
+
+### ExpressoTS Advantage
+
+- ✅ **Automatic filter discovery** - No manual registration needed
+- ✅ **Exception inheritance matching** - Parent filters handle child exceptions automatically
+- ✅ **RFC 7807 compliant** out of the box
+- ✅ **Enhanced AppError** with static helpers (`badRequest()`, `notFound()`, etc.)
+
+### AppError Static Helpers
+
+```typescript
+// Enhanced AppError with static helpers
+throw AppError.badRequest("Invalid input", { field: "email" });
+throw AppError.notFound("User", "123");
+throw AppError.validationFailed([
+    { property: "email", messages: ["Invalid email format"] },
+]);
+throw AppError.unauthorized("Authentication required");
+throw AppError.forbidden("Access denied");
+throw AppError.conflict("Resource already exists");
+```
+
+### Custom Exception Filters
+
+```typescript
+import { Catch, provide, BaseExceptionFilter, ExceptionContext } from "@expressots/core";
+
+// Auto-discovered filter for AppError
+@Catch(AppError)
+@provide(CustomAppErrorFilter)
+export class CustomAppErrorFilter extends BaseExceptionFilter {
+    catch(exception: AppError, context: ExceptionContext): void {
+        this.logError(exception, context);
+        this.sendErrorResponse(
+            context,
+            exception.statusCode,
+            exception.toProblemDetails()
+        );
+    }
+}
+```
+
+### Route-Specific Filters
+
+```typescript
+// Route-specific filters
+@UseFilters(NotFoundFilter)
+@controller("/users")
+export class UserController {
+    @Get("/:id")
+    @UseFilters(CustomNotFoundFilter) // Method-level override
+    getUser(@param("id") id: string) {
+        // Only CustomNotFoundFilter applies here
+    }
+
+    @Post("/")
+    // Controller-level NotFoundFilter applies here
+    createUser() {}
+}
+```
+
+### Enhanced Report Provider
+
+```typescript
+@provide(UserUseCase)
+export class UserUseCase {
+    @inject(Report) private report: Report;
+
+    async getUser(id: string) {
+        if (!id) {
+            throw this.report.badRequest("User ID is required");
+        }
+        const user = await this.repository.findById(id);
+        if (!user) {
+            throw this.report.notFound("User", id);
+        }
+        return user;
+    }
+}
+```
+
+### RFC 7807 Error Response
+
+When an error occurs, ExpressoTS returns a standardized RFC 7807 Problem Details response:
+
+```json
+{
+    "type": "https://httpstatuses.io/404",
+    "title": "Not Found",
+    "status": 404,
+    "detail": "User with ID '123' not found",
+    "instance": "/users/123",
+    "errorCode": "USER_NOT_FOUND",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "requestId": "req-abc-123"
+}
+```
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

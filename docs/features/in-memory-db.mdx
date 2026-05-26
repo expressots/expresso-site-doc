@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 18
 title: DB in memory
 description: A simple in memory database to store data.
 ---
@@ -160,7 +160,134 @@ Once a request is made to the `UserCreateUseCase`:
 
 ---
 
-## Support us ❤️
+## Testing with InMemoryDB
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+### Unit Testing Repositories
+
+Test repositories in isolation:
+
+```typescript
+describe("UserRepository", () => {
+    let repository: UserRepository;
+
+    beforeEach(() => {
+        repository = new UserRepository();
+    });
+
+    it("should create user", () => {
+        const user = repository.create({
+            id: "1",
+            name: "John",
+            email: "john@example.com",
+        });
+
+        expect(user.id).toBe("1");
+        expect(repository.findById("1")).toEqual(user);
+    });
+
+    it("should find by email", () => {
+        repository.create({ id: "1", name: "John", email: "john@example.com" });
+
+        const found = repository.findByEmail("john@example.com");
+
+        expect(found).not.toBeNull();
+        expect(found?.name).toBe("John");
+    });
+});
+```
+
+### E2E Testing with Controllers
+
+```typescript
+describe("User CRUD E2E", () => {
+    let app: IWebServerPublic;
+    let port: number;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should create and retrieve user", async () => {
+        // Create
+        const createRes = await fetch(`http://localhost:${port}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "John", email: "john@test.com" }),
+        });
+
+        const created = await createRes.json();
+        expect(created.id).toBeDefined();
+
+        // Retrieve
+        const getRes = await fetch(`http://localhost:${port}/users/${created.id}`);
+        const user = await getRes.json();
+
+        expect(user.name).toBe("John");
+    });
+});
+```
+
+### Testing Repository Methods
+
+```typescript
+describe("Custom Repository Methods", () => {
+    it("should find users by role", () => {
+        const repo = new UserRepository();
+        
+        repo.create({ id: "1", name: "Admin", role: "admin" });
+        repo.create({ id: "2", name: "User1", role: "user" });
+        repo.create({ id: "3", name: "User2", role: "user" });
+
+        const admins = repo.findByRole("admin");
+        const users = repo.findByRole("user");
+
+        expect(admins).toHaveLength(1);
+        expect(users).toHaveLength(2);
+    });
+});
+```
+
+## Troubleshooting
+
+### Data Not Persisting
+
+**Problem:** Data disappears between requests
+
+**Solution:** Ensure InMemoryDB is registered as Singleton:
+
+```typescript
+this.Provider.register(InMemoryDB, "Singleton");
+```
+
+### DB Inspector Not Showing
+
+**Problem:** Console table not printing
+
+**Solution:** The inspector only shows when operations are performed. Ensure your repository extends BaseRepository.
+
+### Entity ID Not Generated
+
+**Problem:** Entity has undefined ID
+
+**Solution:** Generate ID in entity constructor:
+
+```typescript
+class UserEntity {
+    id: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

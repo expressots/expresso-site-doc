@@ -159,6 +159,10 @@ ExpressoTS facilitates the registration of providers in its dependency injection
 
 These decorators ensure that providers are automatically registered and resolved within the application's dependency injection system.
 
+:::tip Lifecycle Hooks
+Providers can implement lifecycle hooks to run initialization and cleanup code. Use `@provideSingleton()` for providers that implement `IBootstrap` or `IShutdown` interfaces. Learn more in the **[Lifecycle Hooks](./lifecycle.mdx)** documentation.
+:::
+
 ## External providers
 
 ExpressoTS promotes extensibility through the use of external providers. Developers can create reusable packages using the plugin design pattern to add new functionalities to an ExpressoTS application. This approach is ideal for sharing features across multiple projects or integrating third-party services.
@@ -251,7 +255,136 @@ When developing external providers for ExpressoTS, consider the following best p
 
 By adhering to these practices, developers can ensure that their external providers are robust, maintainable, and easily integrated into any ExpressoTS application.
 
-## Support us ❤️
+## Testing Providers
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+### Unit Testing
+
+Test providers in isolation with mocked dependencies:
+
+```typescript
+describe("MailSenderProvider", () => {
+    let provider: MailSenderProvider;
+    let mockTransporter: jest.Mocked<Mail>;
+
+    beforeEach(() => {
+        mockTransporter = {
+            sendMail: jest.fn().mockResolvedValue({ messageId: "123" }),
+        } as any;
+
+        provider = new MailSenderProvider();
+        (provider as any).transporter = mockTransporter;
+    });
+
+    it("should send welcome email", async () => {
+        await provider.sendEmail(EmailType.Welcome);
+
+        expect(mockTransporter.sendMail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining("Welcome"),
+            })
+        );
+    });
+});
+```
+
+### Testing Provider Lifecycle
+
+```typescript
+describe("Provider Lifecycle", () => {
+    it("should reuse singleton instance", () => {
+        const container = new Container();
+        container.bind(Logger).toSelf().inSingletonScope();
+
+        const logger1 = container.get(Logger);
+        const logger2 = container.get(Logger);
+
+        expect(logger1).toBe(logger2);
+    });
+
+    it("should create new transient instance", () => {
+        const container = new Container();
+        container.bind(UserService).toSelf().inTransientScope();
+
+        const service1 = container.get(UserService);
+        const service2 = container.get(UserService);
+
+        expect(service1).not.toBe(service2);
+    });
+});
+```
+
+### Integration Testing
+
+```typescript
+describe("Provider Integration", () => {
+    let app: IWebServerPublic;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should use email provider in user flow", async () => {
+        const response = await fetch(`http://localhost:${await app.getPort()}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: "test@example.com" }),
+        });
+
+        expect(response.status).toBe(201);
+
+        // Verify email was sent (via test email service)
+        const emails = await testEmailService.getSentEmails();
+        expect(emails).toContainEqual(
+            expect.objectContaining({ to: "test@example.com" })
+        );
+    });
+});
+```
+
+### Mocking Providers
+
+```typescript
+// Create mock provider for testing
+class MockMailSenderProvider implements IMailSender {
+    sentEmails: Array<{ to: string; type: EmailType }> = [];
+
+    async sendEmail(to: string, type: EmailType): Promise<boolean> {
+        this.sentEmails.push({ to, type });
+        return true;
+    }
+}
+
+// Use in tests
+describe("UserService with MockMailSender", () => {
+    it("should send welcome email on registration", async () => {
+        const mockMail = new MockMailSenderProvider();
+        const userService = new UserService(mockMail);
+
+        await userService.register({ email: "test@example.com" });
+
+        expect(mockMail.sentEmails).toHaveLength(1);
+        expect(mockMail.sentEmails[0].type).toBe(EmailType.Welcome);
+    });
+});
+```
+
+## Best Practices
+
+1. **Use interfaces**: Define interfaces for providers to enable easy mocking
+2. **Choose appropriate scope**: Use Singleton for stateless services, Transient for stateful
+3. **Inject dependencies**: Use constructor injection for required dependencies
+4. **Handle errors**: Implement proper error handling in providers
+5. **Document providers**: Add JSDoc comments for public methods
+6. **Test thoroughly**: Write unit and integration tests for all providers
+7. **Version carefully**: Follow semantic versioning for external providers
+8. **Secure dependencies**: Regularly audit and update provider dependencies
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

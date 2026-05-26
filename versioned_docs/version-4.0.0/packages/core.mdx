@@ -1,0 +1,100 @@
+---
+sidebar_position: 2
+title: "@expressots/core"
+description: The DI container, lifecycle, validation, error model, providers, and logger that power every ExpressoTS app.
+---
+
+# `@expressots/core`
+
+The framework's heart. Every other package depends on this one.
+
+```bash
+npm install @expressots/core
+```
+
+## What it ships
+
+| Subsystem | Highlights | Deep-dive |
+| --- | --- | --- |
+| **DI / Container** | `provide`, `provideSingleton`, `inject`, `Container` (re-export of Inversify) | [Providers](../core/providers.mdx) |
+| **Application & lifecycle** | `bootstrap()` orchestration, `LifecycleRegistry`, `IBootstrap` / `IShutdown` hooks | [Bootstrap](../core/bootstrap.mdx) |
+| **Configuration** | `defineConfig`, `loadEnvSync`, `Env.*` builders, env-file loaders | [Configuration](../features/configuration.mdx) |
+| **Validation** | `ValidationRegistry`, Zod / Yup / class-validator adapters, `ValidationService` | [Validation](../features/validation.mdx) |
+| **Errors** | `AppError`, `NotFoundError`, `ValidationErrorClass`, `Report`, `@Catch`, `BaseExceptionFilter` | [Error handling](../features/error-handling.mdx) / [Exception filters](../features/exception-filters.mdx) |
+| **Events** | `EventEmitter`, `@OnEvent`, `EventRegistry`, `setupEventSystemForExpress` | [Events](../features/events.mdx) |
+| **Middleware** | `Middleware` service, presets (`api`, `web`, `serverless`, `fullstack`), unified `parse()` / `security()` / `compress()` / `addHealthCheck()` APIs | [Middleware](../features/middleware.mdx) |
+| **Logger & monitoring** | `Logger`, `HealthMonitor`, suggestion engine | [Logging](../guides/logging-setup.mdx) / [Health](../features/health-monitoring.mdx) |
+| **Interceptors / AOP** | `@Interceptor`, `@UseInterceptors`, `InterceptorRegistry` | [Interceptors](../features/interceptors.mdx) |
+| **Authorization** | `@Guard`, `@RequireRoles`, `@RequirePermissions`, `@RequireOwnership` | [Authorization](../features/authorization.mdx) |
+| **Render** | View engines, `@Render`, `@RenderConfig` | [Rendering](../features/render.mdx) |
+| **Testing** | `createTestApp`, `setupExpressoTSMatchers`, fluent HTTP API | [Testing](../features/testing.mdx) |
+
+## Public entry points
+
+The package exports a single barrel:
+
+```typescript
+import {
+    // Application
+    bootstrap, loadEnvSync, defineConfig, Env,
+
+    // DI
+    provide, provideSingleton, inject, Container,
+
+    // Errors
+    AppError, NotFoundError, ValidationErrorClass, Report,
+    Catch, UseFilters, BaseExceptionFilter,
+
+    // Events
+    EventEmitter, OnEvent, OnEvents, setupEventSystemForExpress,
+
+    // Validation
+    validationRegistry, ValidationService,
+    createZodValidator, createYupValidator, ClassValidatorAdapter,
+
+    // Middleware
+    applyPreset, definePreset,
+
+    // Logger
+    Logger, LogLevel,
+
+    // Authorization
+    Guard, RequireAuthentication, RequireRoles, RequirePermissions,
+
+    // Lifecycle
+    IBootstrap, IShutdown, IHealthCheck, IMetrics,
+} from "@expressots/core";
+```
+
+## Module layout
+
+The source is split into cohesive modules — each has its own README under `packages/core/src/<module>/.docs/` if you want the framework-developer view:
+
+```
+src/
+├── application/        # bootstrap, AppContainer, MetricsCollector
+├── config/             # defineConfig, Env builders, env-file loading
+├── console/            # CLI banners and runtime console UI
+├── container-module/   # InversifyJS container helpers
+├── decorator/          # @provide, @inject, @injectable
+├── error/              # AppError, exception filters, Report, RFC 7807
+├── event/              # EventEmitter, @OnEvent, registry, decorator
+├── interceptor/        # AOP interceptors
+├── lazy-loading/       # late-binding helpers
+├── lifecycle/          # IBootstrap / IShutdown registry
+├── middleware/         # unified middleware, presets, health
+├── provider/           # provider registry, validation, logger, db-in-memory
+├── render/             # render engine bridge
+├── authorization/      # guards & policy decorators
+└── testing/            # createTestApp + Jest matchers
+```
+
+## Versioning
+
+Stays in lockstep with the rest of the v4 release line. See [Packages → Overview](./overview.mdx#versioning-policy).
+
+## See also
+
+- **[Bootstrap](../core/bootstrap.mdx)** — application startup contract.
+- **[Decorators](../features/decorators.mdx)** — every decorator the package exposes.
+- **[`@expressots/adapter-express`](./adapter-express.mdx)** — the HTTP front door.

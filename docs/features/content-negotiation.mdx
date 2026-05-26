@@ -1,0 +1,199 @@
+---
+sidebar_position: 19
+title: Content Negotiation
+description: RFC 7231-compliant content negotiation in ExpressoTS v4. Accept / Consumes / Produces decorators, built-in JSON / XML / CSV / YAML / plain-text formatters, and streaming responses.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Content Negotiation
+
+ExpressoTS v4 ships with a content-negotiation engine that automatically selects the right response format based on the `Accept` header, and the right request parser based on `Content-Type`, without any explicit code in your handlers. Five formatters are bundled (JSON, XML, CSV, YAML, plain text) and you can register your own.
+
+## Quick start
+
+```ts title="app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+  async configureServices(): Promise<void> {
+    this.Middleware.addContentNegotiation({
+      formatters: ["json", "xml", "csv", "yaml", "text"],
+    });
+  }
+}
+```
+
+```ts title="controller.ts"
+import { controller, Get, Produces } from "@expressots/adapter-express";
+
+@controller("/users")
+export class UserController {
+  @Get("/")
+  @Produces("application/json", "application/xml", "text/csv")
+  list() {
+    return this.usersService.findAll();
+  }
+}
+```
+
+| Request                                              | Response Content-Type | Body                       |
+| ---------------------------------------------------- | --------------------- | -------------------------- |
+| `GET /users` (no `Accept`)                           | `application/json`    | JSON-serialised array      |
+| `GET /users` `Accept: application/xml`               | `application/xml`     | XML-serialised array       |
+| `GET /users` `Accept: text/csv`                      | `text/csv`            | CSV with header row        |
+| `GET /users` `Accept: text/yaml,application/json;q=0.5` | `text/yaml`        | YAML; quality value wins   |
+| `GET /users` `Accept: image/png`                     | `406 Not Acceptable`  | No formatter for `image/*` |
+
+## Decorators
+
+| Decorator              | Source                            | Purpose                                                                                 |
+| ---------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
+| `@Accept(...types)`    | `@expressots/adapter-express`     | Restrict the handler to specific incoming `Content-Type`s.                              |
+| `@Consumes(...types)`  | `@expressots/adapter-express`     | Alias of `@Accept`. Declares what the **request body** must be.                          |
+| `@Produces(...types)`  | `@expressots/adapter-express`     | Declares what the **response** can be. Drives `Accept` negotiation.                      |
+| `@Version("v1")`       | `@expressots/adapter-express`     | URL / header / query versioning, orthogonal to negotiation but often paired.            |
+
+### `@Produces`
+
+```ts
+@Get("/")
+@Produces("application/json", "application/xml")
+listUsers() {
+  return [{ name: "Ada" }];
+}
+```
+
+If the client's `Accept` header doesn't match any of the declared types, the framework returns **406 Not Acceptable**. If multiple match, the highest [quality value](https://developer.mozilla.org/en-US/docs/Glossary/Quality_values) wins.
+
+### `@Consumes` / `@Accept`
+
+```ts
+@Post("/")
+@Consumes("application/json", "application/xml")
+createUser(@body() body: CreateUserDto) {
+  return this.usersService.create(body);
+}
+```
+
+Requests with any other `Content-Type` are rejected with **415 Unsupported Media Type**.
+
+## Built-in formatters
+
+| Formatter | Default Content-Types          | Options interface                  | Notes                                                          |
+| --------- | ------------------------------ | ---------------------------------- | -------------------------------------------------------------- |
+| `json`    | `application/json`             | (none)                             | Pretty-prints in development; compact in production.            |
+| `xml`     | `application/xml`, `text/xml`  | [`XmlOptions`](#xmloptions)        | Element-based; attribute mapping available via options.         |
+| `csv`     | `text/csv`                     | [`CsvOptions`](#csvoptions)        | Header row, custom delimiter, custom quoting.                   |
+| `yaml`    | `text/yaml`, `application/yaml`| [`YamlOptions`](#yamloptions)      | Indent and line-width control.                                  |
+| `text`    | `text/plain`                   | (none)                             | Calls `.toString()` on the response body.                       |
+
+### XmlOptions
+
+```ts
+import { XmlOptions } from "@expressots/adapter-express";
+
+this.Middleware.addContentNegotiation({
+  xml: {
+    rootName: "root",
+    indent: "  ",
+    declaration: { version: "1.0", encoding: "UTF-8" },
+    cdata: ["description"],
+  } satisfies XmlOptions,
+});
+```
+
+### CsvOptions
+
+```ts
+import { CsvOptions } from "@expressots/adapter-express";
+
+this.Middleware.addContentNegotiation({
+  csv: {
+    delimiter: ",",
+    quote: '"',
+    header: true,
+    columns: ["id", "name", "email"],
+  } satisfies CsvOptions,
+});
+```
+
+### YamlOptions
+
+```ts
+import { YamlOptions } from "@expressots/adapter-express";
+
+this.Middleware.addContentNegotiation({
+  yaml: {
+    indent: 2,
+    lineWidth: 120,
+    noRefs: true,
+  } satisfies YamlOptions,
+});
+```
+
+## Streaming responses
+
+For large payloads, return a `StreamResponse` so the framework streams data through the chosen formatter without buffering.
+
+```ts
+import { StreamResponse } from "@expressots/adapter-express";
+
+@Get("/export")
+@Produces("text/csv")
+exportUsers() {
+  return new StreamResponse(async function* (write) {
+    for await (const user of usersService.cursor()) {
+      write(user);
+    }
+  });
+}
+```
+
+The framework calls the generator function with a `write` helper that pushes one record through the formatter at a time. Backpressure is handled automatically.
+
+## Quality value handling
+
+The framework parses `Accept` with full RFC 7231 quality value support:
+
+```http
+Accept: text/csv;q=0.9, application/xml;q=0.5, application/json;q=1.0
+```
+
+| Step              | Result                                     |
+| ----------------- | ------------------------------------------ |
+| 1. Parse          | `[{json, q=1.0}, {csv, q=0.9}, {xml, q=0.5}]` |
+| 2. Sort by `q`    | Already sorted.                             |
+| 3. Match handler  | Handler `@Produces`d JSON, CSV, XML.        |
+| 4. Pick best      | **JSON**, first match with highest `q`.    |
+
+## Custom formatters
+
+Register your own formatter for a new content type:
+
+```ts
+import { FormatterRegistry } from "@expressots/adapter-express";
+
+FormatterRegistry.register({
+  contentType: "application/x-msgpack",
+  serialize: (value) => msgpack.encode(value),
+  deserialize: (buf) => msgpack.decode(buf),
+});
+```
+
+Once registered, the formatter participates in `Accept` negotiation exactly like the built-ins.
+
+## Composing with other systems
+
+| Other system                | Interaction                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| [Interceptors](./interceptors.mdx) | Negotiation runs **after** interceptors return, so they see the raw return value.       |
+| [Validation](./dto-validator.mdx)  | Validation runs on the **request body**, before content negotiation parses the response. |
+| [Render engines](./render.mdx)     | HTML responses route to the render engine, not the formatter registry.                 |
+| [Studio](../studio/overview.mdx)   | The Studio Request Timeline records the negotiated response Content-Type.              |
+
+## See also
+
+- [`@Version` decorator](../why-expressots/routing.mdx): combine versioning with negotiation.
+- [Streaming + observability](../studio/overview.mdx#feature-tour): Studio surfaces stream sizes per request.

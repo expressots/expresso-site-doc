@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 title: App
 description: The App class is the core of an ExpressoTS application.
 ---
@@ -8,174 +8,869 @@ import imgAppLifecycle from "./img/app-life-cycle.png";
 
 # Application
 
-The `App` class is the core of an ExpressoTS application, handling server creation and configuration.
-It allows you to set up middleware and providers during the bootstrapping process and offers lifecycle hooks
-to run code before, after, and during server shutdown.
+The `App` class is the core of an ExpressoTS application, managing server creation, configuration, and lifecycle.
+It enables you to configure middleware and providers during bootstrapping, and provides lifecycle hooks
+for running code before, after, and during server shutdown.
 
-## App express
+## AppExpress
 
-`AppExpress` is the [Express.js](https://expressjs.com/) platform implementation specifically designed for ExpressoTS.
+`AppExpress` is the [Express.js](https://expressjs.com/) adapter implementation for ExpressoTS.
 It integrates seamlessly with the Express.js ecosystem, providing a robust foundation for building
-and configuring applications within ExpressoTS.
+and configuring applications.
 
-With full support for Express.js middleware, `AppExpress` enables developers to efficiently manage application setup, execution, and shutdown processes,
-all while leveraging the familiar Express.js environment.
+With full support for Express.js middleware, `AppExpress` enables efficient management of application setup,
+execution, and graceful shutdown processes.
 
-Here is the `App` class extending the `AppExpress` adapter from the Opinionated template:
+**Example:**
 
-```typescript title="app.ts"
+```typescript
 export class App extends AppExpress {
     private config: AppContainer = this.configContainer([AppModule]);
 
-    protected globalConfiguration(): void | Promise<void> {
-        this.setGlobalRoutePrefix("/v1");
+    globalConfiguration(): void {
+        this.setGlobalRoutePrefix("/api");
+        this.setBanner({ style: "full", showMetrics: true });
+    }
 
-        this.initEnvironment("development", {
-            env: {
-                development: ".env.development",
-                production: ".env.production",
-            },
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
+        this.Middleware.setErrorHandler({
+            showStackTrace: await this.isDevelopment(),
         });
     }
 
-    protected configureServices(): void {
-        this.Provider.register(Env);
+    async postServerInitialization(): Promise<void> {}
 
-        this.Middleware.addBodyParser();
-        this.Middleware.setErrorHandler({ showStackTrace: true });
-    }
-
-    protected async postServerInitialization(): Promise<void> {
-        if (this.isDevelopment()) {
-            this.Provider.get(Env).checkFile(".env.development");
-        }
-    }
-
-    protected serverShutdown(): void {}
+    async serverShutdown(): Promise<void> {}
 }
 ```
 
--   `this.Provider`: an object containing a register method that allows developers to register internal
-    or external ExpressoTS-compatible providers. This method registers classes in the ExpressoTS container
-    to be part of the dependency injection system, enabling the use of different scopes such as Transient, Scoped, and Singleton.
+## Core properties
 
--   `this.Middleware`: offers a set of out-of-the-box middlewares that can be used to configure your application.
-    See the complete list in the **[Middleware section](../features/middleware.mdx)**
+-   **`this.Provider`**: Access the dependency injection container to register and retrieve services.
+    Supports Transient, Scoped, and Singleton lifecycles. See **[Provider section](./providers.mdx)** for details.
 
-:::tip
-Be sure to explore other functionalities available in the class through `this`, like setGlobalRoutePrefix(), setEngine(), and more.
-:::
+-   **`this.Middleware`**: Configure built-in middleware for request handling, validation,
+    error handling, and more. See **[Middleware section](../features/middleware.mdx)** for the complete list.
 
 ## Lifecycle hooks
 
-An ExpressoTS application and its components follow a lifecycle managed by the framework.
-ExpressoTS offers lifecycle hooks that let developers track important events and run specific
-code within modules, providers, or controllers as these events happen.
+ExpressoTS applications follow a managed lifecycle with hooks that let you execute code at critical stages, from
+application startup through runtime to shutdown.
 
-The diagram below shows the sequence of key lifecycle events, from application startup to when the Node.js process exits.
+The diagram below illustrates the sequence of lifecycle events, from bootstrapping to Node.js process exit.
 
-```typescript title="Add any service to initialize before the server starts."
-protected configureServices(): void | Promise<void> { }
+### `globalConfiguration()`
+
+```typescript
+globalConfiguration(): void
 ```
 
-```typescript title="Add any service to run after the server starts."
-protected postServerInitialization(): void | Promise<void> { }
+Configure global settings that apply to the entire application. This method is called **synchronously** during construction
+before any other initialization. Use it for settings like route prefixes, banner configuration, and view engines.
+
+**Example:**
+
+```typescript
+globalConfiguration(): void {
+    this.setGlobalRoutePrefix("/api");
+    this.setBanner({ style: "full", showMetrics: true });
+}
 ```
 
-```typescript title="Add any service to run after the server shuts down."
-protected serverShutdown(): void | Promise<void> { }
+### `configureServices()`
+
+```typescript
+configureServices(): void | Promise<void>
+```
+
+Configure services and middleware before the server starts. This is where you register providers,
+configure middleware, and set up core application services. Supports both sync and async operations.
+
+**Example:**
+
+```typescript
+async configureServices(): Promise<void> {
+    this.Provider.register(YourProvider, Scope.Singleton);
+
+    this.Middleware.parse();
+    this.Middleware.security("standard");
+    this.Middleware.compress();
+    this.Middleware.setErrorHandler({
+        showStackTrace: await this.isDevelopment()
+    });
+}
+```
+
+### `postServerInitialization()`
+
+```typescript
+postServerInitialization(): void | Promise<void>
+```
+
+Execute actions after the server has started and is ready to handle requests. Use this for operations
+that require an operational server, such as database connections, environment checks, or background task initialization.
+
+**Example:**
+
+```typescript
+async postServerInitialization(): Promise<void> {
+    if (await this.isDevelopment()) {
+        console.log("Server is ready!");
+    }
+}
+```
+
+### `serverShutdown()`
+
+```typescript
+serverShutdown(): void | Promise<void>
+```
+
+Handle cleanup when the server is shutting down. Ideal for closing database connections, stopping background tasks,
+and other cleanup procedures to ensure graceful shutdown. The optional `signal` parameter indicates the shutdown trigger:
+
+-   `SIGTERM`: Graceful termination (e.g., Kubernetes pod shutdown)
+-   `SIGINT`: User interrupt (e.g., Ctrl+C)
+-   `SIGHUP`: Terminal hangup
+-   `SIGQUIT`: Quit with core dump
+-   `SIGBREAK`: Windows break signal
+
+**Example:**
+
+```typescript
+async serverShutdown(): Promise<void> {
+    await this.Provider.get(Database).disconnect();
+}
 ```
 
 ## Hooks execution order
 
 <div style={{ textAlign: "center" }}>
-    <img src={imgAppLifecycle} width="700px" height="700px" alt="Lifecycle events" />
+    <img
+        src={imgAppLifecycle}
+        width="700px"
+        height="700px"
+        alt="Application lifecycle events"
+    />
 </div>
 
-## Method configContainer
+---
 
-The `configContainer` method is used to configure the application container with the modules that will be used in the application.
+## Error Handling in Lifecycle Hooks
 
-```typescript title="Example of configuring the application container."
-private config: AppContainer = this.configContainer([AppModule]);
-```
+Each lifecycle hook has specific error handling behavior optimized for its role in the application lifecycle:
 
-## Middleware property
+### Error Behavior Summary
 
-The `Middleware` property is an instance of the `MiddlewareManager` class, which provides a set of methods to add middleware to the application.
+| Hook | Error Behavior | Bootstrap Result | Use Case |
+|------|----------------|------------------|----------|
+| `globalConfiguration()` | ❌ **Throws & stops** | Bootstrap fails | Critical global settings |
+| `configureServices()` | ❌ **Throws & stops** | Bootstrap fails | Essential services setup |
+| `postServerInitialization()` | ⚠️ **Logs & continues** | Server starts | Non-critical operations |
+| `serverShutdown()` | ⚠️ **Logs & continues** | Shutdown continues | Best-effort cleanup |
 
-```typescript title="Example of adding a middleware to the application."
-this.Middleware.addBodyParser();
-```
+### `globalConfiguration()` Errors
 
-## Provider property
+Errors in `globalConfiguration()` are **fatal** - the application will not start:
 
-The `Provider` property is an instance of the `ProviderManager` class, which provides a set of methods to register and get providers in the application.
-
-```typescript title="Example of registering a provider in the application."
-this.Provider.register(Env);
-```
-
-## Method initEnvironment
-
-The `initEnvironment` method is used to set the environment variables for the application.
-
-```typescript title="Example of setting environment variables for the application."
-this.initEnvironment("development", {
-    env: {
-        development: ".env.development",
-        production: ".env.production",
-    },
-});
-```
-
-## Method isDevelopment
-
-It is a helper method that returns a boolean value indicating whether the application is running in development mode.
-This method is useful for running specific code only in development environments.
-
-```typescript title="Check if the application is running in development mode."
-this.isDevelopment(): boolean
-```
-
-Currently this method is being used in the `postServerInitialization` method to check if the application is running in development mode.
-If it is, the `Env` provider is used to check all environment variables.
-
-```typescript title="Check all environment variables in development mode."
-protected postServerInitialization(): void {
-    if (this.isDevelopment()) {
-        this.Provider.get(Env).checkFile(".env.development");
+```typescript
+export class App extends AppExpress {
+    globalConfiguration(): void {
+        // ❌ This error crashes bootstrap immediately
+        throw new Error("Invalid route prefix configuration");
+        
+        // Server never starts
+        // Process exits with error code
     }
 }
 ```
 
-## Method set global route prefix
+**When to throw:**
+- Invalid configuration detected
+- Missing critical files (e.g., view templates directory)
+- Incompatible settings
 
-You can set a global prefix for all routes in your application. This is useful when you want to version your APIs.
+**Example - Validating configuration:**
 
 ```typescript
-this.setGlobalRoutePrefix("/v1");
+globalConfiguration(): void {
+    const prefix = process.env.API_PREFIX;
+    
+    if (!prefix || !prefix.startsWith("/")) {
+        throw new Error("API_PREFIX must start with '/'");
+    }
+    
+    this.setGlobalRoutePrefix(prefix);
+}
 ```
 
-## Method get http server
+### `configureServices()` Errors
 
-The `getHttpServer` method is used to get the HTTP server instance.
+Errors in `configureServices()` are **fatal** - use for critical service initialization:
 
-```typescript title="Example of getting the HTTP server instance."
-this.getHttpServer(): http.Server
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // ✅ Good: Fail fast if database unavailable
+        const db = this.Provider.get(Database);
+        await db.connect(); // Throws if connection fails
+        
+        // ✅ Good: Fail if critical provider missing
+        if (!this.Provider.isBound(CacheService)) {
+            throw new Error("CacheService must be registered");
+        }
+        
+        this.Middleware.parse();
+        this.Middleware.setErrorHandler({
+            showStackTrace: await this.isDevelopment(),
+        });
+    }
+}
 ```
 
-## Method to set the engine
+**When to throw:**
+- Critical external services unavailable (database, cache, message queue)
+- Required providers not registered
+- Middleware configuration failures
 
-The `setEngine` method is used to set the engine for the application.
+**Example - Graceful vs Fatal errors:**
 
-```typescript title="Example of setting the engine for the application."
-this.setEngine(RenderEngine.Engine.EJS);
+```typescript
+async configureServices(): Promise<void> {
+    // ❌ Fatal: Database is critical
+    const db = this.Provider.get(Database);
+    await db.connect(); // Let this throw if it fails
+    
+    // ⚠️ Non-fatal: Metrics are optional
+    try {
+        const metrics = this.Provider.get(MetricsService);
+        await metrics.initialize();
+    } catch (error) {
+        console.warn("Metrics service unavailable:", error.message);
+        // App continues without metrics
+    }
+}
+```
+
+### `postServerInitialization()` Errors
+
+Errors in `postServerInitialization()` are **logged but non-fatal** - the server continues running:
+
+```typescript
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        // ⚠️ Error logged, server continues
+        throw new Error("Background job scheduler failed");
+        
+        // Server is already running and accepting requests
+        // Error is logged but doesn't stop the server
+    }
+}
+```
+
+**When to use:**
+- Background tasks that can be retried
+- Non-critical monitoring setup
+- Optional feature initialization
+
+**Example - Robust post-initialization:**
+
+```typescript
+async postServerInitialization(): Promise<void> {
+    // Environment check (non-critical)
+    if (await this.isDevelopment()) {
+        console.log("🔧 Development mode enabled");
+        console.log(`Port: ${await this.getPort()}`);
+    }
+    
+    // Background tasks (handle errors)
+    try {
+        await this.Provider.get(SchedulerService).start();
+    } catch (error) {
+        console.error("Scheduler failed to start:", error);
+        // Server continues, retry can happen later
+    }
+    
+    // External API health check (best effort)
+    try {
+        await this.Provider.get(ExternalAPI).ping();
+    } catch (error) {
+        console.warn("External API unreachable (will retry):", error);
+    }
+}
+```
+
+### `serverShutdown()` Errors
+
+Errors in `serverShutdown()` are **logged but don't prevent shutdown**:
+
+```typescript
+export class App extends AppExpress {
+    async serverShutdown(): Promise<void> {
+        // ⚠️ Best-effort cleanup
+        try {
+            await this.Provider.get(Database).disconnect();
+        } catch (error) {
+            console.error("Database disconnect error:", error);
+            // Shutdown continues anyway
+        }
+        
+        try {
+            await this.Provider.get(CacheService).close();
+        } catch (error) {
+            console.error("Cache close error:", error);
+            // Shutdown continues anyway
+        }
+    }
+}
+```
+
+**Best practices:**
+- Always use try-catch for each cleanup operation
+- Log errors but allow shutdown to continue
+- Set reasonable timeouts for cleanup operations
+- Don't throw errors (they're logged but ignored)
+
+**Example - Robust shutdown:**
+
+```typescript
+async serverShutdown(): Promise<void> {
+    console.log("Starting graceful shutdown...");
+    
+    const cleanupTasks = [
+        this.closeDatabase(),
+        this.stopBackgroundJobs(),
+        this.flushMetrics(),
+    ];
+    
+    // Run all cleanup tasks in parallel
+    const results = await Promise.allSettled(cleanupTasks);
+    
+    // Log any failures
+    results.forEach((result, index) => {
+        if (result.status === "rejected") {
+            console.error(`Cleanup task ${index} failed:`, result.reason);
+        }
+    });
+    
+    console.log("Shutdown complete");
+}
+
+private async closeDatabase(): Promise<void> {
+    const db = this.Provider.get(Database);
+    await db.disconnect();
+}
+
+private async stopBackgroundJobs(): Promise<void> {
+    const scheduler = this.Provider.get(SchedulerService);
+    await scheduler.stop();
+}
+
+private async flushMetrics(): Promise<void> {
+    const metrics = this.Provider.get(MetricsService);
+    await metrics.flush();
+}
+```
+
+:::tip Error Handling Strategy
+**Fail Fast vs Fail Safe:**
+
+| Stage | Strategy | Reasoning |
+|-------|----------|-----------|
+| `globalConfiguration()` | **Fail Fast** | Invalid config = broken app |
+| `configureServices()` | **Fail Fast** | Critical services required |
+| `postServerInitialization()` | **Fail Safe** | Server already accepting requests |
+| `serverShutdown()` | **Fail Safe** | Best-effort cleanup |
+
+:::
+
+---
+
+## Configuration methods
+
+### `configContainer()`
+
+Initialize the InversifyJS container with application modules and configure dependency injection.
+
+```typescript
+public configContainer(
+    appModules: Array<ContainerModule>,
+    containerOptions?: ContainerOptions
+): AppContainer
+```
+
+**Parameters:**
+
+-   `appModules`: Array of application modules to load into the container
+-   `containerOptions`: Optional container configuration
+    -   `skipBaseClassChecks`: Skip base class checks (default: false)
+    -   `autoBindInjectable`: Automatically bind injectable classes (default: false)
+    -   `defaultScope`: Default scope for bindings - `"Transient"`, `"Singleton"`, or `"Request"` (default: "Transient")
+
+**Example:**
+
+```typescript
+private config: AppContainer = this.configContainer(
+    [AppModule, UserModule, ProductModule],
+    { defaultScope: "Singleton" }
+);
+```
+
+### `setGlobalRoutePrefix()`
+
+Set a global prefix for all application routes. Useful for API versioning or namespacing.
+
+```typescript
+setGlobalRoutePrefix(prefix: string): Promise<void>
+```
+
+**Example:**
+
+```typescript
+this.setGlobalRoutePrefix("/api");
+// All routes will be prefixed with /api
+// Example: GET /users becomes GET /api/users
+```
+
+### `setBanner()`
+
+Configure the startup banner display with metrics, features, and system information.
+
+```typescript
+setBanner(config: BannerConfig): void
+```
+
+**Configuration Options:**
+
+-   `style`: Banner display style - `"full"`, `"compact"`, `"minimal"`, or `"none"`
+-   `showMetrics`: Display application metrics (controllers, routes, providers)
+-   `showFeatures`: Display enabled features (validation, authorization, etc.)
+-   `showConfig`: Display configuration details
+-   `showPerformance`: Display performance metrics
+-   `showResources`: Display system resources
+-   `environment`: Environment-specific configuration overrides
+
+**Example:**
+
+```typescript
+this.setBanner({
+    style: "full",
+    showMetrics: true,
+    showFeatures: true,
+    showConfig: true,
+    environment: {
+        production: {
+            style: "compact",
+            showConfig: false,
+        },
+    },
+});
+```
+
+### `this.Middleware.render()` <span style={{color: '#4CAF50'}}>v4 NEW</span>
+
+Configure view rendering with the unified render API. Supports traditional engines (EJS, Pug, Handlebars) and modern frameworks (React SSR).
+
+```typescript
+render(config?: RenderConfig | PresetName): Promise<void>
+```
+
+**Configuration Options:**
+
+-   `engine`: Engine type - `'ejs'`, `'pug'`, `'hbs'`, `'react'`, or `'auto'`
+-   `viewsDir`: Path to view templates
+-   `cache`: Enable caching - `true`, `false`, or `'auto'`
+-   `watch`: Enable hot reload - `true`, `false`, or `'auto'`
+-   `debug`: Enable debug endpoint at `/__views`
+-   `ssr`: SSR options for React/Vue/Svelte
+
+**Examples:**
+
+```typescript
+// Auto-detect installed engine
+await this.Middleware.render();
+
+// Use a preset
+await this.Middleware.render("production");
+
+// Full configuration
+await this.Middleware.render({
+    engine: "react",
+    viewsDir: "src/views",
+    cache: "auto",
+    ssr: { hydrate: true, streaming: true },
+});
+```
+
+See **[Render Engine documentation](../features/render.mdx)** for the complete guide.
+
+### `setEngine()` <span style={{color: '#FF9800'}}>Deprecated</span>
+
+:::warning
+`setEngine()` is deprecated. Use `this.Middleware.render()` instead. Will be removed in v5.0.0.
+:::
+
+```typescript
+// Migration
+// Before (deprecated)
+this.setEngine(RenderEngine.Engine.EJS, { viewsDir: "views" });
+
+// After (recommended)
+await this.Middleware.render({ engine: "ejs", viewsDir: "views" });
 ```
 
 ---
 
-## Support us ❤️
+## Utility methods
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+### `isDevelopment()`
+
+Check if the application is running in development mode.
+
+```typescript
+isDevelopment(): Promise<boolean>
+```
+
+**Example:**
+
+```typescript
+if (await this.isDevelopment()) {
+    this.Middleware.setErrorHandler({ showStackTrace: true });
+    this.Provider.get(Env).checkFile(".env.development");
+}
+```
+
+### `getHttpServer()`
+
+Get the underlying HTTP server instance (Express.js by default).
+
+```typescript
+getHttpServer(): Promise<HTTPServer>
+```
+
+**Example:**
+
+```typescript
+const server = await this.getHttpServer();
+// Use for WebSocket setup, custom configurations, etc.
+```
+
+### `getPort()`
+
+Get the actual port the server is listening on. Useful when using dynamic port assignment (port: 0).
+
+```typescript
+getPort(): Promise<number>
+```
+
+**Example:**
+
+```typescript
+const port = await this.getPort();
+console.log(`Server is running on port ${port}`);
+```
+
+---
+
+## Advanced configuration
+
+### Server Information
+
+Access server details and runtime information:
+
+```typescript
+export class App extends AppExpress {
+    async postServerInitialization(): Promise<void> {
+        // Get actual listening port
+        const port = await this.getPort();
+        console.log(`Server listening on port ${port}`);
+        
+        // Get HTTP server instance
+        const httpServer = await this.getHttpServer();
+        const address = httpServer.address();
+        console.log(`Server address: ${address}`);
+        
+        // Check environment
+        if (await this.isDevelopment()) {
+            console.log("Development mode - debug features enabled");
+        }
+    }
+}
+```
+
+**Common use cases:**
+- WebSocket server setup
+- Custom server configuration
+- Health check endpoints
+- Monitoring integration
+
+### Server Cleanup & Testing
+
+Proper server cleanup is essential for tests and controlled shutdowns:
+
+**Basic test pattern:**
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+describe("API Tests", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+
+    beforeAll(async () => {
+        server = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        // Clean up server
+        if (server) {
+            const httpServer = await server.getHttpServer();
+            await new Promise<void>((resolve) => {
+                httpServer.close(() => resolve());
+            });
+        }
+    });
+
+    test("GET /health returns 200", async () => {
+        const port = await server.getPort();
+        const response = await fetch(`http://localhost:${port}/health`);
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+**Timeout-safe cleanup:**
+
+```typescript
+async function closeServerSafely(
+    server: Awaited<ReturnType<typeof bootstrap>>,
+    timeout: number = 5000
+): Promise<void> {
+    if (!server) return;
+
+    const httpServer = await server.getHttpServer();
+    
+    return new Promise<void>((resolve) => {
+        // Force close after timeout
+        const timer = setTimeout(() => {
+            console.warn("Force closing server after timeout");
+            httpServer.closeAllConnections?.(); // Node 18+
+            resolve();
+        }, timeout);
+
+        // Graceful close
+        httpServer.close(() => {
+            clearTimeout(timer);
+            resolve();
+        });
+
+        // Close idle connections immediately (Node 18+)
+        httpServer.closeIdleConnections?.();
+    });
+}
+
+// Usage in tests
+afterAll(async () => {
+    await closeServerSafely(server, 5000);
+});
+```
+
+**Multiple test suites pattern:**
+
+```typescript
+// test-setup.ts
+let globalServer: Awaited<ReturnType<typeof bootstrap>> | null = null;
+
+export async function getTestServer() {
+    if (!globalServer) {
+        globalServer = await bootstrap(App, { port: 0 });
+    }
+    return globalServer;
+}
+
+export async function closeTestServer() {
+    if (globalServer) {
+        const httpServer = await globalServer.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
+        globalServer = null;
+    }
+}
+
+// user.test.ts
+import { getTestServer } from "./test-setup";
+
+describe("User API", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+    let baseUrl: string;
+
+    beforeAll(async () => {
+        server = await getTestServer();
+        const port = await server.getPort();
+        baseUrl = `http://localhost:${port}`;
+    });
+
+    test("creates user", async () => {
+        const response = await fetch(`${baseUrl}/users`, {
+            method: "POST",
+            body: JSON.stringify({ name: "Test" }),
+        });
+        expect(response.status).toBe(201);
+    });
+});
+```
+
+**Cleanup best practices:**
+
+```typescript
+describe("Integration Tests", () => {
+    let server: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
+
+    beforeEach(async () => {
+        // Fresh server for each test (full isolation)
+        server = await bootstrap(App, { port: 0 });
+        port = await server.getPort();
+    });
+
+    afterEach(async () => {
+        // Clean up after each test
+        if (server) {
+            const httpServer = await server.getHttpServer();
+            
+            // Close idle connections first
+            if (typeof httpServer.closeIdleConnections === "function") {
+                httpServer.closeIdleConnections();
+            }
+            
+            // Then close server
+            await new Promise<void>((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Server close timeout"));
+                }, 5000);
+                
+                httpServer.close((err) => {
+                    clearTimeout(timeout);
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+            
+            server = null;
+        }
+    });
+
+    test("isolated test", async () => {
+        // Each test has its own server instance
+        const response = await fetch(`http://localhost:${port}/test`);
+        expect(response.ok).toBe(true);
+    });
+});
+```
+
+:::warning Test Cleanup
+**Always close servers in tests to avoid:**
+- ❌ Port conflicts in subsequent tests
+- ❌ Jest/Vitest hanging ("did not exit after tests")
+- ❌ Resource leaks (connections, timers, file handles)
+- ❌ Flaky tests due to shared state
+
+**Key points:**
+- Use `port: 0` for auto-assigned ports (no conflicts)
+- Close servers in `afterEach` or `afterAll`
+- Use timeout protection for cleanup
+- Close idle connections first for faster cleanup
+:::
+
+### `Graceful shutdown`
+
+ExpressoTS automatically handles graceful shutdown with customizable behavior:
+
+**Supported Signals:**
+
+-   `SIGTERM`: Standard termination (Kubernetes, Docker)
+-   `SIGINT`: User interrupt (Ctrl+C)
+-   `SIGHUP`: Terminal hangup
+-   `SIGQUIT`: Quit with core dump
+-   `SIGBREAK`: Windows break signal
+-   `SIGUSR2`: Used by nodemon (not on Windows)
+
+**Connection Management:**
+
+-   Automatic tracking of active connections
+-   Force-close timeout: 5000ms (configurable)
+-   Immediate cleanup of idle keep-alive connections
+
+**Port Management (Hot Reload):**
+
+-   Automatic port retry on EADDRINUSE
+-   Retry attempts: 10 (configurable)
+-   Retry delay: 500ms (configurable)
+
+### Container access
+
+Access the configured container directly when needed:
+
+```typescript
+export class App extends AppExpress {
+    private config: AppContainer = this.configContainer([AppModule]);
+
+    protected async configureServices(): Promise<void> {
+        // Access container directly
+        const container = this.config.Container;
+
+        // Check if a service is bound
+        if (container.isBound(MyService)) {
+            const service = container.get(MyService);
+        }
+    }
+}
+```
+
+---
+
+## Environment configuration
+
+ExpressoTS provides environment configuration through the `bootstrap()` function in your main entry file.
+Environment files are loaded before the application starts. See **[Bootstrap section](./bootstrap.mdx)** for detailed configuration.
+
+**Quick Example:**
+
+```typescript title="main.ts"
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+async function main() {
+    const app = await bootstrap(App, {
+        currentEnvironment: "development",
+        envFileConfig: {
+            files: {
+                development: ".env.development",
+                production: ".env.production",
+            },
+            required: ["DATABASE_URL", "API_KEY"],
+            validateValues: true,
+            autoCreateTemplate: true,
+        },
+    });
+}
+
+main();
+```
+
+**Key Features:**
+
+-   Opt-in .env file loading
+-   Automatic CI/CD detection
+-   Template file creation
+-   Variable validation
+-   Multiple environment support
+-   `.env.vault` support for CI
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

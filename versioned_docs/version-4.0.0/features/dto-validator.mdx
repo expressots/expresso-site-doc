@@ -1,106 +1,127 @@
 ---
 sidebar_position: 16
 title: DTO validator
-description: DTO validator provider.
+description: Use the v4 validation system with class-validator, Zod, or Yup for DTO payload validation.
 ---
 
-# Payload
+# DTO validator
 
-A payload in a web application refers to the data sent between the client and server, typically within a request body. This data is essential for performing operations like creating, updating, or retrieving resources. Payloads contain the information that the server needs to process a request and return an appropriate response.
+> **Heads up:** the legacy `validateDTO()` middleware described in earlier docs has been replaced in v4 by the unified [Validation system](./validation.mdx), which works with **class-validator**, **Zod**, **Yup**, or any custom validator adapter you register. The patterns on this page show the v4 way to keep using class-validator-style DTOs.
 
-## DTO pattern
+## DTO pattern recap
 
-The Data Transfer Object (DTO) pattern is used to standardize the structure of this payload data as it moves between different layers of the application. DTOs ensure that the data being transferred adheres to specific formats, making it easier to manage and validate. By separating the data structure from business logic, DTOs help keep the application modular, maintainable, and less prone to errors.
+A **Data Transfer Object** standardises payload shapes as they cross HTTP boundaries. v4 keeps the same DTO mindset but lets you choose the schema language:
 
-## DTO validator
+- **class-validator + class-transformer** — decorator-based, classes (the v3 pattern, still supported).
+- **Zod** — schema-first, fully type-inferred.
+- **Yup** — schema-first with chainable builders.
+- **Custom adapter** — implement `IValidator` and register it in the validation registry.
 
-The DTO Validator in ExpressoTS plays a critical role in ensuring the integrity of incoming payloads. This provider validates the data sent by the client, checking for required fields, data types, and overall consistency. By doing so, it helps developers avoid runtime errors that could occur due to missing or invalid data.
+For a side-by-side feature comparison, see the [Validation reference](./validation.mdx). This page focuses on the class-validator path because it's the closest thing to the legacy v3 flow.
 
-When you scaffold a new ExpressoTS project, the DTO Validator is included as middleware named validateDTO. This middleware can be applied to any endpoint to automatically validate incoming data against the defined DTO structure before the request is processed further. This validation step ensures that only well-formed, valid data enters your application's processing pipeline, enhancing reliability and security.
+## Install class-validator
 
-## Pre requisites
+```bash
+npm install class-validator class-transformer
+```
 
-The DTO validator is based on the [class-validator](https://www.npmjs.com/package/class-validator) and [class-transformer](https://www.npmjs.com/package/class-transformer) packages. It uses decorators to validate the DTOs.
+The validation system loads class-validator lazily, so you only pay the cost when a controller actually uses it.
 
-:::caution
-If you don't have class-validator and class-transformer installed and try to use the DTO validator, you will get an warning message in the console mentioning that you need to install the packages.
-:::
+## Define a DTO class
 
-Another key point is that the DTO Validator works exclusively with classes, as interfaces do not exist at runtime. Therefore, if you want to use the DTO Validator, you'll need to change the interface provided by ExpressoTS to a class that represents your DTO instead. This allows the validator to properly validate the incoming data, ensuring it adheres to the defined structure.
+```typescript title="src/usecases/users/create-user.dto.ts"
+import { IsEmail, IsString, MinLength } from "class-validator";
 
-## Usage example
+export class CreateUserDTO {
+    @IsString()
+    @MinLength(2)
+    name!: string;
 
-You can use the DTO validator in any endpoint by adding the `validateDTO` middleware in the endpoint route.
+    @IsEmail()
+    email!: string;
 
-Endpoint that creates a new user:
+    @IsString()
+    @MinLength(8)
+    password!: string;
+}
+```
+
+## Validate inside a controller (v4 way)
+
+Use `@validatedBody()` from `@expressots/adapter-express`. It runs the registered validator on the incoming payload, formats helpful error messages, and rejects malformed requests with a 400 response — all without you wiring a guard or writing a try/catch:
+
+```typescript title="src/usecases/users/users.controller.ts"
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
+import { provide } from "@expressots/core";
+import { CreateUserDTO } from "./create-user.dto";
+
+@controller("/users")
+@provide(UsersController)
+export class UsersController {
+    @Post("/")
+    create(@validatedBody(CreateUserDTO) dto: CreateUserDTO) {
+        // dto is fully typed AND already validated.
+        // class-validator decorators run before this method is called.
+        return { ok: true, ...dto };
+    }
+}
+```
+
+The same parameter decorator is also exported as `@validatedQuery`, `@validatedParam`, and `@validatedHeaders` for the other request locations.
+
+## Programmatic validation
+
+When you need to validate something outside an HTTP request — a queue payload, a CLI input, an event body — use `ValidationService.validate()` directly:
 
 ```typescript
-@httpPost("/", ValidateDTO(CreateUserDTO))
-execute(@requestBody() payload: CreateUserDTO, @response() res: Response) {
-  return res.status(StatusCode.Created).json(this.createUserUseCase.execute(payload));
-}
-```
+import { inject, ValidationService } from "@expressots/core";
 
-Here it is the `CreateUserDTO` class:
+@provide(ImportService)
+export class ImportService {
+    constructor(
+        @inject(ValidationService) private readonly validator: ValidationService,
+    ) {}
 
-```typescript
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
-
-class CreateUserDTO {
-    @IsNotEmpty()
-    @MinLength(10)
-    name: string;
-    @IsNotEmpty()
-    @IsEmail({}, { message: "Invalid email" })
-    email: string;
-}
-
-export { CreateUserDTO };
-```
-
-:::info
-For more information about the decorators, please check the [class-validator](https://www.npmjs.com/package/class-validator) package.
-:::
-
-## Error messages
-
-If you submit a payload that doesn't match the DTO `CreateUserDTO` above, the DTO validator will return an error message with the following format:
-
-**Payload:**
-
-```json title="Invalid payload"
-{
-    "name": "",
-    "email": ""
-}
-```
-
-**Response:**
-
-```json
-{
-    "errorCode": 400,
-    "errorMessage": "Bad Request",
-    "DTO": [
-        {
-            "property": "name",
-            "messages": [
-                "name must be longer than or equal to 10 characters",
-                "name should not be empty"
-            ]
-        },
-        {
-            "property": "email",
-            "messages": ["invalid email", "email should not be empty"]
+    async importBatch(rows: unknown[]) {
+        for (const row of rows) {
+            const result = await this.validator.validate(row, CreateUserDTO);
+            if (!result.valid) throw new ValidationErrorClass(result.errors);
         }
-    ]
+    }
 }
 ```
 
-Messages are split by property, so you can easily identify which property has an error and what is the error message. This is useful when you have a DTO with a lot of properties, as you can easily identify which property has an error. It also helps the frontend application on getting the error messages more easily.
+## What about Zod / Yup?
 
----
+Same controller, different schema:
 
-## Support the Project
+```typescript
+import { z } from "zod";
+import { createZodValidator } from "@expressots/core";
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
 
-ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.
+const CreateUserSchema = z.object({
+    name: z.string().min(2),
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+
+const createUserValidator = createZodValidator(CreateUserSchema);
+
+@controller("/users")
+@provide(UsersController)
+export class UsersController {
+    @Post("/")
+    create(@validatedBody(createUserValidator) dto: z.infer<typeof CreateUserSchema>) {
+        return { ok: true, ...dto };
+    }
+}
+```
+
+`createYupValidator(schema)` is the equivalent for Yup.
+
+## See also
+
+- **[Validation](./validation.mdx)** — full reference for the validation system, registry, adapters, and error format.
+- **[Configuration](./configuration.mdx)** — typed environment variable validation with `defineConfig` + `Env.*`.
+- **[Error handling](./error-handling.mdx)** — how validation errors are mapped to RFC 7807 problem details.

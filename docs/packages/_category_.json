@@ -1,0 +1,10 @@
+{
+    "label": "PACKAGES",
+    "position": 8,
+    "collapsed": true,
+    "collapsible": true,
+    "link": {
+        "type": "doc",
+        "id": "packages/overview"
+    }
+}

@@ -1,0 +1,745 @@
+---
+sidebar_position: 5
+title: Micro API
+description: Build lightweight, production-ready microservices with ExpressoTS Micro API.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Micro API
+
+Micro API is a radically simplified template for building microservices with minimal boilerplate. Inspired by modern frameworks like Hono and Elysia, it focuses on pure simplicity while providing access to advanced features when needed.
+
+## Overview
+
+Micro API provides:
+
+-   **Pure Simplicity**: 3 lines to get started
+-   **Express-Style Conventions**: Middleware before handler
+-   **Auto-Response**: Return values are automatically sent as responses
+-   **Auto JSON Parsing**: Enabled by default
+-   **Production Ready**: Health checks, serverless adapters
+-   **Advanced Features**: CircuitBreaker, ServiceDiscovery, ServiceClient (import separately)
+
+## Getting Started
+
+### Create a New Micro API Project
+
+```bash
+expressots new my-api --template micro
+```
+
+### Minimal Example
+
+```typescript
+import { micro } from "@expressots/adapter-express";
+
+const app = micro();
+
+app.get("/", () => "Hello World");
+
+app.listen(3000);
+```
+
+That's it! Three lines to a working API.
+
+### Project Structure
+
+```tree
+my-api/
+├── src/
+│   └── api.ts              # Main entry point
+├── test/
+│   └── api.spec.ts
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── tsconfig.json
+└── expressots.config.ts
+```
+
+## Basic Usage
+
+The entire application is defined in a single file:
+
+```typescript
+// src/api.ts
+import { micro } from "@expressots/adapter-express";
+
+const app = micro();
+
+// Return objects - automatically JSON serialized
+app.get("/", () => ({
+    name: "ExpressoTS Micro",
+    version: "5.0.0",
+    message: "Hello from ExpressoTS Micro API!",
+}));
+
+// Return strings - sent as text
+app.get("/text", () => "Hello World");
+
+// Health check
+app.get("/health", () => ({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+}));
+
+// Start server
+app.listen(3000);
+```
+
+## Configuration
+
+The `micro()` function accepts an optional configuration object:
+
+```typescript
+const app = micro({
+    autoParseJson: true,    // Enable JSON parsing (default: true)
+    globalPrefix: "/api",   // Prefix all routes with /api
+    showBanner: true,       // Show startup banner (default: true)
+});
+```
+
+## Route Definition
+
+### HTTP Methods
+
+```typescript
+app.get("/path", handler);
+app.post("/path", handler);
+app.put("/path", handler);
+app.patch("/path", handler);
+app.delete("/path", handler);
+```
+
+### Route Parameters
+
+```typescript
+app.get("/users/:id", (req) => {
+    return { id: req.params.id, name: "User " + req.params.id };
+});
+
+app.get("/posts/:postId/comments/:commentId", (req) => {
+    const { postId, commentId } = req.params;
+    return { postId, commentId };
+});
+```
+
+### Query Parameters
+
+```typescript
+app.get("/search", (req) => {
+    const { q, page, limit } = req.query;
+    return {
+        query: q,
+        page: Number(page) || 1,
+        limit: Number(limit) || 10,
+    };
+});
+```
+
+### Request Body
+
+```typescript
+app.post("/users", (req) => {
+    const { name, email } = req.body;
+    return {
+        id: Date.now(),
+        name,
+        email,
+        createdAt: new Date().toISOString(),
+    };
+});
+```
+
+## Middleware
+
+### Express-Style Middleware
+
+Middleware comes **before** the handler (Express convention):
+
+```typescript
+// Single middleware
+const logRequest = (req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+};
+
+app.get("/", logRequest, () => "Hello World");
+
+// Multiple middleware
+const authenticate = (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+    next();
+};
+
+const validate = (req, res, next) => {
+    // validation logic
+    next();
+};
+
+app.post("/users", authenticate, validate, (req) => {
+    return { id: Date.now(), ...req.body };
+});
+```
+
+### Global Middleware
+
+```typescript
+// Apply to all routes
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+// Apply to specific path prefix
+app.use("/api", authenticate);
+```
+
+### Error Handler
+
+```typescript
+app.setErrorHandler((err, req, res, next) => {
+    console.error(err);
+    res.status(500).json({
+        error: err.message,
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// Errors thrown in handlers are caught automatically
+app.get("/error", () => {
+    throw new Error("Something went wrong");
+});
+```
+
+## Auto-Response
+
+Handlers can return values directly - no need to call `res.json()` or `res.send()`:
+
+```typescript
+// String returns → res.send()
+app.get("/text", () => "Hello World");
+
+// Object/Array returns → res.json()
+app.get("/json", () => ({ message: "Hello" }));
+app.get("/array", () => [1, 2, 3]);
+
+// Async handlers work too
+app.get("/async", async () => {
+    const data = await fetchData();
+    return data;
+});
+
+// Still works with traditional Express style if needed
+app.get("/traditional", (req, res) => {
+    res.status(201).json({ created: true });
+});
+```
+
+## Advanced Features
+
+Advanced features are imported separately - use only what you need:
+
+```typescript
+import { 
+    micro, 
+    CircuitBreaker, 
+    ServiceClient, 
+    ServiceDiscovery 
+} from "@expressots/adapter-express";
+```
+
+### Circuit Breaker
+
+Protect against cascading failures:
+
+```typescript
+import { micro, CircuitBreaker } from "@expressots/adapter-express";
+
+const app = micro();
+const cb = new CircuitBreaker({
+    failureThreshold: 5,    // Open after 5 failures
+    successThreshold: 2,    // Close after 2 successes in half-open
+    timeout: 60000,         // Reset timeout (60s)
+});
+
+app.get("/external-api", async () => {
+    return await cb.execute(async () => {
+        const response = await fetch("https://external-api.com/data");
+        return response.json();
+    });
+});
+
+// Circuit status endpoint
+app.get("/circuit/status", () => cb.getStats());
+```
+
+### Service Discovery
+
+```typescript
+import { micro, ServiceDiscovery, ServiceClient } from "@expressots/adapter-express";
+
+const app = micro();
+
+// Initialize discovery
+const discovery = new ServiceDiscovery({ type: "static" });
+
+// Register services
+discovery.registerService({
+    id: "user-service-1",
+    name: "user-service",
+    host: "localhost",
+    port: 3001,
+    health: "healthy",
+    lastCheck: new Date(),
+});
+
+discovery.registerService({
+    id: "user-service-2",
+    name: "user-service",
+    host: "localhost",
+    port: 3002,
+    health: "healthy",
+    lastCheck: new Date(),
+});
+
+// Get a healthy instance (round-robin load balancing)
+app.get("/users/:id", async (req) => {
+    const instance = discovery.getService("user-service");
+    if (!instance) {
+        throw new Error("user-service unavailable");
+    }
+    
+    const client = new ServiceClient({
+        name: "user-service",
+        baseUrl: `http://${instance.host}:${instance.port}`,
+        timeout: 5000,
+    });
+    
+    return await client.get(`/users/${req.params.id}`);
+});
+
+app.listen(3000);
+```
+
+### Service Client
+
+Make HTTP requests to other services:
+
+```typescript
+import { micro, ServiceClient } from "@expressots/adapter-express";
+
+const app = micro();
+
+const userClient = new ServiceClient({
+    name: "user-service",
+    baseUrl: "http://localhost:3001",
+    timeout: 5000,
+    retries: 3,
+    circuitBreaker: {
+        failureThreshold: 5,
+        timeout: 60000,
+    },
+});
+
+app.get("/users", async () => {
+    return await userClient.get("/api/users");
+});
+
+app.get("/users/:id", async (req) => {
+    return await userClient.get(`/api/users/${req.params.id}`);
+});
+
+app.post("/users", async (req) => {
+    return await userClient.post("/api/users", req.body);
+});
+
+app.listen(3000);
+```
+
+## Health Checks (Kubernetes Ready)
+
+```typescript
+app.get("/health", () => ({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+}));
+
+// Kubernetes readiness probe
+app.get("/health/ready", async () => {
+    const dbConnected = await checkDatabaseConnection();
+    if (!dbConnected) {
+        throw new Error("Database not ready");
+    }
+    return { status: "ready", timestamp: new Date().toISOString() };
+});
+
+// Kubernetes liveness probe
+app.get("/health/live", () => ({
+    status: "alive",
+    timestamp: new Date().toISOString(),
+}));
+```
+
+## Serverless Deployment
+
+### AWS Lambda
+
+```typescript
+import { micro, awsLambdaAdapter } from "@expressots/adapter-express";
+
+const app = micro();
+
+app.get("/", () => ({ message: "Hello Lambda!" }));
+
+// Export Lambda handler
+export const handler = awsLambdaAdapter(app);
+```
+
+**serverless.yml:**
+
+```yaml
+service: my-micro-service
+provider:
+    name: aws
+    runtime: nodejs20.x
+
+functions:
+    api:
+        handler: dist/api.handler
+        events:
+            - httpApi: "*"
+```
+
+#### Body, base64, and binary content types
+
+The Lambda adapter handles request and response bodies according to API Gateway / ALB / Function URL conventions:
+
+| Direction | Behaviour                                                                                                                                                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Incoming body** | If `event.isBase64Encoded` is `true`, the body is decoded with `Buffer.from(body, "base64")` first. When `Content-Type` includes `application/json`, the body is then `JSON.parse()`d (with a fallback to the raw value if parsing fails). Other types pass through as a string or `Buffer`. |
+| **Outgoing body (text)** | Strings come back as UTF-8 with `isBase64Encoded: false`. `app.get(...) => "<h1>...</h1>"` returns `text/html`; `=> { ... }` returns `application/json` via the response helper.                                                                |
+| **Outgoing body (binary)** | If the `Content-Type` matches one of `config.binaryContentTypes`, the body is base64-encoded and `isBase64Encoded: true` is set. Wildcards like `image/*` are supported.                                                                       |
+
+Configure the binary types the adapter should encode:
+
+```ts
+export const handler = awsLambdaAdapter(app, {
+  binaryContentTypes: [
+    "application/octet-stream",
+    "application/pdf",
+    "image/*",
+    "video/*",
+    "audio/*",
+  ],
+});
+```
+
+Make sure your API Gateway or Function URL configuration **also** lists these types as binary media types, otherwise the gateway will mangle the response.
+
+#### Lambda-only fields
+
+Each request handler receives the original Lambda event and context attached to `req`:
+
+```ts
+import type { LambdaEvent, LambdaContext } from "@expressots/adapter-express";
+
+app.get("/", (req, res) => {
+  const { event, context } = req.lambda as { event: LambdaEvent; context: LambdaContext };
+  res.set("x-lambda-request-id", context.awsRequestId);
+  return { region: process.env.AWS_REGION, requestId: context.awsRequestId };
+});
+```
+
+The adapter also injects two request headers automatically:
+
+- `x-lambda-request-id`: `context.awsRequestId`.
+- `x-lambda-function`: `context.functionName`.
+
+#### Cold start tips
+
+| Tip                                                              | Why                                                                                       |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Build a single bundle (`esbuild` / `tsup`) and ship it as the function handler. | Saves ~80–150 ms of Node `require()` walking through `node_modules`.                  |
+| Use `micro()` rather than the full `AppExpress`.                 | Skips DI container initialization. Bring DI back only if you need it.                     |
+| Prefer Lambda extensions for log shipping rather than `HttpTransport`. | Avoids blocking the response on log network I/O.                                      |
+| Set `binaryContentTypes` precisely.                              | The fewer wildcards, the faster the per-request content-type lookup.                      |
+
+### Vercel
+
+```typescript
+import { micro, vercelAdapter } from "@expressots/adapter-express";
+
+const app = micro();
+
+app.get("/api", () => ({ message: "Hello Vercel!" }));
+
+export default vercelAdapter(app);
+```
+
+### Cloudflare Workers
+
+```typescript
+import { micro, cloudflareAdapter } from "@expressots/adapter-express";
+
+const app = micro();
+
+app.get("/", () => ({ message: "Hello Workers!" }));
+
+export default cloudflareAdapter(app);
+```
+
+## Docker Deployment
+
+### Dockerfile
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+RUN addgroup -g 1001 -S nodejs && adduser -S expressots -u 1001 -G nodejs
+COPY --from=builder --chown=expressots:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=expressots:nodejs /app/dist ./dist
+ENV NODE_ENV=production
+USER expressots
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -q --spider http://localhost:3000/health || exit 1
+CMD ["node", "dist/src/api.js"]
+```
+
+### Docker Compose
+
+```yaml
+version: "3.8"
+services:
+    app:
+        build: .
+        ports:
+            - "3000:3000"
+        environment:
+            - NODE_ENV=production
+            - PORT=3000
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+            interval: 30s
+            timeout: 3s
+```
+
+## Kubernetes Deployment
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: expressots-micro
+spec:
+    replicas: 3
+    template:
+        spec:
+            containers:
+                - name: app
+                  image: expressots-micro:latest
+                  ports:
+                      - containerPort: 3000
+                  livenessProbe:
+                      httpGet:
+                          path: /health/live
+                          port: 3000
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health/ready
+                          port: 3000
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+```
+
+## Testing
+
+### Using Native Fetch
+
+```typescript
+import "reflect-metadata";
+import { micro, MicroApp } from "@expressots/adapter-express";
+
+describe("Micro API", () => {
+    let app: MicroApp;
+    let baseUrl: string;
+
+    beforeAll(async () => {
+        app = micro({ showBanner: false });
+        
+        app.get("/", () => ({ message: "Hello" }));
+        app.get("/health", () => ({ status: "healthy" }));
+        
+        await app.listen(0);
+        const port = (app.getHttpServer().address() as { port: number }).port;
+        baseUrl = `http://localhost:${port}`;
+    });
+
+    afterAll(() => {
+        app.getHttpServer().close();
+    });
+
+    it("should return message", async () => {
+        const response = await fetch(`${baseUrl}/`);
+        const json = await response.json();
+        expect(json.message).toBe("Hello");
+    });
+
+    it("should return healthy status", async () => {
+        const response = await fetch(`${baseUrl}/health`);
+        const json = await response.json();
+        expect(json.status).toBe("healthy");
+    });
+});
+```
+
+### Using createFluentRequest
+
+```typescript
+import "reflect-metadata";
+import { micro, MicroApp } from "@expressots/adapter-express";
+import { createFluentRequest } from "@expressots/core";
+
+describe("Micro API", () => {
+    let app: MicroApp;
+    let baseUrl: string;
+
+    beforeAll(async () => {
+        app = micro({ showBanner: false });
+        
+        app.get("/health", () => ({ status: "healthy" }));
+        
+        await app.listen(0);
+        const port = (app.getHttpServer().address() as { port: number }).port;
+        baseUrl = `http://localhost:${port}`;
+    });
+
+    it("should return healthy status", async () => {
+        const request = createFluentRequest(baseUrl);
+        const response = await request
+            .get("/health")
+            .expectStatus(200)
+            .execute();
+        
+        expect((response.body as { status: string }).status).toBe("healthy");
+    });
+});
+```
+
+## API Reference
+
+### `micro(config?)`
+
+Creates a new micro API instance.
+
+```typescript
+interface MicroConfig {
+    autoParseJson?: boolean;  // Default: true
+    globalPrefix?: string;    // Default: ""
+    showBanner?: boolean;     // Default: true
+}
+```
+
+### `MicroApp` Methods
+
+| Method | Description |
+|--------|-------------|
+| `get(path, ...middleware, handler)` | Register GET route |
+| `post(path, ...middleware, handler)` | Register POST route |
+| `put(path, ...middleware, handler)` | Register PUT route |
+| `patch(path, ...middleware, handler)` | Register PATCH route |
+| `delete(path, ...middleware, handler)` | Register DELETE route |
+| `use(...middleware)` | Add global middleware |
+| `use(path, ...middleware)` | Add path-scoped middleware |
+| `setErrorHandler(fn)` | Set custom error handler |
+| `listen(port, appInfo?)` | Start the server |
+| `getHttpServer()` | Get HTTP server instance |
+| `getApp()` | Get underlying Express app |
+
+## When to Use Micro API
+
+**Use Micro API for:**
+-   Quick prototypes and POCs
+-   Simple CRUD APIs
+-   Webhook handlers
+-   Serverless functions
+-   Microservices with few endpoints
+-   APIs that don't need DI
+
+**Use Full Template for:**
+-   Complex business logic
+-   Multi-module applications
+-   Applications requiring dependency injection
+-   Projects with complex authorization
+-   Enterprise applications
+
+## Need Dependency Injection?
+
+Micro API is designed for simplicity without DI. If you need dependency injection, decorators, and enterprise features, use the full ExpressoTS framework:
+
+```bash
+expressots new my-app --template application
+```
+
+## Migrating from v3 `createMicroAPI()`
+
+If you have legacy code using the v3-era `createMicroAPI()` API, here are the key changes for v4:
+
+| v3 (`createMicroAPI`) | v4 (`micro`) |
+|----------------------|--------------|
+| `createMicroAPI()` | `micro()` |
+| `microAPI.build()` | Not needed. `micro()` returns the app directly |
+| `app.Middleware.parse()` | Auto-enabled |
+| `app.Route.get(path, handler, ...middleware)` | `app.get(path, ...middleware, handler)` |
+| `microAPI.Container.addSingleton()` | Use the full framework (`@expressots/core`) for DI |
+
+### Quick migration example
+
+**v3 (legacy `createMicroAPI`):**
+
+```typescript
+import { createMicroAPI } from "@expressots/adapter-express";
+
+const microAPI = createMicroAPI();
+const app = microAPI.build();
+app.Middleware.parse();
+app.Route.get("/", (req, res) => {
+    res.json({ message: "Hello" });
+});
+app.listen(3000);
+```
+
+**v4 (current `micro()`):**
+
+```typescript
+import { micro } from "@expressots/adapter-express";
+
+const app = micro();
+app.get("/", () => ({ message: "Hello" }));
+app.listen(3000);
+```
+
+:::caution `createMicroAPI` is removed in v4
+The legacy `createMicroAPI()` factory is not exported from `@expressots/adapter-express` v4. Use `micro()` instead.
+:::
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

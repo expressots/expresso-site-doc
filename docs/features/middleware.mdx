@@ -1,5 +1,5 @@
 ---
-sidebar_position: 0
+sidebar_position: 9
 title: Middleware
 description: Middleware are interceptors.
 ---
@@ -19,21 +19,30 @@ ExpressoTS integrates smoothly with Express middleware, allowing you to leverage
 
 ExpressoTS application supports adding middleware globally to the application as well as per route. It offers all the middleware supported by [Expressjs](https://expressjs.com/en/resources/middleware.html) team out-of-the-box.
 
-In the `app.ts` file, you can add middleware to the application using the `this.Middleware` property. The `this.Middleware` property is
-an instance of the `Middleware` class, which provides a list of out-of-the-box Expressjs middlewares supported by ExpressoTS.
+In the `app.ts` file, you can add middleware to the application using the `this.Middleware` property. The `this.Middleware` property is an instance of the `Middleware` class, which provides a unified API for configuring middleware.
 
-```ts title="Adding middleware globally to the application in app.provider.ts"
-@provide(App)
+```ts title="Adding middleware globally in app.ts (v4 API)"
 export class App extends AppExpress {
-    protected configureServices(): void {
-        this.Middleware.addBodyParser();
-        this.Middleware.addCors();
-        this.Middleware.addHelmet();
+    async configureServices(): Promise<void> {
+        // Unified body parsing (JSON, URL encoded, cookies)
+        this.Middleware.parse({
+            json: { limit: "10mb" },
+            urlencoded: { extended: true },
+            cookies: true,
+        });
+
+        // Unified security (CORS, Helmet, rate limiting)
+        this.Middleware.security("api");
+
+        // Error handling
+        this.Middleware.setErrorHandler({
+            showStackTrace: await this.isDevelopment(),
+        });
     }
 }
 ```
 
-In ExpressoTS, middleware options are available to be added as needed, but the actual middleware packages are not pre-installed to keep the application lightweight. When you choose to add one of the available out-of-the-box middleware options, such as CORS, the system checks if the necessary package is installed.
+In ExpressoTS, middleware options are available to be added as needed, but the actual middleware packages are not pre-installed to keep the application lightweight. When you choose to add middleware, the system checks if the necessary package is installed.
 
 If the middleware package isn't installed, the application will warn you with a message, but will continue running.
 
@@ -41,69 +50,410 @@ If the middleware package isn't installed, the application will warn you with a 
 🖥️ Middleware [cors] not installed. Please install it using your package manager.
 ```
 
-Once you install the required middleware, the warning will disappear on hot reload, and the middleware will be ready for use with its interface integrated into your application.
+Once you install the required middleware, the warning will disappear on hot reload, and the middleware will be ready for use.
 
-## Out-of-the-box middleware
+## Unified Middleware API (v4)
 
-Expressjs middlewares supported by ExpressoTS:
+ExpressoTS v4 introduces a unified, intuitive middleware API:
 
-| Middleware Name     | Description                                           |
-| ------------------- | ----------------------------------------------------- |
-| addBodyParser       | Add body parser middleware to the application.        |
-| addCompression      | Add compression middleware to the application.        |
-| addCookieParser     | Add cookie parser middleware to the application.      |
-| addCookieSession    | Add cookie session middleware to the application.     |
-| addCors             | Add cors middleware to the application.               |
-| addHelmet           | Add helmet middleware to the application.             |
-| addMorgan           | Add morgan middleware to the application.             |
-| addRateLimiter      | Add rate limit middleware to the application.         |
-| addServeFavicon     | Add serve favicon middleware to the application.      |
-| addSession          | Add session middleware to the application.            |
-| addUrlEncodedParser | Add url encoded parser middleware to the application. |
-| serverStatic        | Add static middleware to the application.             |
-| setupMulter         | Create a multer instance for file upload.             |
-| setErrorHandler     | Add error handler middleware to the application.      |
+| Method              | Description                                                    |
+| ------------------- | -------------------------------------------------------------- |
+| `parse()`           | Unified body parsing (JSON, URL encoded, cookies)              |
+| `security()`        | Unified security (CORS, Helmet, rate limiting) with presets    |
+| `compress()`        | Auto-detect compression (shrink-ray or compression)            |
+| `static()`          | Enhanced static file serving with SPA support                  |
+| `logger()`          | Pluggable logging (auto-detects pino, winston, morgan)         |
+| `register()`        | Middleware registry for route-level use                        |
+| `when()`            | Conditional middleware execution                               |
+| `applyPreset()`     | Apply built-in presets (api, web, spa, microservice, graphql, minimal, development, production) |
+| `definePreset()`    | Define custom middleware presets                               |
+| `add()`             | Add custom middleware                                          |
+| `setErrorHandler()` | Configure error handling                                       |
+| `addValidation()`   | Smart validation with auto-detection                           |
+| `addContentNegotiation()` | Content negotiation with multiple formatters             |
+
+### parse() - Unified Body Parsing
+
+Replaces individual body parsers with one unified method:
+
+```typescript
+// Before (v3)
+this.Middleware.addBodyParser();
+this.Middleware.addUrlEncodedParser();
+this.Middleware.addCookieParser();
+
+// After (v4) - One unified call
+this.Middleware.parse({
+    json: { limit: "10mb" },
+    urlencoded: { extended: true },
+    cookies: true,
+});
+
+// Or with defaults
+this.Middleware.parse();
+```
+
+### security() - Unified Security
+
+Replaces individual security middleware with presets:
+
+```typescript
+// Before (v3)
+this.Middleware.addCors();
+this.Middleware.addHelmet();
+this.Middleware.addRateLimiter();
+
+// After (v4) - Use security presets
+this.Middleware.security("standard");  // Balanced security
+this.Middleware.security("strict");    // Maximum security
+this.Middleware.security("api");       // API-optimized
+this.Middleware.security("minimal");   // Development-friendly
+this.Middleware.security("relaxed");   // Minimal restrictions
+```
+
+### compress() - Auto-Detect Compression
+
+```typescript
+// Auto-detects shrink-ray or compression
+this.Middleware.compress({ threshold: 1024 });
+```
+
+### static() - Enhanced Static Files
+
+```typescript
+// Basic static file serving
+this.Middleware.static({
+    path: path.join(process.cwd(), "public"),
+    prefix: "/static",
+    maxAge: "1d",
+    etag: true,
+});
+
+// SPA mode with fallback
+this.Middleware.static({
+    path: "./dist",
+    spaMode: true,
+    fallback: "index.html",
+});
+```
+
+### logger() - Pluggable Logging
+
+```typescript
+// Auto-detects pino → winston → morgan → console
+this.Middleware.logger();
+
+// Or specify implementation
+this.Middleware.logger({ implementation: "pino" });
+```
 
 :::caution
 If you add a middleware that is not installed as dependency, the application will throw a warning message and continue to run.
 :::
 
-## Using `addMiddleware` method
+## Middleware Registry
 
-For any other middleware, or a custom middleware, you can add it using the `this.middleware.addMiddleware()` method. Using the `addMiddleware` method, you can add any middleware from NPM Registry, custom Expressjs middleware or a ExpressoTS class-based middleware.
+The middleware registry allows you to register named middleware for use at the route level:
 
-NPM Registry middleware:
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
 
-```typescript title="Adding NPM Registry cors middleware"
-this.Middleware.addMiddleware(cors());
-```
+        // Register individual middleware
+        this.Middleware.register("verify-jwt", verifyJwtMiddleware);
+        this.Middleware.register("require-auth", requireAuthMiddleware);
+        this.Middleware.register("request-id", requestIdMiddleware);
 
-Custom Expressjs middleware:
-
-```typescript title="Adding custom expressjs middleware"
-function myMiddleware(req: Request, res: Response, next: NextFunction) {
-    next();
-}
-
-this.Middleware.addMiddleware(myMiddleware);
-```
-
-Custom ExpressoTS middleware:
-
-```typescript title="Adding custom expressots middleware"
-class CustomMiddleware extends ExpressoMiddleware {
-    use(req: Request, res: Response, next: NextFunction): void | Promise<void> {
-        next();
+        // Register middleware chains
+        this.Middleware.register("auth-chain", [verifyJwt, requireAuth]);
+        this.Middleware.register("admin", [verifyJwt, requireAuth, requireAdmin]);
     }
 }
-
-this.Middleware.addMiddleware(new CustomMiddleware());
 ```
 
-You can also add middleware to a specific route in the `App` class through the `this.middleware.addMiddleware()` method. You can add any middleware from NPM Registry, custom Expressjs middleware or a custom middleware.
+Then use in controllers with the `@middleware()` decorator:
 
-```typescript title="Adding middleware to a specific route"
-this.Middleware.addMiddleware({ path: "/api", middlewares: [] });
+```typescript
+@controller("/admin")
+@middleware("admin")  // Use registered chain
+export class AdminController {
+    @Get("/dashboard")
+    @middleware("verify-jwt")  // Use single middleware
+    dashboard() {
+        return { admin: true };
+    }
+}
+```
+
+## Conditional Middleware
+
+Execute middleware based on conditions:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.parse();
+
+        // Only in development
+        this.Middleware.when(process.env.NODE_ENV === "development", () => {
+            console.log("🔧 Development mode: Extra logging enabled");
+            this.Middleware.logger();
+        });
+
+        // Only in production
+        this.Middleware.when(process.env.NODE_ENV === "production", () => {
+            this.Middleware.compress();
+            this.Middleware.security("strict");
+        });
+    }
+}
+```
+
+## Middleware Presets
+
+Pre-configured middleware bundles for common scenarios. Pick the one that matches your workload and override any category if needed.
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api");
+    }
+}
+```
+
+### Built-in presets
+
+| Preset         | Parse                                  | Security                                        | Compression | Logger | Best for                              |
+| -------------- | -------------------------------------- | ----------------------------------------------- | ----------- | ------ | ------------------------------------- |
+| `api`          | JSON 10mb, urlencoded 10mb             | Helmet + CORS (methods/headers/credentials) + rate limit 100/min | level 6     | auto   | REST APIs, mobile/SPA backends        |
+| `web`          | JSON 5mb, urlencoded 5mb, cookies      | Helmet + permissive CORS, no rate limit         | default     | auto   | Server-rendered web apps with sessions |
+| `spa`          | JSON 5mb, urlencoded 5mb               | Helmet + permissive CORS                        | default     | none   | SPA backends with static fallback     |
+| `microservice` | JSON 1mb, urlencoded 1mb               | None (assumes trusted internal network)         | level 6     | none   | Service-to-service communication      |
+| `graphql`      | JSON 50mb                              | Helmet + POST-only CORS                         | default     | none   | GraphQL servers (single endpoint)     |
+| `minimal`      | JSON + urlencoded defaults             | None                                            | none        | none   | Quick prototypes                      |
+| `development`  | JSON 50mb, urlencoded 50mb             | Relaxed (no Helmet, permissive CORS)            | none        | morgan | Local development                     |
+| `production`   | JSON 10mb, urlencoded 10mb             | Strict (Helmet + CORS origin: false + rate limit 60/min) | level 6 | auto (silent in test) | Shipped deployments               |
+
+### Preset default values
+
+Below is the exact configuration each built-in preset resolves to at runtime. Use this reference when overriding specific values.
+
+<details>
+<summary><strong>api</strong> — REST APIs, mobile/SPA backends</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "10mb" },
+    urlencoded: { extended: true, limit: "10mb" },
+  },
+  logger: { implementation: "auto" },
+  security: "api",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: {
+  //     origin: true,
+  //     credentials: true,
+  //     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  //     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  //   }
+  //   rateLimit: { windowMs: 60000, max: 100 }
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+<details>
+<summary><strong>web</strong> — Server-rendered web apps with sessions</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "5mb" },
+    urlencoded: { extended: true, limit: "5mb" },
+    cookies: true,
+  },
+  logger: { implementation: "auto" },
+  security: "standard",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: { origin: true }  (permissive)
+  //   rateLimit: false
+  compress: true,   // default compression level
+}
+```
+
+</details>
+
+<details>
+<summary><strong>spa</strong> — SPA backends with static fallback</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "5mb" },
+    urlencoded: { extended: true, limit: "5mb" },
+  },
+  security: "standard",   // Helmet + permissive CORS, no rate limit
+  compress: true,
+}
+```
+
+</details>
+
+<details>
+<summary><strong>microservice</strong> — Service-to-service communication</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "1mb" },
+    urlencoded: { extended: false, limit: "1mb" },
+  },
+  // No security (internal network, behind API gateway)
+  // No logger
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+<details>
+<summary><strong>graphql</strong> — GraphQL servers (single endpoint)</summary>
+
+```typescript
+{
+  parse: { json: { limit: "50mb" } },
+  security: {
+    headers: "helmet",
+    cors: { origin: true, methods: ["GET", "POST", "OPTIONS"] },
+    // No rate limit
+  },
+  compress: true,
+}
+```
+
+</details>
+
+<details>
+<summary><strong>minimal</strong> — Quick prototypes</summary>
+
+```typescript
+{
+  parse: true,   // JSON 100kb default + urlencoded { extended: true }
+  // No security, compression, or logger
+}
+```
+
+</details>
+
+<details>
+<summary><strong>development</strong> — Local development</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "50mb" },
+    urlencoded: { extended: true, limit: "50mb" },
+  },
+  logger: { implementation: "morgan", options: { format: "dev" } },
+  security: "relaxed",   // resolves to:
+  //   headers: false  (no Helmet)
+  //   cors: { origin: true }
+  //   rateLimit: false
+  // No compression
+}
+```
+
+</details>
+
+<details>
+<summary><strong>production</strong> — Shipped deployments</summary>
+
+```typescript
+{
+  parse: {
+    json: { limit: "10mb" },
+    urlencoded: { extended: true, limit: "10mb" },
+  },
+  logger: { implementation: "auto", disableInTest: true },
+  security: "strict",   // resolves to:
+  //   headers: "helmet" (default Helmet options)
+  //   cors: { origin: false, credentials: true }
+  //   rateLimit: { windowMs: 60000, max: 60 }
+  compress: { level: 6 },
+}
+```
+
+</details>
+
+### Security tier reference
+
+The `security` field accepts a string preset name or a full `SecurityConfig` object. Here are the five built-in security tiers:
+
+| Tier | Helmet | CORS | Rate Limit |
+| --- | --- | --- | --- |
+| `"api"` | On (defaults) | `origin: true`, `credentials: true`, explicit methods + `allowedHeaders` | 100 req / 60s |
+| `"standard"` | On (defaults) | `origin: true` (permissive) | Off |
+| `"strict"` | On (defaults) | `origin: false`, `credentials: true` | 60 req / 60s |
+| `"relaxed"` | Off | `origin: true` | Off |
+| `"minimal"` | Off | `origin: true` | Off |
+
+### Overriding a preset
+
+`applyPreset()` accepts an override object that deep-merges with the preset defaults. Set any category to `false` to disable it, or pass an options object to tune it.
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api", {
+            logger: false,
+            parse: { json: { limit: "25mb" } },
+            security: {
+                cors: { origin: "https://myapp.com", credentials: true },
+                rateLimit: { windowMs: 60_000, max: 30 },
+            },
+        });
+    }
+}
+```
+
+### Custom presets
+
+Use `definePreset()` to register a reusable named preset, then apply it like any built-in.
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.definePreset("my-company-api", {
+            parse: { json: { limit: "5mb" }, urlencoded: true },
+            logger: { implementation: "auto" },
+            security: "api",
+            compress: true,
+        });
+
+        this.Middleware.applyPreset("my-company-api");
+    }
+}
+```
+
+## Adding Custom Middleware
+
+Use the `add()` method for custom middleware:
+
+```typescript
+// Function middleware
+this.Middleware.add((req, res, next) => {
+    req.requestTime = Date.now();
+    next();
+});
+
+// Express middleware from NPM
+import cors from "cors";
+this.Middleware.add(cors({ origin: "https://example.com" }));
+
+// Class-based middleware
+this.Middleware.add(new CustomMiddleware());
 ```
 
 :::note Each route can have multiple middlewares.
@@ -195,17 +545,480 @@ create reusable middleware with different configurations.
 You can view all the middlewares added to the application using the `this.middleware.viewMiddlewarePipeline()` method.
 The goal of the `viewMiddlewarePipeline` method is to provide a visual representation of the middleware pipeline in the application.
 
-:::info
-We are working on adding execution time for each middleware in the pipeline. This will allow you to identify bottlenecks in the middleware pipeline.
-:::
-
 Here is the output of the `viewMiddlewarePipeline` method:
 
 ![View Middleware Pipeline](../core/img/middleware-view.png)
 
+## V4 Middleware Enhancements
+
+ExpressoTS v4 introduces powerful new middleware capabilities:
+
+### Conditional Middleware
+
+Execute middleware based on conditions:
+
+```typescript
+import { when, unless } from "@expressots/adapter-express";
+
+@Get("/admin",
+    when(req => req.hostname.startsWith("admin."), AdminMiddleware),
+    AuthMiddleware
+)
+async adminHandler() {}
+
+@Get("/public",
+    unless(req => req.headers.authorization, AuthMiddleware)
+)
+async publicHandler() {}
+```
+
+### Middleware Composition
+
+Group and sequence middleware:
+
+```typescript
+import { combine, sequence } from "@expressots/adapter-express";
+
+// Combine multiple middleware into a reusable group
+@Get("/api", combine(AuthMiddleware, LoggingMiddleware, RateLimitMiddleware))
+async apiHandler() {}
+
+// Sequence middleware with dependencies
+@Get("/data", sequence(ValidateMiddleware, TransformMiddleware, ProcessMiddleware))
+async dataHandler() {}
+```
+
+### Class Reference Support
+
+Use class references without `new`:
+
+```typescript
+// Before (still works)
+@Get("/", new AuthMiddleware())
+
+// After (v4 recommended - cleaner API)
+@Get("/", AuthMiddleware)  // No 'new' needed!
+```
+
+### Middleware Presets
+
+Pre-configured middleware bundles applied with a single call. See the [Middleware Presets](#middleware-presets) section above for the full catalog and override patterns.
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api");         // REST API defaults
+        this.Middleware.applyPreset("production");  // Hardened production defaults
+        this.Middleware.applyPreset("development"); // Relaxed local-dev defaults
+    }
+}
+```
+
+### Performance Profiling
+
+Built-in middleware profiler:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // Enable profiling
+        this.Middleware.enableProfiling();
+        
+        // Add middleware
+        this.Middleware.addBodyParser();
+        this.Middleware.addCors();
+    }
+
+    async postServerInitialization(): Promise<void> {
+        // Access profiler stats
+        const stats = this.Middleware.getProfilerStats();
+        console.log(stats);
+        // {
+        //   "bodyParser": { avgTime: 2.3, callCount: 150, errors: 0 },
+        //   "cors": { avgTime: 0.5, callCount: 150, errors: 0 }
+        // }
+    }
+}
+```
+
+### Pipeline Introspection
+
+Query middleware pipeline at runtime:
+
+```typescript
+// Get ordered list of all middleware
+const pipeline = this.Middleware.getMiddlewarePipeline();
+
+// Get detailed information
+const info = this.Middleware.getMiddlewareInfo("cors");
+
+// Filter by category
+const security = this.Middleware.getMiddlewarePipeline({ category: "security" });
+```
+
+### New v4 Middleware
+
+| Middleware Name        | Description                                              |
+| ---------------------- | -------------------------------------------------------- |
+| addContentNegotiation  | Add content negotiation with multiple formatters         |
+| addValidation          | Add smart validation (zero-config with @validatedBody()) |
+| addHealthCheck         | Add health check endpoint                                |
+| applyPreset            | Apply middleware preset (api, web, production, development, ...) |
+
+### Content Negotiation
+
+Built-in content negotiation with multiple formatters:
+
+```typescript
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.addContentNegotiation({
+            defaultFormat: "json",
+            formatters: {
+                json: { enabled: true },
+                xml: { enabled: true },
+                csv: { enabled: true },
+                yaml: { enabled: true },
+            },
+        });
+    }
+}
+```
+
+### Smart Validation
+
+Zero-config validation with helpful error messages:
+
+```typescript
+import { validatedBody } from "@expressots/core";
+
+@Post("/users")
+createUser(@validatedBody() dto: CreateUserDto) {
+    // dto is automatically validated
+    // TypeScript types are inferred
+    return this.userService.create(dto);
+}
+```
+
+## Advanced Patterns
+
+### Async response handling with callback-based middleware
+
+ExpressoTS v4 has a smart-response handler: when your controller method returns `undefined`, the framework calls `res.end()` automatically (or returns a 404 for `GET`, or a 204 for `DELETE`/`PUT`/`PATCH`). This is great for clean handlers - until you mix it with **callback-based async middleware** like `multer`, `busboy`, or anything that does its own `req`/`res` work via a continuation.
+
+The trap:
+
+```typescript
+@Post("upload")
+single(req: Request, res: Response) {
+    upload.single("file")(req, res, (err) => {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({ ok: true });   // <- runs async, AFTER the handler returns
+    });
+    // handler returns `undefined` here, BEFORE multer finishes
+}
+```
+
+What happens:
+1. Multer kicks off async file parsing.
+2. Your handler returns `undefined`.
+3. Framework sees `undefined` + `res.headersSent === false` -> calls `res.end()`. Headers now sent.
+4. Multer finishes, callback runs, `res.json(...)` -> "Cannot set headers after they are sent" crash.
+
+The fix: make your handler `async` and `await` the middleware via a Promise wrapper.
+
+```typescript
+function runMulter(
+    req: Request,
+    res: Response,
+    middleware: ReturnType<multer.Multer["single"]>,
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        middleware(req, res, (err) => (err ? reject(err) : resolve()));
+    });
+}
+
+@controller("/upload")
+class UploadController {
+    @Post("single")
+    async single(req: Request, res: Response) {
+        try {
+            await runMulter(req, res, upload.single("file"));
+        } catch (err) {
+            res.status(400).json({ success: false, error: (err as Error).message });
+            return;
+        }
+
+        res.json({ success: true, file: req.file });
+    }
+}
+```
+
+Now the framework awaits your handler's promise, which resolves only after multer has fully responded. No double-write.
+
+The same pattern applies to any callback-style middleware that holds the response: `busboy`, custom file pipelines, raw stream consumers, third-party body parsers.
+
+### Production-Ready Middleware Stacks
+
+Create reusable middleware stacks for different scenarios:
+
+```typescript
+import { combine, sequence, when } from "@expressots/adapter-express";
+
+// Define reusable stacks
+const apiStack = combine(CorsMiddleware, LoggingMiddleware, CompressionMiddleware);
+const authStack = combine(JwtMiddleware, RoleMiddleware);
+const validationStack = sequence(ValidateMiddleware, TransformMiddleware);
+
+// Use in controllers
+@controller("/api/v1")
+class ApiController {
+    @Get("/public", apiStack)
+    publicEndpoint() { /* ... */ }
+
+    @Get("/protected", combine(apiStack, authStack))
+    protectedEndpoint() { /* ... */ }
+
+    @Post("/data", combine(apiStack, authStack, validationStack))
+    dataEndpoint() { /* ... */ }
+}
+```
+
+### Error Handling Best Practices
+
+Handle errors at different points in the middleware chain:
+
+```typescript
+@provide(ErrorBoundaryMiddleware)
+class ErrorBoundaryMiddleware extends ExpressoMiddleware {
+    use(req: Request, res: Response, next: NextFunction): void {
+        try {
+            next();
+        } catch (error) {
+            // Handle sync errors
+            next(error);
+        }
+    }
+}
+
+// Global error handler configuration
+async configureServices(): Promise<void> {
+    this.Middleware.setErrorHandler({
+        showStackTrace: await this.isDevelopment(),
+        logErrors: true,
+        customHandler: (error, req, res, next) => {
+            // Custom error formatting
+        },
+    });
+}
+```
+
+### Performance Optimization Tips
+
+1. **Order matters** - Put frequently-skipped conditional middleware early
+2. **Use combine()** for parallel-safe middleware groups
+3. **Use sequence()** when middleware has dependencies
+4. **Avoid deep nesting** - Flatten composition when possible
+
+```typescript
+// Good: Flat and efficient
+@Get("/api", combine(
+    CorsMiddleware,
+    when(() => process.env.NODE_ENV === "production", CompressionMiddleware),
+    AuthMiddleware,
+    LoggingMiddleware
+))
+
+// Avoid: Deeply nested
+@Get("/api", combine(
+    CorsMiddleware,
+    combine(
+        when(() => true, combine(AuthMiddleware, LoggingMiddleware)),
+        CompressionMiddleware
+    )
+))
+```
+
+### Real-World Recipes
+
+#### REST API with Full Security
+
+```typescript
+const secureApiStack = combine(
+    CorsMiddleware,
+    HelmetMiddleware,
+    RateLimitMiddleware,
+    JwtAuthMiddleware,
+    AuditLogMiddleware
+);
+
+@controller("/api/v1/users", secureApiStack)
+class UserController {
+    @Get("/") listUsers() { /* ... */ }
+    @Post("/", ValidationMiddleware) createUser() { /* ... */ }
+    @Get("/:id") getUser() { /* ... */ }
+}
+```
+
+#### Conditional Feature Flags
+
+```typescript
+@Get("/feature",
+    when(() => featureFlags.isEnabled("new-feature"), NewFeatureMiddleware),
+    unless(() => featureFlags.isEnabled("new-feature"), LegacyMiddleware)
+)
+featureEndpoint() { /* ... */ }
+```
+
 ---
 
-## Support us ❤️
+## Named middleware registry (v4)
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+`@expressots/core/middleware` exposes a **named middleware registry**, a separate composition story from the route-level decorators above. Use the registry when you want to declare middleware once under a name and reference it by string in many places.
+
+### Lifecycle
+
+```ts
+import {
+  getMiddlewareRegistry,
+  resetMiddlewareRegistry,
+} from "@expressots/core";
+
+// Register
+const registry = getMiddlewareRegistry();
+registry.register("auth", AuthMiddleware);
+registry.register("audit-log", AuditLogMiddleware);
+
+// Clear (typically only in tests)
+resetMiddlewareRegistry();
+```
+
+### `use(...names)`: resolve registered middleware
+
+```ts
+import { use } from "@expressots/core";
+
+@Get("/", ...use("auth", "audit-log"))
+listUsers() {}
+```
+
+`use()` returns an array of `RequestHandler`s **looked up at request time**, so the registry can be mutated between bootstrap and request without recompiling routes.
+
+### `compose(...middlewares)`: sequential composition
+
+```ts
+import { compose } from "@expressots/core";
+
+const apiChain = compose(corsMw, helmetMw, ...use("auth"));
+app.use(apiChain);
+```
+
+### `when(condition, middleware)`: conditional execution
+
+```ts
+import { when } from "@expressots/core";
+
+app.use(when((req) => req.headers["x-debug"] === "1", debugMw));
+```
+
+This is the **core** `when` (matches `RequestHandler`, runs at request time). The `when()` exported from `@expressots/adapter-express` is the **decorator-level** equivalent for `@Get`/`@Post` etc.
+
+### `parallel(middleware)`: fire-and-forget
+
+```ts
+import { parallel } from "@expressots/core";
+
+app.use(parallel(metricsMw));   // runs via setImmediate, never blocks the response
+```
+
+### `timeout(ms, middleware)`: hard timeout wrapper
+
+```ts
+import { timeout } from "@expressots/core";
+
+app.use(timeout(2000, externalApiMw));    // emits a 504-style error after 2s
+```
+
+## Preset API
+
+Presets are applied through `this.Middleware.applyPreset(name, overrides?)`. The override object deep-merges with the preset defaults so you only need to specify what you want to change.
+
+```ts
+import type { MiddlewareConfig } from "@expressots/core";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api", {
+            security: {
+                cors: { origin: "https://myapp.com", credentials: true },
+                rateLimit: { windowMs: 60_000, max: 50 },
+            },
+            compress: { level: 9 },
+            logger: false,
+        } satisfies Partial<MiddlewareConfig>);
+    }
+}
+```
+
+### Defining and reusing custom presets
+
+```ts
+this.Middleware.definePreset("edge", {
+    parse: { json: { limit: "1mb" } },
+    security: { headers: "helmet", cors: { origin: true } },
+    compress: { level: 6 },
+});
+
+this.Middleware.applyPreset("edge");
+```
+
+`definePreset()` registers the preset on the current middleware service. Once registered, it can be passed to `applyPreset()` by name with the same override semantics as built-in presets.
+
+## Profiler & introspection
+
+The middleware profiler tracks per-middleware timing and can produce a pipeline analysis at runtime.
+
+```ts
+import { MiddlewareProfiler } from "@expressots/core";
+
+const profiler = new MiddlewareProfiler();
+profiler.enable();
+
+app.use(profiler.wrap("cors", corsMw));
+app.use(profiler.wrap("auth", authMw));
+
+// Later:
+const stats = profiler.getStats();
+console.log(stats.totals);            // { count, totalMs, p95Ms }
+console.log(stats.byMiddleware);      // per-name aggregate metrics
+```
+
+Combined with the [Studio Request Timeline](../studio/overview.mdx#feature-tour), the profiler is the source of the "Top slow middleware" chart.
+
+## Optional-package resolver
+
+`@expressots/core` does not bundle Express middleware packages. It loads them on demand. Inspect what's available:
+
+```ts
+import {
+  isMiddlewareAvailable,
+  getAvailableMiddleware,
+  getRegisteredMiddleware,
+  MIDDLEWARE_REGISTRY,
+} from "@expressots/core";
+
+if (!isMiddlewareAvailable("cors")) {
+  console.warn("Install 'cors' to enable CORS support.");
+}
+
+const present  = getAvailableMiddleware();      // ["cors", "helmet", "morgan", ...]
+const registry = getRegisteredMiddleware();     // Names of every middleware backed by a known package
+```
+
+The `MIDDLEWARE_REGISTRY` constant is the static catalog of optional packages the framework knows how to import.
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

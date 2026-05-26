@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Container
-description: The AppContainer simplifies module registration.
+description: The AppContainer manages dependency injection configuration.
 ---
 
 # Container
@@ -28,7 +28,7 @@ interface ContainerOptions {
 
 ### Options Reference
 
-#### defaultScope
+#### `defaultScope`
 
 Controls the default lifecycle for all bindings in the container.
 
@@ -38,9 +38,9 @@ Controls the default lifecycle for all bindings in the container.
 | **Singleton** | Single instance     | Fastest     | DB connections, config       | High    |
 | **Transient** | New every injection | Slowest     | Pure functions, disposable   | Highest |
 
-#### skipBaseClassChecks
+#### `skipBaseClassChecks`
 
-**What it does**: Controls InversifyJS base class inheritance validation.
+**What it does**: Controls D.I base class inheritance validation.
 
 **Performance Impact**:
 
@@ -59,7 +59,7 @@ Controls the default lifecycle for all bindings in the container.
 -   Debugging DI issues
 -   Complex inheritance hierarchies
 
-#### autoBindInjectable
+#### `autoBindInjectable`
 
 **What it does**: Automatically binds classes decorated with @injectable()
 
@@ -98,112 +98,104 @@ private container: AppContainer = this.configContainer([AppModule], {
 });
 ```
 
-## Module Registration
+## Introspection API
 
-### Basic Module
+ExpressoTS v4 provides a comprehensive introspection API for container bindings, designed for debugging, analysis, and integration with ExpressoTS Studio.
 
-```typescript
-export const PaymentModule = CreateModule([PaymentController]);
-```
+### Getting Bindings Data
 
-### Module with Scope
+Retrieve structured data about all container bindings:
 
 ```typescript
-import { CreateModule, Scope } from "@expressots/core";
+// Get all bindings as structured data
+const bindings = this.container.getBindingsInfo();
 
-export const CacheModule = CreateModule([CacheController], Scope.Singleton);
-```
-
-### Module with Custom Bindings
-
-```typescript
-export const AppModule = CreateModule([UserController], (bind) => {
-    bind<ILogger>("ILogger").to(ConsoleLogger).inSingletonScope();
-    bind<ICache>("ICache").to(RedisCache);
+bindings.forEach((b) => {
+    console.log(`${b.serviceIdentifier}: ${b.scope} (${b.type})`);
 });
 ```
 
-### Module with Scope AND Bindings
+Each binding includes:
+
+| Property            | Description                           |
+| ------------------- | ------------------------------------- |
+| `serviceIdentifier` | Class name, symbol, or string token   |
+| `scope`             | Request, Singleton, Transient, custom |
+| `type`              | Constructor, ConstantValue, Factory   |
+| `cached`            | Whether instance is cached            |
+| `activated`         | Whether binding has been resolved     |
+| `moduleId`          | Module the binding belongs to         |
+
+### Filtering Bindings
+
+Query bindings with specific criteria:
 
 ```typescript
-import { CreateModule, Scope } from "@expressots/core";
+// Get only singleton bindings
+const singletons = this.container.filterBindings({ scope: "Singleton" });
 
-export const DatabaseModule = CreateModule(
-    [DbController],
-    Scope.Singleton,
-    (bind) => {
-        bind<IDatabase>("IDatabase").to(PostgresDB);
-    }
-);
-```
+// Get cached bindings
+const cached = this.container.filterBindings({ cached: true });
 
-### Advanced: Using createModule Helper
+// Find by identifier pattern
+const controllers = this.container.filterBindings({ identifier: "Controller" });
 
-```typescript
-import { createModule } from "@expressots/core";
-
-export const LoggingModule = createModule((bind) => {
-    bind<ILogger>("ILogger").to(WinstonLogger).inSingletonScope();
+// Combine filters
+const activeSingletons = this.container.filterBindings({
+    scope: "Singleton",
+    activated: true,
 });
 ```
 
-### Advanced: Combining Modules
+### Summary Statistics
+
+Get aggregate statistics about container bindings:
 
 ```typescript
-import { combineModules, CreateModule } from "@expressots/core";
+const summary = this.container.getBindingsSummary();
 
-export const AppModule = combineModules(
-    CreateModule([UserController]),
-    CreateModule([AuthController]),
-    LoggingModule
-);
+console.log(`Total bindings: ${summary.total}`);
+console.log(`Singletons: ${summary.byScope["Singleton"] || 0}`);
+console.log(`Cached: ${summary.cached}`);
+console.log(`Activated: ${summary.activated}`);
 ```
 
-## Scope Management
+### Formatted View
 
-### Available Scopes
-
-| Scope         | Lifecycle           | Performance | Use Case                     | Memory  |
-| ------------- | ------------------- | ----------- | ---------------------------- | ------- |
-| **Request**   | New per request     | Fast        | Stateless services (default) | Low     |
-| **Singleton** | Single instance     | Fastest     | DB connections, config       | High    |
-| **Transient** | New every injection | Slowest     | Pure functions, disposable   | Highest |
-
-### Scope Precedence
-
-Container default → Module scope → @scope() decorator (highest priority)
-
-### Using @scope() Decorator
-
-Override module scope at controller level:
+Get a formatted string representation:
 
 ```typescript
-import { scope, Scope } from "@expressots/core";
-import { controller } from "@expressots/adapter-express";
+// Print formatted view to console
+console.log(this.container.getFormattedBindingsView());
 
-@scope(Scope.Singleton)
-@controller("/cache")
-export class CacheController {
-    // Single instance regardless of module scope
-}
+// With filters
+console.log(this.container.getFormattedBindingsView({ scope: "Singleton" }));
 ```
 
-## Container Access Methods
+### Complete Introspection
 
-### Viewing Bindings
+Get all container data in a single call (ideal for ExpressoTS Studio):
 
-Debug and inspect all registered services:
+```typescript
+const data = this.container.introspect();
+
+// Structure:
+// {
+//   bindings: BindingInfo[],
+//   summary: BindingsSummary,
+//   options: ContainerOptions,
+//   timestamp: string,
+//   containerId: number
+// }
+```
+
+### Legacy: Table View
+
+For quick debugging, the table view is still available:
 
 ```typescript
 this.container.viewContainerBindings();
 ```
-
-Output shows:
-
--   Service Identifier
--   Scope (Request/Singleton/Transient)
--   Type (Constructor/ConstantValue/etc)
--   Cache status
 
 ![Container Bindings View](./img/container-bindings.png)
 
@@ -219,63 +211,14 @@ console.log(options.autoBindInjectable);
 
 ### Accessing Raw Container
 
-For advanced InversifyJS operations:
+For advanced D.I operations:
 
 ```typescript
 const inversifyContainer = this.container.Container;
-// Use InversifyJS APIs directly
-```
-
-## Custom Bindings
-
-### Binding Types
-
-```typescript
-// Class binding
-bind<IService>("IService").to(MyService);
-
-// Constant value
-bind<IConfig>("IConfig").toConstantValue(config);
-
-// Dynamic value (factory)
-bind<ILogger>("ILogger").toDynamicValue((context) => {
-    return new Logger(context.container.get("IConfig"));
-});
-```
-
-### Binding Scopes
-
-```typescript
-.inSingletonScope()  // Single instance
-.inRequestScope()    // New per request
-.inTransientScope()  // New every injection
-```
-
-### Advanced Patterns
-
-```typescript
-// Conditional binding
-export const Module = CreateModule(
-    [Controller],
-    (bind, unbind, isBound, rebind) => {
-        if (!isBound("ILogger")) {
-            bind<ILogger>("ILogger").to(Logger);
-        }
-
-        if (isBound("OldCache")) {
-            rebind<ICache>("ICache").to(NewCache);
-        }
-    }
-);
+// Use D.I APIs directly
 ```
 
 ## Performance Best Practices
-
-### Scope Selection Guide
-
-1. **Use Request scope** (default) for stateless services
-2. **Use Singleton** for expensive initialization (DB, cache)
-3. **Avoid Transient** unless necessary (disposable objects)
 
 ### Production Optimization
 
@@ -301,25 +244,25 @@ private container: AppContainer = this.configContainer([AppModule], {
 
 **DI Resolution Errors**
 
--   Enable `viewContainerBindings()` to inspect registrations
--   Check scope precedence chain
+-   Use `getBindingsInfo()` or `filterBindings()` to inspect registrations
+-   Use `introspect()` for complete container state
 -   Verify @injectable() decorator is present
+-   Check for missing module registration
 
 **Performance Issues**
 
--   Profile container creation time
+-   Use `getBindingsSummary()` to analyze scope distribution
 -   Consider enabling `skipBaseClassChecks` in production
 -   Review scope usage (too many Transient?)
 
 **Binding Conflicts**
 
+-   Use `filterBindings({ identifier: 'YourService' })` to find duplicates
 -   Use `getContainerOptions()` to inspect config
--   Check for duplicate bindings
--   Use `isBound()` before binding
+-   Use `isBound()` before binding in modules
 
 ---
 
-## Support us ❤️
+## Support the Project
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

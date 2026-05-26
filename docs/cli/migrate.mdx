@@ -1,0 +1,84 @@
+---
+sidebar_position: 10
+title: Migrate
+description: "Generate migration scaffolds from one deployment platform to another: Heroku to Railway/Render/Fly, Docker Compose to Kubernetes, and more."
+---
+
+# Migrate
+
+Generate the configuration and checklist files you need to move your app from one platform to another.
+
+```bash
+expressots migrate <action> [options]
+# aliases
+expressots mig ...
+expressots migration ...
+```
+
+## Actions
+
+| Action      | Purpose                                                                       |
+| ----------- | ----------------------------------------------------------------------------- |
+| `init`      | Interactive: pick a source + target platform and walk through the steps.       |
+| `generate`  | Non-interactive: pass `--from` and `--to` flags.                               |
+| `list`      | Show every supported source → target combination.                              |
+| `analyze`   | Detect the current platform from artifacts in your repo and recommend targets. |
+
+## Supported migration paths
+
+| From               | To                                                                                |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Heroku             | Railway, Render, Fly.io                                                           |
+| Docker Compose     | Kubernetes, Railway, Render                                                       |
+| Generic            | Docker, Kubernetes, AWS ECS, GCP Cloud Run, Azure Container Apps                  |
+
+## Options
+
+| Option              | Alias | Default        | Description                                                                       |
+| ------------------- | ----- | -------------- | --------------------------------------------------------------------------------- |
+| `--from`            | `-f`  | (interactive)  | Source platform: `heroku` / `compose` / `generic`.                                |
+| `--to`              | `-t`  | (interactive)  | Target platform: `railway` / `render` / `fly` / `kubernetes` / `ecs` / `cloudrun` / `aca`. |
+| `--include-data`    |       | `false`        | Include data migration steps (database dump/restore checklist).                    |
+| `--include-secrets` |       | `true`         | Include a secrets-migration checklist (mapping of env vars).                       |
+| `--dry-run`         |       | `false`        | Print the files that *would* be generated without writing.                         |
+| `--output-dir`      | `-o`  | `./migration`  | Folder the migration scaffold is written to.                                       |
+
+## Examples
+
+```bash
+# Interactive
+expressots migrate init
+
+# Heroku to Railway
+expressots migrate generate --from heroku --to railway
+
+# Compose to Kubernetes with a data-migration checklist
+expressots migrate generate --from compose --to kubernetes --include-data
+
+# Just analyze: what platform am I on, what could I move to?
+expressots migrate analyze
+
+# Show every supported path
+expressots migrate list
+```
+
+## What `migrate` writes
+
+A typical Heroku → Railway scaffold lands in `./migration/heroku-to-railway/`:
+
+```text
+migration/heroku-to-railway/
+├── README.md                  # Step-by-step checklist
+├── railway.json               # Railway service config
+├── Procfile.notes.md          # Mapping from Heroku Procfile
+├── env.mapping.md             # Heroku → Railway env-var mapping
+└── deploy.sh                  # Optional CLI helper
+```
+
+The exact files vary by source/target pair. All scaffolds include a **README checklist** so you can sanity-check the migration steps.
+
+## See also
+
+- [`containerize`](./containerize.mdx): emit a Dockerfile that most targets need.
+- [`costs`](./costs.mdx): compare cloud costs before committing to a migration.
+- [`profile`](./containerize.mdx#profile): audit the resulting Dockerfile.

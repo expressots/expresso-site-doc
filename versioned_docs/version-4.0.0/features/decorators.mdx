@@ -1,7 +1,7 @@
 ---
 sidebar_position: 10
 title: Decorators
-description: Decorators extends framework functionality.
+description: Reference for every decorator shipped by ExpressoTS v4 — DI, controllers, methods, parameters, validation, content negotiation, AOP, security, events, and lifecycle.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -9,88 +9,188 @@ import TabItem from "@theme/TabItem";
 
 # Decorators
 
-Decorators are a feature of TypeScript and are used to extend the functionality of a class or method adding metadata to them.
-ExpressoTS uses decorators to refine the user experience and make the code more readable and maintainable.
+Decorators are how ExpressoTS extends classes and methods with metadata the framework reads at runtime — DI bindings, route maps, validation hooks, AOP cross-cuts, security guards, event subscriptions, and more.
 
-## List of decorators
+This page is a complete reference. For a tutorial on a specific subsystem, follow the linked deep-dive page after the relevant table.
 
-Here is a complete list of all decorators available in ExpressoTS as well as a brief description of what they do.
+## DI & class registration
 
-<Tabs>
-    <TabItem label="Class" value="class">
+Imported from `@expressots/core`.
 
-#### Class Decorators
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@provide(target)` | Bind a class to the DI container at **request scope** (default). | `@provide(UserService) class UserService {}` |
+| `@provideSingleton(target)` | Same as `@provide` but **singleton scope**. | `@provideSingleton(Cache) class Cache {}` |
+| `@provideTransient(target)` | Same as `@provide` but **transient scope**. | `@provideTransient(IdGen) class IdGen {}` |
+| `@provideInScope(target, scope)` | Bind to a custom named scope (see `ScopeRegistry`). | `@provideInScope(Tenant, "tenant") class Tenant {}` |
+| `@Provider({ scope })` | Annotate a provider with metadata for `ProviderRegistry` introspection. | `@Provider({ scope: "singleton" })` |
+| `@injectable()` | Mark a class as injectable without binding it (re-export from InversifyJS). | `@injectable() class Helper {}` |
+| `@inject(token)` | Inject a dependency into a constructor / property. | `constructor(@inject(UserRepo) private repo: UserRepo) {}` |
+| `@multiInject(token)` | Inject **all** bindings registered for a token. | `@multiInject(IPlugin) plugins: IPlugin[]` |
+| `@named(name)` | Disambiguate multiple bindings by name. | `@inject(MyToken) @named("primary") svc!: MySvc` |
+| `@tagged(key, value)` | Disambiguate by tag. | `@inject(MyToken) @tagged("region", "us") svc!: MySvc` |
+| `@optional()` | Make an injection optional (returns `undefined` if unbound). | `@inject(Cache) @optional() cache?: Cache` |
+| `@unmanaged()` | Mark a constructor parameter as unmanaged (skipped by the container). | `constructor(@unmanaged() raw: unknown) {}` |
+| `@postConstruct()` | Run a method right after construction. | `@postConstruct() init() {}` |
+| `@preDestroy()` | Run a method right before destruction. | `@preDestroy() cleanup() {}` |
 
-Decorators available for your classes.
+## Controller & routing
 
-| Decorator         | Description                                                                    |
-| ----------------- | ------------------------------------------------------------------------------ |
-| @provide          | Binds a class to a dependency injection container as RequestScope.             |
-| @provideSingleton | Binds a class to a dependency injection container as Singleton.                |
-| @provideTransient | Binds a class to a dependency injection container as Transient.                |
-| @injectable       | Marks a class as available to be injected.                                     |
-| @inject           | Marks a class as available to be injected in the constructor of another class. |
+Imported from `@expressots/adapter-express` unless noted.
 
-    </TabItem>
-    <TabItem label="Controller" value="controller">
+### Class-level
 
-#### Controller Decorators
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@controller(path, ...middleware)` | Mark a class as a controller, prefix its routes. | `@controller("/users", AuthMiddleware)` |
+| `@scope(scope)` (`@expressots/core`) | Override the controller's DI scope. | `@scope("Singleton")` |
 
-Decorators available for your controllers.
+### Method (HTTP verbs)
 
-| Decorator   | Description                    | Usage example                     |
-| ----------- | ------------------------------ | --------------------------------- |
-| @controller | Marks a class as a controller. | @controller("/path", middlewares) |
-| @scope      | Binds a controller to a scope. | @scope("Scope")                   |
+All accept `(path, ...middleware)`.
 
-    </TabItem>
-    <TabItem label="Method" value="method">
+| Decorator | HTTP verb |
+| --- | --- |
+| `@Get(path, …)` | `GET` |
+| `@Post(path, …)` | `POST` |
+| `@Put(path, …)` | `PUT` |
+| `@Patch(path, …)` | `PATCH` |
+| `@Delete(path, …)` | `DELETE` |
+| `@Head(path, …)` | `HEAD` |
+| `@All(path, …)` | All verbs |
+| `@Method(verb, path, …)` | Arbitrary verb (e.g. `OPTIONS`) |
 
-#### Method Decorators
+### Method (response shaping)
 
-Decorators available for your controller methods.
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@Http(code)` | Set the response status code. | `@Http(StatusCode.Created)` |
+| `@Version(version)` | Bind a route handler to a specific API version (header or path-based). See [API versioning](./api-versioning.mdx). | `@Version("2")` |
+| `@Render(view, data?)` | Render a view through the unified render service. | `@Render("home", { user })` |
+| `@FileUpload(opts?)` | Multer-backed file upload. | `@FileUpload({ field: "avatar" })` |
 
-| Decorator   | Description                                           | Usage                                        |
-| ----------- | ----------------------------------------------------- | -------------------------------------------- |
-| @Get        | Binds a controller method to a GET HTTP verb.         | @Get("/path", "/middlewares")                |
-| @Post       | Binds a controller method to a POST HTTP verb.        | @Post("/path", "/middlewares")               |
-| @Put        | Binds a controller method to a PUT HTTP verb.         | @Put("/path", "/middlewares")                |
-| @Patch      | Binds a controller method to a PATCH HTTP verb.       | @Patch("/path", "/middlewares")              |
-| @Head       | Binds a controller method to a HEAD HTTP verb.        | @Head("/path", "/middlewares")               |
-| @Delete     | Binds a controller method to a DELETE HTTP verb.      | @Delete("/path", "/middlewares")             |
-| @Method     | Binds a controller method to a specified HTTP verb.   | @Method("verb", "/path", "/middlewares")     |
-| @Http       | Sets the HTTP status code for the response.           | @Http(200)                                   |
-| @FileUpload | Injects the file upload object for multer middleware. | @FileUpload('fieldOptions', "multerOptions") |
-| @Render     | Renders a view using the specified view engine.       | @Render("view", data )                       |
-| @All        | Binds a controller method to all HTTP verbs.          | @All("/path", "/middlewares")                |
+### Parameter
 
-        </TabItem>
-        <TabItem label="Parameter" value="parameter">
+| Decorator | Source | Example |
+| --- | --- | --- |
+| `@request()` | Express `Request` object | `execute(@request() req: Request)` |
+| `@response()` | Express `Response` object | `execute(@response() res: Response)` |
+| `@next()` | Express `NextFunction` | `execute(@next() next: NextFunction)` |
+| `@principal()` | The authenticated principal (see Security guards) | `execute(@principal() user: Principal)` |
+| `@param(name?)` | URL path parameter | `execute(@param("id") id: string)` |
+| `@query(name?)` | URL query string | `execute(@query("page") page: string)` |
+| `@body()` | Parsed request body | `execute(@body() dto: MyDTO)` |
+| `@headers(name?)` | Request header | `execute(@headers("authorization") auth: string)` |
+| `@cookies(name?)` | Cookie value | `execute(@cookies("session") session: string)` |
+| `@validatedBody(schema)` | Validated body (Zod / Yup / class-validator) | `execute(@validatedBody(CreateUserDTO) dto: CreateUserDTO)` |
+| `@validatedQuery(schema)` | Validated query | `execute(@validatedQuery(ListQuerySchema) q: ListQuery)` |
+| `@validatedParam(name, schema)` | Validated path param | `execute(@validatedParam("id", uuidSchema) id: string)` |
+| `@validatedHeaders(schema)` | Validated headers | `execute(@validatedHeaders(authHeaders) h: AuthHeaders)` |
 
-#### Parameter Decorators
+See **[Validation](./validation.mdx)** for the full validation flow.
 
-Here is a list of all parameter decorators available in ExpressoTS, along with their description and usage:
+## Content negotiation
 
-| Decorator                     | Description                                            | Usage                                            |
-| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------ |
-| @request()                    | Injects the Express Request object.                    | execute(@request() req: Request)                 |
-| @response()                   | Injects the Express Response object.                   | execute(@response() res: Response)               |
-| @param(paramName?: string)    | Injects a parameter from the request URL path.         | execute(@param('id') id: string)                 |
-| @query(paramName?: string)    | Injects a parameter from the request URL query string. | execute(@query('searchTerm') searchTerm: string) |
-| @body()                       | Injects the request body payload.                      | execute(@body() body: MyDTO)                     |
-| @headers(headerName?: string) | Injects a header from the request headers.             | execute(@headers('authorization') auth: string)  |
-| @cookies(cookieName?: string) | Injects a cookie from the request cookies.             | execute(@cookies('session') session: string)     |
-| @next()                       | Injects the Express NextFunction object.               | execute(@next() next: NextFunction)              |
+Imported from `@expressots/adapter-express`. See **[Content Negotiation](./content-negotiation.mdx)** for the deep dive.
 
-        </TabItem>
-        </Tabs>
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@Accept(...types)` | Restrict what `Content-Type` the route accepts. | `@Accept("application/json", "application/xml")` |
+| `@Produces(...types)` | Declare what types the route produces (used to format the response). | `@Produces("application/json", "text/csv")` |
+| `@Consumes(...types)` | Document the request body content type. | `@Consumes("application/json")` |
+| `@CsvOptions(opts)` | Configure CSV serialization for this handler. | `@CsvOptions({ delimiter: ";" })` |
+| `@XmlOptions(opts)` | Configure XML serialization. | `@XmlOptions({ root: "users" })` |
+| `@YamlOptions(opts)` | Configure YAML serialization. | `@YamlOptions({ indent: 2 })` |
+| `@StreamResponse()` | Stream the response body instead of buffering. | `@StreamResponse()` |
 
-:::info
-In a future release, we will add the capability to create custom decorators.
-:::
+## AOP — interceptors
+
+Imported from `@expressots/core`. See **[Interceptors](./interceptors.mdx)**.
+
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@Interceptor({ priority })` | Mark a class as an interceptor; lower priority runs first. | `@Interceptor({ priority: 10 })` |
+| `@UseInterceptors(...interceptors)` | Apply interceptors to a controller class or specific method. | `@UseInterceptors(LoggingInterceptor)` |
+
+## Security — guards & authorization
+
+Imported from `@expressots/core`. See **[Guards & Authorization](./guards.mdx)**.
+
+| Decorator | Purpose |
+| --- | --- |
+| `@Guard({ priority, cacheable })` | Mark a class as a guard. |
+| `@UseGuards(...guards)` | Apply guards to a controller class or method. |
+| `@RequireAuthentication()` | Shorthand for `@UseGuards(AuthenticatedGuard)`. |
+| `@RequireRoles(...roles)` | Require all the listed roles. |
+| `@RequirePermissions(...permissions)` | Require all the listed permissions. |
+| `@RequireOwnership(paramName)` | Require the principal to own the resource identified by `paramName`. |
+| `@RequireAuth()` / `@RequireRole(role)` / `@RequirePermission(perm)` / `@RequireResourceOwner(paramName)` / `@RequirePolicy(policyFn)` | Single-value variants for cleaner one-off checks. |
+
+## Events
+
+Imported from `@expressots/core`. See **[Event System](./events.mdx)**.
+
+> **Important:** `@OnEvent` and `@OnEvents` are **class decorators**. Apply them to the handler class, not to the `handle()` method, otherwise auto-discovery won't see the handler.
+
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@OnEvent(EventClass, opts?)` | Subscribe a class to a single event type. | `@OnEvent(UserCreatedEvent, { priority: 1 })` |
+| `@OnEvents([EventA, EventB])` | Subscribe a class to multiple event types. | `@OnEvents([UserCreatedEvent, UserUpdatedEvent])` |
+| `@When(predicate)` | Run the handler only when the predicate is true. | `@When(event => event.user.isPremium)` |
+| `@Event()` | Mark a class as an event payload (optional metadata; not strictly required). | `@Event() class UserCreatedEvent { … }` |
+
+## Validation
+
+Imported from `@expressots/core` and `@expressots/adapter-express`. See **[Validation](./validation.mdx)**.
+
+| Decorator | Purpose |
+| --- | --- |
+| `@Validate(schema, options?)` | Class-level: validate every method's input against a schema. |
+| `@validatedBody(schema)` / `@validatedQuery(schema)` / `@validatedParam(name, schema)` / `@validatedHeaders(schema)` | Parameter-level (see the Parameter table above). |
+
+## Exception filters
+
+Imported from `@expressots/core` (decorators) and `@expressots/adapter-express` (re-export). See **[Exception filters](./exception-filters.mdx)**.
+
+| Decorator | Purpose |
+| --- | --- |
+| `@Catch(...errorClasses)` | Mark a class as an exception filter that handles the listed error types. |
+| `@UseFilters(...filterClasses)` | Apply filters to a controller class or method. |
+
+## Logging
+
+Imported from `@expressots/core`. See **[Logging](./logging.mdx)**.
+
+| Decorator | Purpose |
+| --- | --- |
+| `@LogPerformance()` | Wrap a method with high-precision timing. |
+
+## Lifecycle (provider-level)
+
+These are interfaces with `@postConstruct` / `@preDestroy` decorators inside, but you'll typically just implement the interface:
+
+```typescript
+import { provide, IBootstrap, IShutdown } from "@expressots/core";
+
+@provide(MyService)
+export class MyService implements IBootstrap, IShutdown {
+    async bootstrap() { /* called by AppExpress before listen() */ }
+    async shutdown()  { /* called on SIGINT / SIGTERM */ }
+}
+```
+
+See **[Lifecycle hooks](../core/lifecycle.mdx)** for the full bootstrap / shutdown sequence.
+
+## Configuration scaffolding
+
+The CLI (`expressots generate`) recognises decorator metadata in `expressots.config.ts` to know where to place generated files (`scaffoldSchematics.controller`, `scaffoldSchematics.guard`, etc.). See **[ExpressoTS config](./expressots-config.mdx)**.
 
 ---
 
-## Support the Project
+## See also
 
-ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.
+- **[Lifecycle hooks](../core/lifecycle.mdx)** — how DI scopes interact with `@postConstruct` / `@preDestroy`.
+- **[Validation](./validation.mdx)** — full reference for the validation system.
+- **[Interceptors](./interceptors.mdx)** — AOP cross-cuts deep dive.
+- **[Guards & Authorization](./guards.mdx)** — security decorators in context.
+- **[Event System](./events.mdx)** — class-level `@OnEvent` discovery flow.

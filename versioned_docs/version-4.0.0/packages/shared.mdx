@@ -1,0 +1,46 @@
+---
+sidebar_position: 4
+title: "@expressots/shared"
+description: Cross-cutting types and small utilities shared by every other ExpressoTS package.
+---
+
+# `@expressots/shared`
+
+Shared types and tiny utilities used across the framework. **You almost never install this directly** — it's pulled in transitively by `@expressots/core` and `@expressots/adapter-express`. It exists so the v4 packages can talk about the same shapes (environments, render engines, web-server contracts) without circular dependencies.
+
+```bash
+npm install @expressots/shared    # only when you need it standalone
+```
+
+## What it ships
+
+| Module | Highlights |
+| --- | --- |
+| `config/` | Internal config types used by `defineConfig` |
+| `env/` | `Env.string()`, `Env.number()`, `Env.boolean()`, `Env.url()`, `Env.enum()` builders, plus the `loadEnvSync()` helper |
+| `interfaces/` | Cross-package contracts (`IWebServer`, `IWebServerPublic`, `IEnvironment`, `RenderEngine`, …) |
+| `utils/` | Small helpers (path joining, type guards, string/number coercion) |
+
+The vast majority of these are re-exported from `@expressots/core` and `@expressots/adapter-express` for convenience, so you'll typically write:
+
+```typescript
+// Idiomatic
+import { Env, loadEnvSync } from "@expressots/core";
+
+// Equivalent — same code, longer path
+import { Env, loadEnvSync } from "@expressots/shared";
+```
+
+Stick to the core import unless you're authoring a downstream package that explicitly *only* depends on `@expressots/shared`.
+
+## When to depend on it directly
+
+- **You're building a meta-package** (e.g. an alternative HTTP adapter, a different DI bridge) and want to share types with `@expressots/core` without inheriting it.
+- **You're building a tool** that introspects ExpressoTS apps (linters, codemod scripts) and only needs the type contracts.
+
+For everything else, use `@expressots/core`.
+
+## See also
+
+- **[Configuration](../features/configuration.mdx)** — `defineConfig` and `Env.*` builders.
+- **[`@expressots/core`](./core.mdx)** — the package that re-exports most of this.

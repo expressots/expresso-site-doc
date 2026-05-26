@@ -1,0 +1,54 @@
+---
+sidebar_position: 5
+title: "@expressots/cli"
+description: The expressots command-line tool — scaffolding, code generation, build, and Studio launcher.
+---
+
+# `@expressots/cli`
+
+The command-line tool you use every day:
+
+```bash
+# One-off (recommended for `new`)
+npx @expressots/cli new my-app
+
+# Persistent install (for repeated use)
+npm install -g @expressots/cli
+```
+
+It powers four flagship commands:
+
+| Command | Purpose | Reference |
+| --- | --- | --- |
+| `expressots new [name]` | Scaffold a fresh project from a template | [CLI: `new`](../cli/new.mdx) |
+| `expressots generate <kind>` | Generate controllers / providers / services into an existing project | [CLI: `generate`](../cli/generate.mdx) |
+| `expressots build` | Compile the current project (TypeScript → JS, alias resolution, asset copy) | [CLI: `running`](../cli/running.mdx) |
+| `expressots studio` | Launch Studio in the browser, attached to your dev server | [Studio overview](../studio/overview.mdx) |
+
+## What's new in v4
+
+- **Four templates** — `application`, `application-with-events`, `micro`, `provider`. The CLI detects compatible flags (`--events`, `--preset`) and steers you to the right scaffold.
+- **Middleware presets** — `--preset api|web|serverless|fullstack` injects the right dependencies and replaces the placeholder in `src/app.ts` *before* `npm install`, so a failed install never leaves you with placeholders.
+- **`--package-manager`** — `npm`, `pnpm`, or `yarn`, applied consistently across the scaffold.
+- **`EXPRESSOTS_TEMPLATE_REF`** — pin scaffolds to a specific template branch/tag for CI-driven testing.
+- **`EXPRESSOTS_DEV` / `EXPRESSOTS_USE_LOCAL_TEMPLATES` / `EXPRESSOTS_SKIP_INSTALL`** — environment switches for local development against unreleased templates.
+
+## Studio launcher
+
+`expressots studio` boots the Studio UI as a sibling of your dev server. The CLI:
+
+1. Reads your dev server's port and global prefix.
+2. Proxies a WebSocket connection to the in-process [Studio agent](./studio-agent.mdx).
+3. Opens `http://localhost:<port>` in your default browser.
+
+You stop the agent the same way you'd stop any dev server (`Ctrl+C`). The CLI hooks into `SIGINT` so the graceful shutdown finishes before the prompt returns.
+
+## Versioning
+
+The CLI moves in lockstep with the framework. Use `npm install @expressots/cli@next` to pin to the same preview line you're testing against, and `npm install @expressots/cli` for stable releases.
+
+## See also
+
+- **[CLI: `new`](../cli/new.mdx)** — the full reference for `expressots new`.
+- **[Studio overview](../studio/overview.mdx)** — what Studio shows and how to use it.
+- **[Bootstrap](../core/bootstrap.mdx)** — what the templates produce.

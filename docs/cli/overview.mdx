@@ -1,238 +1,189 @@
 ---
 sidebar_position: 0
 title: Overview
-description: ExpressoTS CLI overview.
+description: The ExpressoTS CLI is a single binary that scaffolds projects, generates code, runs your app, and produces production-ready container / CI/CD artifacts.
 ---
 
-import Tabs from "@theme/Tabs";
-import TabItem from "@theme/TabItem";
+# CLI Overview
 
-# Overview
+The ExpressoTS CLI (`@expressots/cli`) is a single binary that covers the full lifecycle of an ExpressoTS application: scaffolding, code generation, development, build, production, containerization, CI/CD pipelines, cost estimation, and Studio integration.
 
-The CLI (command-line interface) tool helps you to create ExpressoTS projects and scaffold ExpressoTS resources.
+| Binary names      | Description                                            |
+| ----------------- | ------------------------------------------------------ |
+| `expressots`      | Primary command                                         |
+| `ex`              | Short alias, interchangeable with `expressots`         |
 
-We use the `npm` in this tutorial for simplicity. However, you can use your preferred package manager (`yarn` or `pnpm`) by replacing `npm` with the appropriate command.
+## Requirements
+
+| Requirement | Version       |
+| ----------- | ------------- |
+| Node.js     | `>= 20.18.0`  |
+| Package mgr | npm, yarn, pnpm, or bun (bun is unavailable on Windows for `expressots new`) |
 
 ## Installation
-
-First install the CLI globally using the command below:
 
 ```bash
 npm install -g @expressots/cli
 ```
 
-## Commands available
+You can also call it without installing globally via `npx @expressots/cli ...`. Most templates pin `@expressots/cli` as a devDependency, so commands like `npm run dev` route through the local install.
 
-The CLI provides the following commands:
+## Command catalogue
 
-| Name           | Alias        | Description                                                              |
-| -------------- | ------------ | ------------------------------------------------------------------------ |
-| new project    | new          | Generate a new project                                                   |
-| info           | i            | Provides project information                                             |
-| resources      | r            | Displays CLI commands and resources                                      |
-| scripts        | scripts      | Run scripts list or a specific script                                    |
-| help           | help         | Show command help                                                        |
-| service        | g s          | Generate a service [controller, usecase, dto, module]                    |
-| controller     | g c          | Generate a controller                                                    |
-| usecase        | g u          | Generate a usecase                                                       |
-| dto            | g d          | Generate a DTO                                                           |
-| entity         | g e          | Generate an entity                                                       |
-| provider       | g p          | Generate internal provider                                               |
-| provider       | add          | Add external provider to the project                                     |
-| provider       | remove       | remove external provider                                                 |
-| provider       | create       | Create external provider                                                 |
-| module         | g mo         | Generate a module                                                        |
-| middleware     | g mi         | Generate a middleware                                                    |
-| containerize   | c            | Generate Dockerfile, Docker Compose, or Kubernetes manifests             |
-| cicd           | ci, pipeline | Generate CI pipeline configuration for your platform of choice           |
-| container-dev  | cdev         | Run the dev loop inside a Docker container with hot reload               |
+The CLI is grouped by what stage of the app's life it serves.
 
-## Usage examples
+### Scaffolding
 
-You can use the CLI either with:
+| Command | Alias | Purpose                                              | Page |
+| ------- | ----- | ---------------------------------------------------- | ---- |
+| `new`   | (none) | Create a new project from a template (`application` / `micro`) | [new](./new.mdx) |
+| `generate` | `g` | Scaffold a single resource (controller, use case, DTO, interceptor, event handler, guard, etc.) | [generate](./generate.mdx) |
+| `create` | (none) | Scaffold a standalone provider package skeleton      | [providers](./providers.mdx#create) |
 
-- `expressots`
-- `ex` as an alias.
+### Running
 
-Command example:
+| Command | Alias  | Purpose                                                  | Page |
+| ------- | ------ | -------------------------------------------------------- | ---- |
+| `dev`   | (none)  | Local dev server with `tsx --watch`. Optional `--container` flag for the Docker flow. | [running](./running.mdx#dev) |
+| `build` | (none)  | Compile to JavaScript with `tsc`. Rewrites alias imports in opinionated projects. | [running](./running.mdx#build) |
+| `prod`  | (none)  | Run the compiled output with `node`                      | [running](./running.mdx#prod) |
+| `container-dev` | `cdev`, `docker-dev` | Compose-based dev workflow (start, stop, attach, shell, status, logs). | [running](./running.mdx#container-dev) |
+
+### Dependencies
+
+| Command   | Purpose                                                            | Page |
+| --------- | ------------------------------------------------------------------ | ---- |
+| `add`     | Install an external provider (detects npm / yarn / pnpm via lockfile) | [providers](./providers.mdx#add) |
+| `remove`  | Uninstall an external provider                                     | [providers](./providers.mdx#remove) |
+| `scripts` | Interactively run any script from `package.json`                   | [scripts](./scripts.mdx) |
+| `studio`  | Launch [ExpressoTS Studio](../studio/overview.mdx); auto-installs `@expressots/studio` if missing | [studio](./studio.mdx) |
+
+### Container & deployment
+
+| Command        | Alias                | Purpose                                                                       | Page |
+| -------------- | -------------------- | ----------------------------------------------------------------------------- | ---- |
+| `containerize` | `c`                  | Generate Dockerfiles, compose files, Kubernetes manifests                     | [containerize](./containerize.mdx) |
+| `profile`      | `prof`, `analyze`    | Lint a Dockerfile or built image and emit optimization recommendations        | [containerize](./containerize.mdx#profile) |
+| `cicd`         | `ci`, `pipeline`     | Generate CI/CD pipelines for GitHub Actions, GitLab CI, CircleCI, Jenkins, Bitbucket, Azure | [cicd](./cicd.mdx) |
+| `migrate`      | `mig`, `migration`   | Generate migration configurations between platforms (Heroku → Railway, Compose → K8s, etc.) | [migrate](./migrate.mdx) |
+| `costs`        | `cost`, `pricing`    | Estimate and compare cloud deployment costs                                   | [costs](./costs.mdx) |
+| `templates`    | `tpl`                | Manage the CI/CD / Docker / K8s template cache                                | [templates](./templates.mdx) |
+
+### Diagnostics
+
+| Command     | Alias | Purpose                                                            | Page |
+| ----------- | ----- | ------------------------------------------------------------------ | ---- |
+| `info`      | `i`   | Print OS, Node, CLI bundle version, and project info from `package.json` | [info](./info.mdx#info) |
+| `resources` | `r`   | Print the table of all commands and `generate` schematics (cheat sheet) | [info](./info.mdx#resources) |
+| `--help`    | (none) | yargs-generated help; works on every command (`expressots <cmd> --help`) | (none) |
+
+## Conventions
+
+These apply across the CLI:
+
+| Convention                                  | Detail                                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **No global `--version`**                   | The CLI deliberately does not expose `expressots --version`. Use `expressots info` or `npm list -g @expressots/cli`. |
+| **`expressots.config.ts` is required**      | For `dev`, `build`, `prod`, and `generate`. The CLI walks up from `cwd` until it finds the file. |
+| **`tsconfig.build.json` with `outDir`**     | Required for `build` and `prod`. The CLI creates `outDir` if it doesn't exist.            |
+| **Strict yargs mode**                       | Unknown flags or commands fail fast, no silent typos.                                    |
+| **A subcommand is always required**         | Running `expressots` with no arguments prints the help and exits.                         |
+| **The `run` command was removed**           | Use `dev`, `build`, or `prod` directly.                                                   |
+| **Path positional, not `--module=`**        | `expressots g controller auth/user post`, *not* `expressots g controller --module=auth user`. |
+
+## `expressots.config.ts`
+
+Every project the CLI manages keeps its configuration here. Generated by `expressots new`:
+
+```ts
+import { ExpressoConfig, Pattern } from "@expressots/shared";
+
+export const config: ExpressoConfig = {
+  scaffoldPattern: Pattern.KEBAB_CASE,
+  sourceRoot: "src",
+  entryPoint: "main",
+  opinionated: true,
+  scaffoldSchematics: {
+    controller: "useCases",
+    usecase: "useCases",
+    dto: "useCases",
+    module: "useCases",
+    provider: "providers",
+    entity: "entities",
+    middleware: "middleware",
+    interceptor: "interceptors",
+    event: "events",
+    handler: "events",
+    guard: "guards",
+    config: "config",
+  },
+};
+
+export default config;
+```
+
+| Field                | Purpose                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| `sourceRoot`         | Root the CLI scaffolds under (must be non-empty)                                          |
+| `entryPoint`         | The file name in `sourceRoot/` (without `.ts`) that `dev`/`prod` boots                    |
+| `opinionated`        | When `true`, `generate` places resources in the `scaffoldSchematics` folders and `build` rewrites `@alias/*` imports to relative paths in the emitted JS |
+| `scaffoldPattern`    | Naming convention for generated files: `KEBAB_CASE` (default), `CAMEL_CASE`, `PASCAL_CASE`, `LOWER_CASE` |
+| `scaffoldSchematics` | Per-resource folder names. Custom folders are auto-added to `tsconfig.json` `paths` (and `tsconfig.build.json` in opinionated projects) |
+
+See [Configuration File](../features/expressots-config.mdx) for the full surface.
+
+## Project layout the CLI assumes
+
+```text
+my-app/
+├── expressots.config.ts        # CLI configuration
+├── tsconfig.json               # editor + dev tsconfig
+├── tsconfig.build.json         # has `compilerOptions.outDir`; used by `build` / `prod`
+├── package.json
+└── src/
+    ├── main.ts                 # entryPoint; calls bootstrap(App)
+    ├── app.ts                  # extends AppExpress
+    └── ...                     # generated into folders driven by scaffoldSchematics
+```
+
+## Worked example
 
 ```bash
-expressots <command> [options]
+# 1. Scaffold a project with the application template, pnpm, and the API preset.
+expressots new my-api --template application --package-manager pnpm --preset api
 
-// Or
+cd my-api
 
-ex <command> [options]
+# 2. Scaffold a typed config file.
+expressots g cfg app
+
+# 3. Generate a full CRUD slice (controller + usecase + dto + module wiring).
+expressots g s users/create post
+expressots g s users/list get
+expressots g s users/update put
+expressots g s users/delete delete
+
+# 4. Add an interceptor for response logging.
+expressots g i Logging --priority 5
+
+# 5. Add a domain event + handler.
+expressots g ev UserCreated
+expressots g h EmailWelcome --event UserCreated --priority 20
+
+# 6. Run dev.
+expressots dev
+
+# 7. Build and run prod.
+expressots build && expressots prod
 ```
-
-## Help command
-
-Verify the available commands and options:
-
-```bash
-expressots help
-```
-
-## Info command
-
-Providers information about your Operational System, Project and CLI version:
-
-```bash
-expressots info
-```
-
-## Resources list
-
-List all available resources to scaffold:
-
-```bash
-expressots resources (Alias: r)
-```
-
-## Create a project
-
-There are two options to create a new project, interactively or silently (passing the options as arguments).
-Here is the complete command syntax:
-
-```bash title="Create project command options"
-expressots new <project-name> -p <package-manager> -t <template> -d <directory>
-```
-
-#### Interactively
-
-```bash
-expressots new <project-name>
-```
-
-#### Silently
-
-```bash
-expressots new <project-name> -p <package-manager> -t <template> -d <directory>
-```
-
--   **package-manager**: `npm`, `yarn` or `pnpm`
--   **template**: `opinionated` or `non-opinionated`
--   **directory**: `./my-project`
-
-The flag `-d` is optional and is used to specify the directory where the project will be created. If not specified, the project will be created in the current directory.
-
-## Add a provider
-
-Add an external provider to the project:
-
-```bash
-expressots add <provider-name>
-```
-
-Although you can add npm registry packages, the primary use case for this command is to add providers that were built specifically for ExpressoTS.
-
-:::info Watch for updates of our Providers App Store.
-:::
-
-## Create a provider
-
-Create a new ExpressoTS provider. For more information about providers, check the [Providers](../core/providers.mdx#create-external-provider) section.
-
-```bash
-expressots create <provider-name>
-```
-
-## Scaffold resources
-
-The CLI provides commands to scaffold resources like `controller`, `usecase`, `dto`, `entity`, `module` and `middleware`.
-
-```bash
-expressots generate <resource> <name> [options]
-```
-
-Resources are created in the `src` directory by default. They also can be scaffolded in 2 different ways: `passing the path` or using the `shorthand operation`.
-
-:::caution
-The resource scaffolding operations produce different results based on the project template used. The `opinionated` template provides a more structured project, while the `non-opinionated` template provides a more flexible project structure.
-:::
-
-<Tabs>
-    <TabItem value="non-opinionated" label="Non Opinionated">
-
-#### Passing the path
-
-```bash title="Create a controller named user inside the services directory"
-expressots g c services/user
-```
-
-```bash title="Output"
-src
-└── services
-    └── user.controller.ts
-```
-
-#### Shorthand operation
-
-```bash title="Create a controller named services-user inside the services/user directory"
-expressots g c services-user
-```
-
-```bash title="Output"
-src
-└── services
-    └── user
-        └── services-user.controller.ts
-```
-
-    </TabItem>
-    <TabItem value="opinionated" label="Opinionated">
-
-In the `opinionated` template, the scaffolded resources are created following a predefined structure.
-
--   [@providers](../core/providers.mdx)
--   [@entities](../core/entities.mdx)
--   [@useCases](../core/usecase.mdx)
--   [@repositories](../guides/repositories.mdx)
-
-#### Passing the path
-
-```bash title="Create a controller named user inside the useCases/services directory"
-expressots g c services/user
-```
-
-The command above will create a controller named `user` inside the `useCases/services` directory.
-
-```bash title="Output"
-src
-└── useCases
-    └── services
-        └── user.controller.ts
-```
-
-:::note dto, usecase, controller, modules will be created in the `useCases` directory.
-:::
-
-#### Shorthand operation
-
-```bash title="Create a controller named services-user inside the useCases/services/user directory"
-expressots g c services-user
-```
-
-The command above will create a controller named `services-user` inside the `useCases/services/user` directory.
-
-```bash title="Output"
-src
-└── useCases
-    └── services
-        └── user
-            └── services-user.controller.ts
-```
-
-:::info
-Using the shorthand operation in the opinionated template offers significant benefits. It creates a well-structured project that's easier to navigate and understand. When you scaffold with the shorthand, the CLI automatically places resources in the correct directories, adds controllers to their modules, and integrates the module into the container.
-:::
-
-</TabItem>
-
-</Tabs>
 
 ---
 
-## Support us ❤️
+## Next
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+- [`new`](./new.mdx): create a project from a template.
+- [`generate`](./generate.mdx): scaffold a resource.
+- [`running`](./running.mdx): `dev`, `build`, `prod`, and the Docker container workflow.
+- [`providers`](./providers.mdx): `add`, `remove`, `create`.
+- [`studio`](./studio.mdx): launch the Studio UI from the CLI.
+- [`containerize`](./containerize.mdx), [`cicd`](./cicd.mdx), [`migrate`](./migrate.mdx), [`costs`](./costs.mdx): production-ready DevOps artifacts.

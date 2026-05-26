@@ -1,114 +1,149 @@
 ---
-sidebar_position: 2
+sidebar_position: 11
 title: Status code
-description: Status code is a way to represent the result of a request.
+description: Use the StatusCode enum to set HTTP status codes consistently across controllers, use cases, and errors.
 ---
 
 # Status code
 
-Status code is a way to represent the result of a request. These HTTP responses indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
+`StatusCode` is the canonical enum that ExpressoTS uses everywhere a status code crosses a boundary — controller responses, `AppError` constructors, `@Http()` decorators, exception filters. It maps the standard [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes) status codes to typed numbers, eliminating the magic-number sprawl that creeps into Express apps.
 
--   Informational responses (100-199)
--   Successful responses (200-299)
--   Redirection messages (300-399)
--   Client error responses (400-499)
--   Server error responses (500-599)
-
-You can find more details about the status code in the **[MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)**.
-
-:::tip The status codes listed below are defined by [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes)
-:::
-
-## List of status codes
-
-ExpressoTS provides a list of status codes that you can use in your application represented by the `StatusCode` enum.
-
-## Usage example
-
-Example of how to use the status code in a controller, use case, using `res` object, `@http` decorator etc.
-
-```typescript title="Controller example"
+```typescript
 import { StatusCode } from "@expressots/core";
 
-@controller("/user/create")
-class CreateUserController {
-    constructor(@inject(CreateUserUseCase) private createUserUseCase: CreateUserUseCase) {}
+StatusCode.OK;             // 200
+StatusCode.Created;        // 201
+StatusCode.NoContent;      // 204
+StatusCode.BadRequest;     // 400
+StatusCode.Unauthorized;   // 401
+StatusCode.Forbidden;      // 403
+StatusCode.NotFound;       // 404
+StatusCode.Conflict;       // 409
+StatusCode.UnprocessableEntity; // 422
+StatusCode.TooManyRequests;     // 429
+StatusCode.InternalServerError; // 500
+StatusCode.BadGateway;          // 502
+StatusCode.ServiceUnavailable;  // 503
+```
 
+Five families:
+
+- **1xx** — informational responses (rarely used directly)
+- **2xx** — successful responses
+- **3xx** — redirection
+- **4xx** — client errors
+- **5xx** — server errors
+
+See the [MDN status code reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) for the full meaning of each code.
+
+## Where to use it
+
+### `@Http(...)` decorator
+
+The cleanest pattern: declare the success status next to the route, return the body, and let the framework do the wiring.
+
+```typescript
+import { controller, Get, Http, Post, body } from "@expressots/adapter-express";
+import { StatusCode } from "@expressots/core";
+
+@controller("/users")
+export class UsersController {
     @Post("/")
-    execute(
-        @body() data: ICreateUserRequestDTO,
-        @response() res: Response
-    ) {
-        return this.createUserUseCase.execute(data);
+    @Http(StatusCode.Created)
+    create(@body() dto: CreateUserDTO) {
+        return this.users.create(dto);
     }
-}
-```
 
-```typescript title="Using res object"
-import { StatusCode } from "@expressots/core";
-
-@controller("/")
-class ExampleController {
-    @Get("/")
-    execute(@response() res: Response) {
-        res.status(StatusCode.OK).send("Hello World!");
-    }
-}
-```
-
-```typescript title="Using @http decorator"
-import { StatusCode } from "@expressots/core";
-
-@controller("/")
-class ExampleController {
-    @Get("/")
+    @Get("/:id")
     @Http(StatusCode.OK)
-    execute() {
-        return "Hello World!";
+    getById(@param("id") id: string) {
+        return this.users.findById(id);
     }
 }
 ```
 
-```typescript title="Use case example"
+### Direct `res.status(...)`
+
+When you need to choose the status at runtime (e.g. 200 vs 201 vs 304):
+
+```typescript
+import { controller, Get, response } from "@expressots/adapter-express";
 import { StatusCode } from "@expressots/core";
+import type { Response } from "express";
+
+@controller("/cache")
+export class CacheController {
+    @Get("/:key")
+    fetch(@response() res: Response, @param("key") key: string) {
+        const cached = this.cache.get(key);
+        if (cached === undefined) {
+            return res.status(StatusCode.NotFound).send();
+        }
+        if (cached.notModified) {
+            return res.status(StatusCode.NotModified).send();
+        }
+        return res.status(StatusCode.OK).json(cached.value);
+    }
+}
+```
+
+### Inside `AppError` and `Report.Error()`
+
+Errors thrown anywhere in the request pipeline carry a status code through to the response:
+
+```typescript
+import { AppError, NotFoundError, StatusCode } from "@expressots/core";
+
+if (!user) {
+    throw new NotFoundError(`User ${id} not found`, "users.get");
+}
+
+if (await this.users.findByEmail(email)) {
+    throw new AppError(StatusCode.Conflict, "Email already in use", "users.create");
+}
+
+// Or with the Report helper:
+throw this.report.Error("User already exists", StatusCode.BadRequest, "users.create");
+```
+
+The exception filter pipeline turns these into RFC 7807 problem-details responses with the right status code automatically. See **[Error handling](./error-handling.mdx)**.
+
+### Inside use cases
+
+```typescript
+import { provide, Report, StatusCode } from "@expressots/core";
 
 @provide(CreateUserUseCase)
-class CreateUserUseCase {
-    constructor(private userRepository: UserRepository) {}
+export class CreateUserUseCase {
+    constructor(
+        private readonly users: UserRepository,
+        private readonly report: Report,
+    ) {}
 
-    execute(data: ICreateUserRequestDTO): ICreateUserResponseDTO | null {
-        try {
-            const { name, email } = data;
+    async execute(data: ICreateUserRequestDTO): Promise<ICreateUserResponseDTO> {
+        const { name, email } = data;
 
-            const user: User | null = this.userRepository.create(new User(name, email));
-
-            if (!user) {
-                Report.Error("User already exists", StatusCode.BadRequest, "create-user-usecase");
-            }
-
-            let response: ICreateUserResponseDTO;
-
-            if (user !== null) {
-                response = {
-                    id: user.Id,
-                    name: user.name,
-                    email: user.email,
-                    status: "success",
-                };
-                return response;
-            }
-
-            return null;
-        } catch (error: any) {
-            throw error;
+        if (await this.users.findByEmail(email)) {
+            throw this.report.Error(
+                "User already exists",
+                StatusCode.BadRequest,
+                "users.create",
+            );
         }
+
+        const user = await this.users.create(new User(name, email));
+        return { id: user.id, name: user.name, email: user.email, status: "success" };
     }
 }
 ```
 
----
+## Why use the enum?
 
-## Support us ❤️
+- **Refactor-safe** — your IDE rejects typos.
+- **Searchable** — `StatusCode.Conflict` is greppable; `409` is not.
+- **Consistent** — the framework also uses `StatusCode` in its built-in errors and filters, so your code matches its output.
 
-ExpressoTS is an MIT-licensed open source project. It's an independent project with ongoing development made possible thanks to your support.
-If you'd like to help, please read our **[support guide](../support-us.mdx)**.
+## See also
+
+- **[Error handling](./error-handling.mdx)** — `AppError`, `Report.Error`, RFC 7807 responses.
+- **[Exception filters](./exception-filters.mdx)** — custom error → response mapping.

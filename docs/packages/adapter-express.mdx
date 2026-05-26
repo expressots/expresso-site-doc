@@ -1,0 +1,121 @@
+---
+sidebar_position: 3
+title: "@expressots/adapter-express"
+description: The Express 5 HTTP adapter — controllers, decorators, micro(), and the bridge between Express and the v4 DI container.
+---
+
+# `@expressots/adapter-express`
+
+The HTTP adapter for ExpressoTS v4. It wraps **Express 5** with a v4 DI-aware controller system, the parameter / route decorators, and two bootstrap shapes (`AppExpress` for full apps, `micro()` for small services).
+
+```bash
+npm install @expressots/adapter-express
+```
+
+It depends on `@expressots/core` and pulls in `express@^5.0.0` as a peer requirement.
+
+## What it ships
+
+| Surface | Highlights | Deep-dive |
+| --- | --- | --- |
+| **App classes** | `AppExpress` — extend it to build the canonical v4 app | [Bootstrap](../core/bootstrap.mdx) |
+| **Micro API** | `micro()` — minimal HTTP server with the same DX | [Micro API guide](../guides/micro-api.mdx) |
+| **Controller decorators** | `@controller`, `@Get` / `@Post` / `@Put` / `@Patch` / `@Delete`, `@All`, `@Method`, `@Version`, `@Http`, `@Render`, `@FileUpload` | [Decorators](../features/decorators.mdx) |
+| **Parameter decorators** | `@param`, `@query`, `@body`, `@headers`, `@cookies`, `@request`, `@response`, `@next`, `@principal` | [Decorators](../features/decorators.mdx) |
+| **Validated parameters** | `@validatedBody`, `@validatedQuery`, `@validatedParam`, `@validatedHeaders` | [Validation](../features/validation.mdx) |
+| **Content negotiation** | `@Accept`, `@Produces`, `@Consumes`, `@CsvOptions`, `@XmlOptions`, `@YamlOptions`, `@StreamResponse` | [Content negotiation](../features/content-negotiation.mdx) |
+| **Route patterns** | `Patterns`, `pattern()` | [Route patterns](../features/route-patterns.mdx) |
+| **Studio** | `setupExpressoTSStudioAgent`, telemetry hooks | [Studio agent](./studio-agent.mdx) |
+| **Render** | View engine bridge for Pug/Handlebars/EJS/etc. | [Rendering](../features/render.mdx) |
+| **Middleware** | Express-flavored middleware helpers | [Middleware](../features/middleware.mdx) |
+
+## Public entry points
+
+```typescript
+import {
+    // App classes
+    AppExpress,
+
+    // Micro API
+    micro, MicroApp,
+
+    // Controller decorators
+    controller,
+    Get, Post, Put, Patch, Delete, All, Method,
+    Version, Http,
+
+    // Parameter decorators
+    request, response, next,
+    param, query, body, headers, cookies, principal,
+
+    // Validated decorators
+    validatedBody, validatedQuery, validatedParam, validatedHeaders,
+
+    // Content negotiation
+    Accept, Produces, Consumes,
+    CsvOptions, XmlOptions, YamlOptions, StreamResponse,
+
+    // Patterns
+    Patterns, pattern,
+
+    // Studio
+    setupExpressoTSStudioAgent,
+} from "@expressots/adapter-express";
+```
+
+## The two app shapes
+
+### `AppExpress` (canonical)
+
+Extend it, override the lifecycle hooks, and call `bootstrap(App)`:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+import { bootstrap, loadEnvSync } from "@expressots/core";
+
+class App extends AppExpress {
+    async configureServices() { this.Middleware.applyPreset("api"); }
+    async postServerInitialization() { /* … */ }
+    async serverShutdown() { /* … */ }
+}
+
+loadEnvSync();
+void bootstrap(App);
+```
+
+Use this for any non-trivial application. It gives you the full middleware service, lifecycle hooks, and DI container.
+
+### `micro()` (lightweight)
+
+For small services where `AppExpress` is overkill:
+
+```typescript
+import { micro } from "@expressots/adapter-express";
+import { Get, controller } from "@expressots/adapter-express";
+
+@controller("/")
+class HealthController {
+    @Get("/health") health() { return { status: "ok" }; }
+}
+
+const api = micro([HealthController]);
+await api.listen(3000);
+```
+
+See the [Micro API guide](../guides/micro-api.mdx) for the full surface.
+
+## Express 5 compatibility
+
+The adapter is built and tested against **Express 5.x**. Notable v5 behaviour you should know:
+
+- `path-to-regexp` v8 — inline regex constraints (`:id(\\d+)`) are rewritten through `Patterns` / `pattern()` so existing routes still work. See [Route patterns](../features/route-patterns.mdx).
+- Async middleware errors — Express 5 forwards rejected promises to the error handler automatically. The framework's exception filter pipeline plugs straight in.
+- `app.del` is gone — use `@Delete()` (we never exposed `del`).
+
+If you need to drop down to raw Express, you can reach the underlying app through `this.Application` (in `AppExpress`) or the value returned by `micro()`.
+
+## See also
+
+- **[`@expressots/core`](./core.mdx)** — the DI / lifecycle layer behind the controllers.
+- **[Bootstrap](../core/bootstrap.mdx)** — startup configuration & graceful shutdown.
+- **[Micro API](../guides/micro-api.mdx)** — building small services with `micro()`.
