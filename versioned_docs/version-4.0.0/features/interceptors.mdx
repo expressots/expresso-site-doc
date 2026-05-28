@@ -568,8 +568,8 @@ export class ErrorHandlerInterceptor implements IInterceptor {
 
 Two steps are required to activate an interceptor:
 
-1. **Register** — `setupInterceptorsForExpress({ customInterceptors: [...] })` in `app.ts` binds the class in the DI container and the `InterceptorRegistry`.
-2. **Apply** — `@UseInterceptors(...)` on a controller (all routes) or on a single method (one route).
+1. **Register**: `setupInterceptorsForExpress({ customInterceptors: [...] })` in `app.ts` binds the class in the DI container and the `InterceptorRegistry`.
+2. **Apply**: `@UseInterceptors(...)` on a controller (all routes) or on a single method (one route).
 
 ### Register (app.ts)
 

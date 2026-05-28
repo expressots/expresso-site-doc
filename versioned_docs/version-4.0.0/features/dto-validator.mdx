@@ -12,10 +12,10 @@ description: Use the v4 validation system with class-validator, Zod, or Yup for 
 
 A **Data Transfer Object** standardises payload shapes as they cross HTTP boundaries. v4 keeps the same DTO mindset but lets you choose the schema language:
 
-- **class-validator + class-transformer** — decorator-based, classes (the v3 pattern, still supported).
-- **Zod** — schema-first, fully type-inferred.
-- **Yup** — schema-first with chainable builders.
-- **Custom adapter** — implement `IValidator` and register it in the validation registry.
+- **class-validator + class-transformer**: decorator-based, classes (the v3 pattern, still supported).
+- **Zod**: schema-first, fully type-inferred.
+- **Yup**: schema-first with chainable builders.
+- **Custom adapter**: implement `IValidator` and register it in the validation registry.
 
 For a side-by-side feature comparison, see the [Validation reference](./validation.mdx). This page focuses on the class-validator path because it's the closest thing to the legacy v3 flow.
 
@@ -48,7 +48,7 @@ export class CreateUserDTO {
 
 ## Validate inside a controller (v4 way)
 
-Use `@validatedBody()` from `@expressots/adapter-express`. It runs the registered validator on the incoming payload, formats helpful error messages, and rejects malformed requests with a 400 response — all without you wiring a guard or writing a try/catch:
+Use `@validatedBody()` from `@expressots/adapter-express`. It runs the registered validator on the incoming payload, formats helpful error messages, and rejects malformed requests with a 400 response: all without you wiring a guard or writing a try/catch:
 
 ```typescript title="src/usecases/users/users.controller.ts"
 import { controller, Post, validatedBody } from "@expressots/adapter-express";
@@ -71,7 +71,7 @@ The same parameter decorator is also exported as `@validatedQuery`, `@validatedP
 
 ## Programmatic validation
 
-When you need to validate something outside an HTTP request — a queue payload, a CLI input, an event body — use `ValidationService.validate()` directly:
+When you need to validate something outside an HTTP request: a queue payload, a CLI input, an event body: use `ValidationService.validate()` directly:
 
 ```typescript
 import { inject, ValidationService } from "@expressots/core";
@@ -122,6 +122,6 @@ export class UsersController {
 
 ## See also
 
-- **[Validation](./validation.mdx)** — full reference for the validation system, registry, adapters, and error format.
-- **[Configuration](./configuration.mdx)** — typed environment variable validation with `defineConfig` + `Env.*`.
-- **[Error handling](./error-handling.mdx)** — how validation errors are mapped to RFC 7807 problem details.
+- **[Validation](./validation.mdx)**: full reference for the validation system, registry, adapters, and error format.
+- **[Configuration](./configuration.mdx)**: typed environment variable validation with `defineConfig` + `Env.*`.
+- **[Error handling](./error-handling.mdx)**: how validation errors are mapped to RFC 7807 problem details.

@@ -297,7 +297,7 @@ See the [Validation guide](../features/validation.mdx) for class-validator and Y
 
 ### Health Monitoring
 
-Application health monitoring is built-in at three layers — middleware pipeline, `IHealthCheck` providers, and an aggregated dashboard. Full deep-dive in the [Health & Monitoring guide](../features/health-monitoring.mdx).
+Application health monitoring is built-in at three layers: middleware pipeline, `IHealthCheck` providers, and an aggregated dashboard. Full deep-dive in the [Health & Monitoring guide](../features/health-monitoring.mdx).
 
 ```ts
 import { AppExpress } from "@expressots/adapter-express";
@@ -413,7 +413,7 @@ export class App extends AppExpress {
 }
 ```
 
-Providers can also implement `IBootstrap.onBootstrap()` and `IShutdown.onShutdown()` — they're auto-discovered by the lifecycle registry and run alongside the application-level hooks.
+Providers can also implement `IBootstrap.onBootstrap()` and `IShutdown.onShutdown()`. They're auto-discovered by the lifecycle registry and run alongside the application-level hooks.
 
 ### CLI Improvements
 
@@ -421,9 +421,9 @@ The v4 CLI ships with **four templates** and middleware **presets**:
 
 | Template | Highlights |
 | --- | --- |
-| `application` | Canonical full app — controllers, providers, lifecycle, presets |
+| `application` | Canonical full app: controllers, providers, lifecycle, presets |
 | `application-with-events` | Same as above plus the event system pre-wired |
-| `micro` | Minimal `micro()` HTTP service — single file, fast bootstrap |
+| `micro` | Minimal `micro()`: single file, fast bootstrap |
 | `provider` | Library template for publishing reusable providers (dual ESM/CJS, release-it) |
 
 Plus:

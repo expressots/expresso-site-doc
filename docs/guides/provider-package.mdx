@@ -6,7 +6,7 @@ description: Scaffold, build, test, and publish a reusable @expressots/* provide
 
 # Building a Provider Package
 
-ExpressoTS providers are the unit of reuse in the framework — a database client, a cache adapter, an SDK wrapper, or anything else you'd want to inject into many controllers. The **`provider` template** ships everything you need to build, test, and publish one as a real npm package, complete with **dual ESM + CommonJS** output, dual type declarations, automated changelog, and CI-ready tooling.
+ExpressoTS providers are the unit of reuse in the framework: a database client, a cache adapter, an SDK wrapper, or anything else you'd want to inject into many controllers. The **`provider` template** ships everything you need to build, test, and publish one as a real npm package, complete with **dual ESM + CommonJS** output, dual type declarations, automated changelog, and CI-ready tooling.
 
 This guide walks you through scaffolding `@your-org/cool-provider`, building it, testing it, consuming it from an ExpressoTS app, and publishing it to npm.
 
@@ -19,7 +19,7 @@ This guide walks you through scaffolding `@your-org/cool-provider`, building it,
 | A microservice-shaped HTTP API | The [`micro`](./micro-api.mdx) template |
 | A full DI app | The [`application`](../core/first-steps.mdx) template |
 
-The provider template is **not** an app — it has no server, no controllers, and no `bootstrap()`. It produces a **library** consumed via `import { … } from "@your-org/your-provider"`.
+The provider template is **not** an app. It has no server, no controllers, and no `bootstrap()`. It produces a **library** consumed via `import { … } from "@your-org/your-provider"`.
 
 ## Scaffold
 
@@ -35,7 +35,7 @@ You get:
 ```
 my-provider/
 ├── src/
-│   ├── greeter.provider.ts   # the example provider — replace with your own
+│   ├── greeter.provider.ts   # the example provider: replace with your own
 │   └── index.ts              # public API surface (only export what you intend)
 ├── test/
 │   └── greeter.provider.spec.ts
@@ -51,7 +51,7 @@ my-provider/
 └── README.md
 ```
 
-The example provider is intentionally minimal — keep it as a smoke test until your real provider passes its first build, then replace it.
+The example provider is intentionally minimal. Keep it as a smoke test until your real provider passes its first build, then replace it.
 
 ## The provider class
 
@@ -78,14 +78,14 @@ export class GreeterProvider {
 
 Two things matter here:
 
-- **`@provide(GreeterProvider)`** — registers the class with the v4 DI container so consuming apps don't have to wire it manually.
+- **`@provide(GreeterProvider)`**: registers the class with the v4 DI container so consuming apps don't have to wire it manually.
 - **The class is the public type.** Whatever you `export` from `src/index.ts` is your API contract. Treat additions as features, removals as breaking changes.
 
 ```typescript title="src/index.ts"
 export * from "./greeter.provider.js";
 ```
 
-The `.js` extension is **required** — the ESM build runs under `module: NodeNext`, which insists on explicit extensions. Drop it and the ESM bundle won't resolve.
+The `.js` extension is **required**: the ESM build runs under `module: NodeNext`, which insists on explicit extensions. Drop it and the ESM bundle won't resolve.
 
 ## Dual ESM + CJS build
 
@@ -100,7 +100,7 @@ lib/
 └── esm/
     ├── index.mjs              # ESM entry (renamed from index.js)
     ├── index.d.ts
-    └── package.json           # { "type": "module" } — atomic, lives only in lib/esm
+    └── package.json           # { "type": "module" }: atomic, lives only in lib/esm
 ```
 
 `package.json#exports` wires both:
@@ -140,7 +140,7 @@ npm run build
 2. Run `tsc -p tsconfig.esm.json` so emitted files are interpreted as ESM.
 3. Rename `lib/esm/index.js` to `lib/esm/index.mjs`.
 4. Write `lib/esm/package.json` with `{ "type": "module" }`.
-5. Restore the root `package.json` — `git status` is clean afterwards.
+5. Restore the root `package.json`: `git status` is clean afterwards.
 
 Don't edit `scripts/build-esm.js` unless you understand the atomic swap; otherwise an interrupted build can leave your repo in a half-flipped state.
 
@@ -202,7 +202,7 @@ export class AppController {
 }
 ```
 
-Because `GreeterProvider` is decorated with `@provide`, the container resolves it automatically — no manual `bind()` required.
+Because `GreeterProvider` is decorated with `@provide`, the container resolves it automatically. No manual `bind()` required.
 
 If the consuming app uses a non-default prefix or other constructor options, expose a small factory:
 
@@ -259,7 +259,7 @@ Default behaviour (configured in `package.json#release-it`):
 - ✅ Generates / appends to `CHANGELOG.md`
 - ✅ Creates a Git tag and pushes
 - ✅ Creates a GitHub release
-- 🚫 Does **not** publish to npm automatically — flip `"npm": { "publish": false }` to `true` once you're confident, or use a CI workflow
+- 🚫 Does **not** publish to npm automatically. Flip `"npm": { "publish": false }` to `true` once you're confident, or use a CI workflow
 
 For npm publishing in CI, the typical flow is:
 
@@ -302,7 +302,7 @@ Your provider class needs `@provide(YourClass)`. Without it the DI container doe
 
 ## See also
 
-- **[First Steps](../core/first-steps.mdx)** — scaffolding apps that consume your provider.
-- **[Provider Ecosystem](./provider-ecosystem.mdx)** — official providers and patterns.
-- **[Health & Monitoring](../features/health-monitoring.mdx)** — `IHealthCheck` for providers.
-- **[CLI: new](../cli/new.mdx)** — full reference for the scaffolding command.
+- **[First Steps](../core/first-steps.mdx)**: scaffolding apps that consume your provider.
+- **[Provider Ecosystem](./provider-ecosystem.mdx)**: official providers and patterns.
+- **[Health & Monitoring](../features/health-monitoring.mdx)**: `IHealthCheck` for providers.
+- **[CLI: new](../cli/new.mdx)**: full reference for the scaffolding command.

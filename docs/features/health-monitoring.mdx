@@ -12,7 +12,7 @@ ExpressoTS v4 has health monitoring **built in** at three layers:
 2. A provider-level **`IHealthCheck` interface** that auto-discovers checks across your DI container.
 3. An aggregated **health dashboard** (`registry.checkHealth()`) that runs every check in parallel and reports an overall verdict.
 
-You don't need a third-party library for any of this — but every layer is opt-in and composable.
+You don't need a third-party library for any of this, but every layer is opt-in and composable.
 
 ## A) Middleware health endpoint
 
@@ -48,7 +48,7 @@ $ curl -s localhost:3000/health | jq
 }
 ```
 
-This endpoint reports the **middleware pipeline's health** — what's wired, in what order, and (with `includeMetrics`) how it's performing. It is intentionally cheap and synchronous.
+This endpoint reports the **middleware pipeline's health**: what's wired, in what order, and (with `includeMetrics`) how it's performing. It is intentionally cheap and synchronous.
 
 For *application*-level health (databases, caches, downstream services), use the next layer.
 
@@ -103,11 +103,11 @@ interface HealthCheckResult {
 
 Three statuses keep the contract simple:
 
-- `healthy` — operating normally
-- `degraded` — running with reduced capacity (slow responses, partial outage, …)
-- `unhealthy` — broken or unreachable
+- `healthy`: operating normally
+- `degraded`: running with reduced capacity (slow responses, partial outage, …)
+- `unhealthy`: broken or unreachable
 
-The framework auto-discovers every provider that implements `IHealthCheck` — there is no central register-call.
+The framework auto-discovers every provider that implements `IHealthCheck`. There is no central register-call.
 
 ## C) The aggregated dashboard
 
@@ -121,7 +121,7 @@ interface HealthDashboard {
 }
 ```
 
-`overall` is the *worst* status across providers — one `unhealthy` provider makes the whole system `unhealthy`. This is the right default for orchestrators (k8s readiness probes, ALB target groups, etc.).
+`overall` is the *worst* status across providers: one `unhealthy` provider makes the whole system `unhealthy`. This is the right default for orchestrators (k8s readiness probes, ALB target groups, etc.).
 
 Expose it as your real `/health` endpoint:
 
@@ -191,11 +191,11 @@ logger.startHealthMonitoring();
 logger.stopHealthMonitoring();   // call this on shutdown
 ```
 
-This is configured **per logger instance**, not via the middleware health check — they monitor different things. In a typical app you don't have to touch this; the defaults are sane and the monitor is automatically torn down on graceful shutdown.
+This is configured **per logger instance**, not via the middleware health check. They monitor different things. In a typical app you don't have to touch this; the defaults are sane and the monitor is automatically torn down on graceful shutdown.
 
 ## Studio integration
 
-Both signals — middleware pipeline health and `IHealthCheck` results — are surfaced in the Studio runtime panel. Each provider shows up with a health icon (💚 / 🟡 / 🔴) and the latest latency, so you can spot degraded dependencies without curling endpoints by hand.
+Both signals (middleware pipeline health and `IHealthCheck` results) are surfaced in the Studio runtime panel. Each provider shows up with a health icon (💚 / 🟡 / 🔴) and the latest latency, so you can spot degraded dependencies without curling endpoints by hand.
 
 ## Recommended setup
 
@@ -215,6 +215,6 @@ Then implement `IHealthCheck` on each provider that talks to the outside world (
 
 ## See also
 
-- **[Bootstrap](../core/bootstrap.mdx)** — `Middleware.addHealthCheck` configuration.
-- **[Providers](../core/providers.mdx)** — registering, scoping, and discovering providers.
-- **[Logging](../guides/logging-setup.mdx)** — the logger's own health monitor.
+- **[Bootstrap](../core/bootstrap.mdx)**: `Middleware.addHealthCheck` configuration.
+- **[Providers](../core/providers.mdx)**: registering, scoping, and discovering providers.
+- **[Logging](../guides/logging-setup.mdx)**: the logger's own health monitor.

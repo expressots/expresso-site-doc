@@ -36,7 +36,7 @@ git push origin main
 The rest of this page expands on what each step does and how to
 customize the output.
 
-## Step 1 — Generate container artifacts
+## Step 1: Generate container artifacts
 
 Run from the root of your ExpressoTS project:
 
@@ -46,15 +46,15 @@ expressots containerize
 
 This emits, in your project root:
 
-- `Dockerfile` — multi-stage production image. Stage 1 installs
+- `Dockerfile`: multi-stage production image. Stage 1 installs
   every dependency and runs `<package-manager> run build`; stage 2
   copies only the compiled output and pruned production
   `node_modules`.
-- `Dockerfile.development` — single-stage image with the
+- `Dockerfile.development`: single-stage image with the
   hot-reload `dev` script as `CMD`, plus debug port `9229`.
-- `docker-compose.yml` — orchestrates your app and (when detected)
+- `docker-compose.yml`: orchestrates your app and (when detected)
   Postgres / Redis services.
-- `.dockerignore` — excludes `node_modules/`, `dist/`, build
+- `.dockerignore`: excludes `node_modules/`, `dist/`, build
   artifacts, and IDE metadata from the build context.
 
 The CLI **detects your package manager** (npm / pnpm / yarn / bun)
@@ -115,7 +115,7 @@ Presets tune the base image and security posture:
 expressots containerize --preset secure
 ```
 
-## Step 2 — Validate locally
+## Step 2: Validate locally
 
 ```bash
 docker build -t myapp .
@@ -133,7 +133,7 @@ you can use:
 npm run docker:build       # or pnpm/yarn/bun, matching your project
 ```
 
-## Step 3 — Generate a CI pipeline
+## Step 3: Generate a CI pipeline
 
 ```bash
 expressots cicd init github       # or gitlab / circleci / jenkins / bitbucket / azure
@@ -165,7 +165,7 @@ expressots containerize --include-ci --ci-platform github
 See [CD vs CI pipelines](../cli/containerize.mdx#cd-vs-ci-pipelines)
 for the rationale.
 
-## Step 4 — Deploy
+## Step 4: Deploy
 
 ### Docker host (single node)
 
@@ -184,12 +184,12 @@ expressots containerize k8s production
 
 This writes:
 
-- `k8s/deployment.yaml` — 3-replica `Deployment` with
+- `k8s/deployment.yaml`: 3-replica `Deployment` with
   liveness/readiness probes hitting `/health` (or whichever paths
   the analyzer found in your controllers).
-- `k8s/service.yaml` — `LoadBalancer` Service routing port 80 to
+- `k8s/service.yaml`: `LoadBalancer` Service routing port 80 to
   the analyzed app port.
-- `k8s/configmap.yaml` — placeholder `ConfigMap` with
+- `k8s/configmap.yaml`: placeholder `ConfigMap` with
   `NODE_ENV=production`.
 
 Apply:
@@ -207,7 +207,7 @@ Cloud Run, Kubernetes). The generated workflow contains the
 recommended deploy steps plus the secrets you need to add to your
 repository.
 
-## Step 5 — Customize freely
+## Step 5: Customize freely
 
 Every generated file is **owned by you** once written. Re-running
 `containerize` or `cicd init` overwrites them, so commit your
@@ -243,19 +243,19 @@ container-bound.
 ## Troubleshooting
 
 **`docker compose up --build` fails with "no such file or
-directory"** — re-run `expressots containerize compose` so the
+directory"**: re-run `expressots containerize compose` so the
 referenced `Dockerfile` is generated alongside the compose file.
 The CLI has done this automatically since v4.
 
-**`cicd init` overwrote my custom GitHub Actions** — `cicd init` is
+**`cicd init` overwrote my custom GitHub Actions**: `cicd init` is
 a generator; it always overwrites. Keep your hand-edited files
 under different names (e.g. `release.yml`) so they aren't touched.
 
-**The container runs as root** — switch to the `secure` preset:
+**The container runs as root**: switch to the `secure` preset:
 `expressots containerize --preset secure`. It generates a non-root
 user (`uid=1001`) and chowns the app directory.
 
-**Image is huge** — the default multi-stage build copies
+**Image is huge**: the default multi-stage build copies
 `node_modules` from the builder. For an even smaller image,
 combine `--preset secure` (which uses Alpine) with a `node`
 runtime stage that only contains the compiled JS, or extend the

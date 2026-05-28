@@ -6,7 +6,7 @@ description: Cross-cutting types and small utilities shared by every other Expre
 
 # `@expressots/shared`
 
-Shared types and tiny utilities used across the framework. **You almost never install this directly** — it's pulled in transitively by `@expressots/core` and `@expressots/adapter-express`. It exists so the v4 packages can talk about the same shapes (environments, render engines, web-server contracts) without circular dependencies.
+Shared types and tiny utilities used across the framework. **You almost never install this directly**. It's pulled in transitively by `@expressots/core` and `@expressots/adapter-express`. It exists so the v4 packages can talk about the same shapes (environments, render engines, web-server contracts) without circular dependencies.
 
 ```bash
 npm install @expressots/shared    # only when you need it standalone
@@ -27,7 +27,7 @@ The vast majority of these are re-exported from `@expressots/core` and `@express
 // Idiomatic
 import { Env, loadEnvSync } from "@expressots/core";
 
-// Equivalent — same code, longer path
+// Equivalent: same code, longer path
 import { Env, loadEnvSync } from "@expressots/shared";
 ```
 
@@ -42,5 +42,5 @@ For everything else, use `@expressots/core`.
 
 ## See also
 
-- **[Configuration](../features/configuration.mdx)** — `defineConfig` and `Env.*` builders.
-- **[`@expressots/core`](./core.mdx)** — the package that re-exports most of this.
+- **[Configuration](../features/configuration.mdx)**: `defineConfig` and `Env.*` builders.
+- **[`@expressots/core`](./core.mdx)**: the package that re-exports most of this.

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 24
 title: Route Patterns
-description: Type-safe regex constraints on route parameters using Patterns and pattern() — Express 5 / path-to-regexp v8 compatible.
+description: "Type-safe regex constraints on route parameters using Patterns and pattern(): Express 5 / path-to-regexp v8 compatible."
 ---
 
 # Route Patterns
 
-ExpressoTS v4 ships a small public API — `Patterns` and `pattern()` — for **constraining route parameters with a regex** in a way that survives the Express 5 / `path-to-regexp` v8 jump.
+ExpressoTS v4 ships a small public API: `Patterns` and `pattern()`: for **constraining route parameters with a regex** in a way that survives the Express 5 / `path-to-regexp` v8 jump.
 
 If you're coming from v3 and used inline regex in routes (`@Get("/users/:id(\\d+)")`), you'll like this page. The syntax has changed, but the semantics are the same: a path with `Patterns.NUMERIC_ID` still rejects `/users/abc` and only dispatches the handler for `/users/123`.
 
@@ -16,7 +16,7 @@ Express 5 upgraded `path-to-regexp` to v8, which **dropped inline regex constrai
 
 ExpressoTS does this transparently: at decorator time, the HTTP-method decorators parse the constraint out of your path, register the route under a plain `:id` placeholder, and insert a tiny validator middleware that 404s when the captured value doesn't match the original pattern.
 
-You don't have to think about any of that — just use `Patterns` / `pattern()`.
+You don't have to think about any of that: just use `Patterns` / `pattern()`.
 
 ## The `Patterns` constants
 
@@ -74,7 +74,7 @@ You can also write the literal form if you prefer:
 
 ```typescript
 @Get("/users/:id(\\d+)") // works, rewritten internally
-@Get(`/users/${pattern("id", Patterns.NUMERIC_ID)}`) // recommended — discoverable
+@Get(`/users/${pattern("id", Patterns.NUMERIC_ID)}`) // recommended: discoverable
 ```
 
 Both are equivalent at runtime.
@@ -116,7 +116,7 @@ getTenantUser(
 
 ## Studio integration
 
-The Studio agent reads the pattern metadata too — your route shows up as `GET /api/:tenant/users/:id` with the regex constraint annotated so you can verify the contract at a glance.
+The Studio agent reads the pattern metadata too: your route shows up as `GET /api/:tenant/users/:id` with the regex constraint annotated so you can verify the contract at a glance.
 
 ## Combining with validation
 
@@ -136,6 +136,6 @@ getUser(@validatedParam("id", UserId) id: string) {
 
 ## See also
 
-- **[Validation](./validation.mdx)** — pluggable schema validation for body/query/params/headers.
-- **[Decorators](./decorators.mdx)** — `@Get`, `@param`, and the rest of the route surface.
-- **[API versioning](./api-versioning.mdx)** — combine patterns with versioned controllers.
+- **[Validation](./validation.mdx)**: pluggable schema validation for body/query/params/headers.
+- **[Decorators](./decorators.mdx)**: `@Get`, `@param`, and the rest of the route surface.
+- **[API versioning](./api-versioning.mdx)**: combine patterns with versioned controllers.

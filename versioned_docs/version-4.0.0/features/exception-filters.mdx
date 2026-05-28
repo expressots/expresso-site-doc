@@ -6,7 +6,7 @@ description: Customize how ExpressoTS turns errors into HTTP responses with @Cat
 
 # Exception Filters
 
-The exception filter pipeline is how ExpressoTS v4 turns thrown `Error`s into HTTP responses. Out of the box you don't need to do anything — the framework registers a stack of built-in filters that produce RFC 7807 problem details. When you do need to override that behaviour for one error type, one route, or globally, **`@Catch` + `BaseExceptionFilter` + `@UseFilters`** are the only three primitives you'll touch.
+The exception filter pipeline is how ExpressoTS v4 turns thrown `Error`s into HTTP responses. Out of the box you don't need to do anything. The framework registers a stack of built-in filters that produce RFC 7807 problem details. When you do need to override that behaviour for one error type, one route, or globally, **`@Catch` + `BaseExceptionFilter` + `@UseFilters`** are the only three primitives you'll touch.
 
 If you only care about *which errors to throw*, see [Error handling](./error-handling.mdx). This page focuses on **building filters**.
 
@@ -21,7 +21,7 @@ When the framework boots, it auto-discovers every class decorated with `@Catch(.
 | `AppErrorFilter` | `AppError` (and subclasses not caught above) | `appError.statusCode` | `application/problem+json` |
 | `GlobalExceptionFilter` | everything else | `500` | `application/problem+json`, optional stack |
 
-This means **you can ship a v4 app without writing a single filter** — every `throw new AppError(...)` or `throw new ValidationErrorClass(...)` becomes a structured response automatically.
+This means **you can ship a v4 app without writing a single filter**: every `throw new AppError(...)` or `throw new ValidationErrorClass(...)` becomes a structured response automatically.
 
 ## Anatomy of a filter
 
@@ -62,18 +62,18 @@ export class DatabaseErrorFilter extends BaseExceptionFilter {
 
 `@Catch()` accepts:
 
-- one or more error classes — the filter catches **only** those types (and subclasses)
-- no arguments — the filter becomes a **catch-all**, like `GlobalExceptionFilter`
+- one or more error classes: the filter catches **only** those types (and subclasses)
+- no arguments: the filter becomes a **catch-all**, like `GlobalExceptionFilter`
 
 `BaseExceptionFilter` injects two helpers for free:
 
-- `this.logger` — the framework `Logger`, already scoped to the request
-- `this.report` — the [Report](./error-handling.mdx#the-report-helper) helper, if you need to build a typed payload
+- `this.logger`: the framework `Logger`, already scoped to the request
+- `this.report`: the [Report](./error-handling.mdx#the-report-helper) helper, if you need to build a typed payload
 
 …and exposes two protected methods:
 
-- `logError(exception, context)` — logs the error with controller/handler context, suggestions, and an optional stack trace
-- `sendErrorResponse(context, statusCode, body)` — safely writes the response (skips if headers are already sent)
+- `logError(exception, context)`: logs the error with controller/handler context, suggestions, and an optional stack trace
+- `sendErrorResponse(context, statusCode, body)`: safely writes the response (skips if headers are already sent)
 
 ## Activating a filter
 
@@ -87,7 +87,7 @@ export * from "./tenant-error.filter";
 export * from "./fallback.filter";
 ```
 
-Then make sure `src/filters/index.ts` is imported once — typically from your `App` class or `main.ts`.
+Then make sure `src/filters/index.ts` is imported once, typically from your `App` class or `main.ts`.
 
 ## Scoping filters with `@UseFilters`
 
@@ -147,7 +147,7 @@ export class FallbackFilter extends BaseExceptionFilter {
 }
 ```
 
-You usually don't need this — `GlobalExceptionFilter` already provides a sensible default. Define your own catch-all only when you need to:
+You usually don't need this. `GlobalExceptionFilter` already provides a sensible default. Define your own catch-all only when you need to:
 
 - Send errors to a third-party tracker (Sentry, Datadog, …)
 - Add tenant/correlation IDs to every response
@@ -169,7 +169,7 @@ interface ExceptionContext {
 }
 ```
 
-You can use `context.request` / `context.response` exactly like you would in raw Express — including reading custom headers like `x-correlation-id` to attach to the response payload.
+You can use `context.request` / `context.response` exactly like you would in raw Express, including reading custom headers like `x-correlation-id` to attach to the response payload.
 
 ## Testing a filter
 
@@ -202,7 +202,7 @@ For full HTTP-level integration tests, see [Testing](./testing.mdx).
 
 ## See also
 
-- **[Error handling](./error-handling.mdx)** — `AppError`, `Report`, and the v4 error model.
-- **[Validation](./validation.mdx)** — how `ValidationErrorFilter` formats validation responses.
-- **[Decorators](./decorators.mdx)** — quick reference for `@Catch` and `@UseFilters`.
-- **[Status codes](./status-code.mdx)** — the `StatusCode` enum used in filters.
+- **[Error handling](./error-handling.mdx)**: `AppError`, `Report`, and the v4 error model.
+- **[Validation](./validation.mdx)**: how `ValidationErrorFilter` formats validation responses.
+- **[Decorators](./decorators.mdx)**: quick reference for `@Catch` and `@UseFilters`.
+- **[Status codes](./status-code.mdx)**: the `StatusCode` enum used in filters.

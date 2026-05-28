@@ -6,7 +6,7 @@ description: Run multiple API versions side by side using @Version, with control
 
 # API Versioning
 
-ExpressoTS v4 ships **first-class API versioning** through a single decorator: `@Version`. Apply it to a controller and every route in that controller gets a `/v1`, `/v2`, … prefix. Apply it to a method to override the controller's version for one route. The framework prefixes URLs, registers each version with the router, and surfaces the detected versions to Studio and the CLI banner — without you wiring anything else.
+ExpressoTS v4 ships **first-class API versioning** through a single decorator: `@Version`. Apply it to a controller and every route in that controller gets a `/v1`, `/v2`, … prefix. Apply it to a method to override the controller's version for one route. The framework prefixes URLs, registers each version with the router, and surfaces the detected versions to Studio and the CLI banner, without you wiring anything else.
 
 ## Quick start
 
@@ -40,7 +40,7 @@ export class UsersV2Controller {
 }
 ```
 
-Both controllers can live side by side — `GET /v1/users` and `GET /v2/users` are independently routable.
+Both controllers can live side by side: `GET /v1/users` and `GET /v2/users` are independently routable.
 
 If your app has a global prefix (`bootstrap(App, { rootPath: "/api" })`), versions stack: `GET /api/v1/users`, `GET /api/v2/users`.
 
@@ -73,12 +73,12 @@ export class ProductsController {
     @Version("2")
     @Get("/:id")
     getById(@param("id") id: string) {
-        // /v2/products/:id — overrides the controller's v1
+        // /v2/products/:id: overrides the controller's v1
     }
 }
 ```
 
-Method-level versions **win** over controller-level versions. There is no inheritance / fallback — whatever you put on the method is what runs.
+Method-level versions **win** over controller-level versions. There is no inheritance / fallback: whatever you put on the method is what runs.
 
 ## No `@Version`?
 
@@ -92,7 +92,7 @@ export class HealthController {
 }
 ```
 
-This is useful for cross-cutting endpoints — `/health`, `/metrics`, `/swagger.json` — that you want to share across all API versions.
+This is useful for cross-cutting endpoints like `/health`, `/metrics`, `/swagger.json`: that you want to share across all API versions.
 
 ## Mixing versioned and unversioned controllers
 
@@ -110,7 +110,7 @@ The router resolves the longer prefix first, so versioned routes never collide w
 
 ## Versions and middleware presets
 
-Middleware presets (`api`, `web`, `serverless`, `fullstack`) apply globally — they don't care about versions. You can mix them freely:
+Middleware presets (`api`, `web`, `serverless`, `fullstack`) apply globally: they don't care about versions. You can mix them freely:
 
 ```typescript title="src/app.ts"
 import { AppExpress } from "@expressots/adapter-express";
@@ -125,7 +125,7 @@ export class App extends AppExpress {
 
 ## Versions in Studio
 
-The framework auto-detects versions across all controllers and reports them to Studio's runtime info. Each route in the route panel is annotated with its version, so `/v1/users` and `/v2/users` appear as **separate** entries — even though they map to different controllers.
+The framework auto-detects versions across all controllers and reports them to Studio's runtime info. Each route in the route panel is annotated with its version, so `/v1/users` and `/v2/users` appear as **separate** entries: even though they map to different controllers.
 
 The CLI banner also shows the detected versions when the server boots:
 
@@ -159,17 +159,17 @@ export class UsersV1Controller {
 }
 ```
 
-Or wrap it in a small `@DeprecatedVersion("1", { sunset, replacement })` interceptor — both approaches stay in user land.
+Or wrap it in a small `@DeprecatedVersion("1", { sunset, replacement })` interceptor: both approaches stay in user land.
 
 ## Limitations
 
 - The current strategy is **path-based** only (`/v1/...`). Header-based or media-type-based versioning is not built in.
-- `@Version` accepts string/number arguments — version negotiation logic (e.g. semver matching) is up to you.
+- `@Version` accepts string/number arguments: version negotiation logic (e.g. semver matching) is up to you.
 
 If you need a different strategy, write a small middleware that inspects `Accept-Version` / `Accept` headers and rewrites `req.url` before the router runs.
 
 ## See also
 
-- **[Decorators](./decorators.mdx)** — full `@Version` reference.
-- **[Route patterns](./route-patterns.mdx)** — combining versioning with regex constraints.
-- **[Bootstrap](../core/bootstrap.mdx)** — `rootPath` and global prefixes.
+- **[Decorators](./decorators.mdx)**: full `@Version` reference.
+- **[Route patterns](./route-patterns.mdx)**: combining versioning with regex constraints.
+- **[Bootstrap](../core/bootstrap.mdx)**: `rootPath` and global prefixes.

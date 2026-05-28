@@ -9,7 +9,7 @@ description: The in-process telemetry agent that streams routes, providers, midd
 The Studio agent runs **inside your application** during development. It collects:
 
 - The route table (post-controller-discovery)
-- The provider registry (with capabilities — `IBootstrap`, `IShutdown`, `IHealthCheck`, `IMetrics`)
+- The provider registry (with capabilities: `IBootstrap`, `IShutdown`, `IHealthCheck`, `IMetrics`)
 - The middleware pipeline (resolved order, including built-ins from presets)
 - The lifecycle hook registry
 - Event handler registrations and fire counts
@@ -21,10 +21,10 @@ The Studio agent runs **inside your application** during development. It collect
 
 The agent is wired in for you whenever you scaffold from any v4 template:
 
-- `application` — auto-mounted by `AppExpress.bootstrap()` when `NODE_ENV !== "production"`.
-- `application-with-events` — same as above; events show up in Studio's event panel.
-- `micro` — auto-mounted by `micro()` when not in production.
-- `provider` — N/A (libraries don't run a server).
+- `application`: auto-mounted by `AppExpress.bootstrap()` when `NODE_ENV !== "production"`.
+- `application-with-events`: same as above; events show up in Studio's event panel.
+- `micro`: auto-mounted by `micro()` when not in production.
+- `provider`: N/A (libraries don't run a server).
 
 You can also enable it explicitly:
 
@@ -65,18 +65,18 @@ The agent never sends application-state data (database rows, request bodies, sec
 
 The agent has three guard rails:
 
-1. **Production opt-out** — `NODE_ENV === "production"` disables the agent unless `enabled: true` is forced.
-2. **Localhost binding** — defaults to `127.0.0.1`, not `0.0.0.0`. Reset only with explicit `host: "0.0.0.0"`.
-3. **No request capture** — the agent reads route metadata, not request payloads.
+1. **Production opt-out**: `NODE_ENV === "production"` disables the agent unless `enabled: true` is forced.
+2. **Localhost binding**: defaults to `127.0.0.1`, not `0.0.0.0`. Reset only with explicit `host: "0.0.0.0"`.
+3. **No request capture**: the agent reads route metadata, not request payloads.
 
 If you need to inspect a remote staging instance, tunnel the WebSocket through SSH; don't expose the agent on a public address.
 
 ## Versioning
 
-Released alongside `@expressots/adapter-express`. The Studio UI and agent stay in lockstep — connecting an older Studio to a newer agent (or vice versa) may show partial data.
+Released alongside `@expressots/adapter-express`. The Studio UI and agent stay in lockstep. Connecting an older Studio to a newer agent (or vice versa) may show partial data.
 
 ## See also
 
-- **[Studio overview](../studio/overview.mdx)** — feature tour and screenshots.
-- **[`@expressots/studio`](./studio.mdx)** — the browser dashboard.
-- **[Bootstrap](../core/bootstrap.mdx)** — where the agent is mounted in the lifecycle.
+- **[Studio overview](../studio/overview.mdx)**: feature tour and screenshots.
+- **[`@expressots/studio`](./studio.mdx)**: the browser dashboard.
+- **[Bootstrap](../core/bootstrap.mdx)**: where the agent is mounted in the lifecycle.

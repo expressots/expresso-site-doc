@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: "@expressots/cli"
-description: The expressots command-line tool — scaffolding, code generation, build, and Studio launcher.
+description: The expressots command-line tool for scaffolding, code generation, build, and Studio launcher.
 ---
 
 # `@expressots/cli`
@@ -27,11 +27,11 @@ It powers four flagship commands:
 
 ## What's new in v4
 
-- **Four templates** — `application`, `application-with-events`, `micro`, `provider`. The CLI detects compatible flags (`--events`, `--preset`) and steers you to the right scaffold.
-- **Middleware presets** — `--preset api|web|serverless|fullstack` injects the right dependencies and replaces the placeholder in `src/app.ts` *before* `npm install`, so a failed install never leaves you with placeholders.
-- **`--package-manager`** — `npm`, `pnpm`, or `yarn`, applied consistently across the scaffold.
-- **`EXPRESSOTS_TEMPLATE_REF`** — pin scaffolds to a specific template branch/tag for CI-driven testing.
-- **`EXPRESSOTS_DEV` / `EXPRESSOTS_USE_LOCAL_TEMPLATES` / `EXPRESSOTS_SKIP_INSTALL`** — environment switches for local development against unreleased templates.
+- **Four templates**: `application`, `application-with-events`, `micro`, `provider`. The CLI detects compatible flags (`--events`, `--preset`) and steers you to the right scaffold.
+- **Middleware presets**: `--preset api|web|serverless|fullstack` injects the right dependencies and replaces the placeholder in `src/app.ts` *before* `npm install`, so a failed install never leaves you with placeholders.
+- **`--package-manager`**: `npm`, `pnpm`, or `yarn`, applied consistently across the scaffold.
+- **`EXPRESSOTS_TEMPLATE_REF`**: pin scaffolds to a specific template branch/tag for CI-driven testing.
+- **`EXPRESSOTS_DEV` / `EXPRESSOTS_USE_LOCAL_TEMPLATES` / `EXPRESSOTS_SKIP_INSTALL`**: environment switches for local development against unreleased templates.
 
 ## Studio launcher
 
@@ -49,6 +49,6 @@ The CLI moves in lockstep with the framework. Use `npm install @expressots/cli@n
 
 ## See also
 
-- **[CLI: `new`](../cli/new.mdx)** — the full reference for `expressots new`.
-- **[Studio overview](../studio/overview.mdx)** — what Studio shows and how to use it.
-- **[Bootstrap](../core/bootstrap.mdx)** — what the templates produce.
+- **[CLI: `new`](../cli/new.mdx)**: the full reference for `expressots new`.
+- **[Studio overview](../studio/overview.mdx)**: what Studio shows and how to use it.
+- **[Bootstrap](../core/bootstrap.mdx)**: what the templates produce.

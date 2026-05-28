@@ -5,7 +5,7 @@
 
   <h1>ExpressoTS Documentation</h1>
 
-  <p>Source code for <a href="https://doc.expresso-ts.com">doc.expresso-ts.com</a> — the official documentation site for the ExpressoTS framework.</p>
+  <p>Source code for <a href="https://doc.expresso-ts.com">doc.expresso-ts.com</a>: the official documentation site for the ExpressoTS framework.</p>
 
   <p>
     <a href="https://github.com/expressots/expresso-site-doc/blob/main/LICENSE"><img src="https://img.shields.io/github/license/expressots/expresso-site-doc?style=flat&color=0d0d0d" alt="License"></a>
@@ -42,4 +42,4 @@ See the [Contributing Guide](https://github.com/expressots/expresso-site-doc/blo
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT: see [LICENSE](./LICENSE).

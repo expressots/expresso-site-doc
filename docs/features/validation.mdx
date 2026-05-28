@@ -1,7 +1,7 @@
 ---
 sidebar_position: 22
 title: Validation
-description: ExpressoTS v4 Smart Validation — Zod, Yup, class-validator, and custom adapters via a single registry and parameter decorators.
+description: "ExpressoTS v4 Smart Validation: Zod, Yup, class-validator, and custom adapters via a single registry and parameter decorators."
 ---
 
 import Tabs from "@theme/Tabs";
@@ -9,18 +9,18 @@ import TabItem from "@theme/TabItem";
 
 # Validation
 
-ExpressoTS v4 ships a **pluggable validation system** that decouples *what* you validate (the schema language) from *how* it runs (the registry and parameter decorators). Pick one — or several — of:
+ExpressoTS v4 ships a **pluggable validation system** that decouples *what* you validate (the schema language) from *how* it runs (the registry and parameter decorators). Pick one: or several: of:
 
-- **[Zod](https://zod.dev/)** — schema-first, fully type-inferred. Highest signal-to-noise for new code.
-- **[Yup](https://github.com/jquense/yup)** — chainable schema builder, classic ergonomics.
-- **[class-validator](https://github.com/typestack/class-validator)** — decorator-based on classes (the v3 default). Great when your DTOs already exist.
-- **Custom adapter** — implement `IValidationAdapter` and register your own.
+- **[Zod](https://zod.dev/)**: schema-first, fully type-inferred. Highest signal-to-noise for new code.
+- **[Yup](https://github.com/jquense/yup)**: chainable schema builder, classic ergonomics.
+- **[class-validator](https://github.com/typestack/class-validator)**: decorator-based on classes (the v3 default). Great when your DTOs already exist.
+- **Custom adapter**: implement `IValidationAdapter` and register your own.
 
 The same parameter decorators (`@validatedBody`, `@validatedQuery`, `@validatedParam`, `@validatedHeaders`) work with **all** adapters.
 
 ## Why a registry?
 
-Validation in v3 was hardcoded to class-validator. v4 keeps that path open but lets you mix adapters per project — or per route — without rewriting your DTOs:
+Validation in v3 was hardcoded to class-validator. v4 keeps that path open but lets you mix adapters per project: or per route: without rewriting your DTOs:
 
 ```typescript title="src/main.ts (one-time setup)"
 import {
@@ -59,7 +59,7 @@ All four come from `@expressots/adapter-express`. They have the same call signat
 
 | Decorator | Source | Optional name | Optional schema |
 | --- | --- | --- | --- |
-| `@validatedBody(schema?)` | `req.body` | — | yes |
+| `@validatedBody(schema?)` | `req.body` |: | yes |
 | `@validatedQuery(name?, schema?)` | `req.query` | yes | yes |
 | `@validatedParam(name?, schema?)` | `req.params` | yes | yes |
 | `@validatedHeaders(name?, schema?)` | `req.headers` | yes | yes |
@@ -192,7 +192,7 @@ export class UsersController {
 
 ## Programmatic validation
 
-When you need to validate something outside an HTTP request — a queue payload, an event, a CLI input — use `ValidationService.validate()` or a registered adapter directly:
+When you need to validate something outside an HTTP request: a queue payload, an event, a CLI input: use `ValidationService.validate()` or a registered adapter directly:
 
 ```typescript
 import { inject, ValidationService, ValidationErrorClass } from "@expressots/core";
@@ -224,7 +224,7 @@ type ValidationResult<T> =
 
 ## Smart field detection
 
-The validation system also includes a `SmartFieldDetector` that infers semantics from field names (`email`, `password`, `phone`, `url`, `apiKey`, …) so error messages can suggest fixes ("did you mean `'ada@example.com'`?"). This kicks in automatically — you don't need to wire it up.
+The validation system also includes a `SmartFieldDetector` that infers semantics from field names (`email`, `password`, `phone`, `url`, `apiKey`, …) so error messages can suggest fixes ("did you mean `'ada@example.com'`?"). This kicks in automatically: you don't need to wire it up.
 
 Disable it globally if you want stricter raw error messages:
 
@@ -282,7 +282,7 @@ validationRegistry.register(new MyCustomAdapter());
 
 ## See also
 
-- **[Error handling](./error-handling.mdx)** — the RFC 7807 pipeline and how `ValidationErrorClass` is rendered.
-- **[Exception filters](./exception-filters.mdx)** — override the default validation error response.
-- **[DTO validator](./dto-validator.mdx)** — the class-validator-flavoured walkthrough.
-- **[Configuration](./configuration.mdx)** — typed environment validation with `defineConfig` + `Env.*`.
+- **[Error handling](./error-handling.mdx)**: the RFC 7807 pipeline and how `ValidationErrorClass` is rendered.
+- **[Exception filters](./exception-filters.mdx)**: override the default validation error response.
+- **[DTO validator](./dto-validator.mdx)**: the class-validator-flavoured walkthrough.
+- **[Configuration](./configuration.mdx)**: typed environment validation with `defineConfig` + `Env.*`.

@@ -6,7 +6,7 @@ description: Use the StatusCode enum to set HTTP status codes consistently acros
 
 # Status code
 
-`StatusCode` is the canonical enum that ExpressoTS uses everywhere a status code crosses a boundary — controller responses, `AppError` constructors, `@Http()` decorators, exception filters. It maps the standard [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes) status codes to typed numbers, eliminating the magic-number sprawl that creeps into Express apps.
+`StatusCode` is the canonical enum that ExpressoTS uses everywhere a status code crosses a boundary: controller responses, `AppError` constructors, `@Http()` decorators, exception filters. It maps the standard [RFC 9110](https://httpwg.org/specs/rfc9110.html#overview.of.status.codes) status codes to typed numbers, eliminating the magic-number sprawl that creeps into Express apps.
 
 ```typescript
 import { StatusCode } from "@expressots/core";
@@ -28,11 +28,11 @@ StatusCode.ServiceUnavailable;  // 503
 
 Five families:
 
-- **1xx** — informational responses (rarely used directly)
-- **2xx** — successful responses
-- **3xx** — redirection
-- **4xx** — client errors
-- **5xx** — server errors
+- **1xx**: informational responses (rarely used directly)
+- **2xx**: successful responses
+- **3xx**: redirection
+- **4xx**: client errors
+- **5xx**: server errors
 
 See the [MDN status code reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) for the full meaning of each code.
 
@@ -139,11 +139,11 @@ export class CreateUserUseCase {
 
 ## Why use the enum?
 
-- **Refactor-safe** — your IDE rejects typos.
-- **Searchable** — `StatusCode.Conflict` is greppable; `409` is not.
-- **Consistent** — the framework also uses `StatusCode` in its built-in errors and filters, so your code matches its output.
+- **Refactor-safe**: your IDE rejects typos.
+- **Searchable**: `StatusCode.Conflict` is greppable; `409` is not.
+- **Consistent**: the framework also uses `StatusCode` in its built-in errors and filters, so your code matches its output.
 
 ## See also
 
-- **[Error handling](./error-handling.mdx)** — `AppError`, `Report.Error`, RFC 7807 responses.
-- **[Exception filters](./exception-filters.mdx)** — custom error → response mapping.
+- **[Error handling](./error-handling.mdx)**: `AppError`, `Report.Error`, RFC 7807 responses.
+- **[Exception filters](./exception-filters.mdx)**: custom error → response mapping.

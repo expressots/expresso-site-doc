@@ -119,14 +119,20 @@ test("user creation", async () => {
 
 </details>
 
-:::note Port Resolution Priority
-📊 **How bootstrap picks the port:**
+:::note Resolution Priority
 
-```
- 1️⃣ options.port in bootstrap() // bootstrap(App, { port: 8080 })
- 2️⃣ process.env.PORT // PORT=8080 npm start
- 3️⃣ Default: 3000 // bootstrap(App)
-```
+`bootstrap()` resolves port, app name, and app version with the same priority chain.
+Options passed directly always win, then `.env` / `process.env`, then sensible defaults:
+
+| Value | 1st (highest) | 2nd | 3rd (lowest) |
+| ----- | ------------- | --- | ------------ |
+| **Port** | `options.port` | `process.env.PORT` | `3000` |
+| **App name** | `options.appName` | `package.json` `name` | `"ExpressoTS App"` |
+| **App version** | `options.appVersion` | `package.json` `version` | `"1.0.0"` |
+
+You can set `PORT`, `APP_NAME`, and `APP_VERSION` in your `.env` file and they will be
+picked up automatically (as long as `.env` file loading is enabled via `envFileConfig`
+or `loadEnvSync()`).
 
 **Common Pitfall:**
 
@@ -362,14 +368,23 @@ export type AppConfig = typeof config;
 
 #### Using Type-Safe Config with Bootstrap
 
+You can pass the resolved config object **directly** to `bootstrap()`:
+
 ```typescript
 import { bootstrap } from "@expressots/core";
 import { App } from "./app";
-import { appConfig } from "./config"; // 👈 Import your config
+import { appConfig } from "./config";
 
+// Pass the whole config — bootstrap extracts app, server, and envFileConfig
+bootstrap(App, appConfig.values);
+```
+
+Or spread individual values if you prefer explicit control:
+
+```typescript
 bootstrap(App, {
-    port: appConfig.values.server.port, // 👈 Type-safe!
-    appName: appConfig.values.app.name, // 👈 Autocomplete works
+    port: appConfig.values.server.port,
+    appName: appConfig.values.app.name,
     appVersion: appConfig.values.app.version,
     envFileConfig: appConfig.values.bootstrap.envFileConfig,
 });
@@ -852,6 +867,130 @@ describe("User API", () => {
 
 ---
 
+## `loadEnvSync()`
+
+`loadEnvSync()` is the recommended way to populate `process.env` before `bootstrap()` runs.
+Call it at the top of `src/main.ts` (or your config module) so that every `Env.*` builder,
+`defineConfig()` call, and DI binding can read the loaded values.
+
+### Usage patterns
+
+#### Zero-config (default convention)
+
+```typescript
+import { bootstrap, loadEnvSync } from "@expressots/core";
+import { App } from "./app";
+
+loadEnvSync(); // loads .env, then .env.${NODE_ENV}
+void bootstrap(App);
+```
+
+With `NODE_ENV=development` (the default), this loads `.env` then `.env.development`.
+
+#### Custom file mapping
+
+```typescript
+loadEnvSync({
+    files: {
+        development: ".env",
+        production: ".env.prod",
+        staging: ".env.staging",
+    },
+});
+```
+
+Only the entry matching the **current** `NODE_ENV` is used. Unmapped environments
+fall back to `.env.{NODE_ENV}`.
+
+To load `.env.prod`, start your app with `NODE_ENV=production`:
+
+```bash
+NODE_ENV=production npm run dev
+```
+
+#### With `defineConfig()`
+
+```typescript
+// src/config.ts
+import { defineConfig, Env, loadEnvSync } from "@expressots/core";
+
+loadEnvSync({
+    files: { development: ".env", production: ".env.prod" },
+});
+
+export const appConfig = defineConfig({
+    server: { port: Env.port("PORT", { default: 3000 }) },
+});
+```
+
+#### Force reload (hot-module replacement)
+
+```typescript
+loadEnvSync({ force: true });
+```
+
+### File-loading order
+
+Files are loaded in this order (last file wins on conflicts):
+
+| Step | File | Purpose |
+| ---- | ---- | ------- |
+| 1 | `.env` | Shared defaults (committed) |
+| 2 | `.env.local` | Personal overrides (gitignored) |
+| 3 | `.env.{env}.local` | Per-environment local override (gitignored) |
+| 4 | `.env.{env}` | **Per-environment values (highest priority)** |
+
+`{env}` is resolved from `process.env.NODE_ENV` (defaults to `"development"`).
+If a `files` mapping is provided (e.g. `{ production: ".env.prod" }`), that
+name replaces `.env.{env}` in steps 3 and 4.
+
+Missing files are silently skipped.
+
+:::warning NODE_ENV must be set in the shell
+Both `loadEnvSync()` and `bootstrap({ envFileConfig })` read `process.env.NODE_ENV`
+**before** loading any files to decide which `.env` file to pick. The environment
+is not derived from file contents.
+
+```bash
+# Loads .env.production (or the mapped file)
+NODE_ENV=production npm run dev
+
+# Loads .env.development (default when NODE_ENV is unset)
+npm run dev
+```
+
+If you only map `production` in `files` but run without `NODE_ENV=production`,
+the framework looks for `.env.development` (the default) and your production
+mapping is never used.
+:::
+
+### `LoadEnvSyncOptions` reference
+
+| Option | Type | Default | Description |
+| ------ | ---- | ------- | ----------- |
+| `files` | `Record<string, string>` | `undefined` | Map environment names to custom `.env` file paths. Only the entry matching `NODE_ENV` is loaded. |
+| `force` | `boolean` | `false` | Reload files even if already loaded in this process. |
+
+### `loadEnvSync()` vs `bootstrap({ envFileConfig })`
+
+Both load `.env` files, but they serve different purposes:
+
+| Feature | `loadEnvSync()` | `bootstrap({ envFileConfig })` |
+| ------- | --------------- | ------------------------------ |
+| When it runs | Before `bootstrap()` | Inside `bootstrap()` |
+| Validation | No | Yes (`required`, `validateValues`) |
+| Auto-create templates | No | Yes (`autoCreateTemplate`) |
+| CI/CD detection | No | Yes (auto-skips file loading) |
+| Best for | Simple apps, `defineConfig()` | Production apps, full validation |
+
+:::tip Both can coexist
+If you call `loadEnvSync()` **and** pass `envFileConfig` to `bootstrap()`, the
+framework skips re-loading (tracked via `_EXPRESSOTS_ENV_LOADED`). Validation
+and auto-creation from `envFileConfig` still run.
+:::
+
+---
+
 ## Environment Behavior
 
 ExpressoTS recognizes these environments: `development`, `staging`, `production`, `test`, or any custom string.
@@ -1118,28 +1257,31 @@ Each environment loads its corresponding `.env` file by convention:
 
 #### Loading Priority
 
-Files are loaded in this order (later files override earlier):
+Files are loaded in this order (last file wins on conflicts):
 
-```
-1. .env                          # 👈 Shared across all environments
-2. .env.local                    # 👈 Local overrides (gitignored)
-3. .env.{environment}            # 👈 Environment-specific (e.g., .env.development)
-4. .env.{environment}.local      # 👈 Local env overrides (gitignored)
-```
+| Step | File | Purpose |
+| ---- | ---- | ------- |
+| 1 | `.env` | Shared defaults (committed) |
+| 2 | `.env.local` | Personal overrides (gitignored) |
+| 3 | `.env.{env}.local` | Per-environment local override (gitignored) |
+| 4 | `.env.{env}` | **Per-environment values (highest priority)** |
+
+`{env}` is resolved from `process.env.NODE_ENV` (defaults to `"development"`).
+If a `files` mapping is provided, the mapped filename replaces `.env.{env}`.
 
 **Example:**
 
 ```bash
-# .env (shared)
+# .env (shared, committed)
 APP_NAME=MyApp
 LOG_LEVEL=info
 
-# .env.development (dev-specific)
-LOG_LEVEL=debug          # 👈 Overrides LOG_LEVEL from .env
+# .env.development (env-specific, highest priority)
+LOG_LEVEL=debug          # overrides LOG_LEVEL from .env
 DATABASE_URL=postgresql://localhost:5432/dev
 
-# .env.local (your local overrides, gitignored)
-DATABASE_URL=postgresql://localhost:5433/mylocal  # 👈 Overrides dev DB
+# .env.local (personal overrides, gitignored)
+DATABASE_URL=postgresql://localhost:5433/mylocal  # overrides dev DB
 ```
 
 :::tip Testing Best Practice
@@ -1360,14 +1502,14 @@ guide to read.
 ### CI/CD detection (built into `bootstrap`)
 
 When the framework detects a CI environment (via `CI=true` or any of the
-platform-specific markers — `GITHUB_ACTIONS`, `GITLAB_CI`, `JENKINS_URL`,
+platform-specific markers: `GITHUB_ACTIONS`, `GITLAB_CI`, `JENKINS_URL`,
 `CIRCLECI`, `BUILDKITE`, `TRAVIS`, etc.) it automatically:
 
 - Skips `.env` file loading and reads variables from `process.env` directly.
 - Validates `envFileConfig.required` against `process.env` rather than file contents.
 - Surfaces platform-specific error hints (e.g. "set `JWT_SECRET` in *Settings → Secrets → Actions*").
 
-You don't need to enable this — passing `envFileConfig` is enough.
+You don't need to enable this. Passing `envFileConfig` is enough.
 Force-disable file loading explicitly with
 `envFileConfig: { skipFileLoading: true }`.
 

@@ -1,17 +1,17 @@
 ---
 sidebar_position: 12
 title: Error handling
-description: Error handling in ExpressoTS v4 — typed app errors, RFC 7807 problem details, exception filters, and the Report helper.
+description: "Error handling in ExpressoTS v4: typed app errors, RFC 7807 problem details, exception filters, and the Report helper."
 ---
 
 # Error handling
 
 ExpressoTS v4 ships a layered error story:
 
-1. **Typed errors** — `AppError`, `NotFoundError`, `ValidationErrorClass` extend a single base so every layer of your app speaks the same language.
-2. **RFC 7807 problem details** — by default, errors are serialized as [`application/problem+json`](https://www.rfc-editor.org/rfc/rfc7807) so HTTP clients can introspect them.
-3. **Exception filters** — pluggable handlers (`@Catch(...)`) for full control over how a specific error class becomes an HTTP response. See **[Exception filters](./exception-filters.mdx)** for the focused reference.
-4. **`Report.Error()`** — the v3 helper is **still available** for ergonomic throws.
+1. **Typed errors**: `AppError`, `NotFoundError`, `ValidationErrorClass` extend a single base so every layer of your app speaks the same language.
+2. **RFC 7807 problem details**: by default, errors are serialized as [`application/problem+json`](https://www.rfc-editor.org/rfc/rfc7807) so HTTP clients can introspect them.
+3. **Exception filters**: pluggable handlers (`@Catch(...)`) for full control over how a specific error class becomes an HTTP response. See **[Exception filters](./exception-filters.mdx)** for the focused reference.
+4. **`Report.Error()`**: the v3 helper is **still available** for ergonomic throws.
 
 This page covers (1), (2) and (4); the **[Exception filters](./exception-filters.mdx)** page covers (3).
 
@@ -81,7 +81,7 @@ For `ValidationErrorClass`, the payload also includes a typed `errors` array:
 }
 ```
 
-Disable RFC 7807 (e.g. when you need legacy `{statusCode, error}` shape) by registering a custom global filter — see **[Exception filters](./exception-filters.mdx)**.
+Disable RFC 7807 (e.g. when you need legacy `{statusCode, error}` shape) by registering a custom global filter: see **[Exception filters](./exception-filters.mdx)**.
 
 ## The `Report` helper
 
@@ -118,7 +118,7 @@ export class CreateUserUseCase {
 
 ## Wiring the global error handler
 
-In v4, the global exception filter is registered automatically by the framework. You don't need to call `setErrorHandler()` in `configureServices()` anymore. Custom filters are registered with the `@Catch()` decorator — see **[Exception filters](./exception-filters.mdx)**.
+In v4, the global exception filter is registered automatically by the framework. You don't need to call `setErrorHandler()` in `configureServices()` anymore. Custom filters are registered with the `@Catch()` decorator: see **[Exception filters](./exception-filters.mdx)**.
 
 If you only want to toggle stack-trace verbosity (development vs production), set the `LOG_LEVEL` env var or call `Logger.configure({ level: "DEBUG" })` before bootstrap. Stack traces are emitted at `DEBUG` and `INFO`, hidden at `WARN` and above.
 
@@ -142,7 +142,7 @@ async execute(data: ICreateUserRequestDTO) {
 
 ## See also
 
-- **[Exception filters](./exception-filters.mdx)** — `@Catch`, `@UseFilters`, custom global filters, removing RFC 7807.
-- **[Status codes](./status-code.mdx)** — the `StatusCode` enum used everywhere.
-- **[Validation](./validation.mdx)** — how `ValidationErrorClass` is produced and the error format.
-- **[Logging](./logging.mdx)** — structured error logs and redaction.
+- **[Exception filters](./exception-filters.mdx)**: `@Catch`, `@UseFilters`, custom global filters, removing RFC 7807.
+- **[Status codes](./status-code.mdx)**: the `StatusCode` enum used everywhere.
+- **[Validation](./validation.mdx)**: how `ValidationErrorClass` is produced and the error format.
+- **[Logging](./logging.mdx)**: structured error logs and redaction.

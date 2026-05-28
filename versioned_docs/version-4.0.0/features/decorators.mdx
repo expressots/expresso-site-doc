@@ -1,7 +1,7 @@
 ---
 sidebar_position: 10
 title: Decorators
-description: Reference for every decorator shipped by ExpressoTS v4 — DI, controllers, methods, parameters, validation, content negotiation, AOP, security, events, and lifecycle.
+description: "Reference for every decorator shipped by ExpressoTS v4: DI, controllers, methods, parameters, validation, content negotiation, AOP, security, events, and lifecycle."
 ---
 
 import Tabs from "@theme/Tabs";
@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 
 # Decorators
 
-Decorators are how ExpressoTS extends classes and methods with metadata the framework reads at runtime — DI bindings, route maps, validation hooks, AOP cross-cuts, security guards, event subscriptions, and more.
+Decorators are how ExpressoTS extends classes and methods with metadata the framework reads at runtime: DI bindings, route maps, validation hooks, AOP cross-cuts, security guards, event subscriptions, and more.
 
 This page is a complete reference. For a tutorial on a specific subsystem, follow the linked deep-dive page after the relevant table.
 
@@ -103,7 +103,7 @@ Imported from `@expressots/adapter-express`. See **[Content Negotiation](./conte
 | `@YamlOptions(opts)` | Configure YAML serialization. | `@YamlOptions({ indent: 2 })` |
 | `@StreamResponse()` | Stream the response body instead of buffering. | `@StreamResponse()` |
 
-## AOP — interceptors
+## AOP: interceptors
 
 Imported from `@expressots/core`. See **[Interceptors](./interceptors.mdx)**.
 
@@ -112,7 +112,7 @@ Imported from `@expressots/core`. See **[Interceptors](./interceptors.mdx)**.
 | `@Interceptor({ priority })` | Mark a class as an interceptor; lower priority runs first. | `@Interceptor({ priority: 10 })` |
 | `@UseInterceptors(...interceptors)` | Apply interceptors to a controller class or specific method. | `@UseInterceptors(LoggingInterceptor)` |
 
-## Security — guards & authorization
+## Security: guards & authorization
 
 Imported from `@expressots/core`. See **[Guards & Authorization](./guards.mdx)**.
 
@@ -189,8 +189,8 @@ The CLI (`expressots generate`) recognises decorator metadata in `expressots.con
 
 ## See also
 
-- **[Lifecycle hooks](../core/lifecycle.mdx)** — how DI scopes interact with `@postConstruct` / `@preDestroy`.
-- **[Validation](./validation.mdx)** — full reference for the validation system.
-- **[Interceptors](./interceptors.mdx)** — AOP cross-cuts deep dive.
-- **[Guards & Authorization](./guards.mdx)** — security decorators in context.
-- **[Event System](./events.mdx)** — class-level `@OnEvent` discovery flow.
+- **[Lifecycle hooks](../core/lifecycle.mdx)**: how DI scopes interact with `@postConstruct` / `@preDestroy`.
+- **[Validation](./validation.mdx)**: full reference for the validation system.
+- **[Interceptors](./interceptors.mdx)**: AOP cross-cuts deep dive.
+- **[Guards & Authorization](./guards.mdx)**: security decorators in context.
+- **[Event System](./events.mdx)**: class-level `@OnEvent` discovery flow.

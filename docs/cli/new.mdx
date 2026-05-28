@@ -44,11 +44,11 @@ Presets only apply to the `application` and `application-with-events` templates.
 
 | Preset (`-s`) | What it pre-applies | Extra deps installed |
 | --- | --- | --- |
-| `api` (default) | `Middleware.applyPreset("api")` — body parsing, security headers, CORS, compression, rate limit | `compression`, `cors`, `helmet`, `express-rate-limit` |
-| `web` | `Middleware.applyPreset("web")` — `api` plus cookies and session support | `cookie-parser`, `express-session` |
+| `api` (default) | `Middleware.applyPreset("api")`: body parsing, security headers, CORS, compression, rate limit | `compression`, `cors`, `helmet`, `express-rate-limit` |
+| `web` | `Middleware.applyPreset("web")`: `api` plus cookies and session support | `cookie-parser`, `express-session` |
 | `graphql` | `Middleware.applyPreset("graphql")` plus an Apollo Server scaffold | `@apollo/server`, `@as-integrations/express5`, `graphql`, `compression`, `cors`, `helmet` |
-| `microservice` | `Middleware.applyPreset("microservice")` — minimal stack for service-to-service traffic | `compression` |
-| `minimal` | `this.Middleware.parse()` only — you wire everything yourself | none |
+| `microservice` | `Middleware.applyPreset("microservice")`: minimal stack for service-to-service traffic | `compression` |
+| `minimal` | `this.Middleware.parse()` only: you wire everything yourself | none |
 
 ```bash
 expressots new my-api -t application -p npm -s graphql
@@ -75,10 +75,10 @@ expressots new my-api -t application -p npm -s api -e
 Choices: `npm`, `yarn`, `pnpm`, `bun`. **`bun` is unavailable on Windows** for `expressots new`.
 
 ```bash
-expressots new my-app -p npm
-expressots new my-app -p yarn
-expressots new my-app -p pnpm
-expressots new my-app -p bun   # not on Windows
+expressots new my-app -t application -p npm
+expressots new my-app -t application -p yarn
+expressots new my-app -t application -p pnpm
+expressots new my-app -t application -p bun   # not on Windows
 ```
 
 ## Options
@@ -88,10 +88,12 @@ expressots new my-app -p bun   # not on Windows
 | `--template` | `-t` | `application` \| `micro` | Template to scaffold. |
 | `--package-manager` | `-p` | `npm` \| `yarn` \| `pnpm` \| `bun` | Install backend. |
 | `--preset` | `-s` | `api` \| `web` \| `graphql` \| `microservice` \| `minimal` | Middleware preset (Application templates only). |
-| `--events` | `-e` | boolean | Use `application-with-events` (Application templates only). |
+| `--events` | `-e` | boolean | Use `application-with-events` (Application templates only). Pass the flag alone (`-e`), not `-e interactive`. |
 | `--directory` | `-d` | string | Parent directory for the new project. |
 
-> When `--template` and `--package-manager` are both passed the CLI runs silently. If you skip them you get the interactive prompts.
+> **`-t` and `-p` go together.** The CLI requires both when you use either one (yargs `implies`). Example: `expressots new my-api -t application -p npm`. Pass neither flag to get the interactive prompts instead.
+>
+> **`ex` is an alias** for `expressots` (same binary from `@expressots/cli`).
 
 ## Interactive vs silent
 
@@ -106,7 +108,7 @@ expressots new my-api
 # ? Include the type-safe Event Bus example? › No
 ```
 
-With the flags above it runs silently and never blocks for input — ideal for CI scripts, template generators, or `npx` recipes.
+With the flags above it runs silently and never blocks for input: ideal for CI scripts, template generators, or `npx` recipes.
 
 ## Environment overrides
 
@@ -125,7 +127,7 @@ For preview CLIs (`-preview.x`, `-alpha.x`, `-beta.x`, `-rc.x`), if the template
 
 1. Resolve the template ref (`v${BUNDLE_VERSION}`, then `feature/v4.0` for previews, then `EXPRESSOTS_TEMPLATE_REF` if set).
 2. `degit expressots/templates/<template>#<ref>` into the project folder.
-3. **For `application` / `application-with-events`** — inject preset deps into `package.json`, drop preset-specific files (e.g. `graphql/schema.ts` for the GraphQL preset), and replace `// __MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` with the matching `Middleware.applyPreset(...)` call.
+3. **For `application` / `application-with-events`**: inject preset deps into `package.json`, drop preset-specific files (e.g. `graphql/schema.ts` for the GraphQL preset), and replace `// __MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` with the matching `Middleware.applyPreset(...)` call.
 4. `<pm> install` (skipped under `EXPRESSOTS_SKIP_INSTALL=1`).
 5. Rewrite `package.json#name` to the project folder name.
 
@@ -142,6 +144,8 @@ The dev server starts with `tsx --watch`, the Studio Agent attaches on `ws://loc
 
 | Problem | Fix |
 | --- | --- |
+| `Missing dependent arguments: template -> package-manager` | You passed `-t` without `-p` (or the reverse). Add both, e.g. `-t application -p npm`, or drop both flags for interactive mode. |
+| `Invalid values: package-manager, Given: "interactive"` | `-e` is boolean only. Use `-e` to enable events, or omit all flags for interactive prompts. Never pass `-e interactive`. |
 | `Node version not supported` | Install Node `>= 20.18.0`. The CLI warns outside the `20–24` tested range. |
 | `bun` missing from choices | Expected on Windows. Use `npm`, `yarn`, or `pnpm`. |
 | `degit ... permission denied` / `MISSING_REF` | Templates tag for this CLI version is not on GitHub yet. The CLI auto-falls back to `feature/v4.0` for preview builds. Override with `EXPRESSOTS_TEMPLATE_REF=<branch-or-tag>`. |
@@ -150,8 +154,8 @@ The dev server starts with `tsx --watch`, the Studio Agent attaches on `ws://loc
 
 ## See also
 
-- [`generate`](./generate.mdx) — scaffold resources inside the new project.
-- [`providers`](./providers.mdx) — `expressots create --provider` for the `provider` template.
-- [`running`](./running.mdx) — `dev` / `build` / `prod`.
-- [Bootstrap](../core/bootstrap.mdx) — every option `bootstrap()` accepts.
-- [Middleware](../features/middleware.mdx) — what each preset actually does.
+- [`generate`](./generate.mdx): scaffold resources inside the new project.
+- [`providers`](./providers.mdx): `expressots create --provider` for the `provider` template.
+- [`running`](./running.mdx): `dev` / `build` / `prod`.
+- [Bootstrap](../core/bootstrap.mdx): every option `bootstrap()` accepts.
+- [Middleware](../features/middleware.mdx): what each preset actually does.

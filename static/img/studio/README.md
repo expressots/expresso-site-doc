@@ -27,4 +27,4 @@ See [`overview.mdx#capture-guide`](../../../versioned_docs/version-4.0.0/studio/
 4. Capture each view at **1440 × 900** and save as PNG in this folder using the filenames above.
 5. Open a docs PR against `feature/v4.0`.
 
-Until real screenshots are dropped here, the docs render with broken `<img>` tags (alt text only). That's intentional — it makes missing assets very visible without breaking the build.
+Until real screenshots are dropped here, the docs render with broken `<img>` tags (alt text only). That's intentional: it makes missing assets very visible without breaking the build.

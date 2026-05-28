@@ -52,7 +52,7 @@ await bootstrap(App, {
 
 If you do **nothing**, v4 will silently skip `.env` loading and rely on `process.env` only. CI environments are auto-detected (GitHub Actions, GitLab CI, Jenkins, generic `CI=true`).
 
-> **Recommended alternative:** call `loadEnvSync()` (also from `@expressots/core`) directly in `src/main.ts` *before* `bootstrap(App)`. This is what the `application` and `application-with-events` templates do — it's an explicit, side-effect-free import that loads `.env`, `.env.${NODE_ENV}`, and the matching `.local` overrides, with no extra `bootstrap()` config to remember:
+> **Recommended alternative:** call `loadEnvSync()` (also from `@expressots/core`) directly in `src/main.ts` *before* `bootstrap(App)`. This is what the `application` and `application-with-events` templates do. It's an explicit, side-effect-free import that loads `.env`, `.env.${NODE_ENV}`, and the matching `.local` overrides, with no extra `bootstrap()` config to remember:
 >
 > ```typescript title="src/main.ts"
 > import { bootstrap, loadEnvSync } from "@expressots/core";
