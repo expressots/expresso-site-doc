@@ -86,6 +86,10 @@ The studio-agent only loads when **all** of the following are true:
 
 Production deployments (`NODE_ENV=production`) never import the agent module, so there is zero runtime overhead in production.
 
+:::info Production monitoring
+Starting with v4.0.0-preview, the agent accepts a `mode` and `installId` configuration for future production telemetry and cloud features. See [Production & Telemetry](./production-telemetry.mdx) for details.
+:::
+
 To force-enable Studio in a non-dev `NODE_ENV` (e.g. a staging probe), pass `enabled: true` to `bootstrap()`:
 
 ```ts
