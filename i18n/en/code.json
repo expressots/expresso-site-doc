@@ -7,7 +7,7 @@
         "description": "Title for the homepage"
     },
     "homepageTagline": {
-        "message": "A TypeScript framework for building scalable, type-safe server-side applications on Node.js. Dependency injection, interceptors, events, and a local developer experience platform built for v4.",
+        "message": "A TypeScript framework for Node.js, with DI, interceptors, events, and Studio built in.",
         "description": "Hero subtitle on the homepage"
     },
     "homepageVersionBadge": {
@@ -21,6 +21,46 @@
     "homepageWhatsNew": {
         "message": "What's New in v4",
         "description": "Secondary CTA in the hero"
+    },
+    "homepageHeroH1": {
+        "message": "Ship scalable Node.js services.",
+        "description": "Hero H1 text"
+    },
+    "homepageHeroH1Accent": {
+        "message": "Without the boilerplate.",
+        "description": "Hero H1 accent line"
+    },
+    "homepageInstallLabel": {
+        "message": "Get started in seconds",
+        "description": "Label above install command"
+    },
+    "homepageInstallCopy": {
+        "message": "Copy",
+        "description": "Copy button label on install pill"
+    },
+    "homepageInstallCopied": {
+        "message": "Copied",
+        "description": "Copy button label after click"
+    },
+    "featureStudioBadge": {
+        "message": "New in v4",
+        "description": "Badge on the Studio feature card"
+    },
+    "featureBadgeStable": {
+        "message": "Stable",
+        "description": "Pill on stable feature cards"
+    },
+    "featureCategoryRuntime": {
+        "message": "Runtime",
+        "description": "Category accent on feature cards"
+    },
+    "featureCategoryTooling": {
+        "message": "Tooling",
+        "description": "Category accent on feature cards"
+    },
+    "featureCategoryDX": {
+        "message": "DX",
+        "description": "Category accent on feature cards"
     },
     "homepageDocumentation": {
         "message": "Documentation"

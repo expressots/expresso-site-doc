@@ -1,96 +1,120 @@
 /**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
+ * Homepage hero -- calm, refined, no pulse, no translate-on-hover overload.
  */
 
 .heroBanner {
-    padding: 6rem 0 5rem;
+    padding: var(--xt-s-9) 0 var(--xt-s-8);
     text-align: center;
     position: relative;
     overflow: hidden;
-    min-height: 70vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background-color: transparent;
+}
+
+.heroBanner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(
+            ellipse 800px 400px at 50% -20%,
+            var(--xt-brand-glow) 0%,
+            transparent 65%
+        );
+    pointer-events: none;
+    z-index: 0;
 }
 
 .heroBanner::after {
     content: "";
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background:
-        radial-gradient(circle at 30% 30%, rgba(128, 245, 168, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 70% 70%, rgba(128, 245, 168, 0.08) 0%, transparent 50%);
-    pointer-events: none;
-    animation: pulse 8s ease-in-out infinite;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--xt-stroke-2) 20%,
+        var(--xt-stroke-2) 80%,
+        transparent 100%
+    );
+    z-index: 1;
 }
 
-@keyframes pulse {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
+.heroContainer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .heroBadge {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    background: rgba(128, 245, 168, 0.1);
-    border: 1px solid rgba(128, 245, 168, 0.3);
-    color: var(--expressots-brand);
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-    position: relative;
-    z-index: 1;
+    gap: var(--xt-s-2);
+    padding: 4px var(--xt-s-3);
+    border-radius: var(--xt-r-pill);
+    background: var(--xt-bg-elev-1);
+    border: 1px solid var(--xt-stroke-1);
+    color: var(--xt-fg-secondary);
+    font-size: var(--xt-text-xs);
+    font-weight: var(--xt-weight-semi);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--xt-s-5);
 }
 
 .heroBadgeDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--expressots-brand);
-    box-shadow: 0 0 0 0 rgba(128, 245, 168, 0.6);
-    animation: dotPulse 2s ease-in-out infinite;
-}
-
-@keyframes dotPulse {
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(128, 245, 168, 0.6);
-    }
-    50% {
-        box-shadow: 0 0 0 8px rgba(128, 245, 168, 0);
-    }
+    width: 6px;
+    height: 6px;
+    border-radius: var(--xt-r-pill);
+    background: var(--xt-brand);
+    box-shadow: 0 0 0 3px var(--xt-brand-glow);
 }
 
 .heroLogo {
-    filter: drop-shadow(0 6px 20px rgba(128, 245, 168, 0.25));
-    position: relative;
-    z-index: 1;
+    height: 140px;
+    width: auto;
+    max-width: 90%;
+    margin: 0 0 var(--xt-s-5);
+    opacity: 1;
+    filter: drop-shadow(0 8px 24px rgba(128, 245, 168, 0.18));
+}
+
+.heroTitle {
+    font-family: var(--xt-font-heading);
+    font-size: var(--xt-text-display);
+    font-weight: var(--xt-weight-bold);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--xt-fg-primary);
+    margin: 0 0 var(--xt-s-4);
+    max-width: 720px;
+    text-wrap: balance;
+}
+
+.heroTitleAccent {
+    display: block;
+    background: linear-gradient(
+        90deg,
+        var(--xt-brand) 0%,
+        var(--xt-brand-light) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--xt-brand);
+    font-weight: var(--xt-weight-bold);
 }
 
 .heroSubtitle {
-    max-width: 720px;
-    margin: 0 auto;
-    font-size: 1.25rem;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 400;
-    position: relative;
-    z-index: 1;
+    max-width: 580px;
+    margin: 0 auto var(--xt-s-7);
+    font-size: 1.0625rem;
+    line-height: var(--xt-leading-relaxed);
+    color: var(--xt-fg-secondary);
+    font-weight: var(--xt-weight-normal);
+    text-wrap: balance;
 }
 
 .btnContainer {
@@ -98,85 +122,161 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 2.5rem;
-    position: relative;
-    z-index: 1;
+    gap: var(--xt-s-3);
+    margin-bottom: var(--xt-s-7);
 }
 
 .button {
-    min-width: 220px;
-    height: 56px;
-    border-radius: 10px;
+    min-width: 180px;
+    height: 48px;
+    padding: 0 var(--xt-s-5);
+    border-radius: var(--xt-r-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    gap: var(--xt-s-2);
+    font-size: var(--xt-text-sm);
+    font-weight: var(--xt-weight-semi);
+    letter-spacing: 0;
     position: relative;
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    transition: transform var(--xt-dur-fast) var(--xt-ease),
+        background-color var(--xt-dur-fast) var(--xt-ease),
+        border-color var(--xt-dur-fast) var(--xt-ease),
+        box-shadow var(--xt-dur-fast) var(--xt-ease);
+}
+
+.button svg {
+    transition: transform var(--xt-dur-fast) var(--xt-ease);
 }
 
 .buttonPrimary {
-    background: var(--expressots-brand);
-    color: #1f1f22 !important;
-    border: 1px solid var(--expressots-brand);
+    background: var(--xt-brand);
+    color: var(--xt-bg-base) !important;
+    border: 1px solid var(--xt-brand);
 }
 
 .buttonPrimary:hover {
-    background: var(--expressots-brand-light);
-    color: #1f1f22 !important;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(128, 245, 168, 0.4);
+    background: var(--xt-brand-light);
+    color: var(--xt-bg-base) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--xt-brand-glow);
     text-decoration: none;
+}
+
+.buttonPrimary:hover svg {
+    transform: translateX(2px);
 }
 
 .buttonSecondary {
     background: transparent;
-    color: var(--expressots-brand) !important;
-    border: 1px solid rgba(128, 245, 168, 0.5);
+    color: var(--xt-fg-primary) !important;
+    border: 1px solid var(--xt-stroke-2);
 }
 
 .buttonSecondary:hover {
-    background: rgba(128, 245, 168, 0.1);
-    border-color: var(--expressots-brand);
-    color: var(--expressots-brand) !important;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(128, 245, 168, 0.2);
+    background: var(--xt-bg-elev-1);
+    border-color: var(--xt-stroke-3);
+    color: var(--xt-fg-primary) !important;
+    transform: translateY(-1px);
     text-decoration: none;
 }
 
-.installContainer {
-    margin-top: 3rem;
-    display: flex;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
+/* Install pill */
+.installPill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--xt-s-3);
+    padding: 6px 6px 6px var(--xt-s-4);
+    background: var(--xt-bg-elev-1);
+    border: 1px solid var(--xt-stroke-1);
+    border-radius: var(--xt-r-pill);
+    font-family: var(--xt-font-mono);
+    font-size: var(--xt-text-sm);
+    color: var(--xt-fg-primary);
+    transition: border-color var(--xt-dur-fast) var(--xt-ease);
+}
+
+.installPill:hover {
+    border-color: var(--xt-stroke-2);
+}
+
+.installPrompt {
+    color: var(--xt-fg-muted);
+    font-weight: var(--xt-weight-semi);
+    user-select: none;
 }
 
 .installCommand {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(128, 245, 168, 0.25);
-    border-radius: 8px;
-    font-family: "Fira Code", "Monaco", "Consolas", monospace;
-    font-size: 0.95rem;
-    color: var(--expressots-brand-light);
-    letter-spacing: 0.3px;
-    box-shadow: inset 0 0 12px rgba(128, 245, 168, 0.05);
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--xt-fg-primary);
+    font-family: var(--xt-font-mono);
+    font-size: var(--xt-text-sm);
+    letter-spacing: 0;
+}
+
+.installCopy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 var(--xt-s-3);
+    background: var(--xt-bg-elev-2);
+    color: var(--xt-fg-secondary);
+    border: 1px solid var(--xt-stroke-1);
+    border-radius: var(--xt-r-pill);
+    font-family: var(--xt-font-sans);
+    font-size: var(--xt-text-xs);
+    font-weight: var(--xt-weight-semi);
+    cursor: pointer;
+    transition: background-color var(--xt-dur-fast) var(--xt-ease),
+        color var(--xt-dur-fast) var(--xt-ease),
+        border-color var(--xt-dur-fast) var(--xt-ease);
+}
+
+.installCopy:hover {
+    background: var(--xt-bg-elev-3);
+    color: var(--xt-fg-primary);
+    border-color: var(--xt-stroke-2);
+}
+
+.installCopy:focus-visible {
+    outline: 2px solid var(--xt-brand);
+    outline-offset: 2px;
+}
+
+.installCopy[data-copied] {
+    background: var(--xt-brand-soft);
+    color: var(--xt-brand);
+    border-color: var(--xt-tip-border);
+}
+
+.installCopyLabel {
+    line-height: 1;
 }
 
 @media screen and (max-width: 996px) {
     .heroBanner {
-        padding: 3rem 1rem;
-        min-height: 60vh;
+        padding: var(--xt-s-7) var(--xt-s-4) var(--xt-s-7);
+    }
+
+    .heroLogo {
+        height: 110px;
+    }
+
+    .heroTitle {
+        font-size: 2rem;
+    }
+
+    .heroSubtitle {
+        font-size: 1rem;
     }
 
     .btnContainer {
         flex-direction: column;
-        gap: 0.75rem;
+        gap: var(--xt-s-2);
+        width: 100%;
     }
 
     .button {
@@ -184,12 +284,31 @@
         max-width: 320px;
     }
 
-    .heroSubtitle {
-        font-size: 1.05rem;
+    .installPill {
+        max-width: 100%;
+        overflow: hidden;
     }
 
     .installCommand {
-        font-size: 0.8rem;
-        padding: 0.6rem 1rem;
+        font-size: var(--xt-text-xs);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .heroLogo {
+        height: 88px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .installCopyLabel {
+        display: none;
+    }
+    .installCopy {
+        padding: 0 var(--xt-s-2);
+        height: 28px;
     }
 }

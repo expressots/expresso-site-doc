@@ -29,6 +29,11 @@ const config: Config = {
             {
                 docs: {
                     sidebarPath: "./sidebars.ts",
+                    editUrl:
+                        "https://github.com/expressots/expresso-site-doc/edit/main/",
+                    showLastUpdateTime: true,
+                    showLastUpdateAuthor: true,
+                    breadcrumbs: true,
                     remarkPlugins: [
                         [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
                     ],
@@ -138,7 +143,7 @@ const config: Config = {
             ],
         },
         footer: {
-            style: "light",
+            style: "dark",
             logo: {
                 alt: "ExpressoTS",
                 src: "img/logo.png",

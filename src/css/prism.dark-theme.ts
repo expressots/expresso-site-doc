@@ -2,8 +2,8 @@ import { PrismTheme } from "prism-react-renderer";
 
 const expressotsDarkTheme: PrismTheme = {
     plain: {
-        color: "#e4e4e4", // Light gray/white for general text - better contrast
-        backgroundColor: "#1e1e1e", // Darker background for better contrast
+        color: "#f4f5f7", // --xt-fg-primary
+        backgroundColor: "#17181b", // --xt-bg-elev-1
     },
     styles: [
         {
