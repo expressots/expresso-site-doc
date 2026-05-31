@@ -21,16 +21,16 @@ bootstrap(App);
 
 **What this does:**
 
--   ✅ Starts server on port `3000` (or `process.env.PORT`)
--   ✅ Auto-detects environment (development, production, etc.)
--   ✅ Reads app name/version from `package.json`
--   ✅ Sets up graceful shutdown handlers
+-   Starts server on port `3000` (or `process.env.PORT`)
+-   Auto-detects environment (development, production, etc.)
+-   Reads app name/version from `package.json`
+-   Sets up graceful shutdown handlers
 
 :::tip Perfect for
 
--   🎯 First-time setup
--   🎯 Quick prototyping
--   🎯 Getting started with ExpressoTS
+-   First-time setup
+-   Quick prototyping
+-   Getting started with ExpressoTS
     :::
 
 ---
@@ -39,14 +39,14 @@ bootstrap(App);
 
 Choose your scenario to jump to the relevant section:
 
-| Scenario             | Jump To                                                | What You Get                |
+| Scenario | Jump To | What You Get |
 | -------------------- | ------------------------------------------------------ | --------------------------- |
-| 🔰 Just starting out | [Simplest Usage](#simplest-usage-zero-configuration)   | Zero config, just works     |
-| 🔧 Local development | [Development Setup](#development-with-auto-creation)   | Auto-create .env files      |
-| 🏗️ Staging/Testing   | [Testing Setup](#testing-with-dynamic-ports)           | Dynamic ports, no file I/O  |
-| 🚀 Production        | [Production Setup](#production-with-validation)        | Strict validation, security |
-| 🐳 Docker/K8s        | [Container Setup](#containerized-deployment-dockerk8s) | Container-optimized config  |
-| 🤖 CI/CD Pipeline    | [Deployment scenarios](#deployment-scenarios)          | Auto-detection, zero config |
+| Just starting out | [Simplest Usage](#simplest-usage-zero-configuration) | Zero config, just works |
+| Local development | [Development Setup](#development-with-auto-creation) | Auto-create .env files |
+| Staging/Testing | [Testing Setup](#testing-with-dynamic-ports) | Dynamic ports, no file I/O |
+| Production | [Production Setup](#production-with-validation) | Strict validation, security |
+| Docker/K8s | [Container Setup](#containerized-deployment-dockerk8s) | Container-optimized config |
+| CI/CD Pipeline | [Deployment scenarios](#deployment-scenarios) | Auto-detection, zero config |
 
 ---
 
@@ -55,7 +55,7 @@ Choose your scenario to jump to the relevant section:
 ### Port Configuration
 
 <details open>
-<summary><strong>🎯 I want to use the default port</strong></summary>
+<summary><strong>I want to use the default port</strong></summary>
 
 ```typescript
 bootstrap(App); // Uses port 3000
@@ -63,44 +63,44 @@ bootstrap(App); // Uses port 3000
 
 **When to use:**
 
--   ✅ Local development
--   ✅ Quick prototyping
--   ✅ Following conventions
+-   Local development
+-   Quick prototyping
+-   Following conventions
 
 </details>
 
 <details>
-<summary><strong>🎯 I need a specific port</strong></summary>
+<summary><strong>I need a specific port</strong></summary>
 
 ```typescript
-bootstrap(App, { port: 8080 }); // 👈 Custom port
+bootstrap(App, { port: 8080 }); // Custom port
 ```
 
 **When to use:**
 
--   ✅ Port 3000 is already in use
--   ✅ Corporate firewall requirements
--   ✅ Multi-app development
+-   Port 3000 is already in use
+-   Corporate firewall requirements
+-   Multi-app development
 
 </details>
 
 <details>
-<summary><strong>🎯 I'm writing tests (need dynamic ports)</strong></summary>
+<summary><strong>I'm writing tests (need dynamic ports)</strong></summary>
 
 ```typescript
 // Port 0 = "OS, pick any available port"
-const server = await bootstrap(App, { port: 0 }); // 👈 Auto-assign
-const actualPort = await server.getPort(); // 👈 Discover assigned port
+const server = await bootstrap(App, { port: 0 }); // Auto-assign
+const actualPort = await server.getPort(); // Discover assigned port
 
 console.log(`Test server running on port ${actualPort}`);
 ```
 
 **When to use:**
 
--   ✅ Unit/E2E tests
--   ✅ Parallel test execution
--   ✅ CI/CD environments
--   ✅ Avoiding port conflicts
+-   Unit/E2E tests
+-   Parallel test execution
+-   CI/CD environments
+-   Avoiding port conflicts
 
 **Why this matters:**
 
@@ -141,7 +141,7 @@ or `loadEnvSync()`).
 PORT = 8080;
 
 // main.ts
-bootstrap(App, { port: 3000 }); // 👈 This wins! App runs on 3000, not 8080
+bootstrap(App, { port: 3000 }); // This wins! App runs on 3000, not 8080
 ```
 
 :::
@@ -150,8 +150,8 @@ bootstrap(App, { port: 3000 }); // 👈 This wins! App runs on 3000, not 8080
 
 ```typescript
 await bootstrap(App, {
-    appName: "My API", // 📝 Shows in startup banner
-    appVersion: "1.0.0", // 📝 Shows in banner & logs
+    appName: "My API", // Shows in startup banner
+    appVersion: "1.0.0", // Shows in banner & logs
 });
 ```
 
@@ -175,12 +175,12 @@ The `envFileConfig` option enables .env file loading (opt-in):
 
 ```typescript
 await bootstrap(App, {
-    currentEnvironment: "development", // 🌍 Controls behavior
+    currentEnvironment: "development", // Controls behavior
     envFileConfig: {
         files: {
-            development: ".env.dev", // 🔧 Dev environment file
-            production: ".env.prod", // 🚀 Production file
-            staging: ".env.staging", // 🏗️ Staging file
+            development: ".env.dev", // Dev environment file
+            production: ".env.prod", // Production file
+            staging: ".env.staging", // Staging file
         },
 
         // ⚠️ CRITICAL: App won't start if these are missing/empty
@@ -189,38 +189,38 @@ await bootstrap(App, {
         // ✅ Creates .env.template if file is missing
         autoCreateTemplate: true,
 
-        // 🔐 Ensures required vars have non-empty values
+        // Ensures required vars have non-empty values
         validateValues: true,
     },
 });
 ```
 
 :::warning Opt-In by Design
-🔒 **Security First**: ExpressoTS does NOT load .env files by default.
+**Security first**: ExpressoTS does NOT load .env files by default.
 
 **Why?**
 
--   ✅ Follows 12-factor app principles
--   ✅ Works seamlessly in containers (Docker/K8s)
--   ✅ Explicit configuration prevents surprises
--   ✅ Better for production deployments
+-   Follows 12-factor app principles
+-   Works seamlessly in containers (Docker/K8s)
+-   Explicit configuration prevents surprises
+-   Better for production deployments
 
 **To enable .env loading**, you must provide `envFileConfig` option.
 :::
 
 #### Environment File Options Reference
 
-| Option                 | Type       | Description                             | When to Use                                  |
+| Option | Type | Description | When to Use |
 | ---------------------- | ---------- | --------------------------------------- | -------------------------------------------- |
-| **files**              | `object`   | Custom .env file paths per environment  | Multiple environments with different configs |
-| **required**           | `string[]` | Variables that MUST exist               | Critical configs (DB, API keys)              |
-| **autoCreateTemplate** | `boolean`  | Auto-create `.env.template` if missing  | Team onboarding, dev setup                   |
-| **validateValues**     | `boolean`  | Check that vars have non-empty values   | Production deployments                       |
-| **skipFileLoading**    | `boolean`  | Skip .env files, use `process.env` only | Docker/K8s, CI/CD                            |
-| **ciMode**             | `boolean`  | Force CI/CD mode                        | Testing CI behavior locally                  |
+| **files** | `object` | Custom .env file paths per environment | Multiple environments with different configs |
+| **required** | `string[]` | Variables that MUST exist | Critical configs (DB, API keys) |
+| **autoCreateTemplate** | `boolean` | Auto-create `.env.template` if missing | Team onboarding, dev setup |
+| **validateValues** | `boolean` | Check that vars have non-empty values | Production deployments |
+| **skipFileLoading** | `boolean` | Skip .env files, use `process.env` only | Docker/K8s, CI/CD |
+| **ciMode** | `boolean` | Force CI/CD mode | Testing CI behavior locally |
 
 <details>
-<summary>💡 <strong>What does each option actually do?</strong></summary>
+<summary> <strong>What does each option actually do?</strong></summary>
 
 #### `files` - Custom File Mapping
 
@@ -248,7 +248,7 @@ required: ["DATABASE_URL", "JWT_SECRET"];
 
 **What happens:**
 
--   ✅ Variables exist → App starts normally
+-   Variables exist → App starts normally
 -   ❌ Variables missing → App **crashes immediately** with helpful error
 -   ⚠️ In development → **Warns** instead of crashing (unless `validateValues: true`)
 
@@ -267,7 +267,7 @@ autoCreateTemplate: true;
     DATABASE_URL=
     JWT_SECRET=
     ```
-3. Shows helpful message: "📝 Copy .env.template to .env.development"
+3. Shows helpful message: "Copy .env.template to .env.development"
 
 #### `validateValues` - Value Checking
 
@@ -296,10 +296,10 @@ skipFileLoading: true;
 
 **What happens:**
 
--   🚫 Doesn't read any .env files
--   ✅ Uses `process.env` only
--   ⚡ Faster startup (no file I/O)
--   🐳 Perfect for Docker/K8s
+-   Doesn't read any .env files
+-   Uses `process.env` only
+-   Faster startup (no file I/O)
+-   Perfect for Docker/K8s
 
 </details>
 
@@ -316,7 +316,7 @@ This creates a `config.ts` file with compile-time type safety:
 ```typescript
 import { defineConfig, Env, loadEnvSync } from "@expressots/core";
 
-// 📁 Load environment files before config resolution
+// Load environment files before config resolution
 const envFiles = {
     development: ".env.local",
     production: ".env.prod",
@@ -333,10 +333,10 @@ export const appConfig = defineConfig({
         port: Env.number("PORT", { default: 3000 }),
     },
     database: {
-        url: Env.string("DATABASE_URL", { required: true }), // 👈 Must exist
+        url: Env.string("DATABASE_URL", { required: true }), // Must exist
         pool: Env.number("DB_POOL_SIZE", {
             default: 10,
-            min: 1, // 👈 Validation constraints
+            min: 1, // Validation constraints
             max: 100,
         }),
     },
@@ -348,21 +348,21 @@ export const appConfig = defineConfig({
     },
 });
 
-// 🎯 Export typed config values
+// Export typed config values
 export const config = appConfig.values;
 export type AppConfig = typeof config;
 ```
 
 :::tip Benefits of Type-Safe Configuration
 
-| Benefit                     | Description                        | Example                                                       |
+| Benefit | Description | Example |
 | --------------------------- | ---------------------------------- | ------------------------------------------------------------- |
-| 🔷 **TypeScript Inference** | Full autocomplete & type checking  | `config.database.url` ← typed as `string`                     |
-| ✅ **Validation**           | Helpful errors with context        | "DB_POOL_SIZE must be between 1 and 100"                      |
-| 🎯 **Defaults**             | Fallback values per environment    | `\{ development: "debug", production: "error" \}`             |
-| 🔐 **Secret Redaction**     | Automatic hiding of sensitive data | Secrets hidden in logs automatically                          |
-| 🌍 **Multi-Environment**    | Different configs per env          | `Env.string("HOST", \{ dev: "localhost", prod: "0.0.0.0" \})` |
-| 🏗️ **Centralized**          | Single source of truth             | One file for all configuration                                |
+| **TypeScript Inference** | Full autocomplete & type checking | `config.database.url` ← typed as `string` |
+| **Validation** | Helpful errors with context | "DB_POOL_SIZE must be between 1 and 100" |
+| **Defaults** | Fallback values per environment | `\{ development: "debug", production: "error" \}` |
+| **Secret Redaction** | Automatic hiding of sensitive data | Secrets hidden in logs automatically |
+| **Multi-Environment** | Different configs per env | `Env.string("HOST", \{ dev: "localhost", prod: "0.0.0.0" \})` |
+| **Centralized** | Single source of truth | One file for all configuration |
 
 :::
 
@@ -392,10 +392,10 @@ bootstrap(App, {
 
 **What you get:**
 
--   ✅ Autocomplete in your IDE
--   ✅ Compile-time errors if config structure changes
--   ✅ Refactoring safety
--   ✅ Self-documenting configuration
+-   Autocomplete in your IDE
+-   Compile-time errors if config structure changes
+-   Refactoring safety
+-   Self-documenting configuration
 
 ---
 
@@ -566,7 +566,7 @@ const server = await bootstrap(App);
 process.on("SIGTERM", async () => {
     console.log("Shutting down gracefully...");
     const httpServer = await server.getHttpServer();
-    
+
     httpServer.close(async () => {
         // serverShutdown() hook called automatically
         console.log("Server closed");
@@ -583,7 +583,7 @@ async function closeServerSafely(
     timeout: number = 5000
 ): Promise<void> {
     const httpServer = await server.getHttpServer();
-    
+
     return new Promise<void>((resolve) => {
         const timer = setTimeout(() => {
             console.warn("Force closing server after timeout");
@@ -603,10 +603,10 @@ await closeServerSafely(server, 5000);
 
 :::warning Important
 Always close servers in tests to:
-- ✅ Avoid port conflicts in subsequent tests
-- ✅ Prevent Jest/Vitest from hanging
-- ✅ Clean up resources (connections, timers)
-- ✅ Ensure proper test isolation
+- Avoid port conflicts in subsequent tests
+- Prevent Jest/Vitest from hanging
+- Clean up resources (connections, timers)
+- Ensure proper test isolation
 :::
 
 ---
@@ -615,60 +615,60 @@ Always close servers in tests to:
 
 ### Development with Auto-Creation
 
-**🔧 Scenario:** Local development, team onboarding, first-time setup
+**Scenario:** Local development, team onboarding, first-time setup
 
 ```typescript
 bootstrap(App, {
     currentEnvironment: "development",
     envFileConfig: {
-        autoCreateTemplate: true, // 👈 Creates .env.template if missing
-        required: ["DATABASE_URL"], // 👈 Warns (doesn't crash) if missing
+        autoCreateTemplate: true, // Creates .env.template if missing
+        required: ["DATABASE_URL"], // Warns (doesn't crash) if missing
     },
 });
 ```
 
 **What happens:**
 
-1. ✅ Checks for `.env.development`
-2. 📝 Creates `.env.template` with required variables if file missing
+1. Checks for `.env.development`
+2. Creates `.env.template` with required variables if file missing
 3. ⚠️ **Warns** on missing variables (doesn't crash your dev server)
-4. ✅ Developer copies template and fills in values
+4. Developer copies template and fills in values
 
 **Perfect for:**
 
--   👥 New team members getting started
--   🔧 Setting up local development
--   📚 Open source projects with contributors
+-   New team members getting started
+-   Setting up local development
+-   Open source projects with contributors
 
 ---
 
 ### Production with Validation
 
-**🚀 Scenario:** Production deployment, staging environments
+**Scenario:** Production deployment, staging environments
 
 ```typescript
 bootstrap(App, {
     currentEnvironment: "production",
     envFileConfig: {
         files: {
-            production: ".env.prod", // 👈 Specific production file
+            production: ".env.prod", // Specific production file
         },
         required: [
-            // 👈 MUST exist with values
+            // MUST exist with values
             "DATABASE_URL",
             "JWT_SECRET",
             "API_KEY",
         ],
-        validateValues: true, // 👈 Fails fast if missing/empty
+        validateValues: true, // Fails fast if missing/empty
     },
 });
 ```
 
 **What happens:**
 
-1. 🔍 Loads `.env.prod`
-2. ✅ Validates ALL required variables exist
-3. ✅ Validates ALL required variables have **non-empty values**
+1. Loads `.env.prod`
+2. Validates ALL required variables exist
+3. Validates ALL required variables have **non-empty values**
 4. ❌ **Crashes immediately** with helpful error if validation fails
 
 **Why fail fast?**
@@ -678,7 +678,7 @@ bootstrap(App, {
 bootstrap(App);
 // App starts, runs for hours
 // Then crashes when trying to connect to DB: "DATABASE_URL is undefined"
-// 😱 Silent failure, hard to debug
+// Silent failure, hard to debug
 
 // ✅ With validation
 bootstrap(App, {
@@ -688,27 +688,27 @@ bootstrap(App, {
     },
 });
 // ❌ Crashes immediately: "DATABASE_URL is required but not set"
-// 🎯 Clear error, easy to fix
+// Clear error, easy to fix
 ```
 
 **Perfect for:**
 
--   🚀 Production deployments
--   🏗️ Staging environments
--   🔒 Security-critical applications
+-   Production deployments
+-   Staging environments
+-   Security-critical applications
 
 ---
 
 ### Containerized Deployment (Docker/K8s)
 
-**🐳 Scenario:** Docker, Kubernetes, cloud platforms
+**Scenario:** Docker, Kubernetes, cloud platforms
 
 ```typescript
 bootstrap(App, {
     envFileConfig: {
-        skipFileLoading: true, // 👈 Don't read .env files
+        skipFileLoading: true, // Don't read .env files
         required: [
-            // 👈 Variables MUST be in process.env
+            // Variables MUST be in process.env
             "DATABASE_URL",
             "REDIS_URL",
         ],
@@ -718,17 +718,17 @@ bootstrap(App, {
 
 **What happens:**
 
-1. 🚫 Skips all .env file loading
-2. ✅ Uses only `process.env` (injected by container platform)
-3. ✅ Validates required variables exist in `process.env`
-4. ⚡ Faster startup (no file I/O)
+1. Skips all .env file loading
+2. Uses only `process.env` (injected by container platform)
+3. Validates required variables exist in `process.env`
+4. Faster startup (no file I/O)
 
 **Why skip file loading in containers?**
 
-| Approach         | File Loading | Source             | Performance       |
+| Approach | File Loading | Source | Performance |
 | ---------------- | ------------ | ------------------ | ----------------- |
-| 🏠 **Local Dev** | ✅ Yes       | `.env.development` | Slower (file I/O) |
-| 🐳 **Container** | ❌ No        | `process.env`      | Faster            |
+| **Local Dev** | ✅ Yes | `.env.development` | Slower (file I/O) |
+| **Container** | ❌ No | `process.env` | Faster |
 
 **Container platforms inject environment variables:**
 
@@ -755,38 +755,38 @@ env:
 
 **Perfect for:**
 
--   🐳 Docker deployments
--   ☸️ Kubernetes clusters
--   ☁️ Cloud platforms (AWS ECS, GCP Cloud Run, Azure Container Apps)
--   🔐 Secret management systems
+-   Docker deployments
+-   Kubernetes clusters
+-   Cloud platforms (AWS ECS, GCP Cloud Run, Azure Container Apps)
+-   Secret management systems
 
 :::tip 12-Factor App Pattern
 This follows the [12-factor app](https://12factor.net/config) methodology:
 
--   ✅ Config stored in environment (not files)
--   ✅ Strict separation between environments
--   ✅ No secrets in code repositories
+-   Config stored in environment (not files)
+-   Strict separation between environments
+-   No secrets in code repositories
     :::
 
 ---
 
 ### Testing with Dynamic Ports
 
-**🧪 Scenario:** Unit tests, E2E tests, CI/CD pipelines
+**Scenario:** Unit tests, E2E tests, CI/CD pipelines
 
 ```typescript
 const webServer = await bootstrap(App, {
-    port: 0, // 👈 OS picks available port
+    port: 0, // OS picks available port
     envFileConfig: {
-        skipFileLoading: true, // 👈 No file I/O in tests
+        skipFileLoading: true, // No file I/O in tests
     },
 });
 
-// 🔍 Discover the assigned port
+// Discover the assigned port
 const actualPort = await webServer.getPort();
 expect(actualPort).toBeGreaterThan(0);
 
-// 🔧 Or access HTTP server directly
+// Or access HTTP server directly
 const httpServer = await webServer.getHttpServer();
 ```
 
@@ -800,7 +800,7 @@ test("endpoint 1", async () => {
 });
 
 test("endpoint 2", async () => {
-    await bootstrap(App, { port: 3000 }); // 💥 Port already in use!
+    await bootstrap(App, { port: 3000 }); // Port already in use!
     // Test fails with EADDRINUSE error
 });
 
@@ -833,9 +833,9 @@ describe("User API", () => {
 
     beforeAll(async () => {
         server = await bootstrap(App, {
-            port: 0, // 👈 Dynamic port
+            port: 0, // Dynamic port
             envFileConfig: {
-                skipFileLoading: true, // 👈 Use process.env only
+                skipFileLoading: true, // Use process.env only
             },
         });
 
@@ -860,10 +860,10 @@ describe("User API", () => {
 
 **Perfect for:**
 
--   🧪 Jest/Vitest test suites
--   🔄 Parallel test execution
--   🤖 CI/CD pipelines
--   🚀 Integration tests
+-   Jest/Vitest test suites
+-   Parallel test execution
+-   CI/CD pipelines
+-   Integration tests
 
 ---
 
@@ -999,13 +999,13 @@ ExpressoTS recognizes these environments: `development`, `staging`, `production`
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│ 1️⃣  currentEnvironment in bootstrap()              │ ← Highest priority
+│ 1. currentEnvironment in bootstrap()              │ ← Highest priority
 │     bootstrap(App, { currentEnvironment: "prod" })  │
 ├─────────────────────────────────────────────────────┤
-│ 2️⃣  process.env.NODE_ENV                            │
+│ 2. process.env.NODE_ENV                            │
 │     NODE_ENV=production npm start                   │
 ├─────────────────────────────────────────────────────┤
-│ 3️⃣  Default: "development"                          │ ← Lowest priority
+│ 3. Default: "development"                          │ ← Lowest priority
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -1017,7 +1017,7 @@ The framework **automatically adjusts** based on environment. You don't need to 
 
 #### Error Handling: What Clients See
 
-**🔧 Development & Test:**
+**Development & Test:**
 
 ```json
 // ✅ Full error details exposed
@@ -1030,15 +1030,15 @@ The framework **automatically adjusts** based on environment. You don't need to 
 
 **What you get:**
 
--   ✅ Full error messages
--   ✅ Complete stack traces
--   ✅ File names and line numbers
--   ✅ Detailed debugging context
+-   Full error messages
+-   Complete stack traces
+-   File names and line numbers
+-   Detailed debugging context
 
-**🚀 Production & Staging:**
+**Production & Staging:**
 
 ```json
-// 🔒 Generic error message
+// Generic error message
 {
     "title": "An unexpected error occurred",
     "status": 500
@@ -1049,10 +1049,10 @@ The framework **automatically adjusts** based on environment. You don't need to 
 
 **What you get:**
 
--   ✅ Generic error messages (security)
+-   Generic error messages (security)
 -   ❌ No stack traces in response
--   ✅ Stack traces still logged server-side
--   ✅ Internal details protected
+-   Stack traces still logged server-side
+-   Internal details protected
 
 :::warning Security
 **Never expose stack traces in production!**
@@ -1062,35 +1062,35 @@ The framework **automatically adjusts** based on environment. You don't need to 
 {
   "stack": "at /home/ubuntu/api/node_modules/pg/lib/client.js:526"
 }
-// 😱 Attackers can see your server structure!
+// Attackers can see your server structure!
 
 // ✅ Good: Generic message
 {
   "title": "An unexpected error occurred",
   "status": 500
 }
-// 🔒 No information leak
+// No information leak
 ```
 
 :::
 
 #### Environment Validation: Strictness Levels
 
-| Environment        | `validateValues` Default | Behavior on Missing Vars   |
+| Environment | `validateValues` Default | Behavior on Missing Vars |
 | ------------------ | ------------------------ | -------------------------- |
-| 🟢 **development** | `false`                  | ⚠️ Warns (doesn't crash)   |
-| 🟡 **staging**     | `false`                  | ⚠️ Warns (doesn't crash)   |
-| 🔴 **production**  | **`true`**               | ❌ **Crashes immediately** |
-| 🔵 **test**        | `false`                  | ⚠️ Warns (doesn't crash)   |
+| **development** | `false` | ⚠️ Warns (doesn't crash) |
+| **staging** | `false` | ⚠️ Warns (doesn't crash) |
+| **production** | **`true`** | ❌ **Crashes immediately** |
+| **test** | `false` | ⚠️ Warns (doesn't crash) |
 
 **Why different defaults?**
 
 ```typescript
-// 🔧 Development: Forgiving
+// Development: Forgiving
 // Missing DATABASE_URL → ⚠️ Warning, app still starts
 // Developer can debug without everything configured
 
-// 🚀 Production: Strict
+// Production: Strict
 // Missing DATABASE_URL → ❌ Crashes with clear error
 // Prevents silent failures in production
 ```
@@ -1102,7 +1102,7 @@ The framework **automatically adjusts** based on environment. You don't need to 
 bootstrap(App, {
     currentEnvironment: "development",
     envFileConfig: {
-        validateValues: true, // 👈 Override: crash on missing vars
+        validateValues: true, // Override: crash on missing vars
         required: ["DATABASE_URL"],
     },
 });
@@ -1111,7 +1111,7 @@ bootstrap(App, {
 bootstrap(App, {
     currentEnvironment: "production",
     envFileConfig: {
-        validateValues: false, // 👈 Override: only warn
+        validateValues: false, // Override: only warn
         required: ["DATABASE_URL"],
     },
 });
@@ -1126,14 +1126,14 @@ Check environment in your application logic:
 ```typescript
 // In your App class (extends AppExpress)
 async configureServices(): Promise<void> {
-    // 🔍 Conditional error handler based on environment
+    // Conditional error handler based on environment
     this.Middleware.setErrorHandler({
-        showStackTrace: await this.isDevelopment()  // 👈 true in dev, false in prod
+        showStackTrace: await this.isDevelopment()  // true in dev, false in prod
     });
 
-    // 🔍 Conditional logging
+    // Conditional logging
     if (await this.isDevelopment()) {
-        console.log("🔧 Debug mode enabled");
+        console.log("Debug mode enabled");
         this.Provider.register(DebugService);
     }
 }
@@ -1142,21 +1142,21 @@ async configureServices(): Promise<void> {
 **Common patterns:**
 
 ```typescript
-// 🎨 Pretty logging in development
+// Pretty logging in development
 if (await this.isDevelopment()) {
     this.Middleware.logger({ format: "pretty" });
 } else {
     this.Middleware.logger({ format: "json" }); // Machine-readable in prod
 }
 
-// 🔍 CORS configuration
+// CORS configuration
 this.Middleware.cors({
     origin: (await this.isDevelopment())
         ? "*" // Allow all in dev
         : ["https://myapp.com"], // Strict in prod
 });
 
-// 📊 Performance monitoring
+// Performance monitoring
 if (!(await this.isDevelopment())) {
     this.Provider.register(APMService); // Only in production
 }
@@ -1172,37 +1172,37 @@ import { defineConfig, Env } from "@expressots/core";
 export const config = defineConfig({
     server: {
         host: Env.string("HOST", {
-            development: "localhost", // 🔧 Local only
-            staging: "0.0.0.0", // 🏗️ All interfaces
-            production: "0.0.0.0", // 🚀 All interfaces
+            development: "localhost", // Local only
+            staging: "0.0.0.0", // All interfaces
+            production: "0.0.0.0", // All interfaces
         }),
     },
 
     app: {
         logLevel: Env.enum("LOG_LEVEL", ["debug", "info", "warn", "error"], {
-            development: "debug", // 🔧 Verbose logging
-            staging: "info", // 🏗️ Standard logging
-            production: "warn", // 🚀 Errors & warnings only
+            development: "debug", // Verbose logging
+            staging: "info", // Standard logging
+            production: "warn", // Errors & warnings only
         }),
 
         debug: Env.boolean("DEBUG", {
-            development: true, // 🔧 Debug mode ON
-            staging: false, // 🏗️ Debug mode OFF
-            production: false, // 🚀 Debug mode OFF
+            development: true, // Debug mode ON
+            staging: false, // Debug mode OFF
+            production: false, // Debug mode OFF
         }),
     },
 
     database: {
         url: Env.url("DATABASE_URL", {
-            development: "postgresql://localhost:5432/dev_db", // 🔧 Local DB
-            staging: undefined, // 🏗️ Must be set explicitly
-            production: undefined, // 🚀 Must be set explicitly
+            development: "postgresql://localhost:5432/dev_db", // Local DB
+            staging: undefined, // Must be set explicitly
+            production: undefined, // Must be set explicitly
         }),
 
         ssl: Env.boolean("DB_SSL", {
-            development: false, // 🔧 No SSL locally
-            staging: true, // 🏗️ SSL required
-            production: true, // 🚀 SSL required
+            development: false, // No SSL locally
+            staging: true, // SSL required
+            production: true, // SSL required
         }),
     },
 });
@@ -1247,13 +1247,13 @@ database: {
 
 Each environment loads its corresponding `.env` file by convention:
 
-| Environment        | Default File       | `validateValues` Default | Behavior                  |
+| Environment | Default File | `validateValues` Default | Behavior |
 | ------------------ | ------------------ | ------------------------ | ------------------------- |
-| 🟢 **development** | `.env.development` | `false`                  | ⚠️ Warns on missing       |
-| 🟡 **staging**     | `.env.staging`     | `false`                  | ⚠️ Warns on missing       |
-| 🔴 **production**  | `.env.production`  | **`true`**               | ❌ **Crashes on missing** |
-| 🔵 **test**        | `.env.test`        | `false`                  | ⚠️ Warns on missing       |
-| ⚫ **CI/CD**       | None               | **`true`**               | ❌ **Crashes on missing** |
+| **development** | `.env.development` | `false` | ⚠️ Warns on missing |
+| **staging** | `.env.staging` | `false` | ⚠️ Warns on missing |
+| **production** | `.env.production` | **`true`** | ❌ **Crashes on missing** |
+| **test** | `.env.test` | `false` | ⚠️ Warns on missing |
+| **CI/CD** | None | **`true`** | ❌ **Crashes on missing** |
 
 #### Loading Priority
 
@@ -1303,13 +1303,13 @@ await bootstrap(App, {
 
 **Why?**
 
--   ⚡ Faster test execution (no disk reads)
--   🔄 Better for parallel tests
--   🎯 Explicit test configuration
+-   Faster test execution (no disk reads)
+-   Better for parallel tests
+-   Explicit test configuration
     :::
 
 <details>
-<summary>💡 <strong>Why multiple .env files?</strong></summary>
+<summary> <strong>Why multiple .env files?</strong></summary>
 
 **Separation of concerns:**
 
@@ -1331,10 +1331,10 @@ await bootstrap(App, {
 
 **Benefits:**
 
--   ✅ Share team defaults via git (`.env`, `.env.development`)
--   ✅ Keep personal configs local (`.env.local`)
--   ✅ Prevent secret leaks (`.env.production` gitignored)
--   ✅ Easy onboarding (new devs just copy `.env.template`)
+-   Share team defaults via git (`.env`, `.env.development`)
+-   Keep personal configs local (`.env.local`)
+-   Prevent secret leaks (`.env.production` gitignored)
+-   Easy onboarding (new devs just copy `.env.template`)
 
 </details>
 
@@ -1351,7 +1351,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Detect platform (GitHub Actions, GitLab, etc.)        │
 │ └─ Cache result for subsequent calls                     │
 │                                                           │
-│ 🔍 Output: { isCI: boolean, platform?: string }          │
+│  Output: { isCI: boolean, platform?: string }          │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1365,7 +1365,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Create .env.template if autoCreateTemplate=true       │
 │ └─ Validate required variables if validateValues=true    │
 │                                                           │
-│ 🔍 Output: Environment variables in process.env          │
+│  Output: Environment variables in process.env          │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1374,7 +1374,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Check process.env.PORT                                │
 │ └─ Default to 3000                                        │
 │                                                           │
-│ 🔍 Output: finalPort: number                             │
+│  Output: finalPort: number                             │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1383,7 +1383,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Extract name and version                              │
 │ └─ Cache for future calls                                │
 │                                                           │
-│ 🔍 Output: { name: string, version: string }             │
+│  Output: { name: string, version: string }             │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1393,7 +1393,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Load all modules                                      │
 │ └─ Register providers                                     │
 │                                                           │
-│ 🔍 Output: App instance with configured container        │
+│  Output: App instance with configured container        │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1402,7 +1402,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Make environment accessible via this.isDevelopment()  │
 │ └─ Set up environment-based behavior                     │
 │                                                           │
-│ 🔍 Output: App aware of its environment                  │
+│  Output: App aware of its environment                  │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1411,7 +1411,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Extract API version prefixes                          │
 │ └─ Build version-aware routing table                     │
 │                                                           │
-│ 🔍 Output: Routing configuration with versions           │
+│  Output: Routing configuration with versions           │
 └────────────────────┬─────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────┐
@@ -1423,12 +1423,12 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
 │ ├─ Call App.postServerInitialization() (async)           │
 │ └─ Display startup banner                                │
 │                                                           │
-│ 🎉 Output: Running HTTP server                           │
+│  Output: Running HTTP server                           │
 └──────────────────────────────────────────────────────────┘
 ```
 
 :::info Typical Startup Time
-⚡ **~8-25ms** (optimized)
+**~8-25ms** (optimized)
 
 **Breakdown:**
 
@@ -1445,7 +1445,7 @@ The `bootstrap()` function orchestrates application startup through 8 sequential
     :::
 
 <details>
-<summary>💡 <strong>What happens if a phase fails?</strong></summary>
+<summary> <strong>What happens if a phase fails?</strong></summary>
 
 Each phase has built-in error handling:
 
@@ -1454,7 +1454,7 @@ Each phase has built-in error handling:
 ```typescript
 ❌ Error: DATABASE_URL is required but not set
 
-🔧 Troubleshooting steps:
+ Troubleshooting steps:
    1. Check if .env.development exists
    2. Verify DATABASE_URL is defined in the file
    3. Ensure the file is not empty
@@ -1466,7 +1466,7 @@ Each phase has built-in error handling:
 ```typescript
 ❌ Error: Port 3000 is already in use (EADDRINUSE)
 
-🔧 Troubleshooting steps:
+ Troubleshooting steps:
    1. Check what's using the port:
       - Windows: netstat -ano | findstr :3000
       - Mac/Linux: lsof -i :3000
@@ -1525,7 +1525,7 @@ for the contribution flow.
 
 ## Troubleshooting
 
-### ❌ Port Already in Use
+### Port Already in Use
 
 **Error:**
 
@@ -1587,7 +1587,7 @@ console.log(`Server running on port ${port}`);
 
 ---
 
-### ❌ Missing Environment Variables
+### Missing Environment Variables
 
 **Error:**
 
@@ -1661,7 +1661,7 @@ See [Deployment scenarios](#deployment-scenarios) for details.
 
 ---
 
-### ❌ Validation Fails in CI
+### Validation Fails in CI
 
 **Error:**
 
@@ -1673,8 +1673,8 @@ See [Deployment scenarios](#deployment-scenarios) for details.
 
 In CI/CD, bootstrap:
 
--   🚫 Doesn't load .env files
--   ✅ Only checks `process.env`
+-   Doesn't load .env files
+-   Only checks `process.env`
 -   ❌ Crashes if required vars missing
 
 **Solution:**
@@ -1683,7 +1683,7 @@ Set environment variables in your CI platform (see platform-specific error messa
 
 ---
 
-### ❌ Container Won't Start
+### Container Won't Start
 
 **Error:**
 
