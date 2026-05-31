@@ -110,6 +110,8 @@ expressots new my-api
 
 With the flags above it runs silently and never blocks for input: ideal for CI scripts, template generators, or `npx` recipes.
 
+> **Preset default:** when `-s` is omitted in silent mode with the `application` template, the CLI defaults to `-s api` (the recommended preset). This means `expressots new my-api -t application -p npm` and `expressots new my-api -t application -p npm -s api` produce the same project.
+
 ## Environment overrides
 
 The scaffold flow reads a few environment variables aimed at contributors and pre-release testers. None of them are required for normal use.
