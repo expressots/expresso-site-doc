@@ -4,6 +4,8 @@ title: Template System Architecture
 description: How the CLI fetches, caches, and merges templates from the local cache, remote repository, and embedded fallback.
 ---
 
+import templateSystemArchImg from "../core/img/template-system-architecture.png";
+
 # Dynamic Template System Architecture
 
 Learn about the architecture behind ExpressoTS CLI's dynamic template and pricing system, designed to keep the CLI up-to-date without requiring constant releases.
@@ -26,45 +28,13 @@ Learn about the architecture behind ExpressoTS CLI's dynamic template and pricin
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      ExpressoTS CLI                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │   Template   │    │   Pricing    │    │    Config    │ │
-│  │   Manager    │    │   Manager    │    │   Manager    │ │
-│  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘ │
-│         │                    │                    │          │
-│         v                    v                    v          │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │              Local Cache (~/.expressots/)            │  │
-│  │  - templates/ (24h TTL)                              │  │
-│  │  - pricing.json (6h TTL)                             │  │
-│  │  - config.json                                       │  │
-│  └──────────────────────────────────────────────────────┘  │
-│         │                    │                               │
-└─────────┼────────────────────┼───────────────────────────────┘
-          │                    │
-          v                    v
-┌─────────────────────────────────────────────────────────────┐
-│                   External Sources                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────────┐      ┌──────────────────────┐   │
-│  │  GitHub Repository   │      │   Pricing Sources    │   │
-│  │  expressots/         │      │   1. API (future)    │   │
-│  │  templates           │      │   2. Remote JSON     │   │
-│  │                      │      │   3. Local Override  │   │
-│  │  - manifest.json     │      └──────────────────────┘   │
-│  │  - cicd/            │                                   │
-│  │  - docker/          │                                   │
-│  │  - kubernetes/      │                                   │
-│  │  - migrations/      │                                   │
-│  │  - pricing.json     │                                   │
-│  └──────────────────────┘                                   │
-└─────────────────────────────────────────────────────────────┘
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={templateSystemArchImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS CLI template system: Template, Pricing, and Config managers write to local cache under ~/.expressots/, which syncs with the expressots/templates GitHub repo and remote pricing sources"
+    />
+</div>
 
 ## Component Details
 

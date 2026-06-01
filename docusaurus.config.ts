@@ -38,16 +38,17 @@ const config: Config = {
                         [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
                     ],
                     lastVersion: "4.0.0",
-                    onlyIncludeVersions: ["4.0.0", "3.0.0", "2.16.2"],
+                    onlyIncludeVersions: ["4.0.0", "3.0.0", "2.0.0"],
                     versions: {
                         "4.0.0": {
-                            label: "4.0.0",
+                            label: "4.0.0-preview",
+                            banner: "unreleased",
                         },
                         "3.0.0": {
                             label: "3.0.0",
                         },
-                        "2.16.2": {
-                            label: "2.16.2",
+                        "2.0.0": {
+                            label: "2.0.0",
                         },
                     },
                 },
@@ -67,9 +68,9 @@ const config: Config = {
             },
         ],
         announcementBar: {
-            id: "v4_launch",
+            id: "v4_preview",
             content:
-                'ExpressoTS v4.0 is here! Interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
+                'ExpressoTS v4.0 Preview is available! Interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
             backgroundColor: "#80f5a8",
             textColor: "#1f1f22",
             isCloseable: true,
