@@ -4,6 +4,8 @@ title: Overview
 description: ExpressoTS Studio is a local developer experience platform for v4 applications. Observability, security, and tooling, all running on your machine.
 ---
 
+import studioArchImg from "../core/img/studio-architecture.png";
+
 # Studio Overview
 
 ExpressoTS Studio is a local developer experience platform that runs alongside your application during development. It records every HTTP request, captures every log line, snapshots your DI graph, scans your dependencies for vulnerabilities, and exposes everything through a single web UI.
@@ -24,78 +26,175 @@ In v3, the framework gave you a black-box `app.listen()`. In v4, the framework a
 
 ## Architecture
 
-Studio is split into three packages so production builds stay lean:
+Studio is split into two publishable packages plus a local database so production builds stay lean. The CLI boots the UI; the agent lives inside your app and streams data over WebSocket; recordings persist to SQLite on disk.
 
-```mermaid
-flowchart LR
-    cli["@expressots/studio<br/>(CLI + bundled UI)"]
-    agent["@expressots/studio-agent<br/>(in your app process)"]
-    sqlite[(SQLite recording)]
-    browser["Browser<br/>(Studio UI :3333)"]
-
-    cli --> browser
-    cli -. probe .-> agent
-    browser -. "Socket.IO :3334" .-> agent
-    agent --> sqlite
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={studioArchImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio architecture: Studio CLI serves the browser UI on port 3333, the browser connects via Socket.IO to studio-agent in the app process on port 3334, and the agent writes request recordings to .studio/studio.db"
+    />
+</div>
 
 | Package                       | Where it runs              | What it does                                                                                       |
 | ----------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------- |
 | `@expressots/studio`          | Standalone dev process     | Boots the Web UI, probes the agent, opens the browser, owns the CLI.                               |
-| `@expressots/studio-agent`    | **Inside your app process** | Instrumentation middleware, SQLite recorder, log capture, DI snapshot, security engine, WS server. |
+| `@expressots/studio-agent`    | **Inside your app process** | Instrumentation middleware, SQLite recorder, log capture, DI snapshot, security engine, WebSocket server. |
 
 `@expressots/adapter-express` dynamically imports `@expressots/studio-agent` **only when it is installed and `NODE_ENV=development`**, so production deployments never load the agent code and never pay the runtime cost.
 
-## Screenshots
+## What you can do in Studio
 
-The shipped UI lives at [`static/img/studio/`](https://github.com/expressots/expresso-site-doc/tree/feature/v4.0/static/img/studio) inside the [`expresso-site-doc`](https://github.com/expressots/expresso-site-doc) repository. The placeholders below are the canonical filenames the docs expect. If you are working on Studio and want the docs to reflect the latest UI, run through the [capture guide](#capture-guide) and drop the new PNGs into that folder.
+Studio opens at [http://localhost:3333](http://localhost:3333) once you run `npx expressots-studio` with your app already in dev mode. The sidebar groups every capability below. All views update live over Socket.IO while traffic flows through your app.
 
-<figure>
-  <img src="/img/studio/status-dashboard.png" alt="Studio status dashboard" />
-  <figcaption><code>status-dashboard.png</code>: landing view with health, top routes, security grade.</figcaption>
-</figure>
+### Status: your at-a-glance command center
 
-<figure>
-  <img src="/img/studio/architecture-map.png" alt="Studio architecture map" />
-  <figcaption><code>architecture-map.png</code>: DI graph rendered from <code>AppContainer.introspect()</code>.</figcaption>
-</figure>
+The **Status** view is the landing screen when Studio connects. Use it to answer "is my app healthy right now?" without digging through logs.
 
-<figure>
-  <img src="/img/studio/request-timeline.png" alt="Studio request timeline" />
-  <figcaption><code>request-timeline.png</code>: live recording of HTTP requests with replay.</figcaption>
-</figure>
+- See process uptime, memory, and the ExpressoTS version your app is running.
+- Review DI scope counts (how many singleton, request, and transient bindings are registered).
+- Spot your slowest routes and error rates from **real recorded traffic**, not synthetic probes.
+- Jump to the [Security](#security-supply-chain-and-runtime-posture-in-one-place) view from the aggregate letter grade (A to F) when supply-chain or runtime posture needs attention.
 
-<figure>
-  <img src="/img/studio/security-overview.png" alt="Studio security overview" />
-  <figcaption><code>security-overview.png</code>: supply-chain advisories + runtime posture. See the dedicated <a href="./security.mdx">Security page</a> for deeper screenshots.</figcaption>
-</figure>
+### Requests: record, inspect, and replay every HTTP call
 
-### Capture guide
+The **Requests** view is a live timeline of every HTTP exchange the agent captured to `.studio/studio.db`.
 
-To refresh the screenshots above (and the ones embedded in [Security](./security.mdx)):
+- **Filter and search** by path fragment or HTTP method; pause auto-scroll while you read a long trace.
+- **Open any row** to see Trace Detail: OpenTelemetry spans, request/response headers and bodies, status code, and timing breakdown.
+- **Replay** a recorded request against your still-running app and diff the new response against the original, ideal for reproducing bugs without rewriting `curl` commands.
+- **Clear or snapshot** the recording buffer when you want a clean slate before a focused test run.
 
-1. From the `tests/test-op` north-star app, run `npm run dev` so the studio agent has real traffic, controllers, and a non-empty DI graph to render.
-2. In a second terminal, run `npx expressots studio` and let the UI open on `http://localhost:3333`.
-3. Use the Settings drawer to switch to the **dark** theme. That is the canonical look used in the docs.
-4. Capture each view at **1440 × 900** (the docs theme renders at this width) using any screenshot tool.
-5. Save the result as `static/img/studio/<view>.png` in the [`expresso-site-doc`](https://github.com/expressots/expresso-site-doc) repository, replacing the previous file.
-6. Open a docs PR against the `feature/v4.0` branch and tag the docs maintainer for review.
+Errors surfaced during requests also feed the error inspector (stack frames with `openInEditor` deep-links when your editor supports it).
 
-If you add a brand-new view to Studio, add a new `<figure>` here, a matching capture step above, and a row to the [Feature tour](#feature-tour) table.
+### Logs: every framework and app log line in one place
 
-## Feature tour
+The **Logs** view streams the in-memory log buffer the agent collects from ExpressoTS and your application code.
 
-| View                  | Highlights                                                                                                                         |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Status Dashboard      | App health, runtime info, DI scope counts, top routes, aggregate security score with a click-through to the Security view.        |
-| Architecture Map      | Read-only graph of controllers / use-cases / providers / middleware, with DI scope badges and active-path highlighting.            |
-| Request Timeline      | Live recording of every HTTP request to local SQLite. Filter, pause/resume, auto-scroll, clear, snapshot.                          |
-| Trace Detail          | OpenTelemetry spans rendered per request, headers/body diff, one-click Replay against the running app.                             |
-| Live Logs             | In-memory buffer of every framework + app log line. Filter by level, route, and context. Markdown export.                          |
-| Error Inspector       | Aggregated runtime errors with stack frames and deep-links to source via `openInEditor`.                                           |
-| [Security](./security.mdx) | `npm audit` + OSV.dev advisories, root-cause chains, reachability scoring, and one-click fixes. OWASP API Top 10 runtime posture. |
-| API Client            | Built-in HTTP client (method / URL / headers / body / query) that fires requests at your app and shows live responses.             |
-| Settings drawer       | Theme, recording cap, replay diff filters, keyboard shortcuts.                                                                     |
+- Filter by level (`TRACE` through `FATAL`), route, or logger context.
+- Follow a single request's log trail after selecting it in the timeline.
+- Export a Markdown report when you need to attach evidence to a ticket or PR.
+
+No more grepping terminal output across three restart cycles.
+
+### API Client: send requests without leaving Studio
+
+The **API Client** is a built-in HTTP client aimed at your running app.
+
+- Compose method, URL, headers, query string, and body in one panel.
+- Fire the request and read status, headers, and body from the live response pane.
+- Use it to smoke-test an endpoint while you watch the same call appear seconds later in **Requests** and **Logs**.
+
+Handy when you want to trigger traffic deliberately for architecture or security analysis.
+
+### Container: inspect the DI graph binding-by-binding
+
+The **Container** view shows the DI snapshot the agent captured at startup (and highlights bindings resolved for a selected request).
+
+- Browse a filterable table of every binding: identifier, implementation, and scope (`Singleton`, `Request`, `Transient`).
+- Switch to an interactive **dependency graph** (React Flow) to see how controllers, use cases, and providers connect.
+- When a request is selected in **Requests**, the graph emphasizes which services participated in that call.
+
+Use this when onboarding to an unfamiliar codebase or verifying that a new `provide()` registration landed in the right scope.
+
+### Architecture: see how controllers, use cases, and providers connect
+
+The **Architecture** view renders a read-only map from `AppContainer.introspect()`, the same metadata the framework uses internally.
+
+- Controllers, use cases, providers, and middleware appear as nodes with DI scope badges.
+- Active paths highlight as requests flow, so you can see which slice of the graph your traffic actually exercises.
+- Complements **Container** (binding-level detail) with a higher-level structural map of the application.
+
+### Database: browse your in-memory provider
+
+If your app registers the v4 `InMemoryDBProvider`, the **Database** view becomes a read-only data browser.
+
+- List every entity table with live record counts.
+- Inspect field schemas (keys, unique constraints, indexes) and relations (`hasOne`, `hasMany`, `belongsTo`, `manyToMany`).
+- Page through rows (50 per page) without writing ad-hoc scripts.
+
+When no in-memory provider is registered, Studio shows a friendly empty state with the exact `configureServices()` wiring you need.
+
+### Metrics: latency and throughput from real traffic
+
+The **Metrics** dashboard aggregates performance data from recorded exchanges.
+
+- Per-route P50, P95, and P99 latency.
+- Error rates and request volume over time.
+- Identify regressions after a refactor by comparing routes you exercise in dev, not guesses from a single `curl` timing.
+
+### Replay: batch re-run recorded exchanges
+
+The dedicated **Replay** view focuses on re-executing past requests.
+
+- Pick any recorded exchange and replay it against the current code.
+- Review side-by-side diffs (status, headers, body) when the replay diverges, for example after you change validation or auth.
+- Tune diff filters from the Settings drawer (ignore headers you expect to change, such as `Date` or `ETag`).
+
+Pair with **Requests** when you need full trace context; use **Replay** when you are iterating on response shape.
+
+### Security: supply chain and runtime posture in one place
+
+The **Security** view is a local, always-on security analyst for your application. It combines two complementary lenses so you catch vulnerabilities during development, not in production.
+
+:::note Local only
+Studio never sends your `package.json`, lockfile, code, or traffic anywhere. All analysis happens on your machine.
+:::
+
+#### Why it matters
+
+Most teams run `npm audit` once a sprint and ignore the results because the list is noisy and mostly transitive. Studio solves that with **reachability scoring**: it cross-references advisories against your actual imports, DI graph, and recorded traffic so you know which vulnerabilities your code actually reaches.
+
+#### Supply-chain analysis
+
+When you open the Security view (or whenever the lockfile changes), the agent:
+
+1. Runs `npm audit --json` in a background child process (never on the request thread).
+2. Cross-references results against [OSV.dev](https://osv.dev/) for richer metadata and non-npm advisories.
+3. Parses your lockfile into a dependency graph to build **root-cause chains** that show which direct dependency dragged in the vulnerable transitive package.
+4. Scores each finding for **reachability**:
+
+| Reachability    | Meaning                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| `confirmed`     | A recorded exchange hit a route whose source transitively imports the vulnerable package.        |
+| `likely`        | A route imports the package, but no recorded exchange has hit that route yet.                    |
+| `unreachable`   | The package is in the lockfile but no source file in `src/` imports it (e.g. dev-only transitive). |
+| `unknown`       | Recording is disabled or the source scan timed out.                                             |
+
+Each advisory shows severity, package and version, GHSA/CVE/OSV links, the root-cause chain, and a copy-pasteable fix command.
+
+#### One-click fixes
+
+Findings that share an upgrade target are grouped into **FixGroups**. Click **Apply fix** and Studio runs the command, streams live terminal output, and automatically re-scans when it finishes, with no manual `npm audit` cycle needed.
+
+#### Runtime posture (OWASP API Top 10)
+
+Beyond dependencies, Studio scores your recorded HTTP traffic, routes, logs, and DI graph against the **OWASP API Security Top 10**:
+
+- **BOLA**: routes with `:id` params that respond without an auth guard.
+- **Broken Authentication**: sensitive routes hit without an `Authorization` header.
+- **Excessive Data Exposure**: response bodies leaking `password`, `apiKey`, `token` fields.
+- **Unrestricted Resource Use**: routes responding > 2 s with no `TimeoutInterceptor`.
+- **Server-Side Misconfig**: CORS `*`, missing helmet, and similar middleware gaps.
+- **Injection**: error logs containing raw SQL or shell exception patterns.
+- **Improper Inventory**: source-scanned routes that never appear in recordings (zombie routes).
+
+:::caution Heuristics, not guarantees
+Posture findings are heuristic. They are a valuable development-time second opinion, not a replacement for a formal security review.
+:::
+
+#### Aggregate score
+
+Both pillars feed a single letter grade (A–F) on the Status dashboard. `unreachable` findings count at ⅕ weight, so a clean codebase with only dev-only transitive advisories still scores an A.
+
+### Settings and keyboard shortcuts
+
+Open **Settings** from the sidebar footer to tune how Studio behaves:
+
+- Switch light/dark theme.
+- Cap how many exchanges are retained in memory and on disk.
+- Configure replay diff ignore rules.
+- View keyboard shortcuts (`?` toggles the shortcuts overlay).
 
 ## Performance posture
 
@@ -107,4 +206,4 @@ Studio is built to disappear in production and stay out of the hot path in devel
 - **Logs / metrics**: kept in a bounded in-memory ring buffer; oldest entries are dropped first.
 - **UI broadcasts**: every frame is debounced and only emitted when at least one client is connected.
 
-See [Installation](./installation.mdx) to add Studio to an existing project, or [Security](./security.mdx) for the new v4 security feature.
+See [Installation](./installation.mdx) to add Studio to an existing project.
