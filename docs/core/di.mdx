@@ -8,126 +8,253 @@ import diImg from "./img/di.png";
 
 # Dependency Injection
 
-Dependency Injection (DI) is a design pattern used in software development that involves providing an object with the instances of the classes it needs to perform its tasks, rather than having it construct these instances itself. This process of `providing` instances is called `injecting` them, hence the term Dependency Injection.
+Dependency Injection (DI) is a design pattern where an object receives the instances it depends on rather than constructing them itself. ExpressoTS uses [InversifyJS](https://inversify.io/) under the hood and layers its own decorator and scope system on top, giving you fine-grained control over how services are created, shared, and disposed.
 
 ## Benefits
 
-Here are some of the key benefits of using Dependency Injection:
-
--   Decoupling: DI helps to decouple the components of your application. Instead of components creating the objects they depend upon, these objects are passed in (injected) by a DI framework or container. This means components don't need to know about the inner workings of their dependencies, and dependencies can be swapped out without the component knowing or caring.
-
--   Testability: DI makes unit testing easier. Because dependencies are injected, you can easily provide mock objects during testing. This allows each unit of code to be tested in isolation, with full control over its dependencies.
-
--   Reusable Code: With DI, your classes are typically designed to work with interfaces rather than concrete classes. This means you can reuse the same class in different contexts, with different injected dependencies.
-
--   Easier Maintenance and Increased Efficiency: By centralizing the creation of objects, and by reducing the amount of hard-coded class instantiation, maintenance becomes easier. When a class changes, you typically only need to update code in one place.
-
--   Configurability: You can configure your application structure externally, typically through XML or similar files. This means you can modify the structure and dependencies of your components without having to modify the code itself.
-
--   Lifecycles and Scoping: manage the lifecycle of injected objects, and control their scoping (e.g., singleton scope, request scope). See **[Lifecycle Hooks](./lifecycle.mdx)** for advanced lifecycle management.
-
--   Concurrency Management: containers can automatically handle service lifetimes in a concurrent environment, which can be a complex task to handle correctly without such a tool.
-
-In conclusion, DI is a technique that facilitates loose coupling, increased testability, and more maintainable and flexible code.
+- **Decoupling** — components depend on abstractions, not on concrete implementations. Dependencies can be swapped without touching the consumer.
+- **Testability** — injecting mock or stub implementations makes unit testing straightforward.
+- **Reusable code** — the same class can be used in different contexts with different injected dependencies.
+- **Easier maintenance** — object creation is centralized; when a class changes you typically update one place.
+- **Lifecycle management** — the container manages instance lifetimes through scopes (Request, Singleton, Transient, and custom scopes). See **[Lifecycle Hooks](./lifecycle.mdx)** for advanced lifecycle management.
+- **Concurrency safety** — the container handles service lifetimes in a concurrent environment automatically.
 
 ## Architecture
 
-In the image below, we ensure that each controller is responsible for a single task, which is why
-you see multiple controllers within a module. This architecture showcases the flexibility of the container
-system, enabling developers to define scopes at various levels, including the container, module, and controller.
-Even services like use cases and providers can have their own distinct scopes within the container.
+The diagram below shows how the DI container, modules, controllers, use cases, and providers relate to each other, each with its own scope.
 
 <div style={{ textAlign: "center" }}>
-    <img src={diImg} alt="Container" />
+    <img
+        src={diImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 DI architecture: AppContainer with modules, controllers, use cases, and providers with scope annotations"
+    />
 </div>
 
 ---
 
--   Container have its default scope that can be override by the module. The default scope is `Request` scope.
--   Defining a scope for a module forces all controllers under that module to have the same scope.
--   Not defining a scope for a module allow controllers to have their own scope using `@scope()` decorator.
--   All other registered classes such as providers, entities, helpers can have their specific scope based on the decorator used.
+- The container has a default scope (`Request`) that can be overridden per module.
+- Defining a scope for a module forces all controllers under that module to share the same scope.
+- Not defining a scope for a module allows each controller to declare its own scope with `@scope()`.
+- Providers, use cases, entities, and other classes can have independent scopes via their decorator.
 
 ## Components
 
-The DI system in ExpressoTS is composed of the following components:
+| Component | Description |
+| ---------- | --- |
+| **Container** | The root DI container (`AppContainer`) that holds all bindings. |
+| **Module** | Groups related controllers and their dependencies together with `CreateModule()`. |
+| **Controller** | Primary interface between client and server; handles incoming HTTP requests. |
+| **Use Case** | Business logic class injected into controllers. |
+| **Provider** | Reusable service (email, database, cache) injected into use cases or controllers. |
 
-| Components | Description                                                                                        |
-| ---------- | -------------------------------------------------------------------------------------------------- |
-| Container  | The DI container of the ExpressoTS application.                                                    |
-| Module     | A container module is typically used to group related controllers and their dependencies together. |
-| Controller | Primary interface between the client and server. Responsible to handle incoming requests.          |
-| Classes    | Any other class part of the ExpressoTS ecosystem, for example, providers, entities, helpers, etc.  |
+## Scope decorators
 
-## Decorators
+Scopes control how many instances of a class the container creates:
 
-Injection is done through decorators. The following decorators are used to define the scope of a class:
+| Decorator | Scope | Behavior |
+| --- | --- | --- |
+| `@provide(Class)` | Request | One instance per HTTP request (default) |
+| `@provideSingleton(Class)` | Singleton | One instance for the entire application lifetime |
+| `@provideTransient(Class)` | Transient | New instance on every injection |
+| `@provideInScope(Class, "name")` | Custom | Shared within the same named scope context |
 
-| Decorator           | Description                                                        |
-| ------------------- | ------------------------------------------------------------------ |
-| @provide()          | Binds a class to a dependency injection container as RequestScope. |
-| @provideSingleton() | Binds a class to a dependency injection container as Singleton.    |
-| @provideTransient() | Binds a class to a dependency injection container as Transient.    |
-
-Example of usage:
-
-#### Request
+### Request scope (default)
 
 ```typescript
-@provide(MyRequest)
-class MyRequest {}
+import { provide } from "@expressots/core";
+
+@provide(UserService)
+export class UserService {
+    // New instance created for each HTTP request
+    // Disposed when the request completes
+}
 ```
 
-#### Singleton
+### Singleton scope
 
 ```typescript
-@provideSingleton(MySingleton)
-class MySingleton {}
+import { provideSingleton } from "@expressots/core";
+
+@provideSingleton(DatabasePool)
+export class DatabasePool {
+    // One instance shared across the entire application
+    // Created on first resolution, cached forever
+}
 ```
 
-#### Transient
+### Transient scope
 
 ```typescript
-@provideTransient(MyTransient)
-class MyTransient {}
+import { provideTransient } from "@expressots/core";
+
+@provideTransient(CorrelationId)
+export class CorrelationId {
+    readonly id = crypto.randomUUID();
+    // Brand new instance every time it is injected
+}
+```
+
+### Custom scope
+
+```typescript
+import { provideInScope } from "@expressots/core";
+
+@provideInScope(TenantConfig, "tenant")
+export class TenantConfig {
+    // Shared within the same tenant context
+    // Different instances for different tenants
+}
+```
+
+Custom scope names must not conflict with built-in names (`"Singleton"`, `"Request"`, `"Transient"`). Using a built-in name throws an error at startup.
+
+## The `@Provider` decorator
+
+For providers that need rich metadata, use the `@Provider` decorator which combines scope, source tracking, and metadata in one:
+
+```typescript
+import { Provider, IProvider } from "@expressots/core";
+
+@Provider({
+    scope: "Singleton",
+    name: "Redis Cache",
+    version: "2.0.0",
+    description: "Redis caching provider",
+    author: "My Team",
+    source: "external",
+    dependencies: ["DatabaseProvider"],
+    priority: 10,
+})
+export class RedisCacheProvider implements IProvider {
+    readonly name = "Redis Cache";
+    readonly version = "2.0.0";
+}
+```
+
+See **[Providers](./providers.mdx)** for the full provider API.
+
+## Injecting dependencies
+
+### Constructor injection
+
+The most common pattern — dependencies are declared as constructor parameters with `@inject()`:
+
+```typescript
+import { provide, inject } from "@expressots/core";
+
+@provide(CreateUserUseCase)
+export class CreateUserUseCase {
+    constructor(
+        @inject(EmailProvider) private email: EmailProvider,
+        @inject(DatabaseProvider) private db: DatabaseProvider,
+    ) {}
+
+    async execute(dto: CreateUserDTO): Promise<UserResponseDTO> {
+        const user = await this.db.save(dto);
+        await this.email.sendWelcome(user.email);
+        return { id: user.id, status: "created" };
+    }
+}
+```
+
+### Multi-injection
+
+Inject all bindings for a given identifier with `@multiInject()`:
+
+```typescript
+import { provide, multiInject } from "@expressots/core";
+
+@provide(NotificationService)
+export class NotificationService {
+    constructor(
+        @multiInject("INotificationChannel")
+        private channels: INotificationChannel[],
+    ) {}
+
+    async notifyAll(message: string): Promise<void> {
+        await Promise.all(this.channels.map((ch) => ch.send(message)));
+    }
+}
 ```
 
 ## Controller scope
 
-Controllers can have their own scope using the `@scope()` decorator. This decorator can be used to define the scope of a controller.
-
-Example of usage:
+Controllers can declare their own scope using the `@scope()` decorator, provided the parent module does not already enforce a scope:
 
 ```typescript
+import { scope, controller } from "@expressots/core";
+
 @scope("Singleton")
-@controller()
-class MyController {}
+@controller("/metrics")
+export class MetricsController {
+    // Singleton-scoped controller
+}
 ```
 
 :::info
-You can't define a scope for a controller if the module has a scope defined.
+You cannot define a scope for a controller if the parent module already has a scope defined. The module scope takes precedence.
 :::
+
+## Container configuration
+
+`AppContainer` wraps the InversifyJS container with ExpressoTS defaults:
+
+```typescript
+import { AppContainer, Scope } from "@expressots/core";
+
+const container = new AppContainer({
+    defaultScope: Scope.Request,      // default
+    autoBindInjectable: true,         // auto-bind @injectable classes
+    skipBaseClassChecks: false,
+});
+
+container.create([
+    new UserModule(),
+    new ProductModule(),
+]);
+```
+
+### Container introspection
+
+The container exposes a v4 introspection API for debugging and tooling:
+
+```typescript
+// Get all bindings
+const bindings = container.getBindingsInfo();
+
+// Summary statistics
+const summary = container.getBindingsSummary();
+console.log(`Total: ${summary.total}`);
+console.log(`Singletons: ${summary.byScope["Singleton"] || 0}`);
+
+// Filter bindings
+const singletons = container.filterBindings({ scope: "Singleton" });
+const controllers = container.filterBindings({ identifier: "Controller" });
+
+// Formatted view for debugging
+console.log(container.getFormattedBindingsView());
+
+// Full introspection (for Studio)
+const data = container.introspect();
+```
 
 ## Circular dependencies
 
-Circular dependencies occur when two or more modules depend on each other, leading to a potentially infinite loop or other issues during dependency injection.
+Circular dependencies occur when two or more classes depend on each other, creating a resolution loop.
 
-ExpressoTS circular dependencies can be resolved using the following methods:
+### Lazy injection
 
-<span class="span-table">Lazy Injection: </span> (@inject with LazyServiceIdentifier)
+Use `LazyServiceIdentifier` to defer resolution until the dependency is actually used:
 
-One common approach to handle circular dependencies in ExpressoTS is to use lazy injection. This allows the IoC container to inject a proxy or a function
-that retrieves the dependency only when it's actually needed. This postpones the resolution of the dependency,
-avoiding the immediate circular reference issue.
+```typescript
+import { provide, inject, LazyServiceIdentifier } from "@expressots/core";
 
-To implement this, you can use the `LazyServiceIdentifier` utility provided by the framework.
-
-```typescript title="Lazy Injection"
 @provide(ServiceA)
 class ServiceA {
     constructor(
         @inject(new LazyServiceIdentifier(() => ServiceB))
-        private serviceB: ServiceB
+        private serviceB: ServiceB,
     ) {}
 }
 
@@ -137,17 +264,42 @@ class ServiceB {
 }
 ```
 
-In this example, ServiceA and ServiceB depend on each other. By using `LazyServiceIdentifier`, ServiceB
-is injected into ServiceA in a lazy manner, breaking the circular dependency loop.
+`ServiceB` is injected into `ServiceA` lazily, breaking the circular dependency at construction time.
 
-:::caution Factory Injection is under development.
-:::
+### Other strategies
 
-<span class="span-table">Factory Injection: </span> Use factory functions to create instances on demand,
-thus avoiding circular dependencies at construction time.
+- **Factory injection** — use factory functions to create instances on demand, avoiding circular references at construction time.
+- **Proxies** — employ proxies to delay resolution, giving more control over when and how the dependency is resolved.
 
-<span class="span-table">Proxies: </span> Employ proxies to delay the resolution of dependencies, giving
-more control over when and how the dependency is resolved.
+## Scope registry
+
+For advanced custom scope management, ExpressoTS provides a `ScopeRegistry` that maintains separate instance stores per scope:
+
+```typescript
+import { globalScopeRegistry } from "@expressots/core";
+
+// Get the store for a named scope
+const tenantScope = globalScopeRegistry.getScopeStore("tenant");
+
+// Check if a scope exists
+globalScopeRegistry.hasScope("tenant");
+
+// Clear all instances in a scope (e.g., on tenant switch)
+globalScopeRegistry.clearScope("tenant");
+
+// List all registered scope names
+const scopes = globalScopeRegistry.getScopeNames();
+```
+
+## Best practices
+
+1. **Prefer Request scope** for most services — it is stateless and scales naturally with concurrent requests.
+2. **Use Singleton** for shared infrastructure — database pools, caches, configuration, and providers with `IBootstrap` / `IShutdown`.
+3. **Use Transient sparingly** — every injection creates a new instance, which has a performance cost.
+4. **Use `@provideInScope()`** for multi-tenant or transaction-scoped services that need isolation.
+5. **Inject by class** rather than string tokens when possible for type safety.
+6. **Use `LazyServiceIdentifier`** to break circular dependencies rather than restructuring your entire architecture.
+7. **Inspect bindings** during development with `container.getFormattedBindingsView()` or `container.introspect()` to verify scopes are correct.
 
 ---
 

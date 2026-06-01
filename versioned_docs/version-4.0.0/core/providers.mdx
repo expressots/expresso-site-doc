@@ -1,387 +1,618 @@
 ---
 sidebar_position: 6
 title: Providers
-description: Providers are modular components.
+description: Modular services with DI scopes, optional capabilities, and publishable packages.
 ---
 
 import pluginPatternImg from "./img/plugin-pattern.png";
 
 # Providers
 
-In ExpressoTS, providers act as modular components that encapsulate specific functionalities, such as email services, authentication, or database connections.
-This approach supports a loosely coupled architecture, allowing you to update or swap out these functionalities without impacting the rest of the system.
+Providers encapsulate reusable capabilities — email, databases, caches, third-party SDKs — behind injectable classes. Use cases and controllers depend on provider abstractions instead of wiring libraries directly, which keeps business logic testable and swappable.
 
-### Key advantages
+### Why use providers
 
--   Promote loose coupling between application layers.
--   Simplify the testing process by decoupling logic from specific implementations.
--   Enhance code maintainability and flexibility, supporting easy swaps of underlying services.
+- Loose coupling between application layers
+- Easy mocking in unit tests
+- Optional **health**, **metrics**, and **configuration** capabilities the framework discovers automatically
+- Publishable npm packages for sharing across projects
 
-:::info
-ExpressoTS harnesses providers to augment application capabilities, facilitating functionalities like email dispatching, data storage, and more, without tying the application logic to specific implementations.
+## Provider capabilities
+
+ExpressoTS providers can implement optional interfaces alongside the base metadata contract:
+
+| Interface | Purpose | Key method |
+| --- | --- | --- |
+| **`IProvider`** | Metadata shown in the startup banner and Studio | `readonly name`, `version`, `description`, `author`, `repo` |
+| **`IHealthCheck`** | Contribute to aggregated health dashboards | `healthCheck(): HealthCheckResult` |
+| **`IMetrics`** | Expose numeric metrics for monitoring | `getMetrics(): ProviderMetrics` |
+| **`IConfigurable<T>`** | Validate configuration before use | `configure(config): ConfigurationResult` |
+| **`IBootstrap`** | Run once after the server is listening | `bootstrap()` |
+| **`IShutdown`** | Clean up on graceful shutdown (receives signal) | `shutdown(signal?)` |
+
+Implement only what your provider needs. A simple wrapper may use `@provideSingleton()` + `IProvider`; a database adapter typically adds `IHealthCheck`, `IBootstrap`, and `IShutdown`.
+
+:::tip Deep dives
+- **[Health & Monitoring](../features/health-monitoring.mdx)** — middleware endpoint + `IHealthCheck` dashboard
+- **[Lifecycle Hooks](./lifecycle.mdx)** — `IBootstrap` / `IShutdown` execution order
+- **[In-Memory DB](../features/in-memory-db.mdx)** — built-in provider that implements all six interfaces
+- **[Logging](../features/logging.mdx)** — the built-in `Logger` provider
 :::
 
-## Create a provider
+### IProvider interface
 
-Consider an application needing to send emails under various circumstances, such as user registration or password recovery.
-By implementing an email provider, ExpressoTS can send emails without directly interacting with the mailing service in the business logic.
+```typescript
+interface IProvider {
+    readonly name: string;
+    readonly version?: string;
+    readonly description?: string;
+    readonly author?: string;
+    readonly repo?: string;
+}
+```
 
-In this example we will create a `MailSenderProvider` to send emails using the `nodemailer` library.
+Metadata from `IProvider` is displayed in the startup banner, Studio Architecture Map, and introspection APIs.
 
-Let's use the CLI to scaffold a new provider named `MailSenderProvider`:
+### IHealthCheck interface
+
+```typescript
+interface HealthCheckResult {
+    status: "healthy" | "degraded" | "unhealthy";
+    latency?: number;
+    message?: string;
+    details?: Record<string, unknown>;
+    checkedAt?: number;
+}
+
+interface IHealthCheck {
+    healthCheck(): HealthCheckResult | Promise<HealthCheckResult>;
+}
+```
+
+Health checks are auto-discovered and run in parallel. Results aggregate into a `HealthDashboard` with an `overall` status (worst of all providers).
+
+### IMetrics interface
+
+```typescript
+type ProviderMetrics = Record<string, number | string | boolean>;
+
+interface IMetrics {
+    getMetrics(): ProviderMetrics;
+}
+```
+
+Metrics are collected on demand and aggregated into a `MetricsDashboard`.
+
+```typescript title="Connection pool with metrics"
+import { provideSingleton, IProvider, IMetrics, ProviderMetrics } from "@expressots/core";
+
+@provideSingleton(ConnectionPoolProvider)
+export class ConnectionPoolProvider implements IProvider, IMetrics {
+    readonly name = "Connection Pool";
+    readonly version = "1.0.0";
+
+    getMetrics(): ProviderMetrics {
+        return {
+            "pool.active": this.pool.activeConnections,
+            "pool.idle": this.pool.idleConnections,
+            "pool.total": this.pool.totalConnections,
+            "queries.total": this.stats.totalQueries,
+            "queries.failed": this.stats.failedQueries,
+            "avg.query.time.ms": this.stats.averageQueryTime,
+        };
+    }
+}
+```
+
+### IConfigurable interface
+
+```typescript
+interface ConfigurationResult {
+    valid: boolean;
+    errors?: Array<string>;
+    warnings?: Array<string>;
+}
+
+interface IConfigurable<TConfig = unknown> {
+    configure(config: TConfig): ConfigurationResult;
+}
+```
+
+Call `configure()` before the provider starts accepting work. Validation errors prevent the app from starting with bad configuration.
+
+```typescript title="Email provider with config validation"
+import {
+    provideSingleton,
+    IProvider,
+    IConfigurable,
+    ConfigurationResult,
+} from "@expressots/core";
+
+interface SmtpConfig {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+}
+
+@provideSingleton(EmailProvider)
+export class EmailProvider implements IProvider, IConfigurable<SmtpConfig> {
+    readonly name = "Email Provider";
+    private config?: SmtpConfig;
+
+    configure(config: SmtpConfig): ConfigurationResult {
+        const errors: string[] = [];
+        const warnings: string[] = [];
+
+        if (!config.host) errors.push("SMTP host is required");
+        if (!config.port || config.port < 1 || config.port > 65535)
+            errors.push("SMTP port must be between 1 and 65535");
+        if (!config.user) errors.push("SMTP user is required");
+        if (!config.pass) warnings.push("Password not set — falling back to env var");
+
+        if (errors.length > 0) return { valid: false, errors, warnings };
+
+        this.config = config;
+        return { valid: true, warnings };
+    }
+}
+```
+
+### Combining capabilities
+
+A single provider can implement any combination of interfaces. The built-in `InMemoryDBProvider` is a real-world example that implements all six:
+
+```typescript
+@provideSingleton(InMemoryDBProvider)
+export class InMemoryDBProvider
+    implements IProvider, IHealthCheck, IMetrics, IBootstrap, IShutdown {
+    readonly name = "In-Memory Database Provider";
+    readonly version = "4.0.0";
+
+    async bootstrap(): Promise<void> { /* load persisted data */ }
+    async shutdown(): Promise<void> { /* flush to disk */ }
+    async healthCheck(): Promise<HealthCheckResult> { /* check table count */ }
+    getMetrics(): ProviderMetrics { /* queries, tables, records */ }
+}
+```
+
+## Create an in-app provider
+
+Scaffold a provider inside your application:
 
 ```bash
 expressots g p mailSender
 ```
 
-#### Setting up the provider
+The CLI creates `src/providers/mail-sender.provider.ts` with a `@provide()` stub. Customize it for your integration:
 
-The CLI will add the suffix `Provider` to the provider name, creating a new file in the `providers` directory. This file will contain the provider class, which you can then customize to suit your application's needs.
-
-Here is the default provider file generated by the CLI:
-
-```typescript
-import { provide } from "@expressots/core";
-
-@provide(MailSenderProvider)
-class MailSenderProvider {}
-```
-
-#### Implementing the provider
-
-```typescript
+```typescript title="src/providers/email.provider.ts"
+import {
+    provideSingleton,
+    IProvider,
+    IHealthCheck,
+    HealthCheckResult,
+} from "@expressots/core";
 import nodemailer from "nodemailer";
-import Mail from "nodemailer/lib/mailer";
+import type Transporter from "nodemailer/lib/mailer";
 
-export const enum EmailType {
-    Welcome = 0,
-    CreateUser,
-    ChangePassword,
-    Login,
-    RecoveryPassword,
-}
+@provideSingleton(EmailProvider)
+export class EmailProvider implements IProvider, IHealthCheck {
+    readonly name = "Email Provider";
+    readonly version = "1.0.0";
+    readonly description = "SMTP email delivery";
 
-@provide(MailSenderProvider)
-export class MailSenderProvider {
-    private transporter: Mail;
+    private transporter: Transporter;
 
     constructor() {
         this.transporter = nodemailer.createTransport({
-            host: Env.Mailtrap.HOST,
-            port: Env.Mailtrap.PORT,
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT ?? 587),
             auth: {
-                user: Env.Mailtrap.USERNAME,
-                pass: Env.Mailtrap.PASSWORD,
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
             },
         });
     }
 
-    private mailSender(message: IMessage): Promise<void> {
+    async sendVerification(to: string): Promise<void> {
         await this.transporter.sendMail({
-            to: {
-                name: message.to.name,
-                address: message.to.email,
-            },
-            from: {
-                name: message.from.name,
-                address: message.from.email,
-            },
-            subject: message.subject,
-            html: message.body,
+            to,
+            from: process.env.SMTP_FROM ?? "noreply@example.com",
+            subject: "Verify your account",
+            html: "<p>Please verify your email address.</p>",
         });
     }
 
-    sendEmail(emailType: EmailType): Promise<void> {
-        switch (emailType) {
-            case EmailType.Login:
-                break;
-            case EmailType.Welcome:
-                break;
-            case EmailType.RecoveryPassword:
-                break;
-            case EmailType.ChangePassword:
-                break;
-            case EmailType.CreateUser:
-                this.MailSender({
-                    to: {
-                        name: "User",
-                        email: Env.Mailtrap.INBOX_ALIAS,
-                    },
-                    from: {
-                        name: "ExpressoTS",
-                        email: "noreply@expresso-ts.com",
-                    },
-                    subject: "Successfully logged in!",
-                    body: "<h1>Welcome to the system!</h1>",
-                });
-                break;
+    async healthCheck(): Promise<HealthCheckResult> {
+        const started = Date.now();
+        try {
+            await this.transporter.verify();
+            return { status: "healthy", latency: Date.now() - started };
+        } catch (error) {
+            return {
+                status: "unhealthy",
+                latency: Date.now() - started,
+                message: error instanceof Error ? error.message : String(error),
+            };
         }
     }
 }
 ```
 
-This `MailSenderProvider` abstracts the complexity of configuring and using nodemailer for email operations,
-providing a straightforward method sendEmail to send different types of emails.
+Providers decorated with `@provide()`, `@provideSingleton()`, or `@provideTransient()` are registered automatically when their module loads. Manual registration is only required for external npm packages (see below).
 
-## Using the provider
+## Use a provider from a use case
 
-Here is the use case implementation making use of the `MailSenderProvider` provider:
+Inject the provider through the constructor and call its methods from `execute()`:
 
-```typescript title=" User sending email if login fails"
-@provide(LoginUserUseCase)
-export class LoginUserUseCase {
-    constructor(@inject(MailSenderProvider) private mailSender: MailSenderProvider) {}
+```typescript title="src/usecases/register-user.usecase.ts"
+import { provide, inject } from "@expressots/core";
+import { EmailProvider } from "../providers/email.provider";
+import { RegisterUserRequestDTO } from "../dto/register-user.request.dto";
+import { RegisterUserResponseDTO } from "../dto/register-user.response.dto";
 
-    execute(payload: ILoginUserRequestDTO): boolean {
-        const { email, password } = payload;
+@provide(RegisterUserUseCase)
+export class RegisterUserUseCase {
+    constructor(@inject(EmailProvider) private email: EmailProvider) {}
 
-        if (isAuthenticated(email, password)) {
-            return true;
-        }
+    async execute(dto: RegisterUserRequestDTO): Promise<RegisterUserResponseDTO> {
+        const userId = await this.persistUser(dto);
 
-        mailSender.sendEmail(EmailType.Login);
+        await this.email.sendVerification(dto.email);
 
-        return false;
+        return { userId, status: "pending_verification" };
+    }
+
+    private async persistUser(dto: RegisterUserRequestDTO): Promise<string> {
+        // repository logic
+        return "user-id";
     }
 }
 ```
 
-In this use case, the `MailSenderProvider` is injected through the constructor, leveraging ExpressoTS's dependency injection.
-This decouples the email sending process from the authentication logic, illustrating the provider's role in maintaining clean and maintainable code.
+This matches the **Send verification email** flow from the [Use cases](./usecase.mdx) diagram — the use case owns orchestration; the provider owns SMTP details.
 
-## Decorators for provider
+## Registration and scopes
 
-ExpressoTS facilitates the registration of providers in its dependency injection system through the use of fluent decorators:
+### Scope decorators
 
--   @provide (default scope is request)
--   @provideSingleton (singleton scope)
--   @provideTransient (transient scope)
+| Decorator | Scope | Typical use |
+| --- | --- | --- |
+| `@provide(Provider)` | Request (default) | Per-request services |
+| `@provideSingleton(Provider)` | Singleton | DB pools, config, shared clients |
+| `@provideTransient(Provider)` | Transient | New instance on every injection |
+| `@provideInScope(Provider, "tenant")` | Custom named scope | Multi-tenant, transaction-scoped |
 
-These decorators ensure that providers are automatically registered and resolved within the application's dependency injection system.
+```typescript
+import {
+    provide,
+    provideSingleton,
+    provideTransient,
+    provideInScope,
+} from "@expressots/core";
 
-:::tip Lifecycle Hooks
-Providers can implement lifecycle hooks to run initialization and cleanup code. Use `@provideSingleton()` for providers that implement `IBootstrap` or `IShutdown` interfaces. Learn more in the **[Lifecycle Hooks](./lifecycle.mdx)** documentation.
-:::
+@provide(RequestScopedService)
+export class RequestScopedService {}
 
-## External providers
+@provideSingleton(EmailProvider)
+export class EmailProvider {}
 
-ExpressoTS promotes extensibility through the use of external providers. Developers can create reusable packages using the plugin design pattern to add new functionalities to an ExpressoTS application. This approach is ideal for sharing features across multiple projects or integrating third-party services.
+@provideTransient(CorrelationId)
+export class CorrelationId {}
+```
 
-The goal is to keep the core framework lean while enabling developers to extend their applications' capabilities with external providers.
+Use `@provideSingleton()` for providers implementing `IBootstrap` or `IShutdown` so lifecycle hooks run on a single shared instance.
+
+### Custom scopes with `@provideInScope()`
+
+For multi-tenant or transaction-scoped services, use `@provideInScope()` with a custom scope name. Instances are shared within the same scope context but isolated across different scope values.
+
+```typescript title="Tenant-scoped permission service"
+import { provideInScope } from "@expressots/core";
+
+@provideInScope(TenantConfigService, "tenant")
+export class TenantConfigService {
+    private tenantId?: string;
+
+    setTenant(id: string): void {
+        this.tenantId = id;
+    }
+
+    getTenantSettings(): TenantSettings {
+        return loadSettings(this.tenantId);
+    }
+}
+```
+
+Custom scope names must not conflict with the built-in names (`"Singleton"`, `"Request"`, `"Transient"`). Using a built-in name throws an error at startup.
+
+### Provider source tracking
+
+Every provider decorator accepts an optional `source` parameter that classifies the provider origin:
+
+| Source | Description | Example |
+| --- | --- | --- |
+| `"user"` (default) | Application-level provider | `@provideSingleton(MyService)` |
+| `"builtin"` | Core framework provider | `@provideSingleton(Logger, "builtin")` |
+| `"external"` | Third-party npm package | `@provideSingleton(JwtProvider, "external")` |
+
+```typescript
+@provideSingleton(JwtProvider, "external")
+export class JwtProvider implements IProvider {
+    readonly name = "JWT Provider";
+    readonly version = "2.0.0";
+}
+```
+
+Source tracking powers banner output, Studio views, and introspection queries like `getBySource()`.
+
+### Manual registration (`this.Provider`)
+
+Register external packages or bind an interface to a concrete class inside `configureServices()`:
+
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+import { Scope } from "@expressots/core";
+import { GreeterProvider } from "@acme/expressots-greeter";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        // Self-binding with scope
+        this.Provider.register(GreeterProvider, Scope.Singleton);
+
+        // Interface-to-implementation binding
+        this.Provider.register("ICache", RedisCache, Scope.Singleton);
+    }
+}
+```
+
+The `register()` method has two overloads:
+
+```typescript
+register(Provider, Scope?)                   // bind Provider to itself
+register("IToken", ConcreteClass, Scope?)    // bind token to implementation
+```
+
+Retrieve a provider at runtime:
+
+```typescript
+const email = this.Provider.get(EmailProvider);
+```
+
+Check if a provider is registered:
+
+```typescript
+if (this.Provider.has(EmailProvider)) {
+    // already bound
+}
+```
+
+## Built-in providers
+
+ExpressoTS ships these providers out of the box (source `"builtin"`):
+
+| Provider | Scope | Capabilities | Documentation |
+| --- | --- | --- | --- |
+| **`Logger`** | Singleton | `IProvider` | **[Logging](../features/logging.mdx)** |
+| **`InMemoryDBProvider`** | Singleton | `IProvider`, `IHealthCheck`, `IMetrics`, `IBootstrap`, `IShutdown` | **[In-Memory DB](../features/in-memory-db.mdx)** |
+| **`ValidateDTO`** | — (function) | DTO validation middleware | **[Validation](../features/validation.mdx)** |
+
+`Logger` is always available. `InMemoryDBProvider` must be explicitly bound when needed:
+
+```typescript
+this.Provider.register(InMemoryDBProvider, Scope.Singleton);
+```
 
 ## Plugin pattern
 
-The diagram illustrates the ExpressoTS plugin design pattern, demonstrating how external providers are seamlessly integrated into the client application
-through the Provider Manager.
-
-It showcases the process of registering new providers and their respective lifecycle scopes, which can be singleton, request, or scoped.
+External providers are npm packages that export `@provide()`-decorated classes. The application installs them with `expressots add`, registers them through `this.Provider.register()`, and resolves them with `this.Provider.get()` under the chosen scope.
 
 <div style={{ textAlign: "center" }}>
-    <img src={pluginPatternImg} alt="Plugin pattern" />
+    <img
+        src={pluginPatternImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS provider plugin pattern: ProviderManager, scopes, and optional capabilities"
+    />
 </div>
 
-## Create external provider
+## External provider packages
 
-The CLI can be used to scaffold a new external provider ( plugin ). Here's the command:
+### Install an existing package
 
 ```bash
-expressots create provider-name
+expressots add @expressots/provider-jwt
 ```
 
-This command generates a new directory with the provider's name and all the necessary files to start developing an external provider.
-The generated `package.json` file includes scripts for building, testing, and publishing the package.
+See **[CLI Providers](../cli/providers.mdx)** for `add`, `remove`, and version flags.
 
-An external provider should be a CommonJS package that meets the following requirements:
+### Scaffold a new package
 
-1. Implement the `IProvider` interface in your provider class.
+```bash
+expressots create --provider my-provider
+```
 
-```typescript title="IProvider interface"
-export interface IProvider {
+This clones the official [`provider` template](https://github.com/expressots/templates/tree/v4.0.0/provider) with dual ESM + CJS builds, Jest, and CI workflows. See **[Building a Provider Package](../guides/provider-package.mdx)** for the full publish workflow.
+
+A publishable provider exports a DI-friendly class from its package entry point:
+
+```typescript title="src/index.ts"
+export { GreeterProvider, type GreeterOptions } from "./greeter.provider";
+```
+
+```typescript title="src/greeter.provider.ts"
+import { provide, IProvider } from "@expressots/core";
+
+@provide(GreeterProvider)
+export class GreeterProvider implements IProvider {
+    readonly name = "Greeter Provider";
+    readonly version = "1.0.0";
+
+    greet(name: string): string {
+        return `Hello, ${name}!`;
+    }
+}
+```
+
+Consuming apps install the package, register it, and inject it like any in-app provider.
+
+## Introspection
+
+`ProviderManager` (available as `this.Provider` on `AppExpress`) exposes discovery and query APIs. Auto-discovery runs automatically during startup — you do not need to call `discover()` manually.
+
+### Query providers
+
+```typescript
+// All registered providers
+const all = this.Provider.getAll();
+
+// Filter by scope
+const singletons = this.Provider.getByScope("Singleton");
+
+// Filter by capability
+const withHealth = this.Provider.getWithCapability("hasHealthCheck");
+const withMetrics = this.Provider.getWithCapability("hasMetrics");
+const withConfig = this.Provider.getWithCapability("hasConfigurable");
+const withBootstrap = this.Provider.getWithCapability("hasBootstrap");
+const withShutdown = this.Provider.getWithCapability("hasShutdown");
+
+// Filter by source
+const builtin = this.Provider.getBuiltinProviders();
+const user = this.Provider.getUserProviders();
+const external = this.Provider.getExternalProviders();
+const bySource = this.Provider.getBySource("external");
+
+// Lifecycle providers (bootstrap or shutdown)
+const lifecycle = this.Provider.getLifecycleProviders();
+
+// Count
+const total = this.Provider.getCount();
+```
+
+### Health and metrics dashboards
+
+```typescript
+// Aggregated health (runs all IHealthCheck providers in parallel)
+const health = await this.Provider.checkHealth();
+console.log(health.overall);    // "healthy" | "degraded" | "unhealthy"
+console.log(health.providers);  // [{ name, result: HealthCheckResult }]
+console.log(health.checkedAt);  // timestamp
+
+// Aggregated metrics (collects from all IMetrics providers)
+const metrics = this.Provider.collectMetrics();
+console.log(metrics.providers);   // { "Connection Pool": { "pool.active": 5, ... } }
+console.log(metrics.collectedAt); // timestamp
+```
+
+### Formatted banner view
+
+```typescript
+const view = this.Provider.getFormattedView(5);
+// view.entries     — first N providers with name, scope, source, capability flags
+// view.total       — total count
+// view.remaining   — providers not shown
+// view.bySource    — { builtin: 2, user: 5, external: 1 }
+```
+
+### ProviderInfo structure
+
+Each entry from introspection APIs returns a `ProviderInfo` object:
+
+```typescript
+interface ProviderInfo {
     name: string;
-    version: string;
-    author: string;
-    repo: string;
+    target: new (...args: unknown[]) => unknown;
+    scope: "Singleton" | "Request" | "Transient" | string;
+    capabilities: ProviderCapabilities;
+    version?: string;
+    description?: string;
+    source: "builtin" | "user" | "external";
+    author?: string;
+    repo?: string;
+    dependencies?: string[];
+    priority?: number;
+}
+
+interface ProviderCapabilities {
+    hasBootstrap: boolean;
+    hasShutdown: boolean;
+    hasHealthCheck: boolean;
+    hasMetrics: boolean;
+    hasConfigurable: boolean;
 }
 ```
 
-2. Annotate your provider class with the `@injectable()` decorator for dependency injection.
-3. Export your provider class in the `index.ts` file.
-4. Publish your package to the npm registry.
+## Testing providers
 
-```typescript title="Example of a Logger provider"
-import { IProvider } from "expressots";
-
-@injectable()
-class Logger implements IProvider {
-    log(message: string): void {
-        console.log(message);
-    }
-}
-```
-
-Once the package is developed and published to the npm registry, it can be easily integrated into any ExpressoTS application.
-
-## Using external providers
-
-Providers are registered in the `App` class of an ExpressoTS application using the `ProviderManager`.
-
-```typescript title="Registering external Logger provider in the App class"
-this.Provider.register(Logger);
-```
-
-:::info
-By default provider registration binds the provider as request-scoped. To change the scope, use the `Scope` enum or string representation of the scope.
-:::
-
-Example of registering a provider as a singleton:
+### Unit test with a mock transporter
 
 ```typescript
-this.Provider.register(Logger, "Singleton");
-```
+import { EmailProvider } from "../providers/email.provider";
 
-Adding external providers to an ExpressoTS application is a straightforward process that enhances the application's capabilities without bloating the core framework.
+describe("EmailProvider", () => {
+    it("sends verification email", async () => {
+        const provider = new EmailProvider();
+        (provider as any).transporter = {
+            sendMail: jest.fn().mockResolvedValue({ messageId: "1" }),
+            verify: jest.fn().mockResolvedValue(true),
+        };
 
-## External provider best practices
+        await provider.sendVerification("user@example.com");
 
-When developing external providers for ExpressoTS, consider the following best practices:
-
--   **Interface Implementation**: Ensure that external providers conform to the IProvider interface for consistency.
--   **Lifecycle Management**: Choose the appropriate scope for the provider based on its intended usage pattern.
--   **Testing**: Thoroughly test providers in isolation before integrating them into the main application.
--   **Documentation**: Provide detailed usage instructions and configuration options for the external provider.
--   **Versioning**: Follow semantic versioning practices to manage changes and updates to the provider.
--   **Error Handling**: Implement robust error handling and logging mechanisms to ensure the provider's reliability.
--   **Security**: Follow security best practices to protect sensitive data and prevent vulnerabilities in the provider, especially in the provider dependencies.
-
-By adhering to these practices, developers can ensure that their external providers are robust, maintainable, and easily integrated into any ExpressoTS application.
-
-## Testing Providers
-
-### Unit Testing
-
-Test providers in isolation with mocked dependencies:
-
-```typescript
-describe("MailSenderProvider", () => {
-    let provider: MailSenderProvider;
-    let mockTransporter: jest.Mocked<Mail>;
-
-    beforeEach(() => {
-        mockTransporter = {
-            sendMail: jest.fn().mockResolvedValue({ messageId: "123" }),
-        } as any;
-
-        provider = new MailSenderProvider();
-        (provider as any).transporter = mockTransporter;
-    });
-
-    it("should send welcome email", async () => {
-        await provider.sendEmail(EmailType.Welcome);
-
-        expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                subject: expect.stringContaining("Welcome"),
-            })
+        expect((provider as any).transporter.sendMail).toHaveBeenCalledWith(
+            expect.objectContaining({ to: "user@example.com" }),
         );
     });
 });
 ```
 
-### Testing Provider Lifecycle
+### Replace a provider in tests
 
 ```typescript
-describe("Provider Lifecycle", () => {
-    it("should reuse singleton instance", () => {
-        const container = new Container();
-        container.bind(Logger).toSelf().inSingletonScope();
-
-        const logger1 = container.get(Logger);
-        const logger2 = container.get(Logger);
-
-        expect(logger1).toBe(logger2);
-    });
-
-    it("should create new transient instance", () => {
-        const container = new Container();
-        container.bind(UserService).toSelf().inTransientScope();
-
-        const service1 = container.get(UserService);
-        const service2 = container.get(UserService);
-
-        expect(service1).not.toBe(service2);
-    });
-});
-```
-
-### Integration Testing
-
-```typescript
-describe("Provider Integration", () => {
-    let app: IWebServerPublic;
-
-    beforeAll(async () => {
-        app = await bootstrap(App, { port: 0 });
-    });
-
-    afterAll(async () => {
-        await app.close();
-    });
-
-    it("should use email provider in user flow", async () => {
-        const response = await fetch(`http://localhost:${await app.getPort()}/users`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: "test@example.com" }),
-        });
-
-        expect(response.status).toBe(201);
-
-        // Verify email was sent (via test email service)
-        const emails = await testEmailService.getSentEmails();
-        expect(emails).toContainEqual(
-            expect.objectContaining({ to: "test@example.com" })
-        );
-    });
-});
-```
-
-### Mocking Providers
-
-```typescript
-// Create mock provider for testing
-class MockMailSenderProvider implements IMailSender {
-    sentEmails: Array<{ to: string; type: EmailType }> = [];
-
-    async sendEmail(to: string, type: EmailType): Promise<boolean> {
-        this.sentEmails.push({ to, type });
-        return true;
+class MockEmailProvider implements Pick<EmailProvider, "sendVerification"> {
+    sent: string[] = [];
+    async sendVerification(to: string) {
+        this.sent.push(to);
     }
 }
 
-// Use in tests
-describe("UserService with MockMailSender", () => {
-    it("should send welcome email on registration", async () => {
-        const mockMail = new MockMailSenderProvider();
-        const userService = new UserService(mockMail);
+const useCase = new RegisterUserUseCase(new MockEmailProvider() as EmailProvider);
+await useCase.execute({ email: "test@example.com", password: "secret" });
+expect((useCase as any).email.sent).toContain("test@example.com");
+```
 
-        await userService.register({ email: "test@example.com" });
+### Test health checks and metrics
 
-        expect(mockMail.sentEmails).toHaveLength(1);
-        expect(mockMail.sentEmails[0].type).toBe(EmailType.Welcome);
+```typescript
+describe("ConnectionPoolProvider", () => {
+    it("returns healthy when pool responds", async () => {
+        const provider = new ConnectionPoolProvider();
+        const result = await provider.healthCheck();
+        expect(result.status).toBe("healthy");
+        expect(result.latency).toBeDefined();
+    });
+
+    it("exposes pool metrics", () => {
+        const provider = new ConnectionPoolProvider();
+        const metrics = provider.getMetrics();
+        expect(metrics["pool.active"]).toBeDefined();
+        expect(metrics["pool.total"]).toBeGreaterThanOrEqual(0);
     });
 });
 ```
 
-## Best Practices
+## Best practices
 
-1. **Use interfaces**: Define interfaces for providers to enable easy mocking
-2. **Choose appropriate scope**: Use Singleton for stateless services, Transient for stateful
-3. **Inject dependencies**: Use constructor injection for required dependencies
-4. **Handle errors**: Implement proper error handling in providers
-5. **Document providers**: Add JSDoc comments for public methods
-6. **Test thoroughly**: Write unit and integration tests for all providers
-7. **Version carefully**: Follow semantic versioning for external providers
-8. **Secure dependencies**: Regularly audit and update provider dependencies
+1. **Implement `IProvider`** — metadata powers banner, Studio, and introspection
+2. **Add `IHealthCheck`** for infrastructure providers (DB, cache, queues)
+3. **Add `IMetrics`** for providers you need to monitor (connection pools, caches)
+4. **Use `IConfigurable`** to validate required settings before opening connections
+5. **Use `@provideSingleton()`** for shared connections and lifecycle hooks
+6. **Use `@provideInScope()`** for multi-tenant or transaction-scoped services
+7. **Mark source** as `"external"` when building publishable provider packages
+8. **Define interfaces** when you need swappable implementations in tests
+9. **Publish with semver** — follow **[provider package guide](../guides/provider-package.mdx)** for npm releases
+10. **Combine capabilities** as needed — a database provider can implement `IProvider` + `IHealthCheck` + `IMetrics` + `IBootstrap` + `IShutdown`
 
 ---
 

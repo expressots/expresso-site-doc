@@ -6,10 +6,29 @@ description: Scaffold and run an ExpressoTS v4 project in five minutes.
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import appOverviewImg from "./img/app-overview.png";
 
 # First steps
 
 This page walks you from a clean machine to a running ExpressoTS v4 server. Every command and file shown here matches what `expressots new` actually produces: the exact same scaffolds the framework's own validation suite runs against.
+
+## Architecture
+
+ExpressoTS centers on a DI container that wires controllers, use cases, providers, and repositories through modules. Incoming requests flow through controllers, which delegate to use cases and external providers as needed.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={appOverviewImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS application architecture overview"
+    />
+</div>
+
+> - **DTO IN/OUT**: Structure for incoming and outgoing request data.
+> - **Controller**: Handles HTTP routing and request processing.
+> - **Use Case**: Executes application-specific business logic.
+> - **Provider**: Supplies external capabilities such as database access.
+> - **Repository**: Manages direct persistence communication.
 
 ## Prerequisites
 

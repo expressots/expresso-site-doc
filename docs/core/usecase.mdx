@@ -20,82 +20,134 @@ the use of a clean architecture. We believe this approach leads to more maintain
 Here is an example of a use case diagram for a project x:
 
 <div style={{ textAlign: "center" }}>
-    <img src={usecaseIMG} alt="Project X Use Case" />
+    <img
+        src={usecaseIMG}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="Project X use case diagram with Login and Registration flows"
+    />
 </div>
 
-In the use case diagram above, the actor represents the user interacting with the system. To execute the Login use case, the user must provide specific information known as the payload or, in the case of ExpressoTS, the request DTO. This information is necessary to trigger the use case and for the system to deliver the desired outcome.
+In the use case diagram above, the **User** actor triggers **Login** or **Registration**. Each oval becomes its own `@provide()` class with an `execute()` method. The `<<include>>` relationships become injected providers (for example, **Validate credentials** calls the external **Service** through `AuthService`). The `<<extend>>` path for **Login suspended** becomes a domain error thrown from the Login use case.
 
 :::info
-It is important to note that the use case should exclusively contain the business logic of the application, with no additional or unrelated functionalities.
-This approach helps to ensure a clear separation of concerns, promoting maintainability, and scalability of the system.
+Use cases should contain business logic only — not HTTP routing, not DTO validation decorators (that belongs on DTO classes), and not direct Express request/response handling.
 :::
 
 ## Create use case
 
-You can create use cases using the ExpressoTS CLI. To create a new use case, run the following command:
+You can create use cases using the ExpressoTS CLI:
 
 ```bash
 expressots g u use-case-name
 ```
 
-Here is a simple implementation of the use case:
+The examples below implement the **Login** and **Registration** flows from the Project X diagram.
 
-```typescript title="Login User Use Case"
+### Login
+
+**Login** always validates credentials (`<<include>>`). A suspended account follows the **Login suspended** extension path.
+
+```typescript title="login-user.usecase.ts"
+import { provide, inject } from "@expressots/core";
+import { AuthService } from "../providers/auth.service";
+import { LoginUserRequestDTO } from "../dto/login-user.request.dto";
+import { LoginUserResponseDTO } from "../dto/login-user.response.dto";
+import { LoginSuspendedError } from "../errors/login-suspended.error";
+
 @provide(LoginUserUseCase)
 export class LoginUserUseCase {
-    execute(payload: ILoginUserRequestDTO): boolean {
-        const { email, password } = payload;
+    constructor(@inject(AuthService) private auth: AuthService) {}
 
-        if (isAuthenticated(email, password)) {
-            return true;
+    async execute(dto: LoginUserRequestDTO): Promise<LoginUserResponseDTO> {
+        if (await this.auth.isSuspended(dto.email)) {
+            throw new LoginSuspendedError(dto.email);
         }
 
-        return false;
+        const authenticated = await this.auth.validateCredentials(
+            dto.email,
+            dto.password,
+        );
+
+        return { authenticated };
+    }
+}
+```
+
+`AuthService` represents the external **Service** actor in the diagram — credential validation stays outside the use case class but is invoked through DI.
+
+### Registration
+
+**Registration** always sends a verification email (`<<include>>`).
+
+```typescript title="register-user.usecase.ts"
+import { provide, inject } from "@expressots/core";
+import { EmailService } from "../providers/email.service";
+import { RegisterUserRequestDTO } from "../dto/register-user.request.dto";
+import { RegisterUserResponseDTO } from "../dto/register-user.response.dto";
+
+@provide(RegisterUserUseCase)
+export class RegisterUserUseCase {
+    constructor(@inject(EmailService) private email: EmailService) {}
+
+    async execute(dto: RegisterUserRequestDTO): Promise<RegisterUserResponseDTO> {
+        // Persist the user (repository injection omitted for brevity)
+        const userId = await this.createUser(dto);
+
+        await this.email.sendVerification(dto.email);
+
+        return { userId, status: "pending_verification" };
+    }
+
+    private async createUser(dto: RegisterUserRequestDTO): Promise<string> {
+        // ...
+        return "user-id";
     }
 }
 ```
 
 ## Explanation
 
-The implementation of use cases in ExpressoTS follows the best practices of software design, where each use case is responsible for implementing a specific business logic. As shown in the example code snippet, a use case typically contains only one function, called execute, which is responsible for executing the business logic defined in that use case. The use case may also include a response DTO that defines the format of the response for that particular use case.
+Each use case implements one business scenario from the diagram and exposes a single `execute()` method. Request and response shapes are defined as DTOs; controllers validate the incoming DTO and call `execute()`.
 
-Also, it is common to use constructors in use cases to inject dependencies such as providers and repositories. This allows for better code modularity and testability.
+It is common to inject providers and repositories through the constructor. That keeps **Validate credentials** and **Send verification email** as separate, testable collaborators rather than inline logic inside the use case.
 
 ## Injection
 
-ExpressoTS's **[Dependency Injection](./di.mdx)** system allows you to inject dependencies like providers, repositories, entities,
-or helper classes directly into use cases via constructors or properties. This enhances modularity and makes the code more testable.
+ExpressoTS **[Dependency Injection](./di.mdx)** lets you inject providers, repositories, and other use cases via constructors or properties.
 
-See examples below:
+### Constructor injection
 
-## Constructor Injection
+```typescript title="Login use case with constructor injection"
+import { provide, inject } from "@expressots/core";
+import { AuthService } from "../providers/auth.service";
 
-```typescript title="Example of constructor injection in a use case"
-@provide(ExampleUseCase)
-class ExampleUseCase {
-    constructor(
-     @inject(EmailProvider) private email: EmailProvider,
-     @inject(RepositoryProvider) private repo: RepositoryProvider
-    ) {}
+@provide(LoginUserUseCase)
+export class LoginUserUseCase {
+    constructor(@inject(AuthService) private auth: AuthService) {}
 
-    execute() {
-        this.email.foo();
-        this.repo.bar();
+    async execute(dto: LoginUserRequestDTO): Promise<LoginUserResponseDTO> {
+        const authenticated = await this.auth.validateCredentials(
+            dto.email,
+            dto.password,
+        );
+        return { authenticated };
     }
 }
 ```
 
-## Property Injection
+### Property injection
 
-```typescript title="Example of property injection in a use case"
-@provide(ExampleUseCase)
-class ExampleUseCase {
-    @inject(EmailProvider) private email: EmailProvider;
-    @inject(RepositoryProvider) private repo: RepositoryProvider;
+```typescript title="Registration use case with property injection"
+import { provide, inject } from "@expressots/core";
+import { EmailService } from "../providers/email.service";
 
-    execute() {
-        this.email.foo();
-        this.repo.bar();
+@provide(RegisterUserUseCase)
+export class RegisterUserUseCase {
+    @inject(EmailService) private email!: EmailService;
+
+    async execute(dto: RegisterUserRequestDTO): Promise<RegisterUserResponseDTO> {
+        await this.email.sendVerification(dto.email);
+        return { status: "pending_verification" };
     }
 }
 ```
