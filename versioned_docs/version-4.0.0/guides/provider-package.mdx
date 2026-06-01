@@ -1,0 +1,308 @@
+---
+sidebar_position: 15
+title: Building a Provider Package
+description: Scaffold, build, test, and publish a reusable @expressots/* provider package using the v4 provider template.
+---
+
+# Building a Provider Package
+
+ExpressoTS providers are the unit of reuse in the framework: a database client, a cache adapter, an SDK wrapper, or anything else you'd want to inject into many controllers. The **`provider` template** ships everything you need to build, test, and publish one as a real npm package, complete with **dual ESM + CommonJS** output, dual type declarations, automated changelog, and CI-ready tooling.
+
+This guide walks you through scaffolding `@your-org/cool-provider`, building it, testing it, consuming it from an ExpressoTS app, and publishing it to npm.
+
+## When to use this template
+
+| You want… | Use |
+| --- | --- |
+| A package you'll publish to npm and reuse across apps | **`provider`** template (this guide) |
+| A provider that lives inside a single application | A class under `src/providers/` in your app |
+| A microservice-shaped HTTP API | The [`micro`](./micro-api.mdx) template |
+| A full DI app | The [`application`](../core/first-steps.mdx) template |
+
+The provider template is **not** an app. It has no server, no controllers, and no `bootstrap()`. It produces a **library** consumed via `import { … } from "@your-org/your-provider"`.
+
+## Scaffold
+
+```bash
+npx @expressots/cli new
+# Choose: provider
+# Or directly:
+npx @expressots/cli new my-provider --template provider
+```
+
+You get:
+
+```
+my-provider/
+├── src/
+│   ├── greeter.provider.ts   # the example provider: replace with your own
+│   └── index.ts              # public API surface (only export what you intend)
+├── test/
+│   └── greeter.provider.spec.ts
+├── scripts/
+│   ├── build-esm.js          # dual-build orchestrator (atomic type:module swap)
+│   ├── copy.js               # asset copier (package.json, README, CHANGELOG)
+│   └── rm.js                 # cross-platform clean
+├── tsconfig.json             # base config
+├── tsconfig.cjs.json         # CJS build → lib/cjs (.js + .d.ts)
+├── tsconfig.esm.json         # ESM build → lib/esm (.mjs + .d.ts)
+├── jest.config.ts
+├── package.json
+└── README.md
+```
+
+The example provider is intentionally minimal. Keep it as a smoke test until your real provider passes its first build, then replace it.
+
+## The provider class
+
+```typescript title="src/greeter.provider.ts"
+import { provide } from "@expressots/core";
+
+export interface GreeterOptions {
+    prefix?: string;
+}
+
+@provide(GreeterProvider)
+export class GreeterProvider {
+    private readonly prefix: string;
+
+    constructor(options: GreeterOptions = {}) {
+        this.prefix = options.prefix ?? "Hello";
+    }
+
+    greet(name: string): string {
+        return `${this.prefix}, ${name}!`;
+    }
+}
+```
+
+Two things matter here:
+
+- **`@provide(GreeterProvider)`**: registers the class with the v4 DI container so consuming apps don't have to wire it manually.
+- **The class is the public type.** Whatever you `export` from `src/index.ts` is your API contract. Treat additions as features, removals as breaking changes.
+
+```typescript title="src/index.ts"
+export * from "./greeter.provider.js";
+```
+
+The `.js` extension is **required**: the ESM build runs under `module: NodeNext`, which insists on explicit extensions. Drop it and the ESM bundle won't resolve.
+
+## Dual ESM + CJS build
+
+The template produces two parallel builds in `lib/`:
+
+```
+lib/
+├── cjs/
+│   ├── index.js               # CommonJS entry
+│   ├── index.d.ts             # CJS types
+│   └── package.json           # copied from root for npm consumers
+└── esm/
+    ├── index.mjs              # ESM entry (renamed from index.js)
+    ├── index.d.ts
+    └── package.json           # { "type": "module" }: atomic, lives only in lib/esm
+```
+
+`package.json#exports` wires both:
+
+```json title="package.json (excerpt)"
+{
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/cjs/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  }
+}
+```
+
+Run the full build:
+
+```bash
+npm run build
+# → npm run clean
+# → tsc -p tsconfig.cjs.json   (writes lib/cjs/*.js)
+# → node scripts/build-esm.js  (writes lib/esm/*.mjs + lib/esm/package.json)
+# → node scripts/copy.js …     (copies package.json/README/CHANGELOG into lib/)
+```
+
+`scripts/build-esm.js` is the trick that makes ESM work:
+
+1. Swap the root `package.json` to `"type": "module"` *temporarily*.
+2. Run `tsc -p tsconfig.esm.json` so emitted files are interpreted as ESM.
+3. Rename `lib/esm/index.js` to `lib/esm/index.mjs`.
+4. Write `lib/esm/package.json` with `{ "type": "module" }`.
+5. Restore the root `package.json`: `git status` is clean afterwards.
+
+Don't edit `scripts/build-esm.js` unless you understand the atomic swap; otherwise an interrupted build can leave your repo in a half-flipped state.
+
+## Tests
+
+Tests use Jest with `ts-jest`:
+
+```typescript title="test/greeter.provider.spec.ts"
+import { GreeterProvider } from "../src/greeter.provider";
+
+describe("GreeterProvider", () => {
+    it("greets with the default prefix", () => {
+        const greeter = new GreeterProvider();
+        expect(greeter.greet("ExpressoTS")).toBe("Hello, ExpressoTS!");
+    });
+
+    it("respects a custom prefix", () => {
+        const greeter = new GreeterProvider({ prefix: "Olá" });
+        expect(greeter.greet("ExpressoTS")).toBe("Olá, ExpressoTS!");
+    });
+});
+```
+
+```bash
+npm test            # one-shot
+npm run test:watch  # watch mode
+npm run coverage    # with coverage report
+```
+
+:::note Why is `express` a devDependency?
+The provider template depends on `@expressots/core`, which has an internal `express` import for its middleware service. Even if your provider never touches HTTP, Jest needs `express` resolvable for tests to load the core types. The template lists it under `devDependencies` so it doesn't pollute downstream consumers.
+:::
+
+## Consuming the provider in an app
+
+Once published (or installed via `file:` for local dev):
+
+```bash
+cd ../my-app
+npm install @your-org/cool-provider
+```
+
+```typescript title="src/app.controller.ts"
+import { provide, inject } from "@expressots/core";
+import { controller, Get } from "@expressots/adapter-express";
+import { GreeterProvider } from "@your-org/cool-provider";
+
+@provide(AppController)
+@controller("/")
+export class AppController {
+    constructor(
+        @inject(GreeterProvider) private readonly greeter: GreeterProvider,
+    ) {}
+
+    @Get("/hello/:name")
+    hello(@param("name") name: string) {
+        return { message: this.greeter.greet(name) };
+    }
+}
+```
+
+Because `GreeterProvider` is decorated with `@provide`, the container resolves it automatically. No manual `bind()` required.
+
+If the consuming app uses a non-default prefix or other constructor options, expose a small factory:
+
+```typescript title="@your-org/cool-provider"
+import { Container } from "@expressots/core";
+import { GreeterProvider, GreeterOptions } from "./greeter.provider";
+
+export function registerGreeter(container: Container, options: GreeterOptions = {}) {
+    container.bind(GreeterProvider).toDynamicValue(() => new GreeterProvider(options));
+}
+```
+
+```typescript title="my-app/src/app.ts"
+import { registerGreeter } from "@your-org/cool-provider";
+
+export class App extends AppExpress {
+    async globalConfiguration() {
+        registerGreeter(this.container, { prefix: "Bonjour" });
+    }
+}
+```
+
+## Health checks (optional, recommended)
+
+If your provider talks to a network resource, implement [`IHealthCheck`](../features/health-monitoring.mdx#b-ihealthcheck-providers) so consuming apps can include it in their `/health` endpoint for free:
+
+```typescript
+import { IHealthCheck, HealthCheckResult } from "@expressots/core";
+
+export class CacheProvider implements IHealthCheck {
+    async healthCheck(): Promise<HealthCheckResult> {
+        const start = Date.now();
+        try {
+            await this.client.ping();
+            return { status: "healthy", latency: Date.now() - start };
+        } catch (err) {
+            return { status: "unhealthy", message: (err as Error).message };
+        }
+    }
+}
+```
+
+## Publishing
+
+The template is pre-wired for `release-it` + conventional commits:
+
+```bash
+npm run release   # interactive: bumps version, generates CHANGELOG, tags, pushes
+```
+
+Default behaviour (configured in `package.json#release-it`):
+
+- ✅ Reads conventional-commit messages to bump (patch/minor/major)
+- ✅ Generates / appends to `CHANGELOG.md`
+- ✅ Creates a Git tag and pushes
+- ✅ Creates a GitHub release
+- 🚫 Does **not** publish to npm automatically. Flip `"npm": { "publish": false }` to `true` once you're confident, or use a CI workflow
+
+For npm publishing in CI, the typical flow is:
+
+```bash
+npm run build
+npm publish --access public --tag latest
+```
+
+Or for early previews:
+
+```bash
+npm publish --access public --tag next
+```
+
+Match the tag your CI uses for the framework itself (`preview`, `next`, etc.) so users can opt in/out of unstable releases cleanly.
+
+## Repository hygiene
+
+The template ships with:
+
+- `commitlint.config.ts` + `husky` for conventional commit enforcement
+- `prettier` and `eslint` configs aligned with the rest of the framework
+- `.gitignore` / `.npmignore` already filtering `lib/` correctly (only `lib/**/*` is published)
+
+Don't strip these. They're what makes a provider package look like an `@expressots/*` package from the outside.
+
+## Troubleshooting
+
+**`ERR_MODULE_NOT_FOUND` for relative imports in ESM**
+You forgot the `.js` extension in `src/index.ts` or another barrel file. Add it: `export * from "./greeter.provider.js"`.
+
+**`Cannot find module 'express'` when running tests**
+Make sure `express` and `@types/express` are in `devDependencies`. The provider template includes them by default.
+
+**`build-esm.js` left my package.json with `"type": "module"`**
+The script aborted mid-flight. Manually revert `package.json` to `"type": "commonjs"` (or remove the field) and re-run `npm run build`. The next clean build will be atomic again.
+
+**Consumer app fails to inject the provider**
+Your provider class needs `@provide(YourClass)`. Without it the DI container doesn't know about it. If you can't decorate the class (e.g. you're wrapping a third-party SDK), expose a `register*` helper as shown above.
+
+## See also
+
+- **[First Steps](../core/first-steps.mdx)**: scaffolding apps that consume your provider.
+- **[Provider Ecosystem](./provider-ecosystem.mdx)**: official providers and patterns.
+- **[Health & Monitoring](../features/health-monitoring.mdx)**: `IHealthCheck` for providers.
+- **[CLI: new](../cli/new.mdx)**: full reference for the scaffolding command.

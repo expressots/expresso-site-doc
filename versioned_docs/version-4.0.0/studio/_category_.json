@@ -1,0 +1,8 @@
+{
+    "label": "STUDIO",
+    "position": 5,
+    "link": {
+        "type": "generated-index",
+        "description": "ExpressoTS Studio - developer experience platform for v4 applications. Local-only observability, security, and tooling."
+    }
+}

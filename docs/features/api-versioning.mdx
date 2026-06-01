@@ -1,0 +1,175 @@
+---
+sidebar_position: 25
+title: API Versioning
+description: Run multiple API versions side by side using @Version, with controller-level or method-level overrides.
+---
+
+# API Versioning
+
+ExpressoTS v4 ships **first-class API versioning** through a single decorator: `@Version`. Apply it to a controller and every route in that controller gets a `/v1`, `/v2`, … prefix. Apply it to a method to override the controller's version for one route. The framework prefixes URLs, registers each version with the router, and surfaces the detected versions to Studio and the CLI banner, without you wiring anything else.
+
+## Quick start
+
+```typescript title="src/users/users-v1.controller.ts"
+import { provide } from "@expressots/core";
+import { Version, controller, Get } from "@expressots/adapter-express";
+
+@provide(UsersV1Controller)
+@Version("1")              // produces /v1
+@controller("/users")      // → /v1/users
+export class UsersV1Controller {
+    @Get("/")
+    list() {
+        return { version: "v1", users: [/* … */] };
+    }
+}
+```
+
+```typescript title="src/users/users-v2.controller.ts"
+import { provide } from "@expressots/core";
+import { Version, controller, Get } from "@expressots/adapter-express";
+
+@provide(UsersV2Controller)
+@Version("2")              // produces /v2
+@controller("/users")      // → /v2/users
+export class UsersV2Controller {
+    @Get("/")
+    list() {
+        return { version: "v2", users: [/* … with new fields … */] };
+    }
+}
+```
+
+Both controllers can live side by side: `GET /v1/users` and `GET /v2/users` are independently routable.
+
+If your app has a global prefix (`bootstrap(App, { rootPath: "/api" })`), versions stack: `GET /api/v1/users`, `GET /api/v2/users`.
+
+## Accepted version formats
+
+`@Version` is forgiving and normalises everything to `vN`:
+
+| You write | URL prefix |
+| --- | --- |
+| `@Version("1")` | `/v1` |
+| `@Version(1)` | `/v1` |
+| `@Version("v1")` | `/v1` |
+| `@Version("1.0")` | `/v1.0` |
+| `@Version("v2-beta")` | `/v2-beta` |
+
+Use whichever feels most readable. Internally everything becomes a string, prefixed with `v` if it isn't already.
+
+## Method-level override
+
+Need to bump just one endpoint to a new version while keeping the rest on the old one? Decorate the method:
+
+```typescript
+@provide(ProductsController)
+@Version("1")
+@controller("/products")
+export class ProductsController {
+    @Get("/")
+    list() { /* /v1/products */ }
+
+    @Version("2")
+    @Get("/:id")
+    getById(@param("id") id: string) {
+        // /v2/products/:id: overrides the controller's v1
+    }
+}
+```
+
+Method-level versions **win** over controller-level versions. There is no inheritance / fallback: whatever you put on the method is what runs.
+
+## No `@Version`?
+
+If neither the controller nor the method specifies a version, the route is registered **without** a version prefix:
+
+```typescript
+@controller("/health")
+export class HealthController {
+    @Get("/")
+    check() { /* /health (no /vN prefix) */ }
+}
+```
+
+This is useful for cross-cutting endpoints like `/health`, `/metrics`, `/swagger.json`: that you want to share across all API versions.
+
+## Mixing versioned and unversioned controllers
+
+This is fine and idiomatic:
+
+```typescript
+@Version("1")
+@controller("/users") class UsersV1 {}      // → /v1/users
+@Version("2")
+@controller("/users") class UsersV2 {}      // → /v2/users
+@controller("/health") class Health {}      // → /health
+```
+
+The router resolves the longer prefix first, so versioned routes never collide with unversioned ones.
+
+## Versions and middleware presets
+
+Middleware presets (`api`, `web`, `serverless`, `fullstack`) apply globally: they don't care about versions. You can mix them freely:
+
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices() {
+        this.Middleware.applyPreset("api");
+        // All controllers, regardless of version, get the api preset.
+    }
+}
+```
+
+## Versions in Studio
+
+The framework auto-detects versions across all controllers and reports them to Studio's runtime info. Each route in the route panel is annotated with its version, so `/v1/users` and `/v2/users` appear as **separate** entries: even though they map to different controllers.
+
+The CLI banner also shows the detected versions when the server boots:
+
+```
+🚀 Server is running on port 3000
+   API Versions: v1, v2
+```
+
+## Deprecating a version
+
+There is no built-in deprecation header, but the recipe is short:
+
+```typescript
+import { provide, Logger, inject } from "@expressots/core";
+import { Version, controller, Get, response, Response } from "@expressots/adapter-express";
+
+@provide(UsersV1Controller)
+@Version("1")
+@controller("/users")
+export class UsersV1Controller {
+    constructor(@inject(Logger) private readonly logger: Logger) {}
+
+    @Get("/")
+    list(@response() res: Response) {
+        res.setHeader("Deprecation", "true");
+        res.setHeader("Sunset", "Wed, 31 Dec 2026 23:59:59 GMT");
+        res.setHeader("Link", '</v2/users>; rel="successor-version"');
+        this.logger.warn("Deprecated /v1/users called", "UsersV1Controller");
+        return { users: [/* … */] };
+    }
+}
+```
+
+Or wrap it in a small `@DeprecatedVersion("1", { sunset, replacement })` interceptor: both approaches stay in user land.
+
+## Limitations
+
+- The current strategy is **path-based** only (`/v1/...`). Header-based or media-type-based versioning is not built in.
+- `@Version` accepts string/number arguments: version negotiation logic (e.g. semver matching) is up to you.
+
+If you need a different strategy, write a small middleware that inspects `Accept-Version` / `Accept` headers and rewrites `req.url` before the router runs.
+
+## See also
+
+- **[Decorators](./decorators.mdx)**: full `@Version` reference.
+- **[Route patterns](./route-patterns.mdx)**: combining versioning with regex constraints.
+- **[Bootstrap](../core/bootstrap.mdx)**: `rootPath` and global prefixes.

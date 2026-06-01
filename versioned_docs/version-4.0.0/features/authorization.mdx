@@ -1,0 +1,138 @@
+---
+sidebar_position: 4
+title: Authorization Setup
+description: Wire up the v4 authorization subsystem with one call - permission hierarchy, caching, preloading, and your AuthProvider.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import authorizationImg from "../core/img/authorization.png";
+
+# Authorization Setup
+
+This page documents `setupAuthorizationForExpress` - the **systems-level** entry point for the v4 authorization subsystem. It complements the [Guards & Authorization](./guards) page (which covers per-route decorators).
+
+## Overview
+
+`setupAuthorizationForExpress` registers, in one call, every component the authorization pipeline needs:
+
+| Component                     | Why it is registered                                            |
+| ----------------------------- | --------------------------------------------------------------- |
+| `setupAuthorization` (core)   | Permission service, hierarchy, request-scoped cache.            |
+| `ScopeExtractor`              | Pulls request, tenant, user scope out of the Express request.   |
+| `GuardContextFactory`         | Builds the `GuardContext` consumed by every guard.              |
+| `GuardMiddleware`             | Per-route guard executor wired into Express.                    |
+| `PermissionPreloaderMiddleware` (optional) | Eagerly resolves a user's permissions per request. |
+| Your `AuthProvider`           | The thing that knows how to authenticate a request.             |
+
+## Quick start
+
+```typescript
+import { AppExpress, setupAuthorizationForExpress } from "@expressots/adapter-express";
+import { MyAuthProvider } from "./auth/my-auth-provider";
+
+export class App extends AppExpress {
+  async configureServices(): Promise<void> {
+    setupAuthorizationForExpress(
+      this.config.Container,
+      {
+        enablePreloading: true,
+        enableCaching: true,
+        permissionHierarchy: {
+          "super-admin": ["admin", "moderator", "user"],
+          admin: ["moderator", "user"],
+          moderator: ["user"],
+        },
+      },
+      this.Middleware,
+      MyAuthProvider,
+    );
+  }
+}
+```
+
+## Configuration shape (`AuthorizationConfig`)
+
+| Option                | Type                          | Default | Purpose                                                                |
+| --------------------- | ----------------------------- | ------- | ---------------------------------------------------------------------- |
+| `enablePreloading`    | `boolean`                     | `true`  | Mount the preloader middleware so guards never re-resolve permissions. |
+| `enableCaching`       | `boolean`                     | `true`  | Use the request-scoped permission cache.                               |
+| `permissionHierarchy` | `Record<string, string[]>`    | `{}`    | Implicit permissions inherited by higher roles.                        |
+| `policies`            | `Record<string, PolicyFn>`    | `{}`    | Named ABAC policies referenced by `RequirePolicy("name")`.             |
+| `errorOnMissingScope` | `boolean`                     | `false` | Throw if `ScopeExtractor` cannot resolve a tenant/user.                |
+
+## The `AuthProvider` contract
+
+```typescript
+import type { AuthProvider, Principal } from "@expressots/adapter-express";
+
+export class MyAuthProvider implements AuthProvider {
+  async authenticate(req: import("express").Request): Promise<Principal | null> {
+    const token = req.headers.authorization?.replace(/^Bearer /, "");
+    if (!token) return null;
+
+    const user = await verifyJwt(token);
+    return {
+      id: user.id,
+      details: user,
+      isAuthenticated: () => true,
+      isInRole: (role) => user.roles.includes(role),
+    };
+  }
+}
+```
+
+Pass this class as the **fourth argument** of `setupAuthorizationForExpress`; the helper binds it to `TYPE.AuthProvider` for you.
+
+## Preloading vs lazy resolution
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={authorizationImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 authorization setup: request through ScopeExtractor, AuthProvider, preloading branch, per-request cache, and guard execution"
+    />
+</div>
+
+- **Preloading on** (default): one resolution per request, cached for every guard.
+- **Preloading off**: each guard pays the resolution cost the first time it asks. Useful when only a small fraction of routes is guarded.
+
+## Permission hierarchy in practice
+
+```typescript
+permissionHierarchy: {
+  admin: ["moderator", "user"],
+  moderator: ["user"],
+}
+```
+
+A user with permission `admin` is treated as if they also held `moderator` and `user`. Hierarchies do not need to be a tree; cycles are detected and rejected at startup.
+
+## Pairing with route decorators
+
+`setupAuthorizationForExpress` is the systems wiring. Per-route enforcement is described in [Guards & Authorization](./guards):
+
+```typescript
+@controller("/api/users")
+export class UserController {
+  @Get("/profile") @RequireAuthentication() getProfile() { ... }
+  @Get("/admin")  @RequireRoles("admin") admin() { ... }
+  @Get("/edit")   @RequirePermissions("user.edit") edit() { ... }
+  @Get("/owned/:id") @RequireOwnership("id") mine() { ... }
+}
+```
+
+## Common pitfalls
+
+| Symptom                                                | Cause                                                                                  | Fix                                                                                |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `principal` is always `undefined` in handlers          | `setupAuthorizationForExpress` not called, or called after `Middleware.add(...)`.      | Call it inside `configureServices()` *before* registering domain middleware.       |
+| 403 on routes you expect to pass                       | Permission name typo, or `permissionHierarchy` is missing a parent role.               | Log `principal.details.permissions` once and align with hierarchy.                 |
+| Auth provider runs twice per request                   | `enablePreloading` disabled and the same guard re-evaluated.                           | Re-enable preloading or attach the cache decorator on the guard.                   |
+| `IScopeExtractor` not bound at startup                 | Setup helper not called or container snapshotted before setup.                         | Call `setupAuthorizationForExpress` first; do not snapshot the container too soon. |
+
+## See also
+
+- [Guards & Authorization](./guards) - per-route decorators (`@RequireRoles`, `@RequirePermissions`, `@RequireOwnership`, `RequirePolicy`).
+- [Middleware](./middleware) - how the preloader fits in the middleware chain.
+- [Interceptors](./interceptors) - cross-cutting logging or audit trails around guard execution.

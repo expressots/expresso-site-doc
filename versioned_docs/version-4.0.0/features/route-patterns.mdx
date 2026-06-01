@@ -1,0 +1,141 @@
+---
+sidebar_position: 24
+title: Route Patterns
+description: "Type-safe regex constraints on route parameters using Patterns and pattern(): Express 5 / path-to-regexp v8 compatible."
+---
+
+# Route Patterns
+
+ExpressoTS v4 ships a small public API: `Patterns` and `pattern()`: for **constraining route parameters with a regex** in a way that survives the Express 5 / `path-to-regexp` v8 jump.
+
+If you're coming from v3 and used inline regex in routes (`@Get("/users/:id(\\d+)")`), you'll like this page. The syntax has changed, but the semantics are the same: a path with `Patterns.NUMERIC_ID` still rejects `/users/abc` and only dispatches the handler for `/users/123`.
+
+## Why a new API?
+
+Express 5 upgraded `path-to-regexp` to v8, which **dropped inline regex constraints**. The literal pattern `/users/:id(\\d+)` no longer compiles. Frameworks have to opt out of the new matcher *and* preserve user-facing semantics.
+
+ExpressoTS does this transparently: at decorator time, the HTTP-method decorators parse the constraint out of your path, register the route under a plain `:id` placeholder, and insert a tiny validator middleware that 404s when the captured value doesn't match the original pattern.
+
+You don't have to think about any of that: just use `Patterns` / `pattern()`.
+
+## The `Patterns` constants
+
+```typescript title="src/users/users.controller.ts"
+import { provide } from "@expressots/core";
+import {
+    controller,
+    Get,
+    param,
+    Patterns,
+    pattern,
+} from "@expressots/adapter-express";
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    // Only matches numeric IDs (e.g. /users/123). /users/abc → 404
+    @Get(`/${pattern("id", Patterns.NUMERIC_ID)}`)
+    getById(@param("id") id: string) {
+        return { id: Number(id) };
+    }
+
+    // Only matches UUIDv4 strings
+    @Get(`/by-uuid/${pattern("uuid", Patterns.UUID)}`)
+    getByUuid(@param("uuid") uuid: string) {
+        return { uuid };
+    }
+}
+```
+
+The full set ships out of the box:
+
+| Constant | Regex | Example match |
+| --- | --- | --- |
+| `Patterns.NUMERIC_ID` | `(\\d+)` | `/users/123` |
+| `Patterns.UUID` | UUID v4 | `/docs/550e8400-…` |
+| `Patterns.SLUG` | `([a-z0-9-]+)` | `/posts/my-post` |
+| `Patterns.ALPHANUMERIC` | `([a-zA-Z0-9]+)` | `/codes/ABC123` |
+| `Patterns.LOWERCASE` | `([a-z]+)` | `/tags/javascript` |
+| `Patterns.UPPERCASE` | `([A-Z]+)` | `/codes/USD` |
+| `Patterns.EMAIL` | RFC-ish email | `/users/ada@example.com` |
+| `Patterns.HEXADECIMAL` | `([0-9a-fA-F]+)` | `/colors/ff5733` |
+| `Patterns.MONGO_ID` | 24 hex chars | `/users/507f1f77bcf86cd799439011` |
+
+### `pattern(paramName, patternValue)`
+
+Just sugar that produces `:paramName(patternValue)`:
+
+```typescript
+pattern("id", Patterns.NUMERIC_ID)     // → ":id(\\d+)"
+pattern("slug", Patterns.SLUG)         // → ":slug([a-z0-9-]+)"
+```
+
+You can also write the literal form if you prefer:
+
+```typescript
+@Get("/users/:id(\\d+)") // works, rewritten internally
+@Get(`/users/${pattern("id", Patterns.NUMERIC_ID)}`) // recommended: discoverable
+```
+
+Both are equivalent at runtime.
+
+## Custom patterns
+
+Anything that compiles as a JavaScript regex is accepted. Build your own:
+
+```typescript
+const Patterns2 = {
+    SEMVER: "(\\d+\\.\\d+\\.\\d+)",
+    LOCALE: "([a-z]{2}(?:-[A-Z]{2})?)",
+} as const;
+
+@Get(`/releases/${pattern("ver", Patterns2.SEMVER)}`)
+getRelease(@param("ver") ver: string) { /* … */ }
+
+@Get(`/i18n/${pattern("locale", Patterns2.LOCALE)}`)
+getMessages(@param("locale") locale: string) { /* … */ }
+```
+
+The constraint runs **before** the controller. If the captured value doesn't match, the framework returns `404 Not Found` and the handler is never invoked.
+
+## Multiple constraints in one path
+
+You can mix patterns within the same path:
+
+```typescript
+@Get(`/api/${pattern("tenant", Patterns.NUMERIC_ID)}/users/${pattern("id", Patterns.UUID)}`)
+getTenantUser(
+    @param("tenant") tenantId: string,
+    @param("id") userId: string,
+) {
+    // Matches /api/42/users/550e8400-e29b-41d4-a716-446655440000
+    // Rejects  /api/abc/users/550e8400-…    (tenant must be numeric)
+    // Rejects  /api/42/users/not-a-uuid     (id must be a UUID)
+}
+```
+
+## Studio integration
+
+The Studio agent reads the pattern metadata too: your route shows up as `GET /api/:tenant/users/:id` with the regex constraint annotated so you can verify the contract at a glance.
+
+## Combining with validation
+
+Patterns are great for **structural** filtering, but they don't replace [validation](./validation.mdx). Combine them when you need both shape *and* semantic checks:
+
+```typescript
+import { z } from "zod";
+
+const UserId = z.string().uuid();
+
+@Get(`/${pattern("id", Patterns.UUID)}`)
+getUser(@validatedParam("id", UserId) id: string) {
+    // Pattern guarantees the URL is well-formed (404 otherwise).
+    // Zod re-validates at the type level so `id` is `string & UUID`.
+}
+```
+
+## See also
+
+- **[Validation](./validation.mdx)**: pluggable schema validation for body/query/params/headers.
+- **[Decorators](./decorators.mdx)**: `@Get`, `@param`, and the rest of the route surface.
+- **[API versioning](./api-versioning.mdx)**: combine patterns with versioned controllers.

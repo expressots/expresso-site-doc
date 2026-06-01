@@ -1,0 +1,51 @@
+---
+sidebar_position: 6
+title: Studio
+description: Launch ExpressoTS Studio from the CLI. Auto-installs @expressots/studio if it isn't already a project devDependency.
+---
+
+# Studio
+
+Launch [ExpressoTS Studio](../studio/overview.mdx), the local developer experience platform, from your project root.
+
+```bash
+expressots studio [options]
+```
+
+## What it does
+
+1. If `@expressots/studio` is **not** a devDependency, the CLI installs it as one using your project's package manager (detected from the lockfile).
+2. Spawns `node_modules/.bin/expressots-studio start` with the forwarded options.
+3. Studio's UI opens in your browser (unless `--no-browser` is set).
+
+## Options
+
+| Flag             | Alias | Default              | Description                                       |
+| ---------------- | ----- | -------------------- | ------------------------------------------------- |
+| `--port`         | `-p`  | `3333`               | UI port.                                          |
+| `--agent-port`   | `-a`  | `3334`               | Agent WebSocket port. Must match `EXPRESSOTS_STUDIO_PORT` if set. |
+| `--src`          |       | `./src`              | Source directory to scan.                         |
+| `--no-browser`   |       | `false`              | Don't open the browser automatically.             |
+
+## Examples
+
+```bash
+# Default ports, opens browser
+expressots studio
+
+# Custom ports, no browser (e.g. inside a remote dev container)
+expressots studio --port 4000 --agent-port 4001 --no-browser
+
+# Different source folder
+expressots studio --src ./apps/api/src
+```
+
+## Prerequisites
+
+- Studio activates **only** in development. Make sure `NODE_ENV` is `development` or unset.
+- `@expressots/studio-agent` must be installed as a devDependency of your app. If it's missing, the agent never starts and you'll see an empty UI. See [Studio Installation](../studio/installation.mdx) for the full activation rules.
+
+## See also
+
+- [Studio Overview](../studio/overview.mdx): what Studio is, what it shows, and the built-in security analysis.
+- [Studio Installation](../studio/installation.mdx): env flags, activation, troubleshooting.

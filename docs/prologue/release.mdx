@@ -1,0 +1,477 @@
+---
+sidebar_position: 1
+title: Release notes
+description: Release notes for ExpressoTS.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Release Notes
+
+See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
+
+:::info Preview Release
+**v4.0.0 is currently in preview** (`4.0.0-preview.3`). Install with `npm install @expressots/core@next` or scaffold a new project with `npx @expressots/cli@next new my-app`. APIs are stable but may receive minor refinements before GA.
+:::
+
+## What's New in 4.0
+
+| Feature        | Description                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Interceptors   | AOP system with conditional execution                                                                                          |
+| Testing Module | Zero-config test utilities                                                                                                     |
+| Event System   | Type-safe events with auto-discovery                                                                                           |
+| Lazy-Loading   | On-demand module loading                                                                                                       |
+| Configuration  | Type-safe config with validation                                                                                               |
+| Logging        | 11-phase logging system with transports                                                                                        |
+| Authorization  | Guards with permission hierarchy                                                                                               |
+| Studio         | Local developer experience platform: request timeline, architecture map, live logs, error inspector, security view |
+
+## Versioning Scheme
+
+ExpressoTS follows [Semantic Versioning](https://semver.org/):
+
+- **Major**: Breaking changes (roughly yearly)
+- **Minor**: New features (bi-weekly / monthly)
+- **Patch**: Bug fixes (as needed)
+
+Releases are bundled. All packages share the same version number:
+
+- `@expressots/core`
+- `@expressots/adapter-express`
+- `@expressots/shared`
+- `@expressots/templates`
+- `@expressots/cli`
+- `@expressots/studio`
+- `@expressots/studio-agent`
+
+## Support Policy
+
+Starting with **v4.0.0**, every major release receives **24 months** of bug fixes and security patches from its release date. Releases on the v3.x line and earlier follow the prior 18-month policy. Enterprise customers with support contracts receive extended support.
+
+| Version | Node.js    | Release        | Bug & Security fixed until | Status |
+| ------- | ---------- | -------------- | -------------------------- | ------ |
+| 4.0.0   | >= 20.18.0 | Jun 2026 (preview) | Jun 2028 (from GA)     | 🟣     |
+| 3.0.0   | >= 20.18.0 | December 2024  | December 2026              | 🟢     |
+| 2.0.0   | >= 18.10.0 | September 2023 | March 2025                 | 🔴     |
+
+🟣 Preview 🟢 Active support 🟡 Bug & Security fixes only 🔴 End-of-life
+
+> v3.0.0 was originally on the 18-month policy. With v4.0.0 we extended the v3 window by 6 months so users have a smooth transition runway through the rest of 2026.
+
+## ExpressoTS 4.0
+
+Version 4.0.0 introduces significant features and architectural improvements.
+
+### Nodejs version
+
+ExpressoTS v4.0.0 requires Node.js version 20.18.0 or higher.
+
+### Core Features
+
+#### 1. Interceptors System
+
+AOP system for cross-cutting concerns:
+
+- `whenInterceptor()`, `unlessInterceptor()` for conditional execution
+- Auto-discovery via `@provide()` + `@UseInterceptors()`
+- Composition: `pipeInterceptors()`, `combineInterceptors()`
+- Built-in: `PerformanceInterceptor`, `LoggingInterceptor`, `TimeoutInterceptor`
+
+```ts
+import {
+    UseInterceptors,
+    PerformanceInterceptor,
+    whenInterceptor,
+} from "@expressots/core";
+
+@controller("/users")
+export class UserController {
+    @Get("/")
+    @UseInterceptors(
+        PerformanceInterceptor,
+        whenInterceptor(
+            (ctx) => ctx.request.headers["x-cache"] === "true",
+            CacheInterceptor,
+        ),
+    )
+    getUsers() {
+        return this.userService.findAll();
+    }
+}
+```
+
+#### 2. Testing Module
+
+Testing utilities for unit, integration, and E2E:
+
+- `createTestApp()` for zero-config test setup
+- `mockProvider()` with dependency auto-suggestion
+- Fluent HTTP testing API
+- Snapshot testing with `snapshotRequest()`
+- Load testing with percentile metrics
+- Database fixtures with `createTestDatabase()`
+
+```ts
+import { createTestApp, request } from "@expressots/core";
+
+describe("UserController", () => {
+    const { app, container } = await createTestApp(App);
+
+    test("GET /users returns user list", async () => {
+        await request(app)
+            .get("/users")
+            .expectStatus(200)
+            .expectBody<User[]>((users) => users.length > 0)
+            .expectTime({ lessThan: 100 });
+    });
+});
+```
+
+#### 3. Event System
+
+Type-safe events for decoupled architecture:
+
+- Event classes with full TypeScript inference
+- Auto-discovery via `@OnEvent()` decorator
+- Priority-based handler execution
+- Conditional handlers with `@When()`
+- Event recording and replay
+- Flow visualization
+
+```ts
+// Type-safe event class
+export class UserCreatedEvent {
+    constructor(
+        public readonly userId: string,
+        public readonly email: string,
+    ) {}
+}
+
+// Auto-discovered handler
+@provide(SendWelcomeEmailHandler)
+@OnEvent(UserCreatedEvent, { priority: 1 })
+export class SendWelcomeEmailHandler implements IEventHandler<UserCreatedEvent> {
+    handle(event: UserCreatedEvent) {
+        // Full TypeScript inference on event payload
+        this.emailService.sendWelcome(event.email);
+    }
+}
+```
+
+#### 4. Lazy-Loading Modules
+
+Performance optimization for large applications:
+
+- On-demand module loading
+- Auto-detection of lazy-loadable modules
+- Preloading hints for critical modules
+- Progressive startup cost distribution
+
+```ts
+import { LazyModule } from "@expressots/core";
+
+// Module only loaded when /admin routes are accessed
+@LazyModule({ preload: false })
+export class AdminModule {
+    // Heavy admin functionality loaded on demand
+}
+```
+
+#### 5. Enhanced Configuration
+
+Type-safe configuration with validation:
+
+- Full TypeScript inference
+- Detailed validation error messages
+- Automatic environment switching
+- `SecretValue` for secure handling
+
+```ts
+import { defineConfig, Env } from "@expressots/core";
+
+export default defineConfig({
+    database: {
+        url: Env.string("DATABASE_URL").required(),
+        pool: Env.number("DB_POOL_SIZE").default(10),
+    },
+    features: {
+        caching: Env.boolean("ENABLE_CACHE").default(true),
+    },
+});
+```
+
+### Enhanced Logging System
+
+11-phase production logging:
+
+| Feature            | Description                              |
+| ------------------ | ---------------------------------------- |
+| Log Levels         | TRACE, DEBUG, INFO, WARN, ERROR, FATAL   |
+| Structured Logging | Objects and metadata with formatting     |
+| Context Management | `withContext()` and `child()`            |
+| File Transport     | Daily rotating files, JSON in production |
+| Log Querying       | In-memory buffer with query API          |
+| Export             | Markdown export with statistics          |
+| Redaction          | Automatic sensitive data masking         |
+| Flow Visualization | Visual log flow representation           |
+| Transports         | Console, File, Custom                    |
+
+```ts
+import { Logger, LogLevel, FileTransport } from "@expressots/core";
+
+logger.configure({
+    level: LogLevel.DEBUG,
+    transports: [FileTransport.daily({ directory: "logs" })],
+});
+
+// Query logs
+const errors = logger
+    .query()
+    .level(LogLevel.ERROR)
+    .context("UserService")
+    .search("authentication")
+    .execute();
+
+// Export to markdown
+const report = logger.exportLogsToMarkdown({
+    query: { level: LogLevel.ERROR },
+    groupBy: "level",
+});
+```
+
+### Content Negotiation
+
+RFC 7231 compliant format negotiation:
+
+- Formats: JSON, XML, CSV, YAML, Plain Text
+- Quality value support
+- `@Consumes()` and `@Produces()` decorators
+- Automatic format selection from Accept headers
+
+```ts
+import { provide } from "@expressots/core";
+import { controller, Get, Produces } from "@expressots/adapter-express";
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Get("/")
+    @Produces("application/json", "application/xml", "text/csv")
+    getUsers() {
+        return this.userService.findAll();
+    }
+}
+```
+
+### Smart Validation System
+
+TypeScript-first validation with a pluggable adapter registry:
+
+- Built-in adapters for **class-validator**, **Zod**, and **Yup** (all opt-in via `validationRegistry`)
+- Smart field detection (email, phone, URL, UUID)
+- Helpful error messages with examples
+- Custom adapters via `IValidationAdapter`
+
+```ts
+import { provide, validationRegistry, createZodValidator } from "@expressots/core";
+import { controller, Post, validatedBody } from "@expressots/adapter-express";
+import { z } from "zod";
+
+validationRegistry.register(createZodValidator());
+
+const CreateUser = z.object({
+    name: z.string(),
+    email: z.string().email(),
+    password: z.string().min(8),
+});
+
+@provide(UsersController)
+@controller("/users")
+export class UsersController {
+    @Post("/")
+    createUser(@validatedBody(CreateUser) data: z.infer<typeof CreateUser>) {
+        return this.userService.create(data);
+    }
+}
+```
+
+See the [Validation guide](../features/validation.mdx) for class-validator and Yup variants.
+
+### Health Monitoring
+
+Application health monitoring is built-in at three layers: middleware pipeline, `IHealthCheck` providers, and an aggregated dashboard. Full deep-dive in the [Health & Monitoring guide](../features/health-monitoring.mdx).
+
+```ts
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices() {
+        this.Middleware.applyPreset("api");
+        this.Middleware.addHealthCheck({ path: "/health/middleware", includeMetrics: true });
+    }
+}
+```
+
+Any provider implementing `IHealthCheck` is auto-discovered and aggregated by `ProviderRegistry.checkHealth()` so you can expose `GET /health` from your own controller.
+
+### Custom Scopes
+
+Advanced DI scopes:
+
+- Tenant, Transaction, Workflow, Session scopes
+- Complete isolation between contexts
+- Manual lifecycle control
+
+```ts
+import { provideInScope } from "@expressots/core";
+
+@provideInScope(TenantConfigService, "tenant")
+export class TenantConfigService {
+    // Instance shared within tenant, isolated between tenants
+}
+```
+
+### API Versioning
+
+- URL versioning (`/v1/users`, `/v2/users`)
+- Header and query parameter versioning
+- Multiple active versions
+
+### Route Constraints
+
+- Type constraints: UUID, integer, string patterns
+- Custom constraint validators
+- Automatic validation before handler execution
+
+### Enhanced Middleware System
+
+- Presets: `api`, `production`, `development`
+- Built-in profiler with metrics
+- Pipeline introspection at runtime
+- Conditional execution with `when()` and `unless()`
+- Zero-config validation with `@validatedBody()`
+
+### Enhanced Authorization System
+
+Guard system with advanced access control:
+
+- Built-in: `AuthenticatedGuard`, `RoleGuard`, `PermissionGuard`, `ResourceOwnerGuard`
+- ABAC with `RequirePolicy()`
+- Composition: `combineGuards()`, `sequenceGuards()`, `whenGuard()`
+- Request-scoped caching for performance
+- Permission hierarchy and multi-tenant support
+- Decorators: `@RequireAuthentication()`, `@RequireRoles()`, `@RequirePermissions()`
+
+```ts
+import {
+    controller,
+    Get,
+    RequireRoles,
+    RequirePermissions,
+} from "@expressots/core";
+
+@controller("/documents")
+export class DocumentController {
+    @Get("/")
+    @RequireRoles("user", "admin")
+    @RequirePermissions("documents:read")
+    getDocuments() {
+        return this.documentService.findAll();
+    }
+}
+```
+
+### Enhanced Error Handling
+
+RFC 7807 compliant error handling:
+
+- Exception filters via `@Catch()` decorator
+- `@UseFilters()` at controller and method level
+- `AppError` helpers: `badRequest()`, `notFound()`, `validationFailed()`
+- Route suggestions for 404 errors
+- Context-aware error hints (disabled in production)
+
+### Application Lifecycle Hooks
+
+`AppExpress` exposes four lifecycle hooks you can override on your `App` class. All four are optional and run in the order shown:
+
+```ts
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    // 1. Synchronous container wiring (custom binds, scopes)
+    protected globalConfiguration(): void { /* ... */ }
+
+    // 2. Async configuration once the container is live
+    protected async configureServices(): Promise<void> {
+        this.Middleware.applyPreset("api");
+    }
+
+    // 3. After the HTTP server starts listening
+    protected async postServerInitialization(): Promise<void> { /* ... */ }
+
+    // 4. On SIGINT / SIGTERM, before the process exits
+    protected async serverShutdown(signal?: NodeJS.Signals): Promise<void> { /* ... */ }
+}
+```
+
+Providers can also implement `IBootstrap.onBootstrap()` and `IShutdown.onShutdown()`. They're auto-discovered by the lifecycle registry and run alongside the application-level hooks.
+
+### CLI Improvements
+
+The v4 CLI ships with **four templates** and middleware **presets**:
+
+| Template | Highlights |
+| --- | --- |
+| `application` | Canonical full app: controllers, providers, lifecycle, presets |
+| `application-with-events` | Same as above plus the event system pre-wired |
+| `micro` | Minimal `micro()`: single file, fast bootstrap |
+| `provider` | Library template for publishing reusable providers (dual ESM/CJS, release-it) |
+
+Plus:
+
+- `--preset <api|web|serverless|fullstack>` injects the right dependencies and replaces the placeholder *before* `npm install`.
+- `--events` adds the event system to `application` scaffolds.
+- `--package-manager <npm|pnpm|yarn>` for consistent scaffolding.
+- `EXPRESSOTS_TEMPLATE_REF`, `EXPRESSOTS_DEV`, `EXPRESSOTS_USE_LOCAL_TEMPLATES`, `EXPRESSOTS_SKIP_INSTALL` env switches for CI / local development.
+- `expressots create <kind>` for in-project code generation.
+- `expressots build` for production compilation.
+- `expressots studio` to launch the [Studio](#studio) dashboard.
+
+### Studio
+
+ExpressoTS Studio is the local developer experience platform that ships as part of v4.0.0. Everything runs on your machine; nothing is sent off the box.
+
+- **Status Dashboard**: app health, runtime info, DI scope counts, top routes, aggregate security grade.
+- **Architecture Map**: read-only graph of controllers / use-cases / providers / middleware with DI scope badges and active-path highlighting.
+- **Request Timeline + Trace Detail**: live recording of every HTTP request with OpenTelemetry spans, headers/body diff, and one-click Replay.
+- **Live Logs**: in-memory buffer of every framework + app log line, filterable by level, route, and context.
+- **Error Inspector**: aggregated runtime errors with stack frames and deep-links to source.
+- **Security View**: `npm audit` + OSV.dev advisories with transitive root-cause chains, reachability scoring (confirmed / likely / unreachable / unknown), and one-click fixes. OWASP API Top 10 runtime posture findings derived from recorded traffic.
+```bash
+npm install -D @expressots/studio@next @expressots/studio-agent@next
+npx expressots-studio
+```
+
+The studio-agent dynamically loads only when `NODE_ENV=development` and the package is installed, so production deployments pay zero runtime cost. See the [Studio section](../studio/overview.mdx) for the full tour.
+
+### Breaking Changes
+
+| Change           | Impact                  |
+| ---------------- | ----------------------- |
+| Node.js 20.18.0+ | Update runtime          |
+| DI patterns      | Review injection syntax |
+| Lifecycle hooks  | Update `app.ts`         |
+
+See the [upgrade guide](./upgrade_guide.mdx) for migration instructions.
+
+---
+
+## Previous Releases
+
+For information about previous releases, please see:
+
+- [ExpressoTS 3.0.0 Release Notes](/docs/3.0.0/prologue/release)
+- [ExpressoTS 2.0.0 Documentation](/docs/2.0.0/intro)

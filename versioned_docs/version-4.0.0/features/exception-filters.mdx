@@ -1,0 +1,208 @@
+---
+sidebar_position: 23
+title: Exception Filters
+description: Customize how ExpressoTS turns errors into HTTP responses with @Catch, @UseFilters, and BaseExceptionFilter.
+---
+
+# Exception Filters
+
+The exception filter pipeline is how ExpressoTS v4 turns thrown `Error`s into HTTP responses. Out of the box you don't need to do anything. The framework registers a stack of built-in filters that produce RFC 7807 problem details. When you do need to override that behaviour for one error type, one route, or globally, **`@Catch` + `BaseExceptionFilter` + `@UseFilters`** are the only three primitives you'll touch.
+
+If you only care about *which errors to throw*, see [Error handling](./error-handling.mdx). This page focuses on **building filters**.
+
+## The built-in stack
+
+When the framework boots, it auto-discovers every class decorated with `@Catch(...)` and registers it in the global `ExceptionFilterRegistry`. The default install ships:
+
+| Filter | Catches | Status | Output |
+| --- | --- | --- | --- |
+| `ValidationErrorFilter` | `ValidationErrorClass` | `400` | `application/problem+json` with `errors[]` |
+| `NotFoundFilter` | `NotFoundError` | `404` | `application/problem+json` |
+| `AppErrorFilter` | `AppError` (and subclasses not caught above) | `appError.statusCode` | `application/problem+json` |
+| `GlobalExceptionFilter` | everything else | `500` | `application/problem+json`, optional stack |
+
+This means **you can ship a v4 app without writing a single filter**: every `throw new AppError(...)` or `throw new ValidationErrorClass(...)` becomes a structured response automatically.
+
+## Anatomy of a filter
+
+A custom filter is just a class that extends `BaseExceptionFilter` and is decorated with `@Catch(...ErrorTypes)`:
+
+```typescript title="src/filters/database-error.filter.ts"
+import {
+    Catch,
+    BaseExceptionFilter,
+    ExceptionContext,
+    StatusCode,
+    provide,
+} from "@expressots/core";
+import { DatabaseError } from "../errors/database-error";
+
+@provide(DatabaseErrorFilter)
+@Catch(DatabaseError)
+export class DatabaseErrorFilter extends BaseExceptionFilter {
+    catch(exception: DatabaseError, context: ExceptionContext): void {
+        this.logError(exception, context);
+
+        const status =
+            exception.code === "DUPLICATE_KEY"
+                ? StatusCode.Conflict
+                : StatusCode.InternalServerError;
+
+        this.sendErrorResponse(context, status, {
+            type: "https://api.example.com/errors/database",
+            title: "Database error",
+            status,
+            detail: exception.message,
+            instance: context.request.path,
+            code: exception.code,
+        });
+    }
+}
+```
+
+`@Catch()` accepts:
+
+- one or more error classes: the filter catches **only** those types (and subclasses)
+- no arguments: the filter becomes a **catch-all**, like `GlobalExceptionFilter`
+
+`BaseExceptionFilter` injects two helpers for free:
+
+- `this.logger`: the framework `Logger`, already scoped to the request
+- `this.report`: the [Report](./error-handling.mdx#the-report-helper) helper, if you need to build a typed payload
+
+…and exposes two protected methods:
+
+- `logError(exception, context)`: logs the error with controller/handler context, suggestions, and an optional stack trace
+- `sendErrorResponse(context, statusCode, body)`: safely writes the response (skips if headers are already sent)
+
+## Activating a filter
+
+Filters are activated by **discovery**, not by registration. As long as the file is imported somewhere in your dependency graph (e.g. via a controller import or `index.ts` re-export) and the class is decorated with `@Catch(...)` and `@provide(...)`, it will be picked up at boot.
+
+A common pattern is to keep them all under `src/filters/` and barrel-export from `src/filters/index.ts`:
+
+```typescript title="src/filters/index.ts"
+export * from "./database-error.filter";
+export * from "./tenant-error.filter";
+export * from "./fallback.filter";
+```
+
+Then make sure `src/filters/index.ts` is imported once, typically from your `App` class or `main.ts`.
+
+## Scoping filters with `@UseFilters`
+
+By default a filter applies **wherever its `@Catch` types match**. To restrict a filter to one controller or one method only, use `@UseFilters`:
+
+```typescript title="src/users/users.controller.ts"
+import { provide } from "@expressots/core";
+import { UseFilters } from "@expressots/core";
+import { controller, Get, Post } from "@expressots/adapter-express";
+import { TenantErrorFilter } from "../filters/tenant-error.filter";
+import { AdminErrorFilter } from "../filters/admin-error.filter";
+
+@provide(UsersController)
+@controller("/users")
+@UseFilters(TenantErrorFilter)               // Applies to the whole controller
+export class UsersController {
+    @Get("/")
+    list() { /* … */ }
+
+    @Post("/admin")
+    @UseFilters(AdminErrorFilter)            // Method-level filter (runs first)
+    adminAction() { /* … */ }
+}
+```
+
+The resolution order is:
+
+1. **Method-level** filters (from `@UseFilters` on the method)
+2. **Controller-level** filters (from `@UseFilters` on the controller)
+3. **Global** filters (from `@Catch` discovery)
+
+The first filter whose `@Catch` types match the thrown error wins; the rest are skipped.
+
+## Catching everything
+
+A catch-all filter is built like this:
+
+```typescript
+import { Catch, BaseExceptionFilter, ExceptionContext, StatusCode, provide } from "@expressots/core";
+
+@provide(FallbackFilter)
+@Catch() // <- no arguments
+export class FallbackFilter extends BaseExceptionFilter {
+    catch(exception: Error, context: ExceptionContext): void {
+        this.logError(exception, context);
+
+        this.sendErrorResponse(context, StatusCode.InternalServerError, {
+            type: "https://api.example.com/errors/internal",
+            title: "Internal server error",
+            status: StatusCode.InternalServerError,
+            detail: process.env.NODE_ENV === "production"
+                ? "Something went wrong"
+                : exception.message,
+            instance: context.request.path,
+        });
+    }
+}
+```
+
+You usually don't need this. `GlobalExceptionFilter` already provides a sensible default. Define your own catch-all only when you need to:
+
+- Send errors to a third-party tracker (Sentry, Datadog, …)
+- Add tenant/correlation IDs to every response
+- Mask error messages in production
+
+## The `ExceptionContext`
+
+Every filter receives a structured `ExceptionContext`:
+
+```typescript
+interface ExceptionContext {
+    request: Request;
+    response: Response;
+    next: NextFunction;
+    method: string;                    // GET, POST, …
+    handler?: string;                  // controller method name
+    controller?: { name: string };     // controller class
+    showStackTrace?: boolean;          // honoured by `logError`
+}
+```
+
+You can use `context.request` / `context.response` exactly like you would in raw Express, including reading custom headers like `x-correlation-id` to attach to the response payload.
+
+## Testing a filter
+
+Filters are plain classes, so the easiest path is to construct one with mocked `Logger` / `Report` and call `catch()`:
+
+```typescript title="test/database-error.filter.spec.ts"
+import { DatabaseErrorFilter } from "../src/filters/database-error.filter";
+import { DatabaseError } from "../src/errors/database-error";
+
+describe("DatabaseErrorFilter", () => {
+    it("returns 409 for duplicate key", () => {
+        const filter = new DatabaseErrorFilter();
+        const status = jest.fn().mockReturnThis();
+        const json = jest.fn();
+
+        filter.catch(new DatabaseError("dup", "DUPLICATE_KEY"), {
+            request: { path: "/users" } as never,
+            response: { headersSent: false, status, json } as never,
+            next: jest.fn(),
+            method: "POST",
+        });
+
+        expect(status).toHaveBeenCalledWith(409);
+        expect(json).toHaveBeenCalledWith(expect.objectContaining({ status: 409 }));
+    });
+});
+```
+
+For full HTTP-level integration tests, see [Testing](./testing.mdx).
+
+## See also
+
+- **[Error handling](./error-handling.mdx)**: `AppError`, `Report`, and the v4 error model.
+- **[Validation](./validation.mdx)**: how `ValidationErrorFilter` formats validation responses.
+- **[Decorators](./decorators.mdx)**: quick reference for `@Catch` and `@UseFilters`.
+- **[Status codes](./status-code.mdx)**: the `StatusCode` enum used in filters.

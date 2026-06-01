@@ -1,0 +1,428 @@
+---
+sidebar_position: 14
+title: Provider Ecosystem
+description: Explore ExpressoTS providers for databases, authentication, observability, and more.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# ExpressoTS Provider Ecosystem
+
+ExpressoTS providers are plug-and-play packages that extend the framework's capabilities. This guide covers the built-in providers in `@expressots/core` and the `@expressots/micro-providers` package for microservices.
+
+## Overview
+
+Providers follow these principles:
+
+-   **Plug-and-Play**: One-command installation and minimal configuration
+-   **Type-Safe**: Full TypeScript support with IntelliSense
+-   **Framework Integration**: Seamless DI container and lifecycle hooks integration
+-   **Production-Ready**: Battle-tested with comprehensive testing
+
+## Built-in Providers
+
+ExpressoTS v4 includes these providers in `@expressots/core`:
+
+### Logger Provider
+
+Structured logging with multiple transports:
+
+```typescript
+import { Logger } from "@expressots/core";
+
+const logger = new Logger();
+
+logger.info("User created", "UserService", { userId: "123" });
+logger.warn("Rate limit approaching", "RateLimiter", { current: 90, limit: 100 });
+logger.error("Database connection failed", "DatabaseService", error);
+```
+
+### InMemoryDBProvider
+
+A Prisma-like in-memory database for development, testing, and prototyping. Register it explicitly as a singleton, then access tables through a Prisma-compatible API:
+
+```typescript
+import { InMemoryDBProvider, Scope } from "@expressots/core";
+
+// In app.ts configureServices()
+this.Provider.register(InMemoryDBProvider, Scope.Singleton);
+
+// In a repository / use case
+const users = db.table<UserModel>("users", User);
+
+// Create
+await users.create({ data: { name: "John", email: "john@example.com" } });
+
+// Query with filters, ordering, and pagination
+const adults = await users.findMany({
+    where: { age: { gte: 18 } },
+    orderBy: { name: "asc" },
+    take: 10,
+});
+```
+
+See the **[In-Memory DB guide](../features/in-memory-db.mdx)** for the full API. It is intended for development and testing. Swap to a dedicated database provider for production.
+
+## Micro-Providers Package
+
+The `@expressots/micro-providers` package provides lightweight, production-ready providers for microservices:
+
+```bash
+npm install @expressots/micro-providers
+```
+
+### HealthCheckProvider
+
+Kubernetes-ready health probes with custom checks:
+
+```typescript
+import { HealthCheckProvider } from "@expressots/micro-providers";
+
+const health = new HealthCheckProvider({
+    checkTimeout: 5000,       // Timeout per check (5s)
+    includeDetails: true,     // Show check results
+});
+
+// Add custom health checks
+health.addCheck("database", async () => {
+    return await db.ping();
+});
+
+health.addCheck("redis", async () => {
+    return await redis.ping() === "PONG";
+});
+
+health.addCheck("external-api", async () => {
+    const response = await fetch("https://api.example.com/health");
+    return response.ok;
+});
+
+// Register endpoints
+app.Route.get("/health", health.healthHandler.bind(health));
+app.Route.get("/health/ready", health.readinessHandler.bind(health));
+app.Route.get("/health/live", health.livenessHandler.bind(health));
+```
+
+**Response Format:**
+
+```json
+{
+    "status": "healthy",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "uptime": 3600,
+    "checks": {
+        "database": true,
+        "redis": true,
+        "external-api": true
+    }
+}
+```
+
+### MetricsProvider
+
+Prometheus-compatible metrics endpoint:
+
+```typescript
+import { MetricsProvider } from "@expressots/micro-providers";
+
+const metrics = new MetricsProvider({
+    prefix: "myapp_",              // Metric name prefix
+    includeDefaultMetrics: true,   // Include Node.js metrics
+});
+
+// HTTP metrics middleware
+app.Middleware.add(metrics.httpMetricsMiddleware());
+
+// Custom metrics
+app.Route.post("/orders", (req, res) => {
+    metrics.incrementCounter("orders_created_total");
+    metrics.setGauge("active_orders", getActiveOrderCount());
+    metrics.recordHistogram("order_value", req.body.total);
+    
+    res.status(201).json({ id: "123" });
+});
+
+// Prometheus endpoint
+app.Route.get("/metrics", metrics.prometheusHandler.bind(metrics));
+```
+
+**Prometheus Output:**
+
+```
+# HELP process_uptime_seconds Process uptime in seconds
+# TYPE process_uptime_seconds gauge
+myapp_process_uptime_seconds 3600
+
+# HELP http_requests_total Total HTTP requests
+# TYPE http_requests_total counter
+myapp_http_requests_total{method="GET",status="200"} 150
+myapp_http_requests_total{method="POST",status="201"} 45
+
+# HELP orders_created_total Custom counter
+myapp_orders_created_total 45
+```
+
+### TracingProvider
+
+Distributed tracing with Jaeger/Zipkin support:
+
+```typescript
+import { TracingProvider } from "@expressots/micro-providers";
+
+const tracing = new TracingProvider({
+    serviceName: "order-service",
+    endpoint: process.env.JAEGER_ENDPOINT,
+    sampleRate: 1.0,   // 100% sampling (reduce in production)
+    debug: false,
+});
+
+// Automatic HTTP tracing
+app.Middleware.add(tracing.middleware());
+
+// Manual spans for custom operations
+app.Route.post("/orders", async (req, res) => {
+    const span = tracing.startSpan("create-order", {
+        tags: { userId: req.body.userId },
+    });
+    
+    try {
+        // Database operation
+        const dbSpan = tracing.startSpan("save-to-database", {
+            parentSpanId: span.spanId,
+        });
+        await db.orders.create(order);
+        tracing.endSpan(dbSpan.spanId);
+        
+        // External API call
+        const apiSpan = tracing.startSpan("notify-warehouse", {
+            parentSpanId: span.spanId,
+        });
+        await notifyWarehouse(order);
+        tracing.endSpan(apiSpan.spanId);
+        
+        tracing.addLog(span.spanId, "Order created successfully");
+        tracing.endSpan(span.spanId);
+        
+        res.status(201).json(order);
+    } catch (error) {
+        tracing.endSpan(span.spanId, error);
+        throw error;
+    }
+});
+```
+
+**Trace Headers:**
+
+```
+x-trace-id: abc123def456
+x-span-id: span789xyz
+```
+
+### StructuredLogger
+
+JSON-formatted logging for log aggregation (ELK, Loki):
+
+```typescript
+import { StructuredLogger } from "@expressots/micro-providers";
+
+const logger = new StructuredLogger({
+    serviceName: "order-service",
+    minLevel: "info",
+    format: process.env.NODE_ENV === "production" ? "json" : "pretty",
+});
+
+// Request logging middleware
+app.Middleware.add(logger.middleware());
+
+// Manual logging
+logger.debug("Processing request", { requestId: "123" });
+logger.info("Order created", { orderId: "456", userId: "789" });
+logger.warn("Rate limit approaching", { current: 90, limit: 100 });
+logger.error("Failed to process payment", new Error("Card declined"));
+
+// Child logger with context
+const orderLogger = logger.child({ module: "orders", version: "v2" });
+orderLogger.info("Processing order", { orderId: "123" });
+```
+
+**JSON Output (Production):**
+
+```json
+{"timestamp":"2024-01-15T10:30:00Z","level":"info","service":"order-service","message":"Order created","orderId":"456","userId":"789"}
+```
+
+**Pretty Output (Development):**
+
+```
+[2024-01-15T10:30:00Z] INFO [order-service] Order created {"orderId":"456","userId":"789"}
+```
+
+### CacheProvider
+
+In-memory LRU cache with TTL support:
+
+```typescript
+import { CacheProvider } from "@expressots/micro-providers";
+
+const cache = new CacheProvider({
+    defaultTTL: 60000,    // 1 minute default
+    maxEntries: 500,
+    lruEviction: true,
+});
+
+// Basic usage
+await cache.set("user:123", userData);
+const user = await cache.get("user:123");
+await cache.delete("user:123");
+
+// With custom TTL
+await cache.set("session:abc", sessionData, 3600000); // 1 hour
+
+// Cache-aside pattern
+const user = await cache.getOrSet(
+    `user:${userId}`,
+    () => db.users.findById(userId),
+    60000
+);
+
+// Statistics
+console.log(cache.getStats());
+// { size: 150, maxEntries: 500, hitRate: 0.85 }
+```
+
+## Creating Custom Providers
+
+### Provider Interface
+
+All providers should implement:
+
+```typescript
+export interface IExpressoTSProvider {
+    // Lifecycle hooks
+    onModuleInit?(): Promise<void>;
+    onModuleDestroy?(): Promise<void>;
+    
+    // Health check support
+    healthCheck?(): Promise<{ status: "healthy" | "unhealthy" }>;
+    
+    // Metrics support
+    getMetrics?(): Record<string, number>;
+}
+```
+
+### Example: Custom Redis Provider
+
+```typescript
+import Redis from "ioredis";
+
+export interface RedisConfig {
+    url?: string;
+    host?: string;
+    port?: number;
+    password?: string;
+}
+
+export class RedisProvider implements IExpressoTSProvider {
+    private client: Redis;
+    
+    constructor(private config: RedisConfig) {}
+    
+    async onModuleInit(): Promise<void> {
+        this.client = new Redis(this.config.url || {
+            host: this.config.host || "localhost",
+            port: this.config.port || 6379,
+            password: this.config.password,
+        });
+    }
+    
+    async onModuleDestroy(): Promise<void> {
+        await this.client.quit();
+    }
+    
+    async healthCheck() {
+        try {
+            await this.client.ping();
+            return { status: "healthy" as const };
+        } catch {
+            return { status: "unhealthy" as const };
+        }
+    }
+    
+    async get<T>(key: string): Promise<T | null> {
+        const value = await this.client.get(key);
+        return value ? JSON.parse(value) : null;
+    }
+    
+    async set(key: string, value: unknown, ttl?: number): Promise<void> {
+        const serialized = JSON.stringify(value);
+        if (ttl) {
+            await this.client.setex(key, ttl, serialized);
+        } else {
+            await this.client.set(key, serialized);
+        }
+    }
+    
+    async delete(key: string): Promise<boolean> {
+        return (await this.client.del(key)) > 0;
+    }
+}
+```
+
+### Registration
+
+```typescript
+// Full template
+this.container.bind(RedisProvider).toSelf().inSingletonScope();
+
+// Micro template
+microAPI.Container.addSingleton(RedisProvider);
+const redis = microAPI.Container.get(RedisProvider);
+await redis.onModuleInit();
+```
+
+## Best Practices
+
+### 1. Choose the Right Provider
+
+-   **Development**: Use InMemoryDBProvider, CacheProvider
+-   **Production**: Use dedicated providers (Redis, PostgreSQL)
+-   **Microservices**: Use micro-providers package
+
+### 2. Handle Lifecycle
+
+```typescript
+const redis = new RedisProvider(config);
+await redis.onModuleInit();
+
+process.on("SIGTERM", async () => {
+    await redis.onModuleDestroy();
+    process.exit(0);
+});
+```
+
+### 3. Implement Health Checks
+
+```typescript
+health.addCheck("redis", async () => {
+    const result = await redis.healthCheck();
+    return result.status === "healthy";
+});
+```
+
+### 4. Configure for Environment
+
+```typescript
+const config = {
+    url: process.env.REDIS_URL,
+    // Fallback for local development
+    host: process.env.REDIS_HOST || "localhost",
+    port: Number(process.env.REDIS_PORT) || 6379,
+};
+```
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

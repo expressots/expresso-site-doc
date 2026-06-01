@@ -1,47 +1,314 @@
 /**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
+ * Homepage hero -- calm, refined, no pulse, no translate-on-hover overload.
  */
 
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+    padding: var(--xt-s-9) 0 var(--xt-s-8);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background-color: transparent;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroBanner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(
+            ellipse 800px 400px at 50% -20%,
+            var(--xt-brand-glow) 0%,
+            transparent 65%
+        );
+    pointer-events: none;
+    z-index: 0;
+}
 
-  .btnContainer {
+.heroBanner::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--xt-stroke-2) 20%,
+        var(--xt-stroke-2) 80%,
+        transparent 100%
+    );
+    z-index: 1;
+}
+
+.heroContainer {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-  }
+}
 
-  .navbar {
-    padding: 0;
-  }
+.heroBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--xt-s-2);
+    padding: 4px var(--xt-s-3);
+    border-radius: var(--xt-r-pill);
+    background: var(--xt-bg-elev-1);
+    border: 1px solid var(--xt-stroke-1);
+    color: var(--xt-fg-secondary);
+    font-size: var(--xt-text-xs);
+    font-weight: var(--xt-weight-semi);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--xt-s-5);
+}
+
+.heroBadgeDot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--xt-r-pill);
+    background: var(--xt-brand);
+    box-shadow: 0 0 0 3px var(--xt-brand-glow);
+}
+
+.heroLogo {
+    height: 140px;
+    width: auto;
+    max-width: 90%;
+    margin: 0 0 var(--xt-s-5);
+    opacity: 1;
+    filter: drop-shadow(0 8px 24px rgba(128, 245, 168, 0.18));
+}
+
+.heroTitle {
+    font-family: var(--xt-font-heading);
+    font-size: var(--xt-text-display);
+    font-weight: var(--xt-weight-bold);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--xt-fg-primary);
+    margin: 0 0 var(--xt-s-4);
+    max-width: 720px;
+    text-wrap: balance;
+}
+
+.heroTitleAccent {
+    display: block;
+    background: linear-gradient(
+        90deg,
+        var(--xt-brand) 0%,
+        var(--xt-brand-light) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--xt-brand);
+    font-weight: var(--xt-weight-bold);
+}
+
+.heroSubtitle {
+    max-width: 580px;
+    margin: 0 auto var(--xt-s-7);
+    font-size: 1.0625rem;
+    line-height: var(--xt-leading-relaxed);
+    color: var(--xt-fg-secondary);
+    font-weight: var(--xt-weight-normal);
+    text-wrap: balance;
 }
 
 .btnContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 1rem
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--xt-s-3);
+    margin-bottom: var(--xt-s-7);
 }
 
 .button {
-  width: 180px;
-  height: 50px;
-  border-radius: 5px;
-  margin-top: 2rem;
+    min-width: 180px;
+    height: 48px;
+    padding: 0 var(--xt-s-5);
+    border-radius: var(--xt-r-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--xt-s-2);
+    font-size: var(--xt-text-sm);
+    font-weight: var(--xt-weight-semi);
+    letter-spacing: 0;
+    position: relative;
+    transition: transform var(--xt-dur-fast) var(--xt-ease),
+        background-color var(--xt-dur-fast) var(--xt-ease),
+        border-color var(--xt-dur-fast) var(--xt-ease),
+        box-shadow var(--xt-dur-fast) var(--xt-ease);
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.button svg {
+    transition: transform var(--xt-dur-fast) var(--xt-ease);
+}
+
+.buttonPrimary {
+    background: var(--xt-brand);
+    color: var(--xt-bg-base) !important;
+    border: 1px solid var(--xt-brand);
+}
+
+.buttonPrimary:hover {
+    background: var(--xt-brand-light);
+    color: var(--xt-bg-base) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px var(--xt-brand-glow);
+    text-decoration: none;
+}
+
+.buttonPrimary:hover svg {
+    transform: translateX(2px);
+}
+
+.buttonSecondary {
+    background: transparent;
+    color: var(--xt-fg-primary) !important;
+    border: 1px solid var(--xt-stroke-2);
+}
+
+.buttonSecondary:hover {
+    background: var(--xt-bg-elev-1);
+    border-color: var(--xt-stroke-3);
+    color: var(--xt-fg-primary) !important;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Install pill */
+.installPill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--xt-s-3);
+    padding: 6px 6px 6px var(--xt-s-4);
+    background: var(--xt-bg-elev-1);
+    border: 1px solid var(--xt-stroke-1);
+    border-radius: var(--xt-r-pill);
+    font-family: var(--xt-font-mono);
+    font-size: var(--xt-text-sm);
+    color: var(--xt-fg-primary);
+    transition: border-color var(--xt-dur-fast) var(--xt-ease);
+}
+
+.installPill:hover {
+    border-color: var(--xt-stroke-2);
+}
+
+.installPrompt {
+    color: var(--xt-fg-muted);
+    font-weight: var(--xt-weight-semi);
+    user-select: none;
+}
+
+.installCommand {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: var(--xt-fg-primary);
+    font-family: var(--xt-font-mono);
+    font-size: var(--xt-text-sm);
+    letter-spacing: 0;
+}
+
+.installCopy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 var(--xt-s-3);
+    background: var(--xt-bg-elev-2);
+    color: var(--xt-fg-secondary);
+    border: 1px solid var(--xt-stroke-1);
+    border-radius: var(--xt-r-pill);
+    font-family: var(--xt-font-sans);
+    font-size: var(--xt-text-xs);
+    font-weight: var(--xt-weight-semi);
+    cursor: pointer;
+    transition: background-color var(--xt-dur-fast) var(--xt-ease),
+        color var(--xt-dur-fast) var(--xt-ease),
+        border-color var(--xt-dur-fast) var(--xt-ease);
+}
+
+.installCopy:hover {
+    background: var(--xt-bg-elev-3);
+    color: var(--xt-fg-primary);
+    border-color: var(--xt-stroke-2);
+}
+
+.installCopy:focus-visible {
+    outline: 2px solid var(--xt-brand);
+    outline-offset: 2px;
+}
+
+.installCopy[data-copied] {
+    background: var(--xt-brand-soft);
+    color: var(--xt-brand);
+    border-color: var(--xt-tip-border);
+}
+
+.installCopyLabel {
+    line-height: 1;
+}
+
+@media screen and (max-width: 996px) {
+    .heroBanner {
+        padding: var(--xt-s-7) var(--xt-s-4) var(--xt-s-7);
+    }
+
+    .heroLogo {
+        height: 110px;
+    }
+
+    .heroTitle {
+        font-size: 2rem;
+    }
+
+    .heroSubtitle {
+        font-size: 1rem;
+    }
+
+    .btnContainer {
+        flex-direction: column;
+        gap: var(--xt-s-2);
+        width: 100%;
+    }
+
+    .button {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .installPill {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .installCommand {
+        font-size: var(--xt-text-xs);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .heroLogo {
+        height: 88px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .installCopyLabel {
+        display: none;
+    }
+    .installCopy {
+        padding: 0 var(--xt-s-2);
+        height: 28px;
+    }
 }

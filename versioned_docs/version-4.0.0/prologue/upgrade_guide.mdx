@@ -1,0 +1,324 @@
+---
+sidebar_position: 2
+title: Upgrade guide
+description: Upgrade guide for ExpressoTS 4.0.0.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Upgrade Guide
+
+Upgrade from ExpressoTS 3.x to 4.0.0.
+
+## Prerequisites
+
+| Requirement | Version |
+|-------------|---------|
+| Node.js | 20.18.0+ |
+| Current app | ExpressoTS 3.x |
+
+## Breaking changes summary
+
+There is exactly **one** breaking change in v4.0.0; everything else is additive or opt-in.
+
+### `.env` files are now opt-in (ADR-001)
+
+In v3.x the framework called `dotenv.config()` automatically. In v4 you opt in by passing `envFileConfig` to `bootstrap()`. This was changed because containerised deployments (Docker, Kubernetes, serverless) inject env vars via `process.env` and a missing `.env` file used to trip alarms in production.
+
+**v3.x (implicit):**
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "./app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+// .env was always loaded
+```
+
+**v4 (explicit):**
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+await bootstrap(App, {
+  envFileConfig: {
+    files: { development: ".env", production: ".env.prod" },
+    autoCreateTemplate: true,
+  },
+});
+```
+
+If you do **nothing**, v4 will silently skip `.env` loading and rely on `process.env` only. CI environments are auto-detected (GitHub Actions, GitLab CI, Jenkins, generic `CI=true`).
+
+> **Recommended alternative:** call `loadEnvSync()` (also from `@expressots/core`) directly in `src/main.ts` *before* `bootstrap(App)`. This is what the `application` and `application-with-events` templates do. It's an explicit, side-effect-free import that loads `.env`, `.env.${NODE_ENV}`, and the matching `.local` overrides, with no extra `bootstrap()` config to remember:
+>
+> ```typescript title="src/main.ts"
+> import { bootstrap, loadEnvSync } from "@expressots/core";
+> import { App } from "./app";
+>
+> loadEnvSync();
+> void bootstrap(App);
+> ```
+>
+> Use `envFileConfig` only when you need bootstrap-time validation (`required`, `validateValues`) or `autoCreateTemplate`.
+
+For the full rationale see ADR-001 in [`expressots/packages/core/src/application/.docs/decision-log.md`](https://github.com/expressots/expressots/blob/main/packages/core/src/application/.docs/decision-log.md).
+
+## New in v4.0.0 (non-breaking)
+
+Nothing in this section requires code changes. These are additive features you can adopt incrementally after the upgrade.
+
+### Studio is part of v4.0.0
+
+`@expressots/studio` and `@expressots/studio-agent` ship alongside `@expressots/core` in the v4.0.0 release. Install both as **dev dependencies**:
+
+```bash
+npm install -D @expressots/studio @expressots/studio-agent
+```
+
+The agent auto-activates when `NODE_ENV=development` and the package is installed; no `app.ts` changes are needed. Production deployments pay zero runtime cost. See the [Studio section](../studio/overview.mdx) for the full tour, including supply-chain and runtime posture security analysis.
+
+### Interceptors, events, lazy loading, content negotiation, advanced authorization
+
+These are all new in v4.0.0. None of them require changes to a v3 app; you opt in when you want them. See the dedicated pages under **Features** and **Guides**.
+
+## Step 1: Update Dependencies
+
+Update your `package.json` dependencies to the latest versions:
+
+```json
+{
+    "dependencies": {
+        "@expressots/core": "^4.0.0",
+        "@expressots/adapter-express": "^4.0.0",
+        "@expressots/shared": "^4.0.0"
+    },
+    "devDependencies": {
+        "@expressots/cli": "^4.0.0"
+    }
+}
+```
+
+Then run:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm install
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn install
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm install
+```
+
+</TabItem>
+</Tabs>
+
+## Step 2: Update Node.js Version
+
+Ensure your Node.js version is 20.18.0 or higher:
+
+```bash
+node --version
+```
+
+## Step 3: Application Changes
+
+### Bootstrap Function (Optional)
+
+v4 introduces a simplified `bootstrap()` function. The `AppFactory.create()` pattern still works.
+
+**Before (v3):**
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+```
+
+**After (v4 - new option):**
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "app";
+
+await bootstrap(App);
+
+// Or with options
+await bootstrap(App, {
+    port: 4000,
+    appName: "My API",
+    appVersion: "1.0.0",
+});
+```
+
+### Core APIs (No Changes)
+
+All core APIs remain backward compatible: `configContainer()`, `globalConfiguration()`, `configureServices()`, `postServerInitialization()`, `serverShutdown()`.
+
+## Step 4: New Features (Optional)
+
+### Interceptors
+
+Add interceptors to your routes:
+
+```ts
+import { UseInterceptors, PerformanceInterceptor, LoggingInterceptor } from "@expressots/core";
+
+@controller("/users")
+export class UserController {
+    @Get("/")
+    @UseInterceptors(PerformanceInterceptor, LoggingInterceptor)
+    getUsers() {
+        return this.userService.findAll();
+    }
+}
+```
+
+### Event System
+
+Create type-safe events:
+
+```ts
+// events/user.events.ts
+export class UserCreatedEvent {
+    constructor(
+        public readonly userId: string,
+        public readonly email: string
+    ) {}
+}
+
+// handlers/user-created.handler.ts
+import { provide, OnEvent, IEventHandler } from "@expressots/core";
+import { UserCreatedEvent } from "../events/user.events";
+
+@provide(UserCreatedHandler)
+@OnEvent(UserCreatedEvent)
+export class UserCreatedHandler implements IEventHandler<UserCreatedEvent> {
+    handle(event: UserCreatedEvent) {
+        console.log(`User created: ${event.userId}`);
+    }
+}
+```
+
+### Testing Module
+
+Use the new testing utilities:
+
+```ts
+import { createTestApp, request } from "@expressots/core";
+
+describe("UserController", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        const testApp = await createTestApp(App);
+        app = testApp.app;
+    });
+
+    test("GET /users", async () => {
+        await request(app)
+            .get("/users")
+            .expectStatus(200);
+    });
+});
+```
+
+### Enhanced Configuration
+
+Use type-safe configuration:
+
+```ts
+import { defineConfig, Env } from "@expressots/core";
+
+export default defineConfig({
+    database: {
+        url: Env.string("DATABASE_URL").required(),
+        pool: Env.number("DB_POOL_SIZE").default(10),
+    },
+});
+```
+
+## Step 5: Testing
+
+After upgrading, run your tests to ensure everything works:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm test
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn test
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm test
+```
+
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Node.js Version Error**
+
+    If you see errors about unsupported Node.js features, ensure you're using Node.js 20.18.0 or higher.
+
+2. **TypeScript Errors**
+
+    Update your TypeScript to version 5.x or higher for best compatibility.
+
+3. **Dependency Conflicts**
+
+    Clear your `node_modules` and lock file, then reinstall:
+
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+
+### Getting Help
+
+If you encounter issues during the upgrade:
+
+-   Check the [GitHub Issues](https://github.com/expressots/expressots/issues)
+-   Join our [Discord community](https://discord.com/invite/PyPJfGK)
+-   Read the [documentation](https://doc.expresso-ts.com)
+
+---
+
+## Summary
+
+| Step | Action |
+|------|--------|
+| 1 | Update dependencies to v4.0.0 |
+| 2 | Ensure Node.js 20.18.0+ |
+| 3 | Run tests |
+| 4 | Adopt new features (optional) |
+
+v4.0.0 is backward compatible. New features are additive and can be adopted gradually.

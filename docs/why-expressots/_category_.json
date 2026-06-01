@@ -1,0 +1,8 @@
+{
+    "label": "COMPARISON",
+    "position": 7,
+    "link": {
+        "type": "generated-index",
+        "description": "A feature-by-feature comparison of ExpressoTS v4 against Spring Boot, ASP.NET Core, NestJS, Django, and Laravel, showing where ExpressoTS differs."
+    }
+}

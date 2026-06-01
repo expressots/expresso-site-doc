@@ -1,0 +1,187 @@
+---
+sidebar_position: 0
+title: Framework Comparison
+description: A feature-by-feature comparison of ExpressoTS v4 against Spring Boot, ASP.NET Core, NestJS, Django, and Laravel.
+---
+
+# How ExpressoTS Compares
+
+This is a side-by-side comparison of ExpressoTS v4 against the most popular backend frameworks across each ecosystem: **Spring Boot** (Java), **ASP.NET Core** (.NET), **NestJS** (Node/TS), **Django** (Python), and **Laravel** (PHP).
+
+The goal is not to claim ExpressoTS wins everywhere. It is to show clearly where it offers something the others don't.
+
+:::info Legend
+| Symbol | Meaning |
+| :---: | --- |
+| ✅ | Native / first-class support |
+| ⚠️ | Partial (manual setup, plugin, or external package) |
+| ❌ | Not available in the core framework |
+:::
+
+## What only ExpressoTS has
+
+A handful of capabilities are unique to ExpressoTS across all six frameworks compared here:
+
+| Capability | What it does |
+| --- | --- |
+| **Conditional middleware** | `when()` / `unless()` run middleware based on request context |
+| **Middleware composition** | `combine()` / `sequence()` group middleware semantically |
+| **Middleware presets** | `applyPreset("api")` for pre-tuned bundles for common scenarios |
+| **Pipeline introspection** | `getMiddlewarePipeline()` inspects the live stack at runtime |
+| **Guard caching** | `IGuardCache` caches authorization results per request |
+| **Conditional guards** | `whenGuard()` applies guards based on request context |
+| **Custom DI scopes** | `@provideInScope()` for tenant isolation, transactions, etc. |
+| **CI/CD auto-detection** | Bootstrap detects the CI provider and adjusts behaviour |
+| **Built-in load testing** | `LoadTester.run()` with no external tooling |
+
+## Architecture & Bootstrap
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Bootstrap function | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Environment auto-detection | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Smart `.env` loading | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Port resolution chain | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| `package.json` metadata | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Graceful shutdown | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+| Lifecycle hooks (auto-discovery) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Module composition (`combineModules()`) | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** zero-config `bootstrap(App)` handles env detection, port resolution, and metadata extraction; CI/CD auto-detection and opt-in smart `.env` loading are unique.
+
+## Dependency Injection
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| DI container | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Constructor injection | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Property injection | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| Multi-injection | ✅ | ✅ | ⚠️ | ✅ | ❌ | ⚠️ |
+| Optional injection | ✅ | ✅ | ✅ | ✅ | ❌ | ⚠️ |
+| Named bindings | ✅ | ✅ | ⚠️ | ✅ | ❌ | ✅ |
+| Lazy injection | ✅ | ✅ | ✅ | ✅ | ❌ | ⚠️ |
+| Singleton / Transient / Request scopes | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| **Custom scopes** | ✅ | ✅ | ⚠️ | ❌ | ❌ | ⚠️ |
+
+**Where ExpressoTS stands out:** built on InversifyJS, the most feature-complete DI container in TypeScript, with custom scopes that NestJS lacks entirely.
+
+## Middleware
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Class & function middleware | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Global & route-specific | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 15+ built-in helpers | ✅ | ⚠️ | ✅ | ⚠️ | ✅ | ✅ |
+| **Conditional execution** (`when`/`unless`) | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| **Composition** (`combine`/`sequence`) | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Presets** (`applyPreset`) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Pipeline introspection** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Built-in profiling | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** the only framework here with conditional middleware, semantic composition, presets, and runtime pipeline introspection, all with zero external dependencies.
+
+## Routing & Controllers
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Controller & method decorators | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| Param / query / body / header decorators | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Route constraints (`Patterns` helpers) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| API versioning (`@Version`) | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ |
+| Global route prefix | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+**Where ExpressoTS stands out:** discoverable route-constraint helpers (`Patterns.UUID`, `Patterns.NUMERIC_ID`) plus controller- and method-level `@Version()`.
+
+## Security & Authorization
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Guards system | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Role-based access | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Permission-based access | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| ABAC (attribute-based) | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| Resource ownership | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ✅ |
+| **Guard composition** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Conditional guards** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Guard caching** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Permission hierarchy | ✅ | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** the most complete guard system in TypeScript, with ABAC, composition, conditional guards, and per-request guard caching that no other framework here offers.
+
+:::note Authentication
+For JWT and OAuth, ExpressoTS exposes an `AuthProvider` interface and integrates via middleware/plugins rather than bundling a specific provider, keeping the core lean. Spring Boot, ASP.NET Core, and Laravel ship these built in.
+:::
+
+## Error Handling
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Custom error classes | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Exception filters | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Auto-discovered filters** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Filter inheritance matching** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| RFC 7807 Problem Details | ✅ | ✅ | ✅ | ❌ | ⚠️ | ❌ |
+| Enhanced error metadata | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** RFC 7807 responses out of the box (NestJS and Laravel don't), plus filters that are auto-discovered and inherit by exception type, with no manual registration.
+
+## Validation
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Class-based DTO validation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Nested & array validation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Async validators | ✅ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| Whitelist (strip unknown) | ✅ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| Transform / type coercion | ✅ | ⚠️ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| **Zero-config smart defaults** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** validation works out of the box with `addValidation()` and supports class-validator, Zod, Yup, or a custom adapter, with whitelist and transform on by default.
+
+## Testing
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Testing module | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Zero-config setup** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Smart auto-mocks** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Fluent HTTP testing | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| API snapshot testing | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| **Built-in load testing** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Request context mocking | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** `TestingModule.create()` needs no boilerplate, auto-mocks services with type inference, and includes load testing. Others require external tools like JMeter or k6.
+
+## Performance
+
+| Feature | ExpressoTS | Spring | ASP.NET | NestJS | Django | Laravel |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Optimized request pipeline | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Response compression | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ |
+| Lazy module loading | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| **Guard caching** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Pipeline profiling** | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ⚠️ |
+| Minimal bundle footprint | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ⚠️ |
+
+**Where ExpressoTS stands out:** ~8-25 ms cold start, lazy modules, and per-request guard caching, with a deliberately small footprint.
+
+## ExpressoTS vs NestJS
+
+NestJS is the closest comparison in the TypeScript world. The two share decorator-based controllers and DI, but take different approaches:
+
+| Aspect | ExpressoTS | NestJS |
+| --- | --- | --- |
+| Philosophy | Lightweight, minimal boilerplate | Feature-rich, Angular-inspired |
+| DI container | Custom InversifyJS (custom scopes, multi-inject) | Custom built-in (no custom scopes) |
+| Module system | Auto-binding via `@provide()` | Explicit declarative imports/exports |
+| Middleware | Conditional, composable, presets | Standard arrays |
+| Guards | Caching, ABAC, conditional | Standard guards |
+| Errors | RFC 7807 built-in | Manual setup |
+| Learning curve | Lower (Express-familiar) | Steeper (more concepts) |
+| Built-in breadth | Lean core + Studio tooling | Microservices, GraphQL, WebSockets bundled |
+
+NestJS bundles more out of the box (microservices, GraphQL, WebSocket transports). ExpressoTS keeps the core lean and adds depth where it counts: DI flexibility, middleware/guard ergonomics, standards-compliant errors, and the local [Studio](../studio/overview.mdx) developer platform.
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

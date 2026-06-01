@@ -1,0 +1,64 @@
+---
+sidebar_position: 7
+title: Info & Resources
+description: Two read-only commands that print diagnostic information about your environment and a cheat sheet of every CLI command and generate schematic.
+---
+
+# Info & Resources
+
+Two read-only commands that print useful information.
+
+## info
+
+```bash
+expressots info
+# alias
+expressots i
+```
+
+Prints:
+
+| Field            | Source                                              |
+| ---------------- | --------------------------------------------------- |
+| Project name     | `package.json → name`                               |
+| Project version  | `package.json → version`                            |
+| Project description | `package.json → description`                     |
+| Project author   | `package.json → author`                             |
+| Operating system | `os.platform()` + `os.release()`                    |
+| Node version     | `process.version`                                   |
+| CLI bundle       | `BUNDLE_VERSION` baked at CLI build time            |
+
+:::note No global `--version`
+The CLI intentionally does **not** expose `expressots --version`. Use `expressots info` or `npm list -g @expressots/cli`.
+:::
+
+### Example output
+
+```text
+Project:      my-api
+Description:  An ExpressoTS v4 application
+Version:      0.1.0
+Author:       You
+
+OS:           win32 10.0.22631
+Node:         v20.18.0
+CLI:          4.0.0-beta.1
+```
+
+## resources
+
+```bash
+expressots resources
+# alias
+expressots r
+```
+
+Prints a `cli-table3` of every command and every `generate` schematic, including the new v4 ones (`interceptor`, `event`, `handler`, `guard`, `config`). It's the **command cheat sheet**, the answer to "what can I scaffold and how?".
+
+`resources` is not the same as yargs `--help`:
+
+| Command                | What you get                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `expressots resources` | Wide table of *every* command and schematic in one shot.                              |
+| `expressots --help`    | yargs-generated short summary plus subcommand pointers.                                |
+| `expressots <cmd> --help` | yargs help for a specific command (flags, options, positionals).                  |

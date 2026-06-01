@@ -1,0 +1,196 @@
+---
+sidebar_position: 2
+title: Running the App
+description: "dev, build, prod, and container-dev: every way the CLI runs your ExpressoTS application."
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Running the App
+
+Four CLI commands cover the full local lifecycle: write code with `dev`, compile with `build`, run the compiled output with `prod`, and (optionally) do the whole thing inside Docker with `container-dev`.
+
+| Command         | What it does                                                                  |
+| --------------- | ----------------------------------------------------------------------------- |
+| `dev`           | Hot-reload dev server via `tsx --watch`                                       |
+| `build`         | `tsc -p tsconfig.build.json`; rewrites alias imports in opinionated projects   |
+| `prod`          | `node` against the compiled JavaScript                                        |
+| `container-dev` | Docker-compose-based development workflow (`start`, `stop`, `attach`, `shell`, `status`, `logs`) |
+
+All four read `expressots.config.ts` from the project root and the compile path from `tsconfig.build.json`.
+
+## Prerequisites
+
+| File                  | Purpose                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `expressots.config.ts`| Provides `entryPoint` and `opinionated` flags.                                          |
+| `tsconfig.build.json` | Must define `compilerOptions.outDir`. Used by `build` (output) and `prod` (input).      |
+
+## dev
+
+Hot-reload local dev server.
+
+```bash
+expressots dev
+```
+
+Under the hood it shells out to:
+
+```bash
+npx tsx --watch [-r tsconfig-paths/register] ./src/<entryPoint>.ts
+```
+
+- `tsx --watch` is **tsx's built-in watch mode** with no `nodemon`, no `SIGTERM` quirks on Windows.
+- `tsconfig-paths/register` is added for opinionated projects so `@useCases/...`, `@providers/...` etc. resolve at dev time.
+- The process inherits stdio; press `Ctrl+C` to stop. Saved files trigger a fast restart.
+
+### Options
+
+| Flag        | Alias | Default | Description                                                                |
+| ----------- | ----- | ------- | -------------------------------------------------------------------------- |
+| `--container` | `-c` | `false` | Run dev inside Docker. Generates Dockerfiles + compose if missing.          |
+| `--build`     | `-b` | `false` | (With `--container`) Rebuild the dev container before starting.             |
+| `--detach`    | `-d` | `false` | (With `--container`) Run the dev container in the background.               |
+
+```bash
+expressots dev --container --build --detach
+```
+
+When `--container` is set, the CLI invokes Compose v2 (`docker compose`) when available and falls back to Compose v1 (`docker-compose`). Both `Dockerfile.development` and `docker-compose.development.yml` are generated on demand.
+
+## build
+
+Compile to JavaScript.
+
+```bash
+expressots build
+```
+
+Under the hood:
+
+```bash
+npx tsc -p tsconfig.build.json
+```
+
+Then, **for opinionated projects only**, the CLI post-processes every emitted `.js` file:
+
+- Replaces `require("@alias/<path>")` imports with relative paths so the compiled bundle runs without `tsconfig-paths/register`.
+- Copies `package.json` into `outDir` so production tooling (`npm prune --production`, `npm start`, etc.) can resolve dependencies.
+
+:::note Why the rewrite
+v3 required `register-path.js` at runtime. v4 removed that. Alias resolution is baked into `build` time, so production startup has zero path-mapping cost.
+:::
+
+## prod
+
+Run the compiled output with plain Node.
+
+```bash
+expressots prod
+```
+
+The exact invocation depends on whether the project is opinionated:
+
+| `opinionated` | Command                                            |
+| ------------- | -------------------------------------------------- |
+| `true`        | `node ./${outDir}/src/${entryPoint}.js`            |
+| `false`       | `node ./${outDir}/${entryPoint}.js`                |
+
+In either case the alias rewrite has already happened during `build`, so production startup is just `node <file>`.
+
+## container-dev
+
+Compose-driven development workflow. Use this when your dev story requires sidecar services (Postgres, Redis, RabbitMQ) and you want them all running on `docker compose up`.
+
+| Action  | Purpose                                                  |
+| ------- | -------------------------------------------------------- |
+| `start` | (default) Boot the dev compose file in the foreground.   |
+| `stop`  | Stop the dev compose stack.                              |
+| `attach`| Attach to the app container's stdout.                    |
+| `shell` | Open an interactive shell inside the app container.      |
+| `status`| Show running container state for the compose project.    |
+| `logs`  | Tail the app container's logs.                           |
+
+```bash
+expressots container-dev start --build
+expressots container-dev logs --follow --tail 200
+expressots container-dev shell
+expressots container-dev stop
+```
+
+### Options
+
+| Flag              | Alias | Default                              | Description                                       |
+| ----------------- | ----- | ------------------------------------ | ------------------------------------------------- |
+| `--container`     | `-c`  | `false`                              | Force the container path. Without this, `start` only prints guidance. |
+| `--service`       | `-s`  | `app`                                | Service name from the compose file.               |
+| `--compose-file`  | `-f`  | `docker-compose.development.yml`     | Compose file to use.                              |
+| `--build`         | `-b`  | `false`                              | Rebuild images on `start`.                        |
+| `--detach`        | `-d`  | `false`                              | Run `start` in the background.                    |
+| `--port`          | `-p`  | (compose-driven)                     | Override the host port for `start`.               |
+| `--debug-port`    |       | `9229`                               | Expose the Node inspector on this port.           |
+| `--watch`         | `-w`  | `true`                               | Mount source for live edits.                      |
+| `--follow`        |       | `false`                              | `logs` follow mode.                               |
+| `--tail`          |       | `100`                                | `logs` tail line count.                           |
+
+:::tip dev or container-dev?
+- `expressots dev` is **faster**. `tsx --watch` reload is sub-second and there is no Docker layer.
+- `expressots dev --container` is a one-shot containerized dev.
+- `expressots container-dev` is the **structured** Compose workflow when you need multiple services and a long-lived dev environment.
+:::
+
+## Common scripts
+
+`expressots new` emits these scripts in `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev":   "expressots dev",
+    "build": "expressots build",
+    "prod":  "expressots prod"
+  }
+}
+```
+
+So you can call them through your package manager too:
+
+<Tabs>
+<TabItem value="npm" label="npm">
+
+```bash
+npm run dev
+npm run build
+npm run prod
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn dev
+yarn build
+yarn prod
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm dev
+pnpm build
+pnpm prod
+```
+
+</TabItem>
+</Tabs>
+
+## Troubleshooting
+
+| Problem                                              | Fix                                                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `tsconfig.build.json: outDir missing`                | Add `"outDir": "build"` (or any folder name) under `compilerOptions`.                            |
+| `Cannot find module '@useCases/...'` in production   | You ran `node` directly. Use `expressots prod` so the alias rewrite is applied, or rebuild first. |
+| Port already in use (`EADDRINUSE`)                   | Stop the previous process or change the port via env / `bootstrap({ port })`.                    |
+| `--container` first run is very slow                 | Expected. It generates `Dockerfile.development`, builds the image, and pulls base layers. Subsequent runs are cached. |

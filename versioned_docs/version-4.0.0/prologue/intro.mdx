@@ -1,0 +1,93 @@
+---
+sidebar_position: 0
+title: Intro
+description: Introduction to ExpressoTS.
+---
+
+# EXPRESSO<span class="span-table">TS</span>
+
+ExpressoTS is a TypeScript framework for building server-side applications on Node.js. It provides dependency injection, decorators, and architectural patterns over Express.js.
+
+## Version 4.0
+
+Key features in version 4.0.0:
+
+| Feature | Description |
+|---------|-------------|
+| Interceptors | AOP-based system for cross-cutting concerns |
+| Testing Module | Unit, integration, and E2E testing utilities |
+| Event System | Type-safe events with auto-discovery and replay |
+| Lazy-Loading | On-demand module loading for large applications |
+| Configuration | Type-safe config with validation |
+
+For details, see [release notes](./release.mdx) or [upgrade guide](./upgrade_guide.mdx).
+
+## ExpressoTS Studio
+
+ExpressoTS Studio is a local developer experience platform that runs alongside your application during development. It records every request, captures every log line, snapshots your DI graph, and scans your dependencies for vulnerabilities. Everything stays on your machine, never off-box.
+
+| Capability      | Description                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| Status          | App health, runtime info, top routes, and aggregate security grade                                           |
+| Architecture    | Read-only graph of controllers, use-cases, providers, and middleware with DI scope badges                    |
+| Observability   | Live request timeline, OpenTelemetry trace detail, per-route P50/P95/P99, live logs, error inspector         |
+| Replay          | Replays any recorded request against the running app and diffs status/duration/body                          |
+| Security        | `npm audit` + OSV.dev advisories with root-cause chains, reachability scoring, one-click fixes, and OWASP API Top 10 runtime posture |
+See the dedicated [Studio section](../studio/overview.mdx) for the full tour.
+
+## Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| Node.js | 20.18.0+ |
+| TypeScript | 5.0+ |
+| Package Manager | npm, yarn, or pnpm |
+
+## Documentation Structure
+
+| Section | Content |
+|---------|---------|
+| PROLOGUE | Release notes, upgrade guides |
+| CORE | Framework building blocks (API reference) |
+| FEATURES | Feature documentation (configuration, usage) |
+| CLI | Command-line interface |
+| GUIDES | Step-by-step tutorials and use cases |
+| GOVERNANCE | Contribution guidelines |
+
+## Conventions
+
+### Code Examples
+
+```ts
+@controller("/users")
+export class UserController {
+    @Get("/")
+    getUsers() {
+        return { users: [] };
+    }
+}
+```
+
+### Alerts
+
+:::note
+General information.
+:::
+
+:::tip
+Best practices.
+:::
+
+:::caution
+Potential issues.
+:::
+
+:::danger
+Critical issues.
+:::
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

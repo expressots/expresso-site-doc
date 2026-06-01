@@ -1,0 +1,377 @@
+---
+sidebar_position: 9
+title: Entities
+description: Entities are objects that represent data.
+---
+
+import entitiesImg from "./img/entities.png";
+
+# Entities
+
+Entities are the core data structures of an ExpressoTS application. They define the shape of the data your application manipulates — when an entity changes, use cases and controllers that handle that data will likely need to change too.
+
+ExpressoTS v4 introduces schema decorators that add metadata to your entities for use with the **[In-Memory DB](../features/in-memory-db.mdx)** and future database adapters. These decorators are optional — plain classes decorated with `@provide()` remain fully supported.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={entitiesImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 entity architecture: @Entity decorator with field constraints (@PrimaryKey, @Index, @Unique, @Nullable, @Default, @AutoGenerate) and relations (@HasOne, @HasMany, @BelongsTo, @ManyToMany)"
+    />
+</div>
+
+## Create an entity
+
+Scaffold an entity with the CLI:
+
+```bash
+expressots g e user
+```
+
+### Basic entity
+
+A simple entity only needs a `@provide()` decorator for DI registration:
+
+```typescript title="src/entities/user.entity.ts"
+import { provide } from "@expressots/core";
+import { randomUUID } from "node:crypto";
+
+@provide(UserEntity)
+export class UserEntity {
+    id: string;
+    name: string;
+    email: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+### Schema-decorated entity
+
+For richer metadata (used by the In-Memory DB and future adapters), use the `@Entity` decorator along with field decorators:
+
+```typescript title="src/entities/user.entity.ts"
+import { Entity, PrimaryKey, AutoGenerate, Index, Unique, Nullable, Default } from "@expressots/core";
+
+@Entity({ name: "users", timestamps: true, softDelete: false })
+export class User {
+    @PrimaryKey()
+    @AutoGenerate("uuid")
+    id!: string;
+
+    @Index()
+    @Unique()
+    email!: string;
+
+    name!: string;
+
+    @Default(true)
+    isActive!: boolean;
+
+    @Nullable()
+    bio?: string;
+}
+```
+
+## Entity interfaces
+
+ExpressoTS provides base interfaces for common entity patterns:
+
+| Interface | Extends | Fields added |
+| --- | --- | --- |
+| `IEntity` | — | `id?: string` |
+| `ITimestampedEntity` | `IEntity` | `createdAt?: Date`, `updatedAt?: Date` |
+| `ISoftDeleteEntity` | `ITimestampedEntity` | `deletedAt?: Date \| null` |
+
+```typescript
+import { IEntity, ITimestampedEntity, ISoftDeleteEntity } from "@expressots/core";
+
+interface User extends ITimestampedEntity {
+    name: string;
+    email: string;
+}
+
+interface Product extends ISoftDeleteEntity {
+    title: string;
+    price: number;
+}
+```
+
+When `timestamps: true` is set on `@Entity()`, the In-Memory DB automatically manages `createdAt` and `updatedAt` fields.
+
+## @Entity decorator
+
+The `@Entity` decorator marks a class as a database entity and accepts configuration options:
+
+```typescript
+@Entity(options?: EntityOptions | string)
+```
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | class name (lowercase) | Table/collection name |
+| `timestamps` | `boolean` | `true` | Auto-manage `createdAt` / `updatedAt` |
+| `softDelete` | `boolean` | `false` | Enable soft deletes (`deletedAt` field) |
+| `validate` | `boolean` | `false` | Enable runtime validation |
+
+```typescript
+@Entity({ name: "products", timestamps: true, softDelete: true })
+export class Product { /* ... */ }
+
+@Entity("orders")
+export class Order { /* ... */ }
+```
+
+## Field decorators
+
+| Decorator | Purpose | Example |
+| --- | --- | --- |
+| `@PrimaryKey()` | Mark as primary key | `@PrimaryKey() id!: string` |
+| `@AutoGenerate(strategy)` | Auto-generate values | `@AutoGenerate("uuid") id!: string` |
+| `@Index(options?)` | Index for faster lookups | `@Index() email!: string` |
+| `@Unique()` | Enforce uniqueness | `@Unique() email!: string` |
+| `@Nullable()` | Allow null values | `@Nullable() bio?: string` |
+| `@Default(value)` | Set default value | `@Default(true) isActive!: boolean` |
+
+### @AutoGenerate strategies
+
+| Strategy | Output | Example |
+| --- | --- | --- |
+| `"uuid"` | UUID v4 | `550e8400-e29b-41d4-a716-446655440000` |
+| `"cuid"` | Collision-resistant ID | `clh3am8...` |
+| `"ulid"` | Universally unique, sortable | `01ARZ3NDEKTSV4RRFFQ69G5FAV` |
+| `"increment"` | Auto-incrementing integer | `1`, `2`, `3`, ... |
+
+### @Index options
+
+```typescript
+@Index()
+email!: string;
+
+@Index({ name: "idx_full_name", composite: ["firstName", "lastName"] })
+firstName!: string;
+```
+
+Composite indexes span multiple fields for compound queries.
+
+### @Default with factory functions
+
+The `@Default` decorator accepts either a static value or a factory function:
+
+```typescript
+@Default(true)
+isActive!: boolean;
+
+@Default(() => new Date())
+createdAt!: Date;
+
+@Default(() => "pending")
+status!: string;
+```
+
+## Relation decorators
+
+Define relationships between entities for the In-Memory DB's `include` queries:
+
+| Decorator | Relation type | Example |
+| --- | --- | --- |
+| `@HasOne(target, foreignKey)` | One-to-one | User → Profile |
+| `@HasMany(target, foreignKey)` | One-to-many | User → Posts |
+| `@BelongsTo(target, foreignKey)` | Inverse of HasOne/HasMany | Post → User |
+| `@ManyToMany(target, through)` | Many-to-many via join table | Post → Tags |
+
+```typescript title="Complete entity with relations"
+import {
+    Entity, PrimaryKey, AutoGenerate,
+    Index, Unique, HasOne, HasMany,
+} from "@expressots/core";
+
+@Entity({ name: "users", timestamps: true })
+export class User {
+    @PrimaryKey()
+    @AutoGenerate("uuid")
+    id!: string;
+
+    @Index()
+    @Unique()
+    email!: string;
+
+    name!: string;
+
+    @HasOne(() => Profile, "userId")
+    profile?: Profile;
+
+    @HasMany(() => Post, "authorId")
+    posts?: Post[];
+}
+
+@Entity({ name: "profiles" })
+export class Profile {
+    @PrimaryKey()
+    @AutoGenerate("uuid")
+    id!: string;
+
+    userId!: string;
+    avatar!: string;
+
+    @BelongsTo(() => User, "userId")
+    user?: User;
+}
+
+@Entity({ name: "posts", timestamps: true, softDelete: true })
+export class Post {
+    @PrimaryKey()
+    @AutoGenerate("uuid")
+    id!: string;
+
+    authorId!: string;
+    title!: string;
+    content!: string;
+
+    @BelongsTo(() => User, "authorId")
+    author?: User;
+
+    @ManyToMany(() => Tag, "post_tags")
+    tags?: Tag[];
+}
+```
+
+## Schema registry
+
+All `@Entity`-decorated classes are automatically registered in the `SchemaRegistry`, which provides introspection APIs:
+
+```typescript
+import { SchemaRegistry } from "@expressots/core";
+
+const allEntities = SchemaRegistry.getAll();
+
+const userMeta = SchemaRegistry.getMetadata(User);
+// { name: "users", timestamps: true, softDelete: false, validate: false }
+
+const UserClass = SchemaRegistry.getByName("users");
+
+const indexes = SchemaRegistry.getIndexes(User);
+// [{ field: "email", name: "idx_email" }]
+
+const uniques = SchemaRegistry.getUniqueFields(User);
+// ["email"]
+
+const autoFields = SchemaRegistry.getAutoGenerateFields(User);
+// { id: "uuid" }
+
+const defaults = SchemaRegistry.getDefaults(User);
+// { isActive: true }
+
+const relations = SchemaRegistry.getRelations(User);
+// [{ type: "hasOne", target: () => Profile, foreignKey: "userId", field: "profile" }]
+```
+
+## Entity injection
+
+If your entity has dependencies, inject them using `@inject()`:
+
+```typescript
+import { provide, inject } from "@expressots/core";
+
+@provide(UserEntity)
+class UserEntity {
+    constructor(@inject(Logger) private logger: Logger) {}
+}
+```
+
+### Avoid primitive constructor parameters
+
+Do not inject primitive values (strings, numbers, booleans) through the constructor — the DI container cannot infer what values to provide:
+
+```typescript
+// ❌ Avoid — DI container cannot resolve primitive parameters
+@provide(UserEntity)
+class UserEntity {
+    constructor(name: string) {} // string is ambiguous
+}
+```
+
+**Why primitives are problematic:**
+- **Ambiguity** — the container doesn't know what a `string` or `number` represents
+- **Inflexibility** — a fixed primitive value defeats the purpose of DI
+- **Non-descriptive** — multiple string parameters are indistinguishable
+
+### Factory pattern alternative
+
+Use a factory class to create entities with primitive parameters:
+
+```typescript title="src/entities/user.entity.ts"
+import { provide } from "@expressots/core";
+import { randomUUID } from "node:crypto";
+
+@provide(UserEntity)
+export class UserEntity {
+    public id: string;
+    public name: string;
+    public email: string;
+
+    constructor() {
+        this.id = randomUUID();
+    }
+}
+```
+
+```typescript title="src/factories/user.factory.ts"
+import { provide } from "@expressots/core";
+
+interface IUserEntityFactory {
+    create(name: string, email: string): UserEntity;
+}
+
+@provide(UserEntityFactory)
+export class UserEntityFactory implements IUserEntityFactory {
+    create(name: string, email: string): UserEntity {
+        const user = new UserEntity();
+        user.name = name;
+        user.email = email;
+        return user;
+    }
+}
+```
+
+Now `UserEntityFactory` can be injected into use cases and controllers.
+
+## Base repository
+
+For the In-Memory DB, `BaseRepository<T>` provides a standard CRUD interface:
+
+```typescript
+import { BaseRepository } from "@expressots/core";
+
+export class UserRepository extends BaseRepository<User> {
+    constructor(@inject("IDataProvider") dataProvider: IDataProvider) {
+        super(dataProvider, "users");
+    }
+}
+```
+
+`BaseRepository` exposes `create()`, `update()`, `delete()`, `find()`, `findAll()`, `query()`, and `transaction()`. See **[In-Memory DB](../features/in-memory-db.mdx)** for the full Prisma-like query API.
+
+## Entities are data
+
+ExpressoTS encourages keeping entities as plain data structures without business logic. Use cases own orchestration; providers own infrastructure; entities own shape.
+
+This keeps entities simple, testable, and framework-agnostic. Business rules live in use cases, not in entity methods.
+
+## Best practices
+
+1. **Use `@Entity` decorators** when working with the In-Memory DB or when you want schema metadata for tooling.
+2. **Use `@provide()` for simple entities** that only need DI registration without database schema features.
+3. **Always define a primary key** with `@PrimaryKey()` and `@AutoGenerate()` for database entities.
+4. **Use `@Index` on fields** you query frequently for better performance.
+5. **Use `@Unique`** to enforce data integrity on fields like email or username.
+6. **Use the factory pattern** when entities need primitive parameters at creation time.
+7. **Keep entities lean** — no business logic, no side effects, just data.
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

@@ -1,0 +1,163 @@
+---
+sidebar_position: 1
+title: New
+description: expressots new creates a v4 project from one of the official templates and pre-applies a middleware preset.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# New
+
+Create a new ExpressoTS v4 project from one of the official templates.
+
+```bash
+expressots new <project-name> [options]
+```
+
+The command clones the [`expressots/templates`](https://github.com/expressots/templates) repository at the tag matching the CLI's release (e.g. `v4.0.0-preview.3`) via `degit`, pre-applies a middleware preset for `application` projects, runs `<pm> install`, and rewrites `package.json#name` to the project folder.
+
+## Templates
+
+| Template | When to pick it |
+| --- | --- |
+| `application` | Default REST/GraphQL API. `AppExpress` + DI container, four lifecycle hooks, controllers, middleware presets, Jest with `createTestApp`. |
+| `application-with-events` | Same as `application` plus the type-safe Event Bus example wired in (`UserCreatedEvent` + `WelcomeEmailHandler` + `setupEventSystemForExpress`). Selected via the `--events` flag or the interactive prompt. |
+| `micro` | Single-file lightweight HTTP service. `micro()` fluent factory in `src/api.ts`, no DI. Ships serverless / circuit breaker / service mesh / service client examples in `examples/`. |
+
+> The fourth template, `provider`, is scaffolded by **[`expressots create --provider`](./providers.mdx)**, not `expressots new`. Use it when you are publishing a reusable `@expressots/*`-style npm package.
+
+```bash
+# Application (REST/GraphQL API)
+expressots new my-api -t application -p npm -s api
+
+# Application + events example
+expressots new my-api -t application -p npm -s api --events
+
+# Micro service
+expressots new my-edge -t micro -p npm
+```
+
+## Presets
+
+Presets only apply to the `application` and `application-with-events` templates. They pre-fill `src/app.ts#configureServices` with a middleware preset call so the new project starts with sensible defaults.
+
+| Preset (`-s`) | What it pre-applies | Extra deps installed |
+| --- | --- | --- |
+| `api` (default) | `Middleware.applyPreset("api")`: body parsing, security headers, CORS, compression, rate limit | `compression`, `cors`, `helmet`, `express-rate-limit` |
+| `web` | `Middleware.applyPreset("web")`: `api` plus cookies and session support | `cookie-parser`, `express-session` |
+| `graphql` | `Middleware.applyPreset("graphql")` plus an Apollo Server scaffold | `@apollo/server`, `@as-integrations/express5`, `graphql`, `compression`, `cors`, `helmet` |
+| `microservice` | `Middleware.applyPreset("microservice")`: minimal stack for service-to-service traffic | `compression` |
+| `minimal` | `this.Middleware.parse()` only: you wire everything yourself | none |
+
+```bash
+expressots new my-api -t application -p npm -s graphql
+```
+
+## Events example flag
+
+`--events` (alias `-e`) only applies to the Application templates. When set, the CLI uses the `application-with-events` template instead of `application`. The generated project gets a working type-safe Event Bus example:
+
+```text
+src/events/
+├── user-created.event.ts        # Typed event payload
+└── welcome-email.handler.ts     # Class-level @OnEvent handler, auto-discovered
+```
+
+…and `app.ts` calls `setupEventSystemForExpress(this.container.Container)` inside `configureServices()`. See [Event System](../features/events.mdx) for the full reference.
+
+```bash
+expressots new my-api -t application -p npm -s api -e
+```
+
+## Package managers
+
+Choices: `npm`, `yarn`, `pnpm`, `bun`. **`bun` is unavailable on Windows** for `expressots new`.
+
+```bash
+expressots new my-app -t application -p npm
+expressots new my-app -t application -p yarn
+expressots new my-app -t application -p pnpm
+expressots new my-app -t application -p bun   # not on Windows
+```
+
+## Options
+
+| Flag | Alias | Type | Description |
+| --- | --- | --- | --- |
+| `--template` | `-t` | `application` \| `micro` | Template to scaffold. |
+| `--package-manager` | `-p` | `npm` \| `yarn` \| `pnpm` \| `bun` | Install backend. |
+| `--preset` | `-s` | `api` \| `web` \| `graphql` \| `microservice` \| `minimal` | Middleware preset (Application templates only). |
+| `--events` | `-e` | boolean | Use `application-with-events` (Application templates only). Pass the flag alone (`-e`), not `-e interactive`. |
+| `--directory` | `-d` | string | Parent directory for the new project. |
+
+> **`-t` and `-p` go together.** The CLI requires both when you use either one (yargs `implies`). Example: `expressots new my-api -t application -p npm`. Pass neither flag to get the interactive prompts instead.
+>
+> **`ex` is an alias** for `expressots` (same binary from `@expressots/cli`).
+
+## Interactive vs silent
+
+Without any flags the CLI prompts for every choice:
+
+```bash
+expressots new my-api
+# ? Project name › my-api
+# ? Package manager › npm
+# ? Template › application
+# ? Middleware preset › API :: REST API with security, compression, and auto-logging.
+# ? Include the type-safe Event Bus example? › No
+```
+
+With the flags above it runs silently and never blocks for input: ideal for CI scripts, template generators, or `npx` recipes.
+
+> **Preset default:** when `-s` is omitted in silent mode with the `application` template, the CLI defaults to `-s api` (the recommended preset). This means `expressots new my-api -t application -p npm` and `expressots new my-api -t application -p npm -s api` produce the same project.
+
+## Environment overrides
+
+The scaffold flow reads a few environment variables aimed at contributors and pre-release testers. None of them are required for normal use.
+
+| Variable | Effect |
+| --- | --- |
+| `EXPRESSOTS_TEMPLATE_REF` | Override the templates ref. Set to `feature/v4.0`, `main`, a tag like `v4.0.0`, or any git ref. Useful for testing template changes before they ship. |
+| `EXPRESSOTS_DEV=1` | Marks the run as a dev/contributor run. Pairs with the two flags below. |
+| `EXPRESSOTS_USE_LOCAL_TEMPLATES=1` | Together with `EXPRESSOTS_DEV=1`, copies templates from a local checkout instead of cloning from GitHub. Set `EXPRESSOTS_TEMPLATE_LOCAL_PATH` to the absolute path of your `expressots/templates` checkout. |
+| `EXPRESSOTS_SKIP_INSTALL=1` | Together with `EXPRESSOTS_DEV=1`, skips `<pm> install`. The placeholder substitution and preset file injection still run, so the resulting project is structurally complete; you just install dependencies yourself. |
+
+For preview CLIs (`-preview.x`, `-alpha.x`, `-beta.x`, `-rc.x`), if the templates tag for that version doesn't exist on GitHub yet the CLI **automatically falls back to the `feature/v4.0` branch** and prints a yellow warning. Pass `EXPRESSOTS_TEMPLATE_REF=...` to take manual control.
+
+## What happens after `new`
+
+1. Resolve the template ref (`v${BUNDLE_VERSION}`, then `feature/v4.0` for previews, then `EXPRESSOTS_TEMPLATE_REF` if set).
+2. `degit expressots/templates/<template>#<ref>` into the project folder.
+3. **For `application` / `application-with-events`**: inject preset deps into `package.json`, drop preset-specific files (e.g. `graphql/schema.ts` for the GraphQL preset), and replace `// __MIDDLEWARE_PRESET_PLACEHOLDER__` in `src/app.ts` with the matching `Middleware.applyPreset(...)` call.
+4. `<pm> install` (skipped under `EXPRESSOTS_SKIP_INSTALL=1`).
+5. Rewrite `package.json#name` to the project folder name.
+
+## After it finishes
+
+```bash
+cd my-api
+npm run dev
+```
+
+The dev server starts with `tsx --watch`, the Studio Agent attaches on `ws://localhost:3334`, and the banner prints with route counts, middleware counts, and startup time.
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| `Missing dependent arguments: template -> package-manager` | You passed `-t` without `-p` (or the reverse). Add both, e.g. `-t application -p npm`, or drop both flags for interactive mode. |
+| `Invalid values: package-manager, Given: "interactive"` | `-e` is boolean only. Use `-e` to enable events, or omit all flags for interactive prompts. Never pass `-e interactive`. |
+| `Node version not supported` | Install Node `>= 20.18.0`. The CLI warns outside the `20–24` tested range. |
+| `bun` missing from choices | Expected on Windows. Use `npm`, `yarn`, or `pnpm`. |
+| `degit ... permission denied` / `MISSING_REF` | Templates tag for this CLI version is not on GitHub yet. The CLI auto-falls back to `feature/v4.0` for preview builds. Override with `EXPRESSOTS_TEMPLATE_REF=<branch-or-tag>`. |
+| Existing folder with the same name | `degit` refuses to overwrite. Remove or rename the folder first. |
+| Need a fully offline scaffold | `EXPRESSOTS_DEV=1 EXPRESSOTS_USE_LOCAL_TEMPLATES=1 EXPRESSOTS_TEMPLATE_LOCAL_PATH=<abs-path-to-templates>` |
+
+## See also
+
+- [`generate`](./generate.mdx): scaffold resources inside the new project.
+- [`providers`](./providers.mdx): `expressots create --provider` for the `provider` template.
+- [`running`](./running.mdx): `dev` / `build` / `prod`.
+- [Bootstrap](../core/bootstrap.mdx): every option `bootstrap()` accepts.
+- [Middleware](../features/middleware.mdx): what each preset actually does.

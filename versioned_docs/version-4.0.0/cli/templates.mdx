@@ -1,0 +1,487 @@
+---
+sidebar_position: 12
+title: Templates
+description: Manage the cached CI/CD / Docker / Kubernetes / migration templates.
+---
+
+# Templates
+
+ExpressoTS CLI uses a dynamic template system that allows the community to contribute and customize templates for CI/CD pipelines, Docker configurations, Kubernetes manifests, and migration guides.
+
+## Overview
+
+The template system features:
+
+- **Remote Templates**: Automatically fetched from GitHub
+- **Local Caching**: Templates cached locally for offline usage
+- **Community Contributions**: Anyone can contribute templates
+- **Version Management**: Templates are versioned independently
+- **Embedded Fallback**: CLI works offline with embedded templates
+- **Customizable**: Use your own template repository
+
+## Template Sources
+
+Templates are fetched in the following order:
+
+1. **Local Cache** (`~/.expressots/cache/templates/`) - 24-hour TTL
+2. **Remote Repository** (GitHub: `expressots/templates`)
+3. **Embedded Fallback** (Built into CLI)
+
+This ensures the CLI always works, even offline.
+
+## Available Templates
+
+### CI/CD Pipelines
+
+Generate CI/CD pipelines for multiple platforms:
+
+```bash
+expressots cicd generate github --strategy basic
+expressots cicd generate gitlab --strategy comprehensive
+expressots cicd generate circleci --strategy security-focused
+```
+
+**Supported Platforms:**
+- GitHub Actions
+- GitLab CI
+- CircleCI
+- Jenkins
+- Bitbucket Pipelines
+- Azure DevOps
+
+**Strategies:**
+- `basic` - Lint, test, build
+- `comprehensive` - Adds security scanning, E2E tests, Docker builds
+- `security-focused` - Maximum security with Trivy, Snyk, OWASP checks
+
+### Docker Templates
+
+Generate Docker configurations:
+
+```bash
+expressots containerize docker --env production
+expressots containerize docker --env development
+```
+
+**Templates:**
+- `Dockerfile` (production)
+- `Dockerfile.development`
+- `docker-compose.yml`
+- `docker-compose.development.yml`
+
+### Kubernetes Templates
+
+Generate Kubernetes manifests:
+
+```bash
+expressots containerize k8s
+```
+
+**Templates:**
+- Deployment
+- Service
+- ConfigMap
+- Ingress
+
+### Migration Templates
+
+Generate migration guides and configurations:
+
+```bash
+expressots migrate generate --from heroku --to railway
+```
+
+**Supported Migrations:**
+- Heroku → Railway/Render/Fly.io
+- Docker Compose → Kubernetes
+- Generic migrations to major cloud providers
+
+## Managing Templates
+
+### List Available Templates
+
+```bash
+# List all templates
+expressots templates list
+
+# Filter by category
+expressots templates list --category cicd
+
+# Filter by platform
+expressots templates list --platform github
+```
+
+### Update Template Cache
+
+Fetch the latest templates from the remote repository:
+
+```bash
+expressots templates update
+```
+
+This command:
+1. Fetches the latest `manifest.json` from GitHub
+2. Downloads updated templates
+3. Caches them locally for 24 hours
+4. Shows update summary
+
+### Clear Template Cache
+
+Remove all cached templates:
+
+```bash
+expressots templates clear
+```
+
+### Show Template Information
+
+```bash
+# Show info for a specific category
+expressots templates info cicd
+
+# Show info for a specific platform
+expressots templates info cicd github
+```
+
+### Check Template System Status
+
+```bash
+expressots templates status
+```
+
+Displays:
+- Online/offline status
+- Cache statistics
+- Template source (remote or embedded)
+- Cache age and location
+
+## Custom Template Repositories
+
+### Using a Custom Repository
+
+Point the CLI to your own template repository:
+
+```bash
+# Set custom repository
+expressots templates repo set https://github.com/myorg/templates
+
+# With specific branch
+expressots templates repo set https://github.com/myorg/templates dev
+
+# Reset to default
+expressots templates repo reset
+```
+
+### Local Development
+
+Test templates locally before publishing:
+
+```bash
+# Use local directory
+expressots templates repo set file:///path/to/local/templates
+
+# Update cache
+expressots templates update
+
+# Test template generation
+expressots cicd generate github
+
+# Reset when done
+expressots templates repo reset
+```
+
+## Template Syntax
+
+Templates use Mustache-like syntax for variable substitution:
+
+### Simple Variables
+
+```yaml
+name: {{projectName}}
+version: {{version}}
+```
+
+### Conditional Blocks
+
+```yaml
+{{#includeSecurity}}
+security:
+  - run: npm audit
+{{/includeSecurity}}
+```
+
+### Negative Conditionals
+
+```yaml
+{{^isProduction}}
+dev-tools:
+  - nodemon
+{{/isProduction}}
+```
+
+### Loops
+
+```yaml
+{{#each services}}
+  - name: {{.}}
+{{/each}}
+```
+
+## Contributing Templates
+
+### Process Overview
+
+1. **Fork** the `expressots/templates` repository
+2. **Edit** template files
+3. **Update** `manifest.json` with new version
+4. **Test** locally
+5. **Submit** pull request
+
+### Example: Adding a New CI Strategy
+
+Let's say you want to add a "performance-testing" strategy for GitHub Actions:
+
+1. **Create the template file:**
+
+```yaml
+# templates/cicd/github/performance-testing.yml
+name: Performance Testing CI
+
+on:
+  push:
+    branches: [{{branch}}]
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+      - name: Install dependencies
+        run: {{installCmd}}
+      - name: Run performance tests
+        run: npm run test:performance
+```
+
+2. **Update manifest.json:**
+
+```json
+{
+  "version": "1.1.0",
+  "templates": {
+    "cicd": {
+      "github": {
+        "performance-testing": {
+          "path": "cicd/github/performance-testing.yml",
+          "version": "1.0.0",
+          "description": "Performance-focused testing pipeline"
+        }
+      }
+    }
+  }
+}
+```
+
+3. **Test locally:**
+
+```bash
+expressots templates repo set https://github.com/YOUR_USERNAME/templates
+expressots templates update
+expressots cicd generate github --strategy performance-testing
+```
+
+4. **Submit PR** to `expressots/templates`
+
+### Versioning Guidelines
+
+**Patch (1.0.1):**
+- Bug fixes
+- Typo corrections
+- Comment improvements
+
+**Minor (1.1.0):**
+- New features
+- New variables added (backward compatible)
+- Enhanced functionality
+
+**Major (2.0.0):**
+- Breaking changes
+- Removed variables
+- Changed template structure
+
+### Available Variables
+
+When creating templates, you can use these variables:
+
+**CI/CD Templates:**
+```
+{{projectName}}      - Project name
+{{nodeVersion}}      - Node.js version
+{{packageManager}}   - npm, yarn, or pnpm
+{{strategy}}         - CI strategy name
+{{branch}}           - Git branch
+{{installCmd}}       - Install command (npm ci, etc.)
+{{testCmd}}          - Test command
+{{buildCmd}}         - Build command
+{{lintCmd}}          - Lint command
+{{dockerRegistry}}   - Docker registry URL
+{{deployTarget}}     - Deployment target
+{{port}}             - Application port
+
+# Conditionals
+{{#includeSecurity}}...{{/includeSecurity}}
+{{#includeE2E}}...{{/includeE2E}}
+{{#includeCoverage}}...{{/includeCoverage}}
+```
+
+**Docker Templates:**
+```
+{{nodeVersion}}           - Node.js version
+{{packageManager}}        - Package manager
+{{entryPoint}}            - Application entry point
+{{port}}                  - Application port
+{{healthCheckEndpoint}}   - Health check path
+{{projectName}}           - Project name
+{{installCommand}}        - Install command
+{{buildCommand}}          - Build command
+
+# Conditionals
+{{#hasLocalDeps}}...{{/hasLocalDeps}}
+```
+
+**Kubernetes Templates:**
+```
+{{appName}}          - Application name
+{{namespace}}        - K8s namespace
+{{port}}             - Application port
+{{replicas}}         - Number of replicas
+{{memory}}           - Memory limit
+{{cpu}}              - CPU limit
+{{healthCheckPath}}  - Health check endpoint
+```
+
+## Configuration
+
+Template settings are stored in `~/.expressots/config.json`:
+
+```json
+{
+  "templates": {
+    "repository": "expressots/templates",
+    "branch": "main",
+    "cacheTTL": 86400
+  }
+}
+```
+
+**Options:**
+- `repository` - GitHub repository (format: `owner/repo`)
+- `branch` - Git branch to use
+- `cacheTTL` - Cache time-to-live in seconds (default: 24 hours)
+
+## Troubleshooting
+
+### Templates Not Updating
+
+```bash
+# Clear cache and force update
+expressots templates clear
+expressots templates update
+```
+
+### Offline Usage
+
+The CLI automatically falls back to embedded templates when offline. You'll see:
+
+```
+Source: (embedded fallback)
+```
+
+### Custom Repository Issues
+
+If your custom repository isn't working:
+
+1. **Check repository format:** `owner/repo` (without `https://github.com/`)
+2. **Verify branch exists:** Default is `main`
+3. **Ensure manifest.json is valid:** Must be valid JSON at root
+4. **Check file structure:** Must match expected paths in manifest
+
+```bash
+# Debug: Check current config
+expressots templates status
+
+# Reset to default if needed
+expressots templates repo reset
+```
+
+### Template Variables Not Rendering
+
+If variables aren't being substituted:
+
+1. **Check variable names** match exactly (case-sensitive)
+2. **Verify conditional syntax** uses `{{#var}}` not `{{if var}}`
+3. **Test template locally** before submitting PR
+
+## Best Practices
+
+### For Template Users
+
+1. **Keep cache updated:** Run `expressots templates update` monthly
+2. **Use appropriate strategies:** Start with `basic`, upgrade as needed
+3. **Review generated files:** Always check outputs before committing
+4. **Test in CI/CD:** Verify pipelines work in your environment
+
+### For Template Contributors
+
+1. **Document variables:** Add comments explaining each variable
+2. **Test thoroughly:** Test on multiple Node versions and platforms
+3. **Follow conventions:** Match existing template style
+4. **Keep it simple:** Start basic, add features incrementally
+5. **Include descriptions:** Add helpful descriptions in manifest.json
+6. **Maintain backward compatibility:** Don't remove existing variables
+
+## Examples
+
+### Generate GitHub Actions with Security
+
+```bash
+expressots cicd generate github \
+  --strategy comprehensive \
+  --security \
+  --e2e \
+  --coverage
+```
+
+### Use Custom Templates for Organization
+
+```bash
+# One-time setup
+expressots templates repo set mycompany/expressots-templates
+
+# Team members automatically get company templates
+expressots cicd generate github
+```
+
+### Create Organization-Specific Templates
+
+1. Fork `expressots/templates`
+2. Add company-specific configurations
+3. Update Docker registry URLs, deployment targets
+4. Share repository with team
+5. Everyone uses: `expressots templates repo set mycompany/templates`
+
+## Related Commands
+
+- [`expressots cicd`](./overview.mdx#container--deployment) - Generate CI/CD pipelines
+- [`expressots containerize`](./overview.mdx#container--deployment) - Generate Docker/K8s configs
+- [`expressots migrate`](./overview.mdx#container--deployment) - Generate migration guides
+- [`expressots costs`](./pricing.mdx) - Pricing data management
+
+---
+
+## Next Steps
+
+- [Learn about CI/CD generation](./overview.mdx#container--deployment)
+- [Explore container configurations](./overview.mdx#container--deployment)
+- [Manage pricing data](./pricing.mdx)

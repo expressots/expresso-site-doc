@@ -1,0 +1,928 @@
+---
+sidebar_position: 6
+title: Testing Module
+description: Comprehensive testing utilities for unit, integration, and E2E testing.
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Testing Module
+
+ExpressoTS v4 includes a powerful testing module that provides comprehensive utilities for unit, integration, and end-to-end testing with zero-config setup.
+
+## Overview
+
+The testing module provides:
+
+-   **Zero-Config Setup**: Create fully functional test apps with one function call
+-   **Smart Mocks**: Auto-suggestion of dependencies with full TypeScript support
+-   **Fluent HTTP Testing**: Chainable, readable API better than supertest
+-   **Snapshot Testing**: API snapshot testing with diff output
+-   **Load Testing**: Built-in performance testing utilities
+-   **Database Testing**: Fixtures and test database management
+
+## Getting Started
+
+### Installation
+
+The testing module is included in `@expressots/core`:
+
+```typescript
+import { createTestApp, request, mockProvider } from "@expressots/core";
+```
+
+### Zero-Config Test Setup
+
+Create a fully functional test application with a single function call:
+
+```typescript
+import { createTestApp } from "@expressots/core";
+import { App } from "./app";
+
+describe("UserController", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close();
+    });
+
+    test("GET /users returns user list", async () => {
+        const response = await testApp.request.get("/users");
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+### createTestApp Return Value
+
+The `createTestApp` function returns:
+
+```typescript
+const {
+    app,        // The Express application instance
+    container,  // The DI container for resolving services
+    request,    // Fluent HTTP testing client
+    close,      // Cleanup function
+} = await createTestApp(App);
+```
+
+## Fluent HTTP Testing
+
+The fluent request API provides a chainable, readable interface for HTTP testing:
+
+### Basic Requests
+
+```typescript
+import { request } from "@expressots/core";
+
+// GET request
+await request(app).get("/users").expectStatus(200);
+
+// POST request
+await request(app)
+    .post("/users")
+    .send({ name: "John", email: "john@test.com" })
+    .expectStatus(201);
+
+// PUT request
+await request(app)
+    .put("/users/123")
+    .send({ name: "Jane" })
+    .expectStatus(200);
+
+// DELETE request
+await request(app).delete("/users/123").expectStatus(204);
+```
+
+### Response Assertions
+
+```typescript
+await request(app)
+    .get("/users/123")
+    .expectStatus(200)
+    .expectBody<User>({
+        id: 123,
+        name: "John",
+        email: "john@test.com",
+    })
+    .expectHeaders({ "content-type": "application/json" });
+```
+
+### Reading the parsed response
+
+Most assertions are chainable, but you often need to drill into the response body or headers after the chain has run. Two terminal methods return a `FluentResponse<T>`:
+
+| Method | When to use it |
+| --- | --- |
+| `.execute()` | The standard finisher. Runs the request, validates every chained `expect…` matcher, and resolves to a `FluentResponse<T>`. |
+| `.end()` | Alias kept for ergonomic parity with `supertest`. Identical behaviour to `.execute()`. |
+
+```typescript
+import { request, FluentResponse } from "@expressots/core";
+
+const response: FluentResponse<{ status: string; uptime: number }> = await request(app)
+    .get("/api/health")
+    .expectStatus(200)
+    .execute();
+
+expect(response.body.status).toBe("ok");
+expect(typeof response.body.uptime).toBe("number");
+expect(response.headers["content-type"]).toMatch(/application\/json/);
+```
+
+The `FluentResponse<T>` body type defaults to `any`, so this works without any explicit generic at all (matches the templates' default style):
+
+```typescript
+const response = await testApp.request.get("/api/health").execute();
+
+expect(response.body.status).toBe("ok");        // no generic needed
+expect(typeof response.body.uptime).toBe("number");
+```
+
+Pass an explicit generic when you want the body to be **strictly typed** (and protected by TypeScript) instead of `any`:
+
+```typescript
+interface HealthResponse {
+    status: "ok" | "degraded";
+    uptime: number;
+}
+
+const response = await testApp.request
+    .get("/api/health")
+    .expectStatus(200)
+    .execute<HealthResponse>();
+
+response.body.status;   // "ok" | "degraded"
+response.body.uptime;   // number
+response.body.foo;      // ❌ Type error: Property 'foo' does not exist
+```
+
+### Performance Assertions
+
+```typescript
+// Assert response time
+await request(app)
+    .get("/users")
+    .expectStatus(200)
+    .expectTime({ lessThan: 100 }); // Response under 100ms
+```
+
+### Custom Assertions
+
+```typescript
+await request(app)
+    .get("/users/123")
+    .expectStatus(200)
+    .expect((user: User) => {
+        // Custom assertions with full TypeScript support
+        expect(user.email).toContain("@");
+        expect(user.createdAt).toBeDefined();
+    });
+```
+
+### Predicate Assertions
+
+```typescript
+await request(app)
+    .get("/users")
+    .expectStatus(200)
+    .expectBody<User[]>((users) => users.length > 0);
+```
+
+### Regex Matching
+
+```typescript
+await request(app)
+    .post("/users")
+    .send({ name: "John" })
+    .expectStatus(201)
+    .expectHeader("location", /\/users\/\d+/);
+```
+
+## Smart Mocks
+
+The `mockProvider` function provides intelligent mocking with TypeScript auto-completion:
+
+```typescript
+import { mockProvider } from "@expressots/core";
+
+describe("UserService", () => {
+    test("createUser calls repository", async () => {
+        const { service, mocks } = mockProvider(UserService, {
+            mocks: {
+                UserRepository: {
+                    findById: jest.fn().mockResolvedValue(mockUser),
+                    create: jest.fn().mockResolvedValue(mockUser),
+                },
+                EmailService: {
+                    sendWelcomeEmail: jest.fn().mockResolvedValue(true),
+                },
+            },
+        });
+
+        await service.createUser({ email: "test@test.com" });
+
+        // Verify mock calls
+        expect(mocks.UserRepository.create).toHaveBeenCalled();
+        expect(mocks.EmailService.sendWelcomeEmail).toHaveBeenCalled();
+    });
+});
+```
+
+### Mock Overrides
+
+Override specific methods per test:
+
+```typescript
+test("handles repository error", async () => {
+    const { service, mocks } = mockProvider(UserService, {
+        mocks: {
+            UserRepository: {
+                create: jest.fn().mockRejectedValue(new Error("DB Error")),
+            },
+        },
+    });
+
+    await expect(service.createUser(dto)).rejects.toThrow("DB Error");
+});
+```
+
+## Snapshot Testing
+
+Test API response structures with snapshots:
+
+```typescript
+import { snapshotRequest } from "@expressots/core";
+
+describe("API Snapshots", () => {
+    test("GET /users matches snapshot", async () => {
+        await snapshotRequest(app).get("/users").expect();
+        // Creates snapshot on first run, compares on subsequent runs
+    });
+
+    test("POST /users response structure", async () => {
+        await snapshotRequest(app)
+            .post("/users")
+            .send({ name: "Test" })
+            .expectSnapshot({
+                // Ignore dynamic fields
+                ignore: ["id", "createdAt", "updatedAt"],
+            });
+    });
+});
+```
+
+### Snapshot Benefits
+
+-   **Detect Breaking Changes**: Automatically detect API structure changes
+-   **Ignore Dynamic Fields**: Exclude timestamps, IDs, etc.
+-   **Visual Diffs**: Clear diff output showing exactly what changed
+
+## Load Testing
+
+Built-in load testing utilities for performance testing:
+
+```typescript
+import { loadTest } from "@expressots/core";
+
+describe("Performance Tests", () => {
+    test("handles concurrent requests", async () => {
+        const results = await loadTest(app, {
+            endpoint: "/users",
+            method: "GET",
+            concurrent: 100,
+            duration: "10s",
+            rampUp: "2s", // Gradually increase load
+        });
+
+        // Comprehensive metrics
+        expect(results.totalRequests).toBeGreaterThan(100);
+        expect(results.averageResponseTime).toBeLessThan(100);
+        expect(results.maxResponseTime).toBeLessThan(500);
+        expect(results.errors).toBe(0);
+        expect(results.throughput).toBeGreaterThan(50); // requests/second
+    });
+});
+```
+
+### Percentile Metrics
+
+```typescript
+test("response time percentiles", async () => {
+    const results = await loadTest(app, {
+        endpoint: "/api/data",
+        concurrent: 50,
+        duration: "30s",
+    });
+
+    // Percentile assertions
+    expect(results.p50ResponseTime).toBeLessThan(50);  // 50th percentile
+    expect(results.p95ResponseTime).toBeLessThan(200); // 95th percentile
+    expect(results.p99ResponseTime).toBeLessThan(500); // 99th percentile
+});
+```
+
+### Real-Time Assertions
+
+```typescript
+test("maintains performance under load", async () => {
+    const results = await loadTest(app, {
+        endpoint: "/api/data",
+        concurrent: 100,
+        duration: "60s",
+        assertions: {
+            maxErrorRate: 0.01,  // Max 1% error rate
+            minThroughput: 50,   // Min 50 req/s
+            maxP95: 200,         // Max 200ms p95
+        },
+    });
+});
+```
+
+## Database Testing
+
+Utilities for testing with databases:
+
+```typescript
+import { createTestDatabase } from "@expressots/core";
+
+describe("Database Tests", () => {
+    const db = createTestDatabase({
+        type: "in-memory", // or "postgres", "mysql"
+        fixtures: [userFixtures, postFixtures],
+    });
+
+    beforeEach(async () => {
+        await db.reset(); // Reset to fixtures between tests
+    });
+
+    test("user repository creates user", async () => {
+        const user = await userRepository.create({ name: "Test" });
+
+        // Query test database directly
+        const dbUser = await db.query(
+            "SELECT * FROM users WHERE id = $1",
+            [user.id]
+        );
+        expect(dbUser).toMatchObject({ name: "Test" });
+    });
+});
+```
+
+## Request Context Mocking
+
+Mock the entire request context for testing guards and middleware:
+
+```typescript
+import { mockContext } from "@expressots/core";
+
+describe("Guards", () => {
+    test("admin guard allows admin users", async () => {
+        const context = mockContext({
+            user: { id: 123, role: "admin" },
+            headers: { authorization: "Bearer token" },
+            params: { id: "456" },
+        });
+
+        const guard = container.get(AdminGuard);
+        const result = await guard.canActivate(context);
+
+        expect(result).toBe(true);
+    });
+
+    test("admin guard rejects non-admin users", async () => {
+        const context = mockContext({
+            user: { id: 123, role: "user" },
+        });
+
+        const guard = container.get(AdminGuard);
+        const result = await guard.canActivate(context);
+
+        expect(result).toBe(false);
+    });
+});
+```
+
+## Integration with Jest
+
+The testing module integrates seamlessly with Jest:
+
+### Custom Matchers
+
+Call `setupExpressoTSMatchers()` once in your test setup file (or at the top of every spec) to extend Jest with the ExpressoTS-specific matchers shipped by `@expressots/core`:
+
+```typescript
+// jest.setup.ts (referenced from jest.config.ts: setupFilesAfterEach: ["<rootDir>/jest.setup.ts"])
+import { setupExpressoTSMatchers } from "@expressots/core";
+
+setupExpressoTSMatchers();
+```
+
+Or, equivalently, at the top of a spec:
+
+```typescript
+import { setupExpressoTSMatchers } from "@expressots/core";
+
+setupExpressoTSMatchers();
+
+describe("AppController", () => {
+    // ...
+});
+```
+
+Once registered, you can use the matchers anywhere in your specs:
+
+```typescript
+expect(response).toHaveStatus(200);
+expect(response).toHaveHeader("content-type", "application/json");
+expect(response).toBeValidUser();
+```
+
+### Lifecycle Hooks
+
+```typescript
+import { createTestApp } from "@expressots/core";
+
+describe("API Tests", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close(); // Cleanup
+    });
+
+    beforeEach(async () => {
+        // Reset state between tests if needed
+    });
+});
+```
+
+## Best Practices
+
+1. **Use createTestApp**: Avoid manual test setup when possible
+2. **Isolate tests**: Reset state between tests
+3. **Mock external services**: Use mockProvider for dependencies
+4. **Test edge cases**: Use fluent API for comprehensive assertions
+5. **Performance baselines**: Use load testing to establish baselines
+6. **Snapshot judiciously**: Snapshot critical API structures
+
+## Advanced Patterns
+
+### Testing with Guards and Interceptors
+
+Test applications with full guard and interceptor stacks:
+
+```typescript
+import { bootstrap } from "@expressots/core";
+import { setupInterceptorsForExpress, setupAuthorizationForExpress } from "@expressots/adapter-express";
+import { App } from "./app";
+
+describe("Full Stack Testing", () => {
+    let app: any;
+    let authToken: string;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+        
+        // Get test authentication token
+        authToken = await getTestAuthToken({ roles: ["admin"] });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should execute interceptors and guards in correct order", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/api/admin/dashboard`,
+            {
+                headers: { 
+                    Authorization: `Bearer ${authToken}`,
+                    "X-Request-ID": "test-123"
+                }
+            }
+        );
+
+        expect(response.status).toBe(200);
+        
+        // Verify interceptor added timing header
+        expect(response.headers.get("X-Response-Time")).toBeDefined();
+        
+        // Verify response was transformed by interceptor
+        const data = await response.json();
+        expect(data).toHaveProperty("success", true);
+        expect(data).toHaveProperty("data");
+        expect(data).toHaveProperty("timestamp");
+    });
+
+    it("should block unauthorized requests before hitting handler", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/api/admin/dashboard`
+        );
+
+        expect(response.status).toBe(401);
+        
+        // Interceptors should still run
+        expect(response.headers.get("X-Response-Time")).toBeDefined();
+    });
+});
+```
+
+### Integration Testing Patterns
+
+Test multiple components working together:
+
+```typescript
+describe("User Workflow Integration", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should complete full user registration flow", async () => {
+        // Step 1: Register user
+        const registerResponse = await fetch(
+            `http://localhost:${app.port}/auth/register`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "newuser@test.com",
+                    password: "SecurePass123!",
+                    name: "New User"
+                })
+            }
+        );
+
+        expect(registerResponse.status).toBe(201);
+        const registerData = await registerResponse.json();
+        expect(registerData).toHaveProperty("token");
+
+        // Step 2: Login with credentials
+        const loginResponse = await fetch(
+            `http://localhost:${app.port}/auth/login`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "newuser@test.com",
+                    password: "SecurePass123!"
+                })
+            }
+        );
+
+        expect(loginResponse.status).toBe(200);
+        const loginData = await loginResponse.json();
+        expect(loginData).toHaveProperty("token");
+
+        // Step 3: Access protected resource
+        const profileResponse = await fetch(
+            `http://localhost:${app.port}/users/profile`,
+            {
+                headers: { 
+                    Authorization: `Bearer ${loginData.token}`
+                }
+            }
+        );
+
+        expect(profileResponse.status).toBe(200);
+        const profile = await profileResponse.json();
+        expect(profile.email).toBe("newuser@test.com");
+    });
+});
+```
+
+### Load Testing Integration
+
+Test performance under load:
+
+```typescript
+describe("Load Testing", () => {
+    let app: any;
+
+    beforeAll(async () => {
+        app = await bootstrap(App, { port: 0 });
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    it("should handle 100 concurrent requests", async () => {
+        const promises = Array.from({ length: 100 }, (_, i) => 
+            fetch(`http://localhost:${app.port}/users`)
+        );
+
+        const responses = await Promise.all(promises);
+
+        // All requests should succeed
+        responses.forEach(response => {
+            expect(response.status).toBe(200);
+        });
+    });
+
+    it("should maintain response times under load", async () => {
+        const times: number[] = [];
+
+        for (let i = 0; i < 50; i++) {
+            const start = Date.now();
+            await fetch(`http://localhost:${app.port}/users`);
+            times.push(Date.now() - start);
+        }
+
+        // Calculate percentiles
+        times.sort((a, b) => a - b);
+        const p50 = times[Math.floor(times.length * 0.5)];
+        const p95 = times[Math.floor(times.length * 0.95)];
+        const p99 = times[Math.floor(times.length * 0.99)];
+
+        expect(p50).toBeLessThan(50);   // 50th percentile < 50ms
+        expect(p95).toBeLessThan(200);  // 95th percentile < 200ms
+        expect(p99).toBeLessThan(500);  // 99th percentile < 500ms
+    });
+
+    it("should not leak memory under sustained load", async () => {
+        const initialMemory = process.memoryUsage().heapUsed;
+
+        // Make 1000 requests
+        for (let i = 0; i < 1000; i++) {
+            await fetch(`http://localhost:${app.port}/users`);
+            
+            if (i % 100 === 0) {
+                global.gc?.(); // Force garbage collection if available
+            }
+        }
+
+        const finalMemory = process.memoryUsage().heapUsed;
+        const memoryIncrease = (finalMemory - initialMemory) / 1024 / 1024;
+
+        // Memory increase should be reasonable (< 50MB)
+        expect(memoryIncrease).toBeLessThan(50);
+    });
+});
+```
+
+### Database Testing Patterns
+
+Test with database fixtures:
+
+```typescript
+describe("Database Integration", () => {
+    let app: any;
+    let db: Database;
+
+    beforeAll(async () => {
+        // Set up test database
+        db = await createTestDatabase({
+            type: "postgres",
+            url: process.env.TEST_DATABASE_URL,
+        });
+
+        await db.migrate();
+    });
+
+    beforeEach(async () => {
+        // Reset database state between tests
+        await db.reset();
+        
+        // Load fixtures
+        await db.fixtures([
+            { table: "users", data: testUsers },
+            { table: "posts", data: testPosts }
+        ]);
+    });
+
+    afterAll(async () => {
+        await db.close();
+        await app.close();
+    });
+
+    it("should create user and persist to database", async () => {
+        const response = await fetch(
+            `http://localhost:${app.port}/users`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: "test@example.com",
+                    name: "Test User"
+                })
+            }
+        );
+
+        expect(response.status).toBe(201);
+        const user = await response.json();
+
+        // Verify in database
+        const dbUser = await db.query(
+            "SELECT * FROM users WHERE id = $1",
+            [user.id]
+        );
+
+        expect(dbUser).toMatchObject({
+            email: "test@example.com",
+            name: "Test User"
+        });
+    });
+});
+```
+
+## Testing Troubleshooting
+
+### Tests Timing Out
+
+**Problem:** Tests hang and timeout
+
+**Solutions:**
+
+1. **Always close servers in afterAll:**
+```typescript
+afterAll(async () => {
+    await app.close();
+});
+```
+
+2. **Use dynamic ports (port 0):**
+```typescript
+const server = await bootstrap(App, { port: 0 });
+```
+
+3. **Increase timeout for slow operations:**
+```typescript
+beforeAll(async () => {
+    app = await bootstrap(App, { port: 0 });
+}, 30000); // 30 second timeout
+```
+
+### Port Already in Use
+
+**Problem:** `Error: EADDRINUSE: address already in use`
+
+**Solution:**
+```typescript
+// Always use port 0 for dynamic allocation
+const server = await bootstrap(App, { port: 0 });
+const port = await server.getPort();
+```
+
+### Memory Leaks in Tests
+
+**Problem:** Tests consume increasing memory
+
+**Solutions:**
+
+1. **Clean up properly:**
+```typescript
+afterEach(async () => {
+    await clearCache();
+    await closeConnections();
+});
+
+afterAll(async () => {
+    await app.close();
+    await database.disconnect();
+});
+```
+
+2. **Use Jest's detectOpenHandles:**
+```bash
+npm test -- --detectOpenHandles
+```
+
+3. **Force garbage collection:**
+```typescript
+afterEach(() => {
+    global.gc?.(); // Requires --expose-gc flag
+});
+```
+
+### Flaky Tests
+
+**Problem:** Tests pass sometimes, fail other times
+
+**Solutions:**
+
+1. **Add delays for async operations:**
+```typescript
+await createUser();
+await new Promise(resolve => setTimeout(resolve, 100)); // Wait for events
+const result = await checkResult();
+```
+
+2. **Use retry logic:**
+```typescript
+async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fetch(url);
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+}
+```
+
+3. **Isolate test state:**
+```typescript
+beforeEach(async () => {
+    await resetDatabase();
+    await clearCache();
+});
+```
+
+### Mock Service Issues
+
+**Problem:** Mocks not working as expected
+
+**Solution:**
+```typescript
+// ✅ Good: Create fresh mocks for each test
+beforeEach(() => {
+    mockService = {
+        method: jest.fn().mockResolvedValue(result)
+    } as any;
+});
+
+// ❌ Bad: Reuse mocks across tests
+const mockService = { method: jest.fn() }; // Declared once
+```
+
+---
+
+6. **Snapshot judiciously**: Snapshot critical API structures
+
+## Example: Complete Test Suite
+
+```typescript
+import { createTestApp, request, mockProvider } from "@expressots/core";
+import { App } from "./app";
+import { UserService } from "./user.service";
+
+describe("User API", () => {
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.close();
+    });
+
+    describe("GET /users", () => {
+        test("returns user list", async () => {
+            await request(testApp.app)
+                .get("/users")
+                .expectStatus(200)
+                .expectBody<User[]>((users) => users.length >= 0);
+        });
+
+        test("responds within 100ms", async () => {
+            await request(testApp.app)
+                .get("/users")
+                .expectStatus(200)
+                .expectTime({ lessThan: 100 });
+        });
+    });
+
+    describe("POST /users", () => {
+        test("creates a new user", async () => {
+            await request(testApp.app)
+                .post("/users")
+                .send({ name: "John", email: "john@test.com" })
+                .expectStatus(201)
+                .expect((user: User) => {
+                    expect(user.id).toBeDefined();
+                    expect(user.name).toBe("John");
+                });
+        });
+
+        test("validates required fields", async () => {
+            await request(testApp.app)
+                .post("/users")
+                .send({})
+                .expectStatus(400);
+        });
+    });
+});
+```
+
+---
+
+## Support the Project
+
+ExpressoTS is MIT-licensed open source. See the **[support guide](../support-us.mdx)** to contribute.

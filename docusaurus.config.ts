@@ -16,8 +16,7 @@ const config: Config = {
     deploymentBranch: "gh-pages",
     trailingSlash: false,
 
-    onBrokenLinks: "ignore", // 'throw' | 'warn' | 'ignore'
-    onBrokenMarkdownLinks: "throw",
+    onBrokenLinks: "throw", // 'throw' | 'warn' | 'ignore'
 
     i18n: {
         defaultLocale: "en",
@@ -30,19 +29,26 @@ const config: Config = {
             {
                 docs: {
                     sidebarPath: "./sidebars.ts",
+                    editUrl:
+                        "https://github.com/expressots/expresso-site-doc/edit/main/",
+                    showLastUpdateTime: true,
+                    showLastUpdateAuthor: true,
+                    breadcrumbs: true,
                     remarkPlugins: [
                         [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
                     ],
-                    lastVersion: "3.0.0",
+                    lastVersion: "4.0.0",
+                    onlyIncludeVersions: ["4.0.0", "3.0.0", "2.0.0"],
                     versions: {
-                        current: {
-                            label: "NEXT",
+                        "4.0.0": {
+                            label: "4.0.0-preview",
+                            banner: "unreleased",
                         },
                         "3.0.0": {
                             label: "3.0.0",
                         },
-                        "2.16.2": {
-                            label: "2.16.2",
+                        "2.0.0": {
+                            label: "2.0.0",
                         },
                     },
                 },
@@ -61,6 +67,14 @@ const config: Config = {
                 content: "expressots, framework, nodejs, typescript, javascript",
             },
         ],
+        announcementBar: {
+            id: "v4_preview",
+            content:
+                'ExpressoTS v4.0 Preview is available! Interceptors, events, lazy loading, Studio, and more. <a href="/docs/prologue/release">See what\'s new</a>',
+            backgroundColor: "#80f5a8",
+            textColor: "#1f1f22",
+            isCloseable: true,
+        },
         colorMode: {
             defaultMode: "dark",
             disableSwitch: true,
@@ -83,9 +97,31 @@ const config: Config = {
             items: [
                 {
                     type: "doc",
+                    docId: "core/first-steps",
+                    position: "left",
+                    label: "Getting Started",
+                },
+                {
+                    type: "doc",
+                    docId: "cli/overview",
+                    position: "left",
+                    label: "CLI",
+                },
+                {
+                    type: "doc",
+                    docId: "studio/overview",
+                    position: "left",
+                    label: "Studio",
+                },
+                {
+                    type: "doc",
                     docId: "governance",
-                    position: "right",
+                    position: "left",
                     label: "Governance",
+                },
+                {
+                    type: "search",
+                    position: "left",
                 },
                 {
                     type: "docsVersionDropdown",
@@ -105,27 +141,35 @@ const config: Config = {
                     "aria-label": "LinkedIn profile",
                     className: "header-linkedin-link",
                 },
-                {
-                    type: "search",
-                    position: "left",
-                },
             ],
         },
-        stylesheets: [
-            {
-                href: "/css/custom.css",
-                type: "text/css",
-            },
-        ],
         footer: {
-            style: "light",
+            style: "dark",
+            logo: {
+                alt: "ExpressoTS",
+                src: "img/logo.png",
+                href: "https://www.expresso-ts.com",
+                height: 48,
+            },
             links: [
                 {
                     title: "Docs",
                     items: [
                         {
-                            label: "Tutorial",
-                            to: "docs/category/guides",
+                            label: "Getting Started",
+                            to: "/docs/core/first-steps",
+                        },
+                        {
+                            label: "CLI",
+                            to: "/docs/cli/overview",
+                        },
+                        {
+                            label: "Studio",
+                            to: "/docs/studio/overview",
+                        },
+                        {
+                            label: "Upgrade Guide",
+                            to: "/docs/prologue/upgrade_guide",
                         },
                     ],
                 },
@@ -133,16 +177,20 @@ const config: Config = {
                     title: "Community",
                     items: [
                         {
-                            label: "LinkedIn",
-                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                            label: "Discord",
+                            href: "https://discord.gg/PyPJfGK",
                         },
                         {
                             label: "X (Twitter)",
                             href: "https://twitter.com/expressots",
                         },
                         {
-                            label: "Discord",
-                            href: "https://discord.gg/PyPJfGK",
+                            label: "LinkedIn",
+                            href: "https://www.linkedin.com/company/expresso-ts/?viewAsMember=true",
+                        },
+                        {
+                            label: "YouTube",
+                            href: "https://www.youtube.com/@expressots",
                         },
                     ],
                 },
@@ -150,16 +198,20 @@ const config: Config = {
                     title: "Code",
                     items: [
                         {
-                            label: "NPM Core",
+                            label: "GitHub",
+                            href: "https://github.com/expressots",
+                        },
+                        {
+                            label: "@expressots/core",
                             href: "https://www.npmjs.com/package/@expressots/core",
                         },
                         {
-                            label: "NPM CLI",
+                            label: "@expressots/cli",
                             href: "https://www.npmjs.com/package/@expressots/cli",
                         },
                         {
-                            label: "GitHub",
-                            href: "https://github.com/expressots",
+                            label: "@expressots/studio",
+                            href: "https://www.npmjs.com/package/@expressots/studio",
                         },
                     ],
                 },
@@ -174,6 +226,9 @@ const config: Config = {
     themes: ["@docusaurus/theme-mermaid"],
     markdown: {
         mermaid: true,
+        hooks: {
+            onBrokenMarkdownLinks: "throw",
+        },
     },
 };
 
