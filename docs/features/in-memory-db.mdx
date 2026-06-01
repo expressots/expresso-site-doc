@@ -1,202 +1,264 @@
 ---
 sidebar_position: 18
 title: DB in memory
-description: A simple in memory database to store data.
+description: A Prisma-like in-memory database for development, testing, and prototyping.
 ---
 
-# In memory DB
+# In-Memory DB
 
-<span class="span-table">In-memory-db</span> is a provider that uses a simple in memory database to store
-data. It is a class that can be registered in the ExpressoTS dependency injection system as a singleton.
+The **`InMemoryDBProvider`** is a built-in provider that ships with `@expressots/core`. It offers a high-performance, Prisma-like query API backed entirely by in-process memory.
 
-```ts
-this.provider.register(InMemoryDB, "Singleton");
-```
+:::info Scope: development, testing, and prototyping
+The in-memory database is designed for **development, testing, and rapid prototyping** — not as a durable production datastore. Data lives in process memory (with optional file snapshots), so it does not provide the crash safety, concurrency, or multi-process guarantees of a real database engine.
 
-The `InMemoryDB` class provides a simple and efficient way to simulate a database entirely in-memory, which can be particularly useful for testing and rapid development where a full-fledged database might be overkill.
-
-## DB inspector
-
-The `InMemoryDB` class have the ability to print tables to the console. This feature is particularly useful for debugging and testing purposes. It can also be used to quickly inspect the contents of a table.
-
-The table content will be printed to the console every time the repository is used by any endpoint that have operations that read or write to the database.
-
-Here is an image showing the output in the console of the `InMemoryDB` when we create a new user:
-
-![Application Overview](../core/img/inMemoryDB.png)
-
-:::info
-The DB inspector is enabled by default. As soon as you create a new entity and extend the BaseRepository class, the InMemoryDB will print the table to the console.
+The provider implements the universal `IDataAdapter` contract, so when you are ready for production you can swap it for a real database adapter (Prisma, TypeORM, etc.) without rewriting your repositories.
 :::
 
-## Register InMemoryDB
+## Register the provider
 
-To use the `InMemoryDB` class, you need to import it from the `@expressots/core` package and register it as a singleton in the dependency injection system. Here is an example of how to do this in a service class:
+`InMemoryDBProvider` is **not auto-registered**. Bind it explicitly as a singleton in `configureServices()`:
 
-```typescript
-import { InMemoryDB } from "@expressots/core";
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+import { InMemoryDBProvider, Scope } from "@expressots/core";
 
 export class App extends AppExpress {
-    protected configureServices(): void {
-        this.Provider.register(InMemoryDB, "Singleton");
+    async configureServices(): Promise<void> {
+        this.Provider.register(InMemoryDBProvider, Scope.Singleton);
     }
 }
 ```
 
-When registering the `InMemoryDB` class, you can specify the scope as `string` or using the `Scope` enum.
+Registering as a singleton is required so data persists across requests and so the provider's lifecycle hooks (`bootstrap`, `shutdown`) run on a single shared instance.
 
-## Create an entity
+### Optional configuration
 
-Create an entity to represent the data that will be stored in the database. The entity class should have properties that represent the fields of the data that will be stored in the database.
+Configure global behavior by retrieving the provider and calling `configure()`:
 
 ```typescript
-@provide(UserEntity)
-export class UserEntity {
-    id: string;
-    name: string;
-    email: string;
+async configureServices(): Promise<void> {
+    this.Provider.register(InMemoryDBProvider, Scope.Singleton);
 
-    constructor() {
-        this.id = randomUUID();
-    }
+    const db = this.Provider.get(InMemoryDBProvider);
+    db.configure({
+        timestamps: true,    // auto-manage createdAt / updatedAt (default: true)
+        softDelete: false,   // soft-delete via deletedAt (default: false)
+        logging: false,      // log operations to console (default: false)
+        persist: {
+            storage: "file",
+            path: "./data/db.json",
+            interval: 30000, // auto-save every 30s
+        },
+    });
 }
 ```
+
+## Define an entity
+
+Use the schema decorators to describe your entity. See **[Entities](../core/entities.mdx)** for the full decorator reference.
+
+```typescript title="src/entities/user.entity.ts"
+import { Entity, PrimaryKey, AutoGenerate, Index, Unique } from "@expressots/core";
+
+@Entity({ name: "users", timestamps: true })
+export class User {
+    @PrimaryKey()
+    @AutoGenerate("uuid")
+    id!: string;
+
+    name!: string;
+
+    @Index()
+    @Unique()
+    email!: string;
+
+    age!: number;
+}
+```
+
+## Access a table
+
+Get a table adapter from the provider with `table<T>(name, EntityClass)`. Passing the entity class enables schema metadata such as indexes, auto-generated fields, and relation `include` resolution.
+
+```typescript
+import { IEntity } from "@expressots/core";
+
+interface UserModel extends IEntity {
+    name: string;
+    email: string;
+    age: number;
+}
+
+const users = db.table<UserModel>("users", User);
+```
+
+## Prisma-like queries
+
+The table adapter exposes a Prisma-compatible API:
+
+```typescript
+// Create
+const user = await users.create({
+    data: { name: "John", email: "john@example.com", age: 30 },
+});
+
+// Create many
+await users.createMany({
+    data: [
+        { name: "Jane", email: "jane@example.com", age: 25 },
+        { name: "Bob", email: "bob@example.com", age: 40 },
+    ],
+});
+
+// Find with complex filters
+const adults = await users.findMany({
+    where: {
+        OR: [{ name: { contains: "Jo" } }, { age: { gte: 18 } }],
+    },
+    orderBy: { age: "desc" },
+    take: 10,
+});
+
+// Find one
+const byId = await users.findUnique({ where: { id: user.id } });
+const byEmail = await users.findFirst({ where: { email: "john@example.com" } });
+
+// Update
+await users.update({ where: { id: user.id }, data: { age: 31 } });
+await users.updateMany({ where: { age: { lt: 18 } }, data: { age: 18 } });
+
+// Upsert
+await users.upsert({
+    where: { id: "missing-id" },
+    update: { name: "Updated" },
+    create: { name: "New", email: "new@example.com", age: 20 },
+});
+
+// Delete
+await users.delete({ where: { id: user.id } });
+await users.deleteMany({ where: { age: { gte: 65 } } });
+
+// Count & aggregate
+const total = await users.count({ where: { age: { gte: 18 } } });
+const stats = await users.aggregate({ _avg: { age: true }, _max: { age: true } });
+```
+
+Supported `where` operators include `equals`, `not`, `in`, `notIn`, `lt`, `lte`, `gt`, `gte`, `contains`, `startsWith`, `endsWith`, and case-insensitive matching via `mode: "insensitive"`, combined with the logical operators `AND`, `OR`, and `NOT`.
 
 ## Repository pattern
 
-The repository pattern is a design pattern that abstracts the data access logic from the rest of the application. It provides a way to access and manipulate data in the database without exposing the details of the database to the rest of the application.
+For a cleaner separation, extend `BaseRepository<T>` and inject the provider. The repository delegates to the table adapter and is where you add custom query methods.
 
-Read more about the repository pattern in here: [Repositories](../guides/repositories.mdx).
+```typescript title="src/repositories/user.repository.ts"
+import { BaseRepository, InMemoryDBProvider, provide, inject } from "@expressots/core";
+import { User } from "../entities/user.entity";
 
-## Create a repository
+interface UserModel {
+    id?: string;
+    name: string;
+    email: string;
+    age: number;
+}
 
-The repository is a class that extends the `BaseRepository` class and is used to manage entities of a specific type. The repository class is part of the dependency injection system and is marked by the @provide decorator.
-
-```typescript
 @provide(UserRepository)
-export class UserRepository extends BaseRepository<UserEntity> {
-    constructor() {
-        super("users");
+export class UserRepository extends BaseRepository<UserModel> {
+    constructor(@inject(InMemoryDBProvider) db: InMemoryDBProvider) {
+        super(db, "users", User);
+    }
+
+    async findByEmail(email: string): Promise<UserModel | null> {
+        return this.findFirst({ where: { email } });
     }
 }
 ```
 
-In the class above, we are creating a repository for the `UserEntity` class. The repository is initialized with the table name `users` in the constructor, as well as the entity class `UserEntity`.
+`BaseRepository` exposes `findUnique`, `findFirst`, `findMany`, `create`, `createMany`, `update`, `updateMany`, `upsert`, `delete`, `deleteMany`, `count`, `aggregate`, and `transaction`.
 
-By extending the `BaseRepository` class, the `UserRepository` class inherits all the CRUD methods for managing entities in the database.
+### Usage in a use case
 
-## Define custom methods
+```typescript title="src/usecases/user-create.usecase.ts"
+import { provide, inject } from "@expressots/core";
+import { UserRepository } from "../repositories/user.repository";
 
-You can also define custom methods for the user repository.
-
-```typescript
-@provide(UserRepository)
-class UserRepository extends BaseRepository<UserEntity> {
-    constructor() {
-        super("users");
-    }
-
-    findByEmail(email: string): User | null {
-        const user = this.table.find((item) => item.email === email);
-        return user || null;
-    }
-}
-```
-
-## Usage in a use case
-
-You can inject the repository in the constructor or via property injection. Example:
-
-```typescript title="Injecting repository via property injection"
 @provide(UserCreateUseCase)
 export class UserCreateUseCase {
-    @inject(UserRepository) private userRepo: UserRepository;
-    @inject(UserEntity) private userEntity: UserEntity;
+    constructor(@inject(UserRepository) private userRepo: UserRepository) {}
 
-    execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
-        this.userEntity.name = payload.name;
-        this.userEntity.email = payload.email;
-
-        this.userRepo.create(this.userEntity);
-
-        return {
-            id: this.userEntity.id,
-            name: this.userEntity.name,
-            email: this.userEntity.email,
-        };
-    }
-}
-```
-
-```typescript title="Injecting repository in the constructor"
-@provide(UserCreateUseCase)
-export class UserCreateUseCase {
-    constructor(
-        @inject(UserEntity) private userEntity: UserEntity,
-        @inject(UserRepository) private userRepo: UserRepository
-    ) {}
-
-    execute(payload: IUserCreateRequestDTO): IUserCreateResponseDTO {
-        this.userEntity.name = payload.name;
-        this.userEntity.email = payload.email;
-
-        this.userRepo.create(this.userEntity);
-
-        return {
-            id: this.userEntity.id,
-            name: this.userEntity.name,
-            email: this.userEntity.email,
-        };
-    }
-}
-```
-
-Once a request is made to the `UserCreateUseCase`:
-
--   The `UserEntity` is populated with the request data.
--   The entity is created in the database using the `UserRepository`.
--   The response data is then returned to the client.
--   The `InMemoryDB` will print the table to the console, showing the newly created entity.
-
----
-
-## Testing with InMemoryDB
-
-### Unit Testing Repositories
-
-Test repositories in isolation:
-
-```typescript
-describe("UserRepository", () => {
-    let repository: UserRepository;
-
-    beforeEach(() => {
-        repository = new UserRepository();
-    });
-
-    it("should create user", () => {
-        const user = repository.create({
-            id: "1",
-            name: "John",
-            email: "john@example.com",
+    async execute(payload: IUserCreateRequestDTO): Promise<IUserCreateResponseDTO> {
+        const user = await this.userRepo.create({
+            data: { name: payload.name, email: payload.email, age: payload.age },
         });
 
-        expect(user.id).toBe("1");
-        expect(repository.findById("1")).toEqual(user);
+        return { id: user.id, name: user.name, email: user.email };
+    }
+}
+```
+
+## Relations
+
+Declare relations with `@HasOne`, `@HasMany`, `@BelongsTo`, and `@ManyToMany`, then resolve them with `include`:
+
+```typescript
+const userWithPosts = await users.findUnique({
+    where: { id: user.id },
+    include: { posts: true },
+});
+```
+
+Relation `include` requires the table adapters to be created with their entity classes (`db.table("posts", Post)`) so the schema metadata is available. See **[Entities → Relation decorators](../core/entities.mdx#relation-decorators)**.
+
+## Transactions
+
+Run multiple operations atomically. If the function throws, all changes roll back.
+
+```typescript
+await db.transaction(async (tx) => {
+    const user = await tx.table<UserModel>("users", User).create({
+        data: { name: "John", email: "john@example.com", age: 30 },
     });
 
-    it("should find by email", () => {
-        repository.create({ id: "1", name: "John", email: "john@example.com" });
-
-        const found = repository.findByEmail("john@example.com");
-
-        expect(found).not.toBeNull();
-        expect(found?.name).toBe("John");
+    await tx.table<PostModel>("posts", Post).create({
+        data: { title: "Hello", authorId: user.id },
     });
 });
 ```
 
-### E2E Testing with Controllers
+## Persistence
+
+By default data lives only in memory and is cleared on restart. Enable file-based snapshots through `configure({ persist: ... })` (see above). Snapshots are written as a JSON dump of all tables and reloaded on `bootstrap()`. This is intended for dev convenience, not high-throughput durability.
+
+## Testing
+
+The in-memory DB shines in tests — it is fast, isolated, and requires no external services.
+
+### Unit testing a repository
+
+```typescript
+import { InMemoryDBProvider } from "@expressots/core";
+import { UserRepository } from "../repositories/user.repository";
+
+describe("UserRepository", () => {
+    let repository: UserRepository;
+
+    beforeEach(() => {
+        const db = new InMemoryDBProvider();
+        repository = new UserRepository(db);
+    });
+
+    it("creates and finds a user", async () => {
+        const user = await repository.create({
+            data: { name: "John", email: "john@example.com", age: 30 },
+        });
+
+        expect(user.id).toBeDefined();
+        expect(await repository.findByEmail("john@example.com")).toMatchObject({
+            name: "John",
+        });
+    });
+});
+```
+
+### E2E testing with controllers
 
 ```typescript
 describe("User CRUD E2E", () => {
@@ -212,79 +274,39 @@ describe("User CRUD E2E", () => {
         await app.close();
     });
 
-    it("should create and retrieve user", async () => {
-        // Create
+    it("creates and retrieves a user", async () => {
         const createRes = await fetch(`http://localhost:${port}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: "John", email: "john@test.com" }),
         });
-
         const created = await createRes.json();
         expect(created.id).toBeDefined();
 
-        // Retrieve
         const getRes = await fetch(`http://localhost:${port}/users/${created.id}`);
         const user = await getRes.json();
-
         expect(user.name).toBe("John");
     });
 });
 ```
 
-### Testing Repository Methods
+For a dedicated lightweight test store, see also `createTestDatabase()` in **[Testing](./testing.mdx)**.
+
+## Health checks and metrics
+
+`InMemoryDBProvider` implements `IHealthCheck` and `IMetrics`, so it contributes to the aggregated health and metrics dashboards automatically:
 
 ```typescript
-describe("Custom Repository Methods", () => {
-    it("should find users by role", () => {
-        const repo = new UserRepository();
-        
-        repo.create({ id: "1", name: "Admin", role: "admin" });
-        repo.create({ id: "2", name: "User1", role: "user" });
-        repo.create({ id: "3", name: "User2", role: "user" });
+const health = await this.Provider.checkHealth();
+// includes "In-Memory Database Provider": { status: "healthy", details: { tables, records } }
 
-        const admins = repo.findByRole("admin");
-        const users = repo.findByRole("user");
-
-        expect(admins).toHaveLength(1);
-        expect(users).toHaveLength(2);
-    });
-});
+const metrics = this.Provider.collectMetrics();
+// includes db.tables, db.records.total, db.queries.total, per-table records/memory
 ```
 
-## Troubleshooting
+## Migrating to a real database
 
-### Data Not Persisting
-
-**Problem:** Data disappears between requests
-
-**Solution:** Ensure InMemoryDB is registered as Singleton:
-
-```typescript
-this.Provider.register(InMemoryDB, "Singleton");
-```
-
-### DB Inspector Not Showing
-
-**Problem:** Console table not printing
-
-**Solution:** The inspector only shows when operations are performed. Ensure your repository extends BaseRepository.
-
-### Entity ID Not Generated
-
-**Problem:** Entity has undefined ID
-
-**Solution:** Generate ID in entity constructor:
-
-```typescript
-class UserEntity {
-    id: string;
-
-    constructor() {
-        this.id = randomUUID();
-    }
-}
-```
+Because repositories depend on the table adapter's `IDataAdapter` contract rather than on the in-memory implementation directly, moving to a production database is a swap rather than a rewrite: register a real adapter implementing the same contract and keep your repository and use-case code unchanged.
 
 ---
 

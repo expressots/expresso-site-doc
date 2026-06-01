@@ -38,27 +38,31 @@ logger.warn("Rate limit approaching", "RateLimiter", { current: 90, limit: 100 }
 logger.error("Database connection failed", "DatabaseService", error);
 ```
 
-### InMemoryDB Provider
+### InMemoryDBProvider
 
-Simple key-value store for development and testing:
+A Prisma-like in-memory database for development, testing, and prototyping. Register it explicitly as a singleton, then access tables through a Prisma-compatible API:
 
 ```typescript
-import { InMemoryDB } from "@expressots/core";
+import { InMemoryDBProvider, Scope } from "@expressots/core";
 
-const db = new InMemoryDB();
+// In app.ts configureServices()
+this.Provider.register(InMemoryDBProvider, Scope.Singleton);
 
-// Store data
-await db.set("user:123", { name: "John", email: "john@example.com" });
+// In a repository / use case
+const users = db.table<UserModel>("users", User);
 
-// Retrieve data
-const user = await db.get("user:123");
+// Create
+await users.create({ data: { name: "John", email: "john@example.com" } });
 
-// With TTL
-await db.set("session:abc", sessionData, { ttl: 3600 });
-
-// Query
-const users = await db.query((key, value) => key.startsWith("user:"));
+// Query with filters, ordering, and pagination
+const adults = await users.findMany({
+    where: { age: { gte: 18 } },
+    orderBy: { name: "asc" },
+    take: 10,
+});
 ```
+
+See the **[In-Memory DB guide](../features/in-memory-db.mdx)** for the full API. It is intended for development and testing — swap to a dedicated database provider for production.
 
 ## Micro-Providers Package
 
@@ -443,7 +447,7 @@ await redis.onModuleInit();
 
 ### 1. Choose the Right Provider
 
--   **Development**: Use InMemoryDB, CacheProvider
+-   **Development**: Use InMemoryDBProvider, CacheProvider
 -   **Production**: Use dedicated providers (Redis, PostgreSQL)
 -   **Microservices**: Use micro-providers package
 

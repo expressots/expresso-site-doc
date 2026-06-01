@@ -340,19 +340,20 @@ Now `UserEntityFactory` can be injected into use cases and controllers.
 
 ## Base repository
 
-For the In-Memory DB, `BaseRepository<T>` provides a standard CRUD interface:
+For the In-Memory DB, `BaseRepository<T>` provides a Prisma-like CRUD interface. Inject the `InMemoryDBProvider` and pass the table name and entity class to `super()`:
 
 ```typescript
-import { BaseRepository } from "@expressots/core";
+import { BaseRepository, InMemoryDBProvider, provide, inject } from "@expressots/core";
 
+@provide(UserRepository)
 export class UserRepository extends BaseRepository<User> {
-    constructor(@inject("IDataProvider") dataProvider: IDataProvider) {
-        super(dataProvider, "users");
+    constructor(@inject(InMemoryDBProvider) db: InMemoryDBProvider) {
+        super(db, "users", User);
     }
 }
 ```
 
-`BaseRepository` exposes `create()`, `update()`, `delete()`, `find()`, `findAll()`, `query()`, and `transaction()`. See **[In-Memory DB](../features/in-memory-db.mdx)** for the full Prisma-like query API.
+`BaseRepository` exposes `findUnique()`, `findFirst()`, `findMany()`, `create()`, `createMany()`, `update()`, `updateMany()`, `upsert()`, `delete()`, `deleteMany()`, `count()`, `aggregate()`, and `transaction()`. See **[In-Memory DB](../features/in-memory-db.mdx)** for the full Prisma-like query API.
 
 ## Entities are data
 
