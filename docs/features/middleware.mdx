@@ -4,6 +4,8 @@ title: Middleware
 description: Middleware are interceptors.
 ---
 
+import middlewarePipelineImg from "../core/img/middleware-view.png";
+
 # Middleware
 
 Middlewares play a crucial role in the request-response cycle of an ExpressoTS application. They allow you to execute code, modify request and response objects, end the cycle, or pass control to the next middleware in the stack. To prevent request timeouts, it's important to call `next()` unless your middleware completes the cycle.
@@ -542,12 +544,16 @@ create reusable middleware with different configurations.
 
 ## View middleware pipeline
 
-You can view all the middlewares added to the application using the `this.middleware.viewMiddlewarePipeline()` method.
+You can view all the middlewares added to the application using the `this.Middleware.viewMiddlewarePipeline()` method.
 The goal of the `viewMiddlewarePipeline` method is to provide a visual representation of the middleware pipeline in the application.
 
-Here is the output of the `viewMiddlewarePipeline` method:
-
-![View Middleware Pipeline](../core/img/middleware-view.png)
+<div style={{ textAlign: "center" }}>
+    <img
+        src={middlewarePipelineImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 middleware pipeline: HTTP request flows through jsonParser, cors, helmet, logger, and compress middleware before reaching the route handler"
+    />
+</div>
 
 ## V4 Middleware Enhancements
 

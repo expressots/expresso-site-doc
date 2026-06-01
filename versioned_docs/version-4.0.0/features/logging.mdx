@@ -6,6 +6,7 @@ description: Production-ready logging with 11 comprehensive phases including str
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import loggingImg from "../core/img/logging.png";
 
 # Logging System
 
@@ -26,29 +27,13 @@ Production-ready logging with 11 phases.
 | Error Suggestions | Helpful hints for common errors |
 | Health Monitoring | CPU, memory, system health |
 
-```mermaid
-flowchart LR
-    subgraph Core [Logger Core]
-        Input[Log Call] --> Level[Level Filter]
-        Level --> Context[Add Context]
-        Context --> Format[Formatter]
-    end
-
-    subgraph Transports [Transports]
-        Format --> Console[Console]
-        Format --> File[File]
-        Format --> Custom[Custom]
-    end
-
-    subgraph Features [Advanced Features]
-        Redact[Redaction]
-        Query[Query System]
-        Health[Health Monitor]
-        Flow[Flow Viz]
-    end
-
-    Transports -.-> Features
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={loggingImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 logging architecture: Logger core with level filter, context, and formatter flowing to console, file, and custom transports with redaction, query, health, and flow features"
+    />
+</div>
 
 ---
 

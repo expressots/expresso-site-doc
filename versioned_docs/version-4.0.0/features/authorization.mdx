@@ -6,6 +6,7 @@ description: Wire up the v4 authorization subsystem with one call - permission h
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import authorizationImg from "../core/img/authorization.png";
 
 # Authorization Setup
 
@@ -85,18 +86,13 @@ Pass this class as the **fourth argument** of `setupAuthorizationForExpress`; th
 
 ## Preloading vs lazy resolution
 
-```mermaid
-flowchart LR
-    Req[Request arrives] --> Extract[ScopeExtractor]
-    Extract --> Auth[AuthProvider.authenticate]
-    Auth --> Preload{enablePreloading?}
-    Preload -->|yes| Resolve[PermissionPreloader resolves all permissions once]
-    Preload -->|no| OnDemand[Guards resolve permissions when first read]
-    Resolve --> Cache[Per-request cache]
-    OnDemand --> Cache
-    Cache --> Guard[Guard executes]
-    Guard --> Allow[Allow / 401 / 403]
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={authorizationImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 authorization setup: request through ScopeExtractor, AuthProvider, preloading branch, per-request cache, and guard execution"
+    />
+</div>
 
 - **Preloading on** (default): one resolution per request, cached for every guard.
 - **Preloading off**: each guard pays the resolution cost the first time it asks. Useful when only a small fraction of routes is guarded.

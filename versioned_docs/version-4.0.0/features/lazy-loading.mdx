@@ -6,6 +6,7 @@ description: Zero-config lazy loading with auto-detection, warmup strategies, an
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import lazyLoadingImg from "../core/img/lazy-loading.png";
 
 # Lazy Loading
 
@@ -22,18 +23,13 @@ Zero-config module loading with automatic route detection.
 | Performance Metrics | Built-in tracking |
 | Auto Middleware | Loads middleware for lazy routes |
 
-```mermaid
-flowchart TD
-    Request[HTTP Request] --> Check{Module Loaded?}
-    Check -->|Yes| Execute[Execute Handler]
-    Check -->|No| Load[Load Module]
-    Load --> Bind[Bind to Container]
-    Bind --> Register[Register Routes]
-    Register --> Execute
-    Execute --> Response[Return Response]
-    
-    Warmup[Warmup Strategy] -.->|Idle/Immediate| Load
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={lazyLoadingImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 lazy loading: HTTP request checks module load state, loads and binds module on first access, registers routes, then executes handler with optional warmup strategy"
+    />
+</div>
 
 ---
 

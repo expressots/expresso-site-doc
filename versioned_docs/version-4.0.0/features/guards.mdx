@@ -6,6 +6,7 @@ description: Comprehensive guard system for authentication and authorization.
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import guardsImg from "../core/img/guards.png";
 
 # Guards & Authorization
 
@@ -24,20 +25,13 @@ Guard system for authentication and authorization.
 | Conditional | `whenGuard()` for conditional execution |
 | Caching | Request-scoped result caching |
 
-```mermaid
-flowchart TD
-    Request[HTTP Request] --> Auth[Auth Provider]
-    Auth --> Extract[Extract Token]
-    Extract --> Validate[Validate Credentials]
-    Validate -->|Valid| CheckPerm{Check Permission}
-    Validate -->|Invalid| Deny[401 Unauthorized]
-    CheckPerm -->|Has Permission| Allow[Execute Handler]
-    CheckPerm -->|No Permission| Deny403[403 Forbidden]
-    CheckPerm -->|Check Cache| Cache{Cached?}
-    Cache -->|Hit| Allow
-    Cache -->|Miss| Hierarchy[Check Hierarchy]
-    Hierarchy --> Allow
-```
+<div style={{ textAlign: "center" }}>
+    <img
+        src={guardsImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS v4 guard pipeline: HTTP request through AuthProvider, credential validation, permission checks, and cache to handler execution or 401/403 denial"
+    />
+</div>
 
 ## Basic Usage
 
