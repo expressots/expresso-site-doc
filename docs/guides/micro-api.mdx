@@ -6,21 +6,24 @@ description: Build lightweight, production-ready microservices with ExpressoTS M
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import microApiImg from "../core/img/micro-api-architecture.png";
 
 # Micro API
 
-Micro API is a radically simplified template for building microservices with minimal boilerplate. Inspired by modern frameworks like Hono and Elysia, it focuses on pure simplicity while providing access to advanced features when needed.
+Micro API is a radically simplified template for building microservices with minimal boilerplate. Inspired by modern frameworks like Hono and Elysia, it focuses on pure simplicity while giving you access to the rest of `@expressots/adapter-express` when you need it.
 
-## Overview
+<img src={microApiImg} alt="Micro API architecture" />
 
-Micro API provides:
+## What you get
 
--   **Pure Simplicity**: 3 lines to get started
--   **Express-Style Conventions**: Middleware before handler
--   **Auto-Response**: Return values are automatically sent as responses
--   **Auto JSON Parsing**: Enabled by default
--   **Production Ready**: Health checks, serverless adapters
--   **Advanced Features**: CircuitBreaker, ServiceDiscovery, ServiceClient (import separately)
+| Feature | Default |
+|---|---|
+| Three-line startup | `micro()`, `app.get(...)`, `app.listen(...)` |
+| Auto-response | Return a string, object, or array; the framework calls `res.send` / `res.json` for you |
+| Auto JSON parsing | On by default |
+| Express middleware | Drop in any `RequestHandler` |
+| Studio Agent | Auto-enabled in development when the package is installed |
+| Opt-in service mesh | `CircuitBreaker`, `ServiceClient`, `ServiceDiscovery`, `ServiceProxy` (separate imports) |
 
 ## Getting Started
 
@@ -72,7 +75,7 @@ const app = micro();
 // Return objects - automatically JSON serialized
 app.get("/", () => ({
     name: "ExpressoTS Micro",
-    version: "5.0.0",
+    version: "4.0.0",
     message: "Hello from ExpressoTS Micro API!",
 }));
 

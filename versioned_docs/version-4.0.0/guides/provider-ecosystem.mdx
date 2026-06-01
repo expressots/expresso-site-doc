@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 
 # ExpressoTS Provider Ecosystem
 
-ExpressoTS providers are plug-and-play packages that extend the framework's capabilities. This guide covers built-in providers, the micro-providers package, and the future ExpressoTS Store.
+ExpressoTS providers are plug-and-play packages that extend the framework's capabilities. This guide covers the built-in providers in `@expressots/core` and the `@expressots/micro-providers` package for microservices.
 
 ## Overview
 
@@ -38,27 +38,31 @@ logger.warn("Rate limit approaching", "RateLimiter", { current: 90, limit: 100 }
 logger.error("Database connection failed", "DatabaseService", error);
 ```
 
-### InMemoryDB Provider
+### InMemoryDBProvider
 
-Simple key-value store for development and testing:
+A Prisma-like in-memory database for development, testing, and prototyping. Register it explicitly as a singleton, then access tables through a Prisma-compatible API:
 
 ```typescript
-import { InMemoryDB } from "@expressots/core";
+import { InMemoryDBProvider, Scope } from "@expressots/core";
 
-const db = new InMemoryDB();
+// In app.ts configureServices()
+this.Provider.register(InMemoryDBProvider, Scope.Singleton);
 
-// Store data
-await db.set("user:123", { name: "John", email: "john@example.com" });
+// In a repository / use case
+const users = db.table<UserModel>("users", User);
 
-// Retrieve data
-const user = await db.get("user:123");
+// Create
+await users.create({ data: { name: "John", email: "john@example.com" } });
 
-// With TTL
-await db.set("session:abc", sessionData, { ttl: 3600 });
-
-// Query
-const users = await db.query((key, value) => key.startsWith("user:"));
+// Query with filters, ordering, and pagination
+const adults = await users.findMany({
+    where: { age: { gte: 18 } },
+    orderBy: { name: "asc" },
+    take: 10,
+});
 ```
+
+See the **[In-Memory DB guide](../features/in-memory-db.mdx)** for the full API. It is intended for development and testing. Swap to a dedicated database provider for production.
 
 ## Micro-Providers Package
 
@@ -287,68 +291,6 @@ console.log(cache.getStats());
 // { size: 150, maxEntries: 500, hitRate: 0.85 }
 ```
 
-## Future: ExpressoTS Store
-
-The ExpressoTS Store will be the central hub for discovering and installing providers:
-
-### Priority Tiers
-
-#### Tier 1: Essential (Available at v4 Launch)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/redis` | Caching and sessions |
-| `@expressots/postgres` | PostgreSQL with TypeORM/Prisma |
-| `@expressots/mongodb` | MongoDB integration |
-| `@expressots/jwt-auth` | JWT authentication |
-| `@expressots/health-check` | Kubernetes health probes |
-| `@expressots/metrics` | Prometheus metrics |
-| `@expressots/mailer` | Email (SendGrid, SES, SMTP) |
-
-#### Tier 2: High Value (3-6 months post-launch)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/queue-rabbitmq` | RabbitMQ messaging |
-| `@expressots/queue-sqs` | AWS SQS integration |
-| `@expressots/grpc` | gRPC protocol |
-| `@expressots/graphql` | GraphQL integration |
-| `@expressots/s3` | AWS S3 storage |
-| `@expressots/oauth2` | OAuth2/OpenID Connect |
-| `@expressots/tracing` | Distributed tracing |
-
-#### Tier 3: Community (Ongoing)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/stripe` | Stripe payments |
-| `@expressots/paypal` | PayPal integration |
-| `@expressots/twilio` | SMS/Voice |
-| `@expressots/elasticsearch` | Search engine |
-| `@expressots/firebase-auth` | Firebase Auth |
-
-### CLI Commands
-
-```bash
-# List available providers
-expressots store list
-
-# Search providers
-expressots store search "database"
-
-# Show provider info
-expressots store info @expressots/redis
-
-# Install provider
-expressots add @expressots/redis
-
-# Update provider
-expressots update @expressots/redis
-
-# Remove provider
-expressots remove @expressots/redis
-```
-
 ## Creating Custom Providers
 
 ### Provider Interface
@@ -443,7 +385,7 @@ await redis.onModuleInit();
 
 ### 1. Choose the Right Provider
 
--   **Development**: Use InMemoryDB, CacheProvider
+-   **Development**: Use InMemoryDBProvider, CacheProvider
 -   **Production**: Use dedicated providers (Redis, PostgreSQL)
 -   **Microservices**: Use micro-providers package
 

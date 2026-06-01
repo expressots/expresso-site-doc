@@ -1,104 +1,121 @@
 ---
 sidebar_position: 10
 title: Database Integration
-description: Integrate databases with ExpressoTS using providers and repositories.
+description: Integrate databases with ExpressoTS v4 using the provider lifecycle and the built-in InMemoryDBProvider.
 ---
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import dbProvidersImg from "../core/img/database-providers.png";
 
-# Database Integration Guide
+# Database Integration
 
-This guide walks you through integrating databases with ExpressoTS applications, covering PostgreSQL, MongoDB, and other popular databases.
+ExpressoTS does not bundle a database driver. The framework gives you two things and gets out of your way: a **provider lifecycle** (`IBootstrap` / `IShutdown`) for connection management, and a Prisma-compatible **InMemoryDBProvider** that you can use end-to-end in development and tests before swapping in a real database.
 
-## Overview
+<img src={dbProvidersImg} alt="ExpressoTS database providers and lifecycle" />
 
-```mermaid
-flowchart LR
-    subgraph Application
-        Controller --> UseCase
-        UseCase --> Repository
-    end
+## Pattern at a glance
 
-    subgraph Data [Data Layer]
-        Repository --> Provider[DB Provider]
-        Provider --> Pool[Connection Pool]
-    end
+| Step | Where it lives |
+|---|---|
+| Open the connection | `bootstrap()` on a singleton provider |
+| Close the connection | `shutdown()` on the same provider |
+| Read and write data | A thin repository that injects the provider |
+| Test against a real DB shape | `InMemoryDBProvider` swapped in by environment |
 
-    subgraph Database
-        Pool --> DB[(Database)]
-    end
+## InMemoryDBProvider: dev and test out of the box
+
+`InMemoryDBProvider` ships in `@expressots/core`. It exposes a Prisma-shaped API (`create`, `findMany`, `update`, `delete`, relations, transactions) backed by an in-process store. Use it while you're prototyping, then switch to a real database without changing your repository signatures.
+
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+import { AppContainer, InMemoryDBProvider, Scope } from "@expressots/core";
+import { AppModule } from "./app.module";
+
+export class App extends AppExpress {
+    private container: AppContainer = this.configContainer([AppModule]);
+
+    protected configureServices(): void {
+        this.Provider.register(InMemoryDBProvider, Scope.Singleton);
+    }
+}
 ```
 
-## Architecture
+```typescript title="src/users/user.repository.ts"
+import { inject, InMemoryDBProvider, provide } from "@expressots/core";
 
-ExpressoTS uses the repository pattern for database access:
+interface UserModel {
+    id: string;
+    email: string;
+    name: string;
+    createdAt: Date;
+}
 
-| Component | Responsibility |
-|-----------|---------------|
-| **Entity** | Data structure definition |
-| **Repository** | Data access abstraction |
-| **Provider** | Database connection management |
-| **Migration** | Schema changes |
+@provide(UserRepository)
+export class UserRepository {
+    constructor(@inject(InMemoryDBProvider) private readonly db: InMemoryDBProvider) {}
 
-## PostgreSQL Integration
+    private get users() {
+        return this.db.table<UserModel>("users");
+    }
 
-### Step 1: Install Dependencies
+    findByEmail(email: string) {
+        return this.users.findUnique({ where: { email } });
+    }
+
+    create(input: { email: string; name: string }) {
+        return this.users.create({ data: input });
+    }
+
+    list(limit = 100) {
+        return this.users.findMany({ orderBy: { createdAt: "desc" }, take: limit });
+    }
+}
+```
+
+See [In-Memory DB](../features/in-memory-db.mdx) for the full query API, relations, transactions, and persistence options.
+
+## PostgreSQL: a real provider in 30 lines
+
+The pattern is the same for any external store. Implement `IBootstrap` and `IShutdown` on a `@provideSingleton` class and the framework will open the pool when the app starts and close it when it shuts down.
 
 ```bash
 npm install pg
 npm install -D @types/pg
 ```
 
-### Step 2: Create Database Provider
+```typescript title="src/providers/postgres.provider.ts"
+import { IBootstrap, IShutdown, Logger, provideSingleton } from "@expressots/core";
+import { Pool, type PoolClient } from "pg";
 
-```typescript title="src/providers/database.provider.ts"
-import { provideSingleton, IBootstrap, IShutdown, Logger } from "@expressots/core";
-import { Pool, PoolClient } from "pg";
-
-@provideSingleton(DatabaseProvider)
-export class DatabaseProvider implements IBootstrap, IShutdown {
-    private pool: Pool;
-    private logger = new Logger();
+@provideSingleton(PostgresProvider)
+export class PostgresProvider implements IBootstrap, IShutdown {
+    private pool!: Pool;
+    private readonly logger = new Logger();
 
     async bootstrap(): Promise<void> {
         this.pool = new Pool({
-            host: process.env.DB_HOST || "localhost",
-            port: parseInt(process.env.DB_PORT || "5432"),
-            database: process.env.DB_NAME || "expressots",
-            user: process.env.DB_USER || "postgres",
+            host: process.env.DB_HOST,
+            port: Number(process.env.DB_PORT ?? 5432),
+            database: process.env.DB_NAME,
+            user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
-            max: 20, // Max connections
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
+            max: 20,
+            idleTimeoutMillis: 30_000,
+            connectionTimeoutMillis: 2_000,
         });
 
-        // Test connection
-        const client = await this.pool.connect();
-        await client.query("SELECT NOW()");
-        client.release();
-
-        this.logger.info("Database connected");
+        await this.pool.query("SELECT 1");
+        this.logger.info("Postgres pool ready", "PostgresProvider");
     }
 
     async shutdown(): Promise<void> {
         await this.pool.end();
-        this.logger.info("Database disconnected");
+        this.logger.info("Postgres pool closed", "PostgresProvider");
     }
 
-    async query<T>(sql: string, params?: any[]): Promise<T[]> {
-        const result = await this.pool.query(sql, params);
-        return result.rows as T[];
-    }
-
-    async queryOne<T>(sql: string, params?: any[]): Promise<T | null> {
-        const rows = await this.query<T>(sql, params);
-        return rows[0] || null;
-    }
-
-    async execute(sql: string, params?: any[]): Promise<number> {
-        const result = await this.pool.query(sql, params);
-        return result.rowCount || 0;
+    query<T>(sql: string, params?: Array<unknown>): Promise<Array<T>> {
+        return this.pool.query<T extends object ? T : never>(sql, params).then((r) => r.rows);
     }
 
     async transaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
@@ -108,9 +125,9 @@ export class DatabaseProvider implements IBootstrap, IShutdown {
             const result = await fn(client);
             await client.query("COMMIT");
             return result;
-        } catch (error) {
+        } catch (err) {
             await client.query("ROLLBACK");
-            throw error;
+            throw err;
         } finally {
             client.release();
         }
@@ -118,581 +135,160 @@ export class DatabaseProvider implements IBootstrap, IShutdown {
 }
 ```
 
-### Step 3: Create Entity
+Register it in `configureServices` the same way as the in-memory provider:
 
-```typescript title="src/modules/users/entities/user.entity.ts"
-import { provide } from "@expressots/core";
-import { randomUUID } from "node:crypto";
-
-@provide(User)
-export class User {
-    id: string;
-    name: string;
-    email: string;
-    password: string;
-    createdAt: Date;
-    updatedAt: Date;
-
-    constructor() {
-        this.id = randomUUID();
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
-    }
-}
+```typescript
+this.Provider.register(PostgresProvider, Scope.Singleton);
 ```
 
-### Step 4: Create Repository
+That's the whole integration. No special hooks, no decorators to memorize, no graceful-shutdown plumbing to write yourself.
 
-```typescript title="src/modules/users/repositories/user.repository.ts"
-import { provide, inject } from "@expressots/core";
-import { DatabaseProvider } from "../../../providers/database.provider";
-import { User } from "../entities/user.entity";
+## Other drivers
 
-@provide(UserRepository)
-export class UserRepository {
-    constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
-
-    async findById(id: string): Promise<User | null> {
-        return this.db.queryOne<User>(
-            "SELECT * FROM users WHERE id = $1",
-            [id]
-        );
-    }
-
-    async findByEmail(email: string): Promise<User | null> {
-        return this.db.queryOne<User>(
-            "SELECT * FROM users WHERE email = $1",
-            [email]
-        );
-    }
-
-    async findAll(limit = 100, offset = 0): Promise<User[]> {
-        return this.db.query<User>(
-            "SELECT * FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2",
-            [limit, offset]
-        );
-    }
-
-    async save(user: User): Promise<void> {
-        await this.db.execute(
-            `INSERT INTO users (id, name, email, password, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [user.id, user.name, user.email, user.password, user.createdAt, user.updatedAt]
-        );
-    }
-
-    async update(user: User): Promise<void> {
-        user.updatedAt = new Date();
-        await this.db.execute(
-            `UPDATE users SET name = $1, email = $2, updated_at = $3 WHERE id = $4`,
-            [user.name, user.email, user.updatedAt, user.id]
-        );
-    }
-
-    async delete(id: string): Promise<void> {
-        await this.db.execute("DELETE FROM users WHERE id = $1", [id]);
-    }
-
-    async count(): Promise<number> {
-        const result = await this.db.queryOne<{ count: string }>(
-            "SELECT COUNT(*) as count FROM users"
-        );
-        return parseInt(result?.count || "0");
-    }
-}
-```
-
-### Step 5: Database Migrations
-
-```typescript title="src/migrations/001-create-users.ts"
-import { DatabaseProvider } from "../providers/database.provider";
-
-export async function up(db: DatabaseProvider): Promise<void> {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS users (
-            id UUID PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            email VARCHAR(255) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    await db.execute(`
-        CREATE INDEX idx_users_email ON users(email)
-    `);
-}
-
-export async function down(db: DatabaseProvider): Promise<void> {
-    await db.execute("DROP TABLE IF EXISTS users");
-}
-```
-
-## MongoDB Integration
+The same `IBootstrap` + `IShutdown` shape covers every popular client. Two short examples:
 
 <Tabs>
-    <TabItem value="provider" label="Provider">
+<TabItem value="mongo" label="MongoDB">
 
-```typescript title="src/providers/mongodb.provider.ts"
-import { provideSingleton, IBootstrap, IShutdown, Logger } from "@expressots/core";
-import { MongoClient, Db, Collection } from "mongodb";
+```typescript title="src/providers/mongo.provider.ts"
+import { IBootstrap, IShutdown, provideSingleton } from "@expressots/core";
+import { MongoClient, type Db } from "mongodb";
 
-@provideSingleton(MongoDBProvider)
-export class MongoDBProvider implements IBootstrap, IShutdown {
-    private client: MongoClient;
-    private database: Db;
-    private logger = new Logger();
+@provideSingleton(MongoProvider)
+export class MongoProvider implements IBootstrap, IShutdown {
+    private client!: MongoClient;
+    private database!: Db;
 
     async bootstrap(): Promise<void> {
-        const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
-        const dbName = process.env.MONGODB_DB || "expressots";
-
-        this.client = new MongoClient(uri, {
+        this.client = new MongoClient(process.env.MONGODB_URI!, {
             maxPoolSize: 10,
             minPoolSize: 2,
         });
-
         await this.client.connect();
-        this.database = this.client.db(dbName);
-
-        this.logger.info("MongoDB connected");
+        this.database = this.client.db(process.env.MONGODB_DB);
     }
 
     async shutdown(): Promise<void> {
         await this.client.close();
-        this.logger.info("MongoDB disconnected");
     }
 
-    collection<T>(name: string): Collection<T> {
+    collection<T>(name: string) {
         return this.database.collection<T>(name);
     }
 }
 ```
 
-    </TabItem>
-    <TabItem value="repository" label="Repository">
-
-```typescript title="src/modules/users/repositories/user.mongo.repository.ts"
-import { provide, inject } from "@expressots/core";
-import { MongoDBProvider } from "../../../providers/mongodb.provider";
-import { User } from "../entities/user.entity";
-import { ObjectId } from "mongodb";
-
-@provide(UserRepository)
-export class UserRepository {
-    constructor(@inject(MongoDBProvider) private mongo: MongoDBProvider) {}
-
-    private get collection() {
-        return this.mongo.collection<User>("users");
-    }
-
-    async findById(id: string): Promise<User | null> {
-        return this.collection.findOne({ _id: new ObjectId(id) } as any);
-    }
-
-    async findByEmail(email: string): Promise<User | null> {
-        return this.collection.findOne({ email });
-    }
-
-    async findAll(limit = 100, skip = 0): Promise<User[]> {
-        return this.collection
-            .find()
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .skip(skip)
-            .toArray();
-    }
-
-    async save(user: User): Promise<void> {
-        await this.collection.insertOne(user as any);
-    }
-
-    async update(id: string, updates: Partial<User>): Promise<void> {
-        await this.collection.updateOne(
-            { _id: new ObjectId(id) } as any,
-            { $set: { ...updates, updatedAt: new Date() } }
-        );
-    }
-
-    async delete(id: string): Promise<void> {
-        await this.collection.deleteOne({ _id: new ObjectId(id) } as any);
-    }
-}
-```
-
-    </TabItem>
-</Tabs>
-
-## TypeORM Integration
-
-### Install Dependencies
-
-```bash
-npm install typeorm reflect-metadata
-npm install pg # or mysql2, sqlite3, etc.
-```
-
-### Configuration
-
-```typescript title="src/providers/typeorm.provider.ts"
-import { provideSingleton, IBootstrap, IShutdown, Logger } from "@expressots/core";
-import { DataSource, Repository, EntityTarget } from "typeorm";
-
-@provideSingleton(TypeORMProvider)
-export class TypeORMProvider implements IBootstrap, IShutdown {
-    private dataSource: DataSource;
-    private logger = new Logger();
-
-    async bootstrap(): Promise<void> {
-        this.dataSource = new DataSource({
-            type: "postgres",
-            host: process.env.DB_HOST || "localhost",
-            port: parseInt(process.env.DB_PORT || "5432"),
-            database: process.env.DB_NAME || "expressots",
-            username: process.env.DB_USER || "postgres",
-            password: process.env.DB_PASSWORD,
-            entities: ["src/modules/**/entities/*.entity.ts"],
-            migrations: ["src/migrations/*.ts"],
-            synchronize: process.env.NODE_ENV === "development",
-            logging: process.env.NODE_ENV === "development",
-        });
-
-        await this.dataSource.initialize();
-        this.logger.info("TypeORM connected");
-    }
-
-    async shutdown(): Promise<void> {
-        await this.dataSource.destroy();
-        this.logger.info("TypeORM disconnected");
-    }
-
-    getRepository<T>(entity: EntityTarget<T>): Repository<T> {
-        return this.dataSource.getRepository(entity);
-    }
-
-    get manager() {
-        return this.dataSource.manager;
-    }
-}
-```
-
-### Entity with Decorators
-
-```typescript title="src/modules/users/entities/user.entity.ts"
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
-
-@Entity("users")
-export class User {
-    @PrimaryGeneratedColumn("uuid")
-    id: string;
-
-    @Column({ length: 255 })
-    name: string;
-
-    @Column({ unique: true })
-    email: string;
-
-    @Column()
-    password: string;
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
-}
-```
-
-### Repository with TypeORM
-
-```typescript title="src/modules/users/repositories/user.typeorm.repository.ts"
-import { provide, inject } from "@expressots/core";
-import { TypeORMProvider } from "../../../providers/typeorm.provider";
-import { User } from "../entities/user.entity";
-
-@provide(UserRepository)
-export class UserRepository {
-    constructor(@inject(TypeORMProvider) private orm: TypeORMProvider) {}
-
-    private get repo() {
-        return this.orm.getRepository(User);
-    }
-
-    async findById(id: string): Promise<User | null> {
-        return this.repo.findOneBy({ id });
-    }
-
-    async findByEmail(email: string): Promise<User | null> {
-        return this.repo.findOneBy({ email });
-    }
-
-    async findAll(options?: { take?: number; skip?: number }): Promise<User[]> {
-        return this.repo.find({
-            order: { createdAt: "DESC" },
-            take: options?.take || 100,
-            skip: options?.skip || 0,
-        });
-    }
-
-    async save(user: User): Promise<User> {
-        return this.repo.save(user);
-    }
-
-    async delete(id: string): Promise<void> {
-        await this.repo.delete(id);
-    }
-}
-```
-
-## Prisma Integration
-
-### Install Dependencies
-
-```bash
-npm install @prisma/client
-npm install -D prisma
-npx prisma init
-```
-
-### Schema Definition
-
-```prisma title="prisma/schema.prisma"
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     Post[]
-}
-
-model Post {
-  id        String   @id @default(uuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
-### Prisma Provider
+</TabItem>
+<TabItem value="prisma" label="Prisma">
 
 ```typescript title="src/providers/prisma.provider.ts"
-import { provideSingleton, IBootstrap, IShutdown, Logger } from "@expressots/core";
+import { IBootstrap, IShutdown, provideSingleton } from "@expressots/core";
 import { PrismaClient } from "@prisma/client";
 
 @provideSingleton(PrismaProvider)
-export class PrismaProvider implements IBootstrap, IShutdown {
-    private client: PrismaClient;
-    private logger = new Logger();
-
-    get prisma(): PrismaClient {
-        return this.client;
+export class PrismaProvider extends PrismaClient implements IBootstrap, IShutdown {
+    bootstrap() {
+        return this.$connect();
     }
 
-    async bootstrap(): Promise<void> {
-        this.client = new PrismaClient({
-            log: process.env.NODE_ENV === "development" 
-                ? ["query", "info", "warn", "error"] 
-                : ["error"],
-        });
-
-        await this.client.$connect();
-        this.logger.info("Prisma connected");
-    }
-
-    async shutdown(): Promise<void> {
-        await this.client.$disconnect();
-        this.logger.info("Prisma disconnected");
+    shutdown() {
+        return this.$disconnect();
     }
 }
 ```
 
-### Repository with Prisma
+Inject `PrismaProvider` and call any model directly: `this.prisma.user.findMany(...)`.
 
-```typescript title="src/modules/users/repositories/user.prisma.repository.ts"
-import { provide, inject } from "@expressots/core";
-import { PrismaProvider } from "../../../providers/prisma.provider";
-import { User } from "@prisma/client";
+</TabItem>
+<TabItem value="typeorm" label="TypeORM">
 
-@provide(UserRepository)
-export class UserRepository {
-    constructor(@inject(PrismaProvider) private prisma: PrismaProvider) {}
+```typescript title="src/providers/typeorm.provider.ts"
+import { IBootstrap, IShutdown, provideSingleton } from "@expressots/core";
+import { DataSource } from "typeorm";
 
-    async findById(id: string): Promise<User | null> {
-        return this.prisma.prisma.user.findUnique({ where: { id } });
+@provideSingleton(TypeOrmProvider)
+export class TypeOrmProvider implements IBootstrap, IShutdown {
+    readonly dataSource = new DataSource({
+        type: "postgres",
+        url: process.env.DATABASE_URL,
+        entities: ["src/**/*.entity.ts"],
+        synchronize: process.env.NODE_ENV === "development",
+    });
+
+    bootstrap() {
+        return this.dataSource.initialize();
     }
 
-    async findByEmail(email: string): Promise<User | null> {
-        return this.prisma.prisma.user.findUnique({ where: { email } });
-    }
-
-    async findAll(options?: { take?: number; skip?: number }): Promise<User[]> {
-        return this.prisma.prisma.user.findMany({
-            orderBy: { createdAt: "desc" },
-            take: options?.take || 100,
-            skip: options?.skip || 0,
-        });
-    }
-
-    async create(data: { name: string; email: string; password: string }): Promise<User> {
-        return this.prisma.prisma.user.create({ data });
-    }
-
-    async update(id: string, data: Partial<User>): Promise<User> {
-        return this.prisma.prisma.user.update({
-            where: { id },
-            data,
-        });
-    }
-
-    async delete(id: string): Promise<void> {
-        await this.prisma.prisma.user.delete({ where: { id } });
+    shutdown() {
+        return this.dataSource.destroy();
     }
 }
 ```
 
-## Connection Pooling
+</TabItem>
+</Tabs>
 
-### PostgreSQL Pool Configuration
+## Health checks
+
+Implement `IHealthCheck` on your provider and it shows up automatically in `/health` (see [Health Monitoring](../features/health-monitoring.mdx)).
 
 ```typescript
-const pool = new Pool({
-    max: 20,                    // Maximum connections
-    min: 5,                     // Minimum connections
-    idleTimeoutMillis: 30000,   // Close idle connections after 30s
-    connectionTimeoutMillis: 2000, // Fail if can't connect in 2s
-    allowExitOnIdle: false,     // Keep pool alive
-});
-```
+import type { HealthCheckResult, IHealthCheck } from "@expressots/core";
 
-### Health Checks
+@provideSingleton(PostgresProvider)
+export class PostgresProvider implements IBootstrap, IShutdown, IHealthCheck {
+    // ...bootstrap / shutdown...
 
-```typescript title="src/providers/database-health.provider.ts"
-import { provide, inject } from "@expressots/core";
-import { DatabaseProvider } from "./database.provider";
-
-@provide(DatabaseHealthProvider)
-export class DatabaseHealthProvider {
-    constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
-
-    async check(): Promise<{ status: string; latency: number }> {
+    async healthCheck(): Promise<HealthCheckResult> {
         const start = Date.now();
-        
         try {
-            await this.db.queryOne("SELECT 1");
-            return {
-                status: "healthy",
-                latency: Date.now() - start,
-            };
-        } catch (error) {
-            return {
-                status: "unhealthy",
-                latency: Date.now() - start,
-            };
+            await this.pool.query("SELECT 1");
+            return { status: "healthy", latency: Date.now() - start };
+        } catch (err) {
+            return { status: "unhealthy", message: (err as Error).message };
         }
     }
 }
 ```
 
-## Transactions
+## Environment configuration
 
-### Simple Transaction
+Keep credentials out of code. The framework's `envFileConfig` (see [Configuration](../features/configuration.mdx)) loads the right `.env.<environment>` for you.
 
-```typescript
-async transferFunds(fromId: string, toId: string, amount: number): Promise<void> {
-    await this.db.transaction(async (client) => {
-        // Debit from source
-        await client.query(
-            "UPDATE accounts SET balance = balance - $1 WHERE id = $2",
-            [amount, fromId]
-        );
-
-        // Credit to destination
-        await client.query(
-            "UPDATE accounts SET balance = balance + $1 WHERE id = $2",
-            [amount, toId]
-        );
-    });
-}
-```
-
-### Transaction with Rollback
-
-```typescript
-async createOrderWithItems(order: Order, items: OrderItem[]): Promise<Order> {
-    return this.db.transaction(async (client) => {
-        // Create order
-        const orderResult = await client.query(
-            "INSERT INTO orders (id, user_id, total) VALUES ($1, $2, $3) RETURNING *",
-            [order.id, order.userId, order.total]
-        );
-
-        // Create items
-        for (const item of items) {
-            await client.query(
-                "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
-                [order.id, item.productId, item.quantity, item.price]
-            );
-
-            // Update stock
-            const result = await client.query(
-                "UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1 RETURNING *",
-                [item.quantity, item.productId]
-            );
-
-            if (result.rowCount === 0) {
-                throw new Error(`Insufficient stock for product ${item.productId}`);
-            }
-        }
-
-        return orderResult.rows[0];
-    });
-}
-```
-
-## Best Practices
-
-| Practice | Description |
-|----------|-------------|
-| Use Connection Pools | Reuse connections for performance |
-| Close Connections | Release connections in finally blocks |
-| Use Transactions | Wrap related operations in transactions |
-| Parameterized Queries | Prevent SQL injection |
-| Health Checks | Monitor database connectivity |
-| Graceful Shutdown | Close connections on app shutdown |
-
-## Environment Configuration
-
-```bash title=".env"
-# PostgreSQL
+```bash title=".env.development"
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=expressots
+DB_NAME=expressots_dev
 DB_USER=postgres
-DB_PASSWORD=secret
-
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DB=expressots
-
-# Prisma
-DATABASE_URL="postgresql://postgres:secret@localhost:5432/expressots"
+DB_PASSWORD=devpassword
 ```
+
+```bash title=".env.production"
+DB_HOST=prod-host
+DB_PORT=5432
+DB_NAME=expressots
+DB_USER=app
+DB_PASSWORD=${SECRET_FROM_VAULT}
+```
+
+## Best practices
+
+| Practice | Why |
+|---|---|
+| Always implement both `IBootstrap` and `IShutdown` | Stops connection leaks on graceful shutdown. |
+| Register the provider as `Singleton` | One pool per app, not one per request. |
+| Pool size matches your concurrency target | An idle pool that's too large wastes connections; one that's too small queues requests. |
+| Parameterize queries | Prevents SQL injection. |
+| Use transactions for multi-step writes | Atomicity is opt-in, not free. |
+| Implement `IHealthCheck` | Container orchestrators rely on it for readiness gates. |
+| Use `InMemoryDBProvider` in tests | Real database semantics with zero infrastructure. |
+
+## See also
+
+- [In-Memory DB](../features/in-memory-db.mdx): full Prisma-compatible API.
+- [Providers](../core/providers.mdx): scopes, registration, lifecycle.
+- [Health Monitoring](../features/health-monitoring.mdx): `IHealthCheck` in the request flow.
+- [Configuration](../features/configuration.mdx): environment loading.
 
 ---
 

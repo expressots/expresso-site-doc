@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 
 # ExpressoTS Provider Ecosystem
 
-ExpressoTS providers are plug-and-play packages that extend the framework's capabilities. This guide covers built-in providers, the micro-providers package, and the future ExpressoTS Store.
+ExpressoTS providers are plug-and-play packages that extend the framework's capabilities. This guide covers the built-in providers in `@expressots/core` and the `@expressots/micro-providers` package for microservices.
 
 ## Overview
 
@@ -62,7 +62,7 @@ const adults = await users.findMany({
 });
 ```
 
-See the **[In-Memory DB guide](../features/in-memory-db.mdx)** for the full API. It is intended for development and testing — swap to a dedicated database provider for production.
+See the **[In-Memory DB guide](../features/in-memory-db.mdx)** for the full API. It is intended for development and testing. Swap to a dedicated database provider for production.
 
 ## Micro-Providers Package
 
@@ -289,68 +289,6 @@ const user = await cache.getOrSet(
 // Statistics
 console.log(cache.getStats());
 // { size: 150, maxEntries: 500, hitRate: 0.85 }
-```
-
-## Future: ExpressoTS Store
-
-The ExpressoTS Store will be the central hub for discovering and installing providers:
-
-### Priority Tiers
-
-#### Tier 1: Essential (Available at v4 Launch)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/redis` | Caching and sessions |
-| `@expressots/postgres` | PostgreSQL with TypeORM/Prisma |
-| `@expressots/mongodb` | MongoDB integration |
-| `@expressots/jwt-auth` | JWT authentication |
-| `@expressots/health-check` | Kubernetes health probes |
-| `@expressots/metrics` | Prometheus metrics |
-| `@expressots/mailer` | Email (SendGrid, SES, SMTP) |
-
-#### Tier 2: High Value (3-6 months post-launch)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/queue-rabbitmq` | RabbitMQ messaging |
-| `@expressots/queue-sqs` | AWS SQS integration |
-| `@expressots/grpc` | gRPC protocol |
-| `@expressots/graphql` | GraphQL integration |
-| `@expressots/s3` | AWS S3 storage |
-| `@expressots/oauth2` | OAuth2/OpenID Connect |
-| `@expressots/tracing` | Distributed tracing |
-
-#### Tier 3: Community (Ongoing)
-
-| Package | Description |
-|---------|-------------|
-| `@expressots/stripe` | Stripe payments |
-| `@expressots/paypal` | PayPal integration |
-| `@expressots/twilio` | SMS/Voice |
-| `@expressots/elasticsearch` | Search engine |
-| `@expressots/firebase-auth` | Firebase Auth |
-
-### CLI Commands
-
-```bash
-# List available providers
-expressots store list
-
-# Search providers
-expressots store search "database"
-
-# Show provider info
-expressots store info @expressots/redis
-
-# Install provider
-expressots add @expressots/redis
-
-# Update provider
-expressots update @expressots/redis
-
-# Remove provider
-expressots remove @expressots/redis
 ```
 
 ## Creating Custom Providers
