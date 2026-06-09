@@ -1,0 +1,148 @@
+---
+sidebar_position: 26
+title: OpenAPI Spec Generation
+description: Generate an OpenAPI 3.1 document from your ExpressoTS app with zero annotations, enrich it with real traffic, detect spec drift, and keep clients in sync.
+---
+
+# OpenAPI Spec Generation
+
+ExpressoTS v4 generates an **OpenAPI 3.1** document straight from your application: no decorators to sprinkle, no second source of truth to maintain. The same scanner that powers Studio reads your routes, controllers, and `@Body()` DTOs, then enriches the document with **real recorded traffic** so your responses reflect what the app actually returns.
+
+Everything here is **dev/CI-time only**. Nothing is mounted in your production server and there is zero runtime cost.
+
+:::info Provenance, not gospel
+Generated documents are marked `info.x-expressots-generated: "inferred"` (or `"mixed"` / `"extracted"` when precise schemas are available). Treat the output as a high-quality starting point and review it before publishing it as an authoritative contract.
+:::
+
+## Two ways to generate
+
+### 1. From the CLI (headless, CI-friendly)
+
+```bash
+npx expressots openapi emit --out openapi.json --src ./src
+```
+
+This runs a static scan and writes `openapi.json` to the project root. Useful flags:
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--out, -o` | `openapi.json` | Output file path. |
+| `--src` | `./src` | Source directory to scan. |
+| `--title` | `ExpressoTS API` | Sets `info.title`. |
+| `--api-version` | (all) | Restrict output to one version, e.g. `--api-version 2` emits only `/v2/*`. |
+| `--global-prefix` | (auto) | Global route prefix (e.g. `/api`). Auto-detected from `setGlobalRoutePrefix(...)`; pass `""` to force none. |
+| `--fail-on-drift <path>` | (off) | Diff against a committed spec and exit non-zero on drift (CI gate). |
+
+:::tip Global prefix
+If your app calls `setGlobalRoutePrefix("/api")`, the generated paths are prefixed (`/api/users`, …) so they match what the app actually serves and what Studio shows. The CLI recovers the prefix statically from your source, so a CLI-generated spec and a Studio-generated one line up; this keeps `--fail-on-drift` from reporting false positives. Override with `--global-prefix` if detection misses it.
+:::
+
+The first time you run it, the CLI installs `@expressots/studio` as a dev dependency (the generator lives there).
+
+### 2. From Studio (enriched with live traffic)
+
+Open Studio, go to the **API Client** view, and expand the **OpenAPI spec** panel. From there you can:
+
+- **Regenerate** the document from the current routes plus everything recorded so far.
+- **Download `openapi.json`** or **Copy spec** to the clipboard.
+- **Check spec drift** against a committed file.
+
+Because Studio sees real requests and responses, the document it produces includes **response schemas, status codes, and examples** that a static scan alone can't know.
+
+## What goes into the document
+
+| Source | Contributes |
+| --- | --- |
+| Route scanner (static) | Paths, HTTP methods, controller tags, path parameters, `@Body()` DTO shapes. |
+| Recorded traffic (Studio) | Response schemas + examples per status code, request examples, observed query parameters. |
+| Validation adapter (`extractSchema`) | Precise request-body JSON Schema (Zod today). |
+
+### Precise schemas with Zod
+
+When a route's `@Body()` uses a Zod schema, ExpressoTS can extract an exact JSON Schema instead of inferring one from a sample. The Zod adapter uses Zod 4's native `z.toJSONSchema()` (falling back to the optional `zod-to-json-schema` package for Zod 3). You can call the same helper directly:
+
+```typescript
+import { schemaToJsonSchema } from "@expressots/core";
+import { z } from "zod";
+
+const CreateUser = z.object({
+    name: z.string(),
+    age: z.number().int().optional(),
+});
+
+const jsonSchema = schemaToJsonSchema(CreateUser);
+```
+
+When a precise schema is available it takes precedence over the inferred sample, and the document's provenance becomes `mixed` or `extracted`.
+
+## Versioning
+
+By default a single document covers every version (paths keep their `/v1`, `/v2` prefixes). Pass `--api-version <n>` to emit a document scoped to one version, which is handy when you publish a separate spec per major version.
+
+:::note How version filtering matches
+`--api-version` keeps routes whose path begins with a `/v<n>` segment. When Studio generates the spec from the **running** app, versioned routes already carry their `/v1`, `/v2` prefix (the adapter applies `@Version` at runtime), so filtering is exact. A **static CLI scan** only sees the literal controller/route paths, so `--api-version` filters reliably only when the version appears in the path. If you rely solely on the `@Version` decorator, generate from Studio (live) for accurate per-version output.
+:::
+
+The document's `info.version` is read from your application's `package.json`, so it tracks your API's releases rather than the framework version. Override it with `--title` for the name; the version follows your project automatically.
+
+## Spec drift detection
+
+This is the part decorator-only generators can't do: comparing your **published contract** against what the app **actually does**. Studio (and `--fail-on-drift`) report:
+
+- Routes present in code but missing from the committed spec.
+- Routes documented in the spec but missing from code.
+- Status codes seen in real traffic that the spec doesn't document.
+- Required fields the spec promises that are absent in a percentage of recorded responses (e.g. *"required field `email` absent in 14% of 200s"*).
+
+In CI:
+
+```bash
+npx expressots openapi emit --fail-on-drift openapi.json
+```
+
+The command exits non-zero when structural drift is found, so a stale contract fails the build. Field-frequency findings require recorded traffic and surface in Studio.
+
+## Keeping clients in sync
+
+A typical workflow once you have `openapi.json`:
+
+```bash
+# 1. Generate the spec
+npx expressots openapi emit --out openapi.json
+
+# 2. Lint it (catches missing descriptions, invalid schemas, etc.)
+npx @stoplight/spectral-cli lint openapi.json
+
+# 3. Generate a typed client
+#    Option A — Orval (TypeScript + your HTTP client of choice)
+npx orval --input openapi.json --output ./src/api/client.ts
+#    Option B — openapi-generator (many languages)
+npx @openapitools/openapi-generator-cli generate \
+    -i openapi.json -g typescript-axios -o ./generated-client
+
+# 4. Gate breaking changes in CI
+npx expressots openapi emit --fail-on-drift openapi.json
+```
+
+Commit `openapi.json` to your repo, regenerate it on every change, and let the drift gate keep code and contract honest.
+
+## Getting useful response schemas
+
+Response schemas and examples come from real recorded traffic, so a route only gets them once it has been exercised with a response that carries a body. Two things to keep in mind:
+
+- **Hit every route.** A route you never call shows a placeholder `default` response until traffic arrives.
+- **Watch for `304 Not Modified`.** Browsers and `fetch` send conditional headers (`If-None-Match`), so a repeat `GET` can return `304` with no body, and that is what gets documented instead of the full `200`. To capture the real payload, trigger a fresh request (e.g. disable cache, or send `Cache-Control: no-cache`) so the server responds `200` with the body.
+
+## Limitations
+
+The generator focuses on the common case and intentionally defers some things:
+
+- Schema inference is shallow for non-Zod bodies (primitives, arrays, objects). Use Zod for precise request schemas.
+- Authentication / security schemes, polymorphic (`oneOf`) schemas, and non-JSON content types are not modeled yet.
+- We don't auto-mount a public, consumer-facing docs page in your app. For interactive exploration *during development* you already have Studio's **API Client** (live route discovery, DTO-prefilled bodies, try-it-out, replay). What's not built in is a hosted rendering of the published spec for your API's consumers; serve the generated `openapi.json` to any renderer (Swagger UI, Redoc, Scalar) - it's a file you own and host however you like.
+
+## See also
+
+- **[API Versioning](./api-versioning.mdx)**: how `@Version` shapes the generated paths.
+- **[DTO Validator](./dto-validator.mdx)**: validating request bodies with Zod, Yup, or class-validator.
+- **[Validation](./validation.mdx)**: the pluggable validation layer behind `schemaToJsonSchema`.

@@ -92,7 +92,7 @@ export class HealthController {
 }
 ```
 
-This is useful for cross-cutting endpoints like `/health`, `/metrics`, `/swagger.json`: that you want to share across all API versions.
+This is useful for cross-cutting endpoints like `/health`, `/metrics`, `/swagger.json`: that you want to share across all API versions. If you want a generated OpenAPI document for those versioned routes, see **[OpenAPI Spec Generation](./openapi.mdx)**.
 
 ## Mixing versioned and unversioned controllers
 
@@ -172,4 +172,5 @@ If you need a different strategy, write a small middleware that inspects `Accept
 
 - **[Decorators](./decorators.mdx)**: full `@Version` reference.
 - **[Route patterns](./route-patterns.mdx)**: combining versioning with regex constraints.
+- **[OpenAPI Spec Generation](./openapi.mdx)**: emit a per-version OpenAPI document and keep clients in sync.
 - **[Bootstrap](../core/bootstrap.mdx)**: `rootPath` and global prefixes.
