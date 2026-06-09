@@ -8,9 +8,9 @@
   <p>Source for <a href="https://doc.expresso-ts.com">doc.expresso-ts.com</a>, the official ExpressoTS documentation site.</p>
 
   <p>
-    <a href="https://github.com/expressots/expresso-site-doc/blob/main/LICENSE"><img src="https://img.shields.io/github/license/expressots/expresso-site-doc?style=flat-square&color=181717" alt="License"></a>
+    <a href="https://github.com/expressots/expresso-site-doc/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square&color=181717" alt="License"></a>
     <a href="https://discord.com/invite/PyPJfGK"><img src="https://img.shields.io/badge/Discord-join-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
-    <a href="https://github.com/expressots/expresso-site-doc/actions"><img src="https://img.shields.io/github/actions/workflow/status/expressots/expresso-site-doc/build.yml?branch=main&style=flat-square&logo=github&label=build" alt="Build"></a>
+    <a href="https://github.com/expressots/expresso-site-doc/actions"><img src="https://img.shields.io/github/actions/workflow/status/expressots/expresso-site-doc/static.yml?branch=main&style=flat-square&logo=github&label=build" alt="Build"></a>
   </p>
 
   <p>
