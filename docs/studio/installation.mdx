@@ -183,3 +183,15 @@ npx expressots-studio --agent-port 3344
 ### Peer dependency warning
 
 If you see `npm WARN ... @expressots/adapter-express` complaining about `@expressots/studio-agent` peer dependency, ensure both `adapter-express` and `studio-agent` are on the same v4 line. Studio v4.0.x pairs with adapter-express v4.0.x.
+
+### Request recording (Replay) requires Node 22.5+
+
+Request recording is backed by Node's built-in SQLite module (`node:sqlite`), which is available from **Node 22.5**. Studio no longer ships a native dependency, so there is nothing to compile and no package-manager build approval to grant (this is what previously caused `Could not locate the bindings file` errors under pnpm v10+ and bun).
+
+On Node versions older than 22.5, the agent starts normally and every Studio feature works except request recording and the Replay tab, which stay disabled. You'll see this one-time line at startup:
+
+```text
+StudioAgent: request recording disabled (node:sqlite unavailable, requires Node >=22.5). All other Studio features remain active.
+```
+
+To enable recording, upgrade to Node 22.5 or newer (Node 24.15+ is fully stable and emits no experimental notices). On Node 22.x the agent suppresses the SQLite experimental warning automatically so your dev console stays clean.
