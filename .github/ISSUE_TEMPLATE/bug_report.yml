@@ -6,26 +6,17 @@ body:
     attributes:
       value: |
         ## :warning: We use GitHub Issues to track bug reports and feature requests
- 
+
         If you are not sure that your issue is a bug, you could:
 
         - use our [Discord community](https://discord.gg/A877Mc3V)
         - use [StackOverflow using the tag `expressots`](https://stackoverflow.com/questions/tagged/expressots)
 
+        All framework work is tracked on the [Expressots Project board](https://github.com/orgs/expressots/projects/5).
+
         **NOTE:** You don't need to answer questions that you know that aren't relevant.
 
         ---
-  - type: markdown
-    attributes:
-      value: Thanks for taking the time to complete this bug report!
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Guidelines
-      description: By submitting this issue, you agree to follow our [Contributing Guidelines](https://github.com/expressots/expresso-site-doc/blob/main/CONTRIBUTING.md).
-      options:
-        - label: I agree to follow this project's Contributing Guidelines.
-          required: true
 
   - type: checkboxes
     attributes:
@@ -34,15 +25,6 @@ body:
       options:
       - label: "I have searched the existing issues"
         required: true
-
-  - type: input
-    id: existing-issues
-    attributes:
-      label: Existing Issues
-      description: Are there any similar existing issues?
-      placeholder: "#42"
-    validations:
-      required: false
 
   - type: textarea
     validations:
@@ -80,9 +62,9 @@ body:
     attributes:
       label: "Package version"
       description: |
-        Which version of `@expressots/core` are you using?
+        Which version or section of the docs is affected?
         **Tip**: Make sure that all of yours `@expressots/*` dependencies are in sync!
-      placeholder: "1.2.0"
+      placeholder: "N/A"
 
   - type: input
     attributes:
