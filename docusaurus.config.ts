@@ -96,28 +96,29 @@ const config: Config = {
             },
             items: [
                 {
-                    type: "doc",
-                    docId: "core/first-steps",
+                    to: "/docs/core/first-steps",
                     position: "left",
                     label: "Getting Started",
+                    activeBaseRegex:
+                        "^/docs/(?:[\\w.-]+/)?(?:core|prologue|why-expressots|features|guides)(?:/|$)",
                 },
                 {
-                    type: "doc",
-                    docId: "cli/overview",
+                    to: "/docs/cli/overview",
                     position: "left",
                     label: "CLI",
+                    activeBaseRegex: "^/docs/(?:[\\w.-]+/)?cli(?:/|$)",
                 },
                 {
-                    type: "doc",
-                    docId: "studio/overview",
+                    to: "/docs/studio/overview",
                     position: "left",
                     label: "Studio",
+                    activeBaseRegex: "^/docs/(?:[\\w.-]+/)?studio(?:/|$)",
                 },
                 {
-                    type: "doc",
-                    docId: "governance",
+                    to: "/docs/governance",
                     position: "left",
                     label: "Governance",
+                    activeBaseRegex: "^/docs/(?:[\\w.-]+/)?governance(?:/|$)",
                 },
                 {
                     type: "search",
