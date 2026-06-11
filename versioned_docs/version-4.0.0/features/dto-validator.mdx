@@ -15,7 +15,7 @@ A **Data Transfer Object** standardises payload shapes as they cross HTTP bounda
 - **class-validator + class-transformer**: decorator-based, classes (the v3 pattern, still supported).
 - **Zod**: schema-first, fully type-inferred.
 - **Yup**: schema-first with chainable builders.
-- **Custom adapter**: implement `IValidator` and register it in the validation registry.
+- **Custom adapter**: implement `IValidationAdapter` and register it in the validation config.
 
 For a side-by-side feature comparison, see the [Validation reference](./validation.mdx). This page focuses on the class-validator path because it's the closest thing to the legacy v3 flow.
 
@@ -46,6 +46,20 @@ export class CreateUserDTO {
 }
 ```
 
+## Enable validation
+
+Turn the validation system on once in your `App` class. The class-validator adapter is registered automatically:
+
+```typescript title="src/app.ts"
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.addValidation();
+    }
+}
+```
+
 ## Validate inside a controller (v4 way)
 
 Use `@validatedBody()` from `@expressots/adapter-express`. It runs the registered validator on the incoming payload, formats helpful error messages, and rejects malformed requests with a 400 response: all without you wiring a guard or writing a try/catch:
@@ -71,33 +85,37 @@ The same parameter decorator is also exported as `@validatedQuery`, `@validatedP
 
 ## Programmatic validation
 
-When you need to validate something outside an HTTP request: a queue payload, a CLI input, an event body: use `ValidationService.validate()` directly:
+When you need to validate something outside an HTTP request: a queue payload, a CLI input, an event body: use a `ValidationRegistry` directly:
 
 ```typescript
-import { inject, ValidationService } from "@expressots/core";
+import { provide, ValidationRegistry, ClassValidatorAdapter } from "@expressots/core";
+import { CreateUserDTO } from "./create-user.dto";
+
+const registry = new ValidationRegistry();
+registry.register(new ClassValidatorAdapter());
 
 @provide(ImportService)
 export class ImportService {
-    constructor(
-        @inject(ValidationService) private readonly validator: ValidationService,
-    ) {}
-
-    async importBatch(rows: unknown[]) {
+    async importBatch(rows: Array<unknown>) {
         for (const row of rows) {
-            const result = await this.validator.validate(row, CreateUserDTO);
-            if (!result.valid) throw new ValidationErrorClass(result.errors);
+            const result = await registry.validate(row, CreateUserDTO);
+            if (!result.success) {
+                throw new Error(`Invalid row: ${JSON.stringify(result.errors)}`);
+            }
         }
     }
 }
 ```
 
+`registry.validate()` returns a `ValidationResult`: `{ success: true, data }` on success, `{ success: false, errors }` on failure, where `errors` is a `ValidationFieldError[]`.
+
 ## What about Zod / Yup?
 
-Same controller, different schema:
+Same controller, different schema. Register the Zod adapter once in your `App` class (`this.Middleware.addValidation({ adapters: [ZodValidatorAdapter] })`), then pass the Zod schema straight to the decorator:
 
 ```typescript
 import { z } from "zod";
-import { createZodValidator } from "@expressots/core";
+import { provide } from "@expressots/core";
 import { controller, Post, validatedBody } from "@expressots/adapter-express";
 
 const CreateUserSchema = z.object({
@@ -106,22 +124,20 @@ const CreateUserSchema = z.object({
     password: z.string().min(8),
 });
 
-const createUserValidator = createZodValidator(CreateUserSchema);
-
 @controller("/users")
 @provide(UsersController)
 export class UsersController {
     @Post("/")
-    create(@validatedBody(createUserValidator) dto: z.infer<typeof CreateUserSchema>) {
+    create(@validatedBody(CreateUserSchema) dto: z.infer<typeof CreateUserSchema>) {
         return { ok: true, ...dto };
     }
 }
 ```
 
-`createYupValidator(schema)` is the equivalent for Yup.
+For Yup, register `YupValidatorAdapter` the same way and pass the Yup schema to `@validatedBody`. (`createZodValidator()` / `createYupValidator()` are no-argument factories used when registering adapters on a `ValidationRegistry` manually.)
 
 ## See also
 
 - **[Validation](./validation.mdx)**: full reference for the validation system, registry, adapters, and error format.
 - **[Configuration](./configuration.mdx)**: typed environment variable validation with `defineConfig` + `Env.*`.
-- **[Error handling](./error-handling.mdx)**: how validation errors are mapped to RFC 7807 problem details.
+- **[Error handling](./error-handling.mdx)**: typed errors and the exception-filter pipeline. (Request validation failures are answered directly with a plain JSON 400; see the [Validation error format](./validation.mdx#validation-error-format).)

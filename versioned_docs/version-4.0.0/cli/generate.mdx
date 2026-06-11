@@ -246,11 +246,11 @@ import { defineConfig, Env, loadEnvSync } from "@expressots/core";
 
 export const appConfig = defineConfig({
   app: {
-    port: Env.port("PORT").default(3000),
-    name: Env.string("APP_NAME").default("expressots-app"),
+    port: Env.port("PORT", { default: 3000 }),
+    name: Env.string("APP_NAME", { default: "expressots-app" }),
   },
   database: {
-    url: Env.url("DATABASE_URL").required(),
+    url: Env.url("DATABASE_URL", { required: true }),
   },
 });
 

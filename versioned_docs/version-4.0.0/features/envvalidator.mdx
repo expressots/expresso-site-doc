@@ -13,7 +13,7 @@ The v4 way to validate environment variables is the combination of:
 1. **`loadEnvSync()`** in `src/main.ts` to load `.env` files into `process.env`.
 2. **`defineConfig` + `Env.*` builders** in `src/config/app.config.ts` to declare every variable, its type, default, and validation rules.
 
-If anything is missing or misshapen, configuration resolution fails fast at startup with a structured error.
+If anything is missing or misshapen, configuration resolution reports a structured error block at startup. Validation runs on first access to the config (for example `appConfig.values` or `appConfig.isValid()`); in production (`throwOnError` defaults to `true` when `NODE_ENV=production`) it also throws and aborts the boot.
 
 ## Quick example
 
@@ -52,9 +52,15 @@ export type AppConfig = typeof appConfig;
 ```typescript title="src/main.ts"
 import { bootstrap, loadEnvSync } from "@expressots/core";
 import { App } from "./app";
+import { appConfig } from "./config/app.config";
 
-loadEnvSync();         // Load .env, .env.${NODE_ENV}, .local overrides
-void bootstrap(App);   // Validates every Env.* declaration before listen()
+loadEnvSync();         // Load .env, .env.local, .env.${NODE_ENV} (last wins)
+
+if (!appConfig.isValid()) {
+    process.exit(1);   // Errors were already printed as a structured block
+}
+
+void bootstrap(App);
 ```
 
 If `JWT_SECRET` is shorter than 32 chars, or `DATABASE_URL` is unset, or `PORT` is non-numeric, the boot fails with a single error block listing every issue at once.
@@ -69,7 +75,7 @@ If `JWT_SECRET` is shorter than 32 chars, or `DATABASE_URL` is unset, or `PORT` 
 | `Env.get("FOO")` | `appConfig.values.foo` (typed) |
 | Manual fallbacks | `Env.string("FOO", { default: "bar" })` |
 | Manual existence checks | `Env.string("FOO", { required: true })` |
-| Custom regex | `Env.string("FOO", { pattern: /…/ })` |
+| Custom regex | `Env.string("FOO", { pattern: /^[a-z]+$/ })` |
 | Secret redaction in logs | `Env.secret("FOO")` (auto-redacts in logs and `toObject()`) |
 
 ## See also

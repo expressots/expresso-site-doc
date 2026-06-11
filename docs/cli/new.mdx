@@ -148,7 +148,7 @@ The dev server starts with `tsx --watch`, the Studio Agent attaches on `ws://loc
 | --- | --- |
 | `Missing dependent arguments: template -> package-manager` | You passed `-t` without `-p` (or the reverse). Add both, e.g. `-t application -p npm`, or drop both flags for interactive mode. |
 | `Invalid values: package-manager, Given: "interactive"` | `-e` is boolean only. Use `-e` to enable events, or omit all flags for interactive prompts. Never pass `-e interactive`. |
-| `Node version not supported` | Install Node `>= 20.18.0`. The CLI warns outside the `20–24` tested range. |
+| Node.js version warning | The CLI never blocks on Node version: it only prints a warning when your version is outside the tested `>=20 <=24` range and continues scaffolding. Use Node v20.x or v22.x LTS to avoid the warning. |
 | `bun` missing from choices | Expected on Windows. Use `npm`, `yarn`, or `pnpm`. |
 | `degit ... permission denied` / `MISSING_REF` | Templates tag for this CLI version is not on GitHub yet. The CLI auto-falls back to `feature/v4.0` for preview builds. Override with `EXPRESSOTS_TEMPLATE_REF=<branch-or-tag>`. |
 | Existing folder with the same name | `degit` refuses to overwrite. Remove or rename the folder first. |

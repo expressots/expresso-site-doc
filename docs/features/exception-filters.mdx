@@ -6,22 +6,36 @@ description: Customize how ExpressoTS turns errors into HTTP responses with @Cat
 
 # Exception Filters
 
-The exception filter pipeline is how ExpressoTS v4 turns thrown `Error`s into HTTP responses. Out of the box you don't need to do anything. The framework registers a stack of built-in filters that produce RFC 7807 problem details. When you do need to override that behaviour for one error type, one route, or globally, **`@Catch` + `BaseExceptionFilter` + `@UseFilters`** are the only three primitives you'll touch.
+The exception filter pipeline is how ExpressoTS v4 turns thrown `Error`s into HTTP responses. Enable it once with `setErrorHandler({ enableExceptionFilters: true })` and the framework discovers a stack of built-in filters that produce RFC 7807 problem details. When you need to override that behaviour for one error type, one route, or globally, **`@Catch` + `BaseExceptionFilter` + `@UseFilters`** are the only three primitives you'll touch.
 
 If you only care about *which errors to throw*, see [Error handling](./error-handling.mdx). This page focuses on **building filters**.
 
 ## The built-in stack
 
-When the framework boots, it auto-discovers every class decorated with `@Catch(...)` and registers it in the global `ExceptionFilterRegistry`. The default install ships:
+Exception filters are enabled in your `App` class:
+
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.setErrorHandler({ enableExceptionFilters: true });
+    }
+}
+```
+
+Once enabled, the framework auto-discovers every imported class decorated with `@Catch(...)` and registers it in the global `ExceptionFilterRegistry`. `@expressots/core` ships four built-in filters that are discovered the same way:
 
 | Filter | Catches | Status | Output |
 | --- | --- | --- | --- |
-| `ValidationErrorFilter` | `ValidationErrorClass` | `400` | `application/problem+json` with `errors[]` |
-| `NotFoundFilter` | `NotFoundError` | `404` | `application/problem+json` |
-| `AppErrorFilter` | `AppError` (and subclasses not caught above) | `appError.statusCode` | `application/problem+json` |
-| `GlobalExceptionFilter` | everything else | `500` | `application/problem+json`, optional stack |
+| `ValidationErrorFilter` | `ValidationErrorClass` | `400` | problem details with `validationErrors[]` |
+| `NotFoundFilter` | `NotFoundError` | `404` | problem details |
+| `AppErrorFilter` | `AppError` (and subclasses not caught above) | `appError.statusCode` | `appError.toProblemDetails()` |
+| `GlobalExceptionFilter` | everything else | `500` | problem details (`type`, `title`, `status`, `instance`, `timestamp`); stack included when `NODE_ENV` is `development` or `test` |
 
-This means **you can ship a v4 app without writing a single filter**: every `throw new AppError(...)` or `throw new ValidationErrorClass(...)` becomes a structured response automatically.
+All of them respond through `BaseExceptionFilter.sendErrorResponse`, which sets `Content-Type: application/problem+json` unless the filter set its own Content-Type first.
+
+This means **you can ship a v4 app without writing a single filter**: once exception filters are enabled, every `throw new AppError(...)` or `throw new ValidationErrorClass(...)` becomes a structured response automatically.
 
 ## Anatomy of a filter
 
@@ -67,17 +81,17 @@ export class DatabaseErrorFilter extends BaseExceptionFilter {
 
 `BaseExceptionFilter` injects two helpers for free:
 
-- `this.logger`: the framework `Logger`, already scoped to the request
+- `this.logger`: the framework `Logger`
 - `this.report`: the [Report](./error-handling.mdx#the-report-helper) helper, if you need to build a typed payload
 
 …and exposes two protected methods:
 
 - `logError(exception, context)`: logs the error with controller/handler context, suggestions, and an optional stack trace
-- `sendErrorResponse(context, statusCode, body)`: safely writes the response (skips if headers are already sent)
+- `sendErrorResponse(context, statusCode, body)`: safely writes the response (skips if headers are already sent) and tags it `Content-Type: application/problem+json`, unless you set a Content-Type on the response yourself before calling it
 
 ## Activating a filter
 
-Filters are activated by **discovery**, not by registration. As long as the file is imported somewhere in your dependency graph (e.g. via a controller import or `index.ts` re-export) and the class is decorated with `@Catch(...)` and `@provide(...)`, it will be picked up at boot.
+Filters are activated by **discovery**, not by manual registration. With `enableExceptionFilters: true` set (see above), any class decorated with `@Catch(...)` is picked up at boot, as long as the file is imported somewhere in your dependency graph (e.g. via a controller import or `index.ts` re-export). Decorating it with `@provide(...)` lets the registry resolve it from the DI container; without it, the filter is instantiated directly and the logger is injected manually.
 
 A common pattern is to keep them all under `src/filters/` and barrel-export from `src/filters/index.ts`:
 
@@ -115,11 +129,11 @@ export class UsersController {
 
 The resolution order is:
 
-1. **Method-level** filters (from `@UseFilters` on the method)
-2. **Controller-level** filters (from `@UseFilters` on the controller)
-3. **Global** filters (from `@Catch` discovery)
+1. **Method-level** filters (from `@UseFilters` on the method); these run for any error thrown on that route
+2. **Controller-level** filters (from `@UseFilters` on the controller); same, for any error in that controller
+3. **Global** filters (from `@Catch` discovery), matched by exception type walking up the inheritance chain (exact type first, then parent classes, then catch-all filters)
 
-The first filter whose `@Catch` types match the thrown error wins; the rest are skipped.
+Filters run in that order; the first one that sends a response stops the chain. If no filter sends a response, a fallback handler answers with `{ "code": <status>, "error": "<message>" }`.
 
 ## Catching everything
 
@@ -162,9 +176,11 @@ interface ExceptionContext {
     request: Request;
     response: Response;
     next: NextFunction;
-    method: string;                    // GET, POST, …
+    controller?: NewableFunction;      // controller class (if resolved)
     handler?: string;                  // controller method name
-    controller?: { name: string };     // controller class
+    route?: string;                    // route path
+    method?: string;                   // GET, POST, …
+    httpContext?: IHttpContext;        // adapter HTTP context (if available)
     showStackTrace?: boolean;          // honoured by `logError`
 }
 ```
@@ -203,6 +219,6 @@ For full HTTP-level integration tests, see [Testing](./testing.mdx).
 ## See also
 
 - **[Error handling](./error-handling.mdx)**: `AppError`, `Report`, and the v4 error model.
-- **[Validation](./validation.mdx)**: how `ValidationErrorFilter` formats validation responses.
+- **[Validation](./validation.mdx)**: request validation; its 400 responses are sent directly as plain JSON, not through filters.
 - **[Decorators](./decorators.mdx)**: quick reference for `@Catch` and `@UseFilters`.
 - **[Status codes](./status-code.mdx)**: the `StatusCode` enum used in filters.

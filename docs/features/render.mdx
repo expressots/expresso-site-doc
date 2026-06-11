@@ -290,11 +290,14 @@ async about(): Promise<void> {}
 For advanced use cases:
 
 ```typescript
+import { controller, Get, param, response } from "@expressots/adapter-express";
+import type { Response } from "express";
+
 @controller("/api")
 export class ApiController {
     @Get("/preview/:template")
     async preview(
-        @Param("template") template: string,
+        @param("template") template: string,
         @response() res: Response
     ): Promise<void> {
         const renderService = (this.Middleware as any).getRenderService();

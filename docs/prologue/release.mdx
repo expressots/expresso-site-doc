@@ -114,17 +114,26 @@ Testing utilities for unit, integration, and E2E:
 - Database fixtures with `createTestDatabase()`
 
 ```ts
-import { createTestApp, request } from "@expressots/core";
+import { createTestApp } from "@expressots/core";
 
 describe("UserController", () => {
-    const { app, container } = await createTestApp(App);
+    let testApp: Awaited<ReturnType<typeof createTestApp>>;
+
+    beforeAll(async () => {
+        testApp = await createTestApp(App);
+    });
+
+    afterAll(async () => {
+        await testApp.cleanup();
+    });
 
     test("GET /users returns user list", async () => {
-        await request(app)
+        await testApp.request
             .get("/users")
             .expectStatus(200)
             .expectBody<User[]>((users) => users.length > 0)
-            .expectTime({ lessThan: 100 });
+            .expectTime({ lessThan: 100 })
+            .execute();
     });
 });
 ```
@@ -164,19 +173,22 @@ export class SendWelcomeEmailHandler implements IEventHandler<UserCreatedEvent> 
 
 Performance optimization for large applications:
 
-- On-demand module loading
-- Auto-detection of lazy-loadable modules
-- Preloading hints for critical modules
-- Progressive startup cost distribution
+- On-demand module loading with `CreateLazyModule()`
+- Route auto-detection from `@controller()` decorators
+- Preload hints (`high`, `medium`, `low`, `never`) via `.withPreloadHint()`
+- Prefetch and timeout configuration via `.withLazyConfig()`
+- One-liner Express wiring with `setupLazyLoadingForExpress()`
+- Background warmup strategies (`idle`, `immediate`, `scheduled`)
 
 ```ts
-import { LazyModule } from "@expressots/core";
+import { CreateLazyModule } from "@expressots/core";
 
 // Module only loaded when /admin routes are accessed
-@LazyModule({ preload: false })
-export class AdminModule {
-    // Heavy admin functionality loaded on demand
-}
+// (routes auto-detected from @controller("/admin"))
+export const AdminModule = CreateLazyModule(
+    [AdminController],
+    { name: "AdminModule" },
+).withPreloadHint("never");
 ```
 
 #### 5. Enhanced Configuration
@@ -193,11 +205,11 @@ import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     database: {
-        url: Env.string("DATABASE_URL").required(),
-        pool: Env.number("DB_POOL_SIZE").default(10),
+        url: Env.string("DATABASE_URL", { required: true }),
+        pool: Env.number("DB_POOL_SIZE", { default: 10 }),
     },
     features: {
-        caching: Env.boolean("ENABLE_CACHE").default(true),
+        caching: Env.boolean("ENABLE_CACHE", { default: true }),
     },
 });
 ```
@@ -269,17 +281,18 @@ export class UsersController {
 
 TypeScript-first validation with a pluggable adapter registry:
 
-- Built-in adapters for **class-validator**, **Zod**, and **Yup** (all opt-in via `validationRegistry`)
+- Built-in adapters for **class-validator** (registered automatically), **Zod**, and **Yup** (opt-in via `addValidation({ adapters: [...] })`)
 - Smart field detection (email, phone, URL, UUID)
 - Helpful error messages with examples
 - Custom adapters via `IValidationAdapter`
 
 ```ts
-import { provide, validationRegistry, createZodValidator } from "@expressots/core";
+import { provide, ZodValidatorAdapter } from "@expressots/core";
 import { controller, Post, validatedBody } from "@expressots/adapter-express";
 import { z } from "zod";
 
-validationRegistry.register(createZodValidator());
+// In your App class:
+// this.Middleware.addValidation({ adapters: [ZodValidatorAdapter] });
 
 const CreateUser = z.object({
     name: z.string(),
@@ -335,9 +348,9 @@ export class TenantConfigService {
 
 ### API Versioning
 
-- URL versioning (`/v1/users`, `/v2/users`)
-- Header and query parameter versioning
-- Multiple active versions
+- URL versioning (`/v1/users`, `/v2/users`) via the `@Version()` decorator
+- Controller-level and method-level versions (method overrides controller)
+- Multiple active versions, auto-detected and shown in the startup banner
 
 ### Route Constraints
 
@@ -365,12 +378,8 @@ Guard system with advanced access control:
 - Decorators: `@RequireAuthentication()`, `@RequireRoles()`, `@RequirePermissions()`
 
 ```ts
-import {
-    controller,
-    Get,
-    RequireRoles,
-    RequirePermissions,
-} from "@expressots/core";
+import { RequireRoles, RequirePermissions } from "@expressots/core";
+import { controller, Get } from "@expressots/adapter-express";
 
 @controller("/documents")
 export class DocumentController {
@@ -432,7 +441,7 @@ The v4 CLI ships with **four templates** and middleware **presets**:
 
 Plus:
 
-- `--preset <api|web|serverless|fullstack>` injects the right dependencies and replaces the placeholder *before* `npm install`.
+- `--preset <api|web|graphql|microservice|minimal>` selects the middleware preset for `application` scaffolds (default: `api`).
 - `--events` adds the event system to `application` scaffolds.
 - `--package-manager <npm|pnpm|yarn>` for consistent scaffolding.
 - `EXPRESSOTS_TEMPLATE_REF`, `EXPRESSOTS_DEV`, `EXPRESSOTS_USE_LOCAL_TEMPLATES`, `EXPRESSOTS_SKIP_INSTALL` env switches for CI / local development.

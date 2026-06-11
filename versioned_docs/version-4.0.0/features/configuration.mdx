@@ -18,7 +18,7 @@ The enhanced configuration system provides:
 -   **Type-Safe Config**: Full TypeScript inference on configuration values
 -   **Helpful Validation**: Detailed error messages with examples and hints
 -   **Environment Switching**: Automatic config switching based on environment
--   **Secret Management**: `SecretValue` class for secure handling
+-   **Secret Management**: `SecretValue` wrapper for secure handling
 -   **Environment Variables**: Type-safe access to environment variables
 
 ## Defining Configuration
@@ -31,76 +31,91 @@ import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     app: {
-        name: Env.string("APP_NAME").default("My API"),
-        port: Env.number("PORT").default(3000),
-        environment: Env.string("NODE_ENV").default("development"),
+        name: Env.string("APP_NAME", { default: "My API" }),
+        port: Env.port("PORT", { default: 3000 }),
+        environment: Env.string("NODE_ENV", { default: "development" }),
     },
     database: {
-        url: Env.string("DATABASE_URL").required(),
-        pool: Env.number("DB_POOL_SIZE").default(10),
-        ssl: Env.boolean("DB_SSL").default(false),
+        url: Env.string("DATABASE_URL", { required: true }),
+        pool: Env.number("DB_POOL_SIZE", { default: 10 }),
+        ssl: Env.boolean("DB_SSL", { default: false }),
     },
     features: {
-        caching: Env.boolean("ENABLE_CACHE").default(true),
-        rateLimit: Env.number("RATE_LIMIT").default(100),
+        caching: Env.boolean("ENABLE_CACHE", { default: true }),
+        rateLimit: Env.number("RATE_LIMIT", { default: 100 }),
     },
     api: {
-        version: Env.string("API_VERSION").default("v1"),
-        prefix: Env.string("API_PREFIX").default("/api"),
+        version: Env.string("API_VERSION", { default: "v1" }),
+        prefix: Env.string("API_PREFIX", { default: "/api" }),
     },
 });
 ```
 
 ## Environment Field Builders
 
-The `env` object provides type-safe builders for environment variables:
+The `Env` object provides type-safe builders for environment variables. Every builder takes the environment variable name plus a single options object:
 
 ### String Values
 
 ```typescript
-Env.string("VAR_NAME")
-    .required()           // Make required
-    .default("fallback")  // Set default value
-    .enum(["a", "b", "c"]) // Restrict to specific values
-    .pattern(/^[a-z]+$/)  // Validate with regex
+Env.string("VAR_NAME", {
+    required: true,        // Make required
+    default: "fallback",   // Set default value
+    minLength: 1,          // Minimum string length
+    maxLength: 100,        // Maximum string length
+    pattern: /^[a-z]+$/,   // Validate with regex
+    format: "email",       // Or a predefined format: email, url, uuid,
+                           // alphanumeric, hostname, ip, ipv4, ipv6
+})
+// Whitespace is trimmed by default (disable with trim: false).
 ```
 
 ### Number Values
 
 ```typescript
-Env.number("VAR_NAME")
-    .required()
-    .default(100)
-    .min(1)      // Minimum value
-    .max(1000)   // Maximum value
-    .integer()   // Must be integer
+Env.number("VAR_NAME", {
+    required: true,
+    default: 100,
+    min: 1,         // Minimum value
+    max: 1000,      // Maximum value
+    integer: true,  // Must be integer
+    positive: true, // Must be positive
+})
 ```
 
 ### Boolean Values
 
 ```typescript
-Env.boolean("VAR_NAME")
-    .required()
-    .default(false)
-// Accepts: true, false, "true", "false", "1", "0", "yes", "no"
+Env.boolean("VAR_NAME", {
+    required: true,
+    default: false,
+})
+// Accepts as true:  "true", "1", "yes", "on"
+// Accepts as false: "false", "0", "no", "off"
+// Extend with trueValues / falseValues options.
 ```
 
 ### Array Values
 
 ```typescript
-Env.array("VAR_NAME")
-    .required()
-    .default(["item1", "item2"])
-    .separator(",")  // Custom separator (default: ",")
+Env.array("VAR_NAME", {
+    required: true,
+    default: ["item1", "item2"],
+    delimiter: ",",     // Custom delimiter (default: ",")
+    itemType: "string", // "string" (default) or "number"
+    unique: true,       // Remove duplicates
+})
 // VAR_NAME=item1,item2,item3 → ["item1", "item2", "item3"]
 ```
 
 ### Object Values
 
 ```typescript
-Env.json("VAR_NAME")
-    .required()
-    .default({ key: "value" })
+Env.json<{ key: string }>("VAR_NAME", {
+    required: true,
+    default: { key: "value" },
+    validate: (v) => typeof v.key === "string" || "key must be a string",
+})
 // VAR_NAME='{"key":"value"}' → { key: "value" }
 ```
 
@@ -153,49 +168,57 @@ See [SecretValue Features](#secretvalue-features) for the full API surface.
 
 ### In Services
 
-Inject configuration using the `Config` provider:
+Import the config instance exported from your config module and read `config.values` (fully typed):
 
 ```typescript
-import { provide, inject, Config } from "@expressots/core";
+import { provide } from "@expressots/core";
+import config from "../config/app.config";
 
 @provide(DatabaseService)
 export class DatabaseService {
-    constructor(@inject(Config) private config: Config) {}
-
     connect() {
-        const dbUrl = this.config.get("database.url");
-        const poolSize = this.config.get("database.pool");
-        
+        const dbUrl = config.values.database.url;   // string
+        const poolSize = config.values.database.pool; // number
+
         // TypeScript knows the types!
         return this.createPool(dbUrl, poolSize);
     }
 }
 ```
 
+For dynamic access, `config.get()` accepts a dot-notation path (the return type defaults to `unknown`, so pass a type parameter):
+
+```typescript
+const dbUrl = config.get<string>("database.url");
+const poolSize = config.get<number>("database.pool");
+
+// Check whether a value is set
+if (config.has("features.caching")) {
+    // ...
+}
+```
+
 ### In Application Class
 
-Access configuration in the application class:
+Access configuration the same way inside your application class:
 
 ```typescript
 import { AppExpress } from "@expressots/adapter-express";
+import config from "./config/app.config";
 
 export class App extends AppExpress {
     async globalConfiguration(): Promise<void> {
-        const config = this.getConfig();
-        
-        this.setGlobalRoutePrefix(config.get("api.prefix"));
+        this.setGlobalRoutePrefix(config.values.api.prefix);
     }
 
     async configureServices(): Promise<void> {
-        const config = this.getConfig();
-        
-        if (config.get("features.caching")) {
+        if (config.values.features.caching) {
             this.Middleware.addCaching();
         }
-        
-        if (config.get("features.rateLimit") > 0) {
+
+        if (config.values.features.rateLimit > 0) {
             this.Middleware.addRateLimiter({
-                max: config.get("features.rateLimit"),
+                max: config.values.features.rateLimit,
             });
         }
     }
@@ -207,68 +230,72 @@ export class App extends AppExpress {
 When configuration is invalid, ExpressoTS provides detailed error messages:
 
 ```
-❌ Configuration Error: DATABASE_URL
+❌ Configuration Validation Failed
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-   Missing required environment variable
+1. DATABASE_URL (missing)
+   └─ Required environment variable DATABASE_URL is not set
+   ├─ Expected: Non-empty string
+   ├─ Example: postgresql://user:password@localhost:5432/mydb
+   └─ 💡 Hint: Add DATABASE_URL to your .env file
 
-   Expected: A valid database connection string
-   Example:  postgresql://user:password@localhost:5432/mydb
-   
-   Hint: Create a .env file with DATABASE_URL=your_connection_string
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  Server will not start until configuration is valid.
 ```
+
+By default validation runs on first access to `config.values`. Errors are logged in every environment; in production (`throwOnError` defaults to `true` when `NODE_ENV=production`) they also throw and abort startup.
 
 ### Validation Examples
 
 ```typescript
 // Required field missing
-Env.string("API_KEY").required()
-// ❌ Missing required environment variable: API_KEY
+Env.string("API_KEY", { required: true })
+// ❌ Required environment variable API_KEY is not set
 
-// Invalid number
-Env.number("PORT").min(1).max(65535)
+// Out of range number
+Env.number("PORT", { min: 1, max: 65535 })
 // PORT=99999
-// ❌ PORT must be between 1 and 65535, got: 99999
+// ❌ PORT must be at most 65535
 
 // Invalid enum
-Env.string("LOG_LEVEL").enum(["debug", "info", "warn", "error"])
+Env.enum("LOG_LEVEL", ["debug", "info", "warn", "error"])
 // LOG_LEVEL=verbose
-// ❌ LOG_LEVEL must be one of: debug, info, warn, error, got: verbose
+// ❌ LOG_LEVEL must be one of the allowed values
+//    Expected: One of: debug, info, warn, error
 
 // Pattern mismatch
-Env.string("SLUG").pattern(/^[a-z0-9-]+$/)
+Env.string("SLUG", { pattern: /^[a-z0-9-]+$/ })
 // SLUG=My Slug
-// ❌ SLUG does not match pattern: /^[a-z0-9-]+$/
+// ❌ SLUG does not match the required pattern
 ```
 
 ## Environment-Specific Configuration
 
-Define different configurations per environment:
+Use the conditional helpers `Env.is()` and `Env.when()` to pick values per environment:
+
+- `Env.is(name)` returns `true` when `NODE_ENV` matches `name` (case-insensitive, defaults to `"development"` when unset). Pass an array to match any of several names.
+- `Env.when(condition, value, fallback)` returns `value` when the condition is truthy, otherwise `fallback`. The condition can be a boolean (typically `Env.is(...)`) or a function evaluated lazily.
 
 ```typescript
-import { defineConfig, Env, when } from "@expressots/core";
+import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     database: {
-        url: when(Env.string("NODE_ENV"), {
+        url: Env.string("DATABASE_URL", {
             development: "postgresql://localhost:5432/dev",
             test: "postgresql://localhost:5432/test",
-            production: Env.string("DATABASE_URL").required(),
+            required: true,
         }),
-        pool: when(Env.string("NODE_ENV"), {
-            development: 5,
-            test: 2,
-            production: 20,
-        }),
+        pool: Env.when(Env.is("production"), 20, 5),
     },
     logging: {
-        level: when(Env.string("NODE_ENV"), {
-            development: "debug",
-            test: "warn",
-            production: "error",
-        }),
+        level: Env.when(Env.is(["production", "staging"]), "error", "debug"),
+        pretty: Env.when(() => process.env.NO_COLOR !== "1", true, false),
     },
 });
 ```
+
+Static values returned by `Env.when()` are preserved as-is in the resolved config. The same helpers are also exported as the free functions `envIs` and `envWhen`.
 
 ### Inline multi-environment defaults
 
@@ -327,43 +354,46 @@ export const config = defineConfig({
 export type AppConfig = typeof config.values;
 ```
 
-The resolved environment is picked from `NODE_ENV`. Passing `undefined` for a given environment means "no default, must be provided explicitly", which makes the field required for that environment.
+The resolved environment is picked from `NODE_ENV`. Passing `undefined` for a given environment means "no default for that environment": the value must come from the environment variable itself. To make startup fail when a variable is missing, declare the field with `{ required: true }`.
 
 ### Alternative: Multiple Config Files
 
 ```typescript
 // config/development.ts
+import { defineConfig } from "@expressots/core";
+
 export default defineConfig({
     database: { url: "postgresql://localhost:5432/dev" },
     logging: { level: "debug" },
 });
 
 // config/production.ts
+import { defineConfig, Env } from "@expressots/core";
+
 export default defineConfig({
-    database: { url: Env.string("DATABASE_URL").required() },
+    database: { url: Env.string("DATABASE_URL", { required: true }) },
     logging: { level: "error" },
 });
 
 // config/index.ts
+import { Env } from "@expressots/core";
 import development from "./development";
 import production from "./production";
 
-export default Env.string("NODE_ENV").value === "production"
-    ? production
-    : development;
+export default Env.is("production") ? production : development;
 ```
 
 ## Secret Management
 
-Use `SecretValue` for sensitive data:
+Use `Env.secret()` for sensitive data. The resolved value is a `SecretValue` wrapper instead of a plain string:
 
 ```typescript
-import { defineConfig, Env, SecretValue } from "@expressots/core";
+import { defineConfig, Env } from "@expressots/core";
 
-export default defineConfig({
+const config = defineConfig({
     auth: {
-        jwtSecret: new SecretValue(Env.string("JWT_SECRET").required()),
-        apiKey: new SecretValue(Env.string("API_KEY").required()),
+        jwtSecret: Env.secret("JWT_SECRET", { required: true, minLength: 32 }),
+        apiKey: Env.secret("API_KEY", { required: true }),
     },
 });
 ```
@@ -371,19 +401,33 @@ export default defineConfig({
 ### SecretValue Features
 
 ```typescript
-const secret = config.get("auth.jwtSecret");
+import type { SecretValue } from "@expressots/core";
+
+const secret: SecretValue = config.values.auth.jwtSecret;
 
 // Access the actual value
-const value = secret.reveal(); // Returns the actual secret
+const value = secret.value; // Returns the full secret string
 
-// Safe logging (won't expose secret)
-console.log(secret); // Outputs: [SECRET]
-console.log(secret.toString()); // Outputs: [SECRET]
-console.log(secret.toJSON()); // Outputs: "[REDACTED]"
+// Safe logging (won't expose the secret)
+console.log(secret.toString()); // "[REDACTED]" (partial reveal in development)
+console.log(secret.toJSON());   // "[REDACTED]" (always, in every environment)
+console.log(config.toObject()); // Secrets replaced with "[REDACTED]"
 
-// Comparison without exposing
+// Partial reveal for debugging: shows the last few characters,
+// e.g. "...z789". Only works when NODE_ENV=development and
+// allowPartialReveal is enabled (the default); otherwise it
+// returns "[REDACTED]". It never returns the full secret.
+console.log(secret.reveal());
+
+// Timing-safe comparison without exposing the value
 secret.equals("expected-value"); // Returns true/false
+
+// Introspection without exposing the value
+secret.isSet;  // true if non-empty
+secret.length; // number of characters
 ```
+
+How many characters `reveal()` and the development `toString()` show is controlled by the `revealStart` (default 0) and `revealEnd` (default 4) options on `Env.secret()`. Set `allowPartialReveal: false` to always get `"[REDACTED]"`.
 
 ## Configuration in expressots.config.ts
 
@@ -411,66 +455,73 @@ export default config;
 
 ## Configuration Schema
 
-Define a schema for configuration validation:
+The schema passed to `defineConfig` doubles as documentation. Use the `description` and `example` options to enrich validation errors and generated docs:
 
 ```typescript
-import { defineConfig, defineSchema, Env } from "@expressots/core";
+import { defineConfig, Env } from "@expressots/core";
 
-const schema = defineSchema({
+const config = defineConfig({
     database: {
-        url: {
-            type: "string",
+        url: Env.string("DATABASE_URL", {
             required: true,
             description: "Database connection URL",
             example: "postgresql://user:pass@localhost:5432/db",
-        },
-        pool: {
-            type: "number",
+        }),
+        pool: Env.number("DB_POOL_SIZE", {
             default: 10,
             min: 1,
             max: 100,
             description: "Connection pool size",
-        },
+        }),
     },
 });
 
-export default defineConfig(schema, {
-    database: {
-        url: Env.string("DATABASE_URL"),
-        pool: Env.number("DB_POOL_SIZE"),
-    },
-});
+export default config;
+
+// Validate explicitly and inspect the result
+const result = config.validate();
+if (!result.valid) {
+    console.error(config.getErrors());
+}
+
+// Generate a configuration reference from the schema
+const markdown = config.generateDocs("markdown"); // default format
+const json = config.generateDocs("json");
+
+// List every environment variable the schema reads
+config.getEnvVars(); // ["DATABASE_URL", "DB_POOL_SIZE"]
 ```
 
 ## Best Practices
 
 1. **Use Type-Safe Builders**: Always use `Env.string()`, `Env.number()`, etc.
-2. **Provide Defaults**: Use `.default()` for optional configuration
-3. **Mark Required Fields**: Use `.required()` for essential config
-4. **Use SecretValue**: Wrap sensitive data in `SecretValue`
-5. **Validate Early**: Configuration is validated at startup
-6. **Document Config**: Use schema descriptions for documentation
+2. **Provide Defaults**: Use the `default` option for optional configuration
+3. **Mark Required Fields**: Use `{ required: true }` for essential config
+4. **Use Secrets**: Declare sensitive data with `Env.secret()` so it resolves to a `SecretValue`
+5. **Validate Early**: Call `config.isValid()` (or access `config.values`) at startup
+6. **Document Config**: Use the `description` and `example` options for documentation
 
 ## Migration from v3
 
-If you're using the v3 `Env` provider, you can continue using it:
+The v3 `Env` provider (with `checkFile()` / `checkAll()`) has been replaced in v4 by `defineConfig` and the `Env.*` builders:
 
 ```typescript
-// v3 style (still works in v4)
-import { Env } from "@expressots/core";
+// v3 style (removed in v4)
+// const port = this.Provider.get(Env).get("PORT");
 
-this.initEnvironment("development", {
-    env: {
-        development: ".env.development",
-        production: ".env.production",
+// v4 style
+import { defineConfig, Env } from "@expressots/core";
+
+export const config = defineConfig({
+    server: {
+        port: Env.port("PORT", { default: 3000 }),
     },
 });
 
-// Access via Env provider
-const port = this.Provider.get(Env).get("PORT");
+const port = config.values.server.port; // number
 ```
 
-The new `defineConfig` approach is recommended for new projects but is fully optional.
+See the [Env validator](./envvalidator.mdx) page for a full mapping from the legacy provider to the v4 equivalents.
 
 ## Comparison with Other Frameworks
 

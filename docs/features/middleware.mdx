@@ -693,15 +693,20 @@ export class App extends AppExpress {
 
 ### Smart Validation
 
-Zero-config validation with helpful error messages:
+Zero-config validation with helpful error messages. Enable it once with `addValidation()`, then pass the schema (or rely on auto-detection of class-validator DTO parameter types) in your controllers:
 
 ```typescript
-import { validatedBody } from "@expressots/core";
+import { validatedBody } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.addValidation();
+    }
+}
 
 @Post("/users")
-createUser(@validatedBody() dto: CreateUserDto) {
-    // dto is automatically validated
-    // TypeScript types are inferred
+createUser(@validatedBody(CreateUserDto) dto: CreateUserDto) {
+    // dto is validated before the handler runs
     return this.userService.create(dto);
 }
 ```
@@ -811,10 +816,10 @@ class ErrorBoundaryMiddleware extends ExpressoMiddleware {
 async configureServices(): Promise<void> {
     this.Middleware.setErrorHandler({
         showStackTrace: await this.isDevelopment(),
-        logErrors: true,
-        customHandler: (error, req, res, next) => {
-            // Custom error formatting
-        },
+        enableExceptionFilters: true,
+        // Or take full control with a custom Express error handler
+        // (disables exception filters):
+        // errorHandler: (error, req, res, next) => { ... },
     });
 }
 ```

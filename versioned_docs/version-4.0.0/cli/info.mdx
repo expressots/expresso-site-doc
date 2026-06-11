@@ -28,8 +28,8 @@ Prints:
 | Node version     | `process.version`                                   |
 | CLI bundle       | `BUNDLE_VERSION` baked at CLI build time            |
 
-:::note No global `--version`
-The CLI intentionally does **not** expose `expressots --version`. Use `expressots info` or `npm list -g @expressots/cli`.
+:::note `--version` flag
+`expressots --version` (alias `-V`) prints just the CLI bundle version (the same `BUNDLE_VERSION` shown by `expressots info`). Use `expressots info` when you also want project and environment details.
 :::
 
 ### Example output

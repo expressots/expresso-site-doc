@@ -9,9 +9,9 @@ description: "Error handling in ExpressoTS v4: typed app errors, RFC 7807 proble
 ExpressoTS v4 ships a layered error story:
 
 1. **Typed errors**: `AppError`, `NotFoundError`, `ValidationErrorClass` extend a single base so every layer of your app speaks the same language.
-2. **RFC 7807 problem details**: by default, errors are serialized as [`application/problem+json`](https://www.rfc-editor.org/rfc/rfc7807) so HTTP clients can introspect them.
+2. **RFC 7807 problem details**: with exception filters enabled, errors are serialized as [`application/problem+json`](https://www.rfc-editor.org/rfc/rfc7807) so HTTP clients can introspect them.
 3. **Exception filters**: pluggable handlers (`@Catch(...)`) for full control over how a specific error class becomes an HTTP response. See **[Exception filters](./exception-filters.mdx)** for the focused reference.
-4. **`Report.Error()`**: the v3 helper is **still available** for ergonomic throws.
+4. **`Report`**: the v3 helper is **still available** for ergonomic throws.
 
 This page covers (1), (2) and (4); the **[Exception filters](./exception-filters.mdx)** page covers (3).
 
@@ -25,8 +25,8 @@ This page covers (1), (2) and (4); the **[Exception filters](./exception-filters
 import { AppError, StatusCode } from "@expressots/core";
 
 throw new AppError(
-    StatusCode.BadRequest,
     "Email already in use",
+    StatusCode.BadRequest,
     "users.create",
 );
 ```
@@ -37,55 +37,60 @@ throw new AppError(
 | --- | --- | --- |
 | `AppError` | Anything | `500 Internal Server Error` |
 | `NotFoundError` | Missing entity / 404 | `404 Not Found` |
-| `ValidationErrorClass` | Validation failed (multi-error) | `400 Bad Request` |
+| `ValidationErrorClass` | Validation failed (multi-error) | `422 Unprocessable Entity` |
+
+`NotFoundError` takes a resource name and an optional id; the message is built for you:
 
 ```typescript
 import { NotFoundError } from "@expressots/core";
 
 const user = await this.userRepo.findById(id);
-if (!user) throw new NotFoundError(`User ${id} not found`, "users.get");
+if (!user) throw new NotFoundError("User", id); // "User with id ... not found"
 ```
 
-`ValidationErrorClass` carries a list of `ValidationError` items and is thrown automatically by `@validatedBody` / `@validatedQuery` etc. when payload validation fails.
+`ValidationErrorClass` carries a list of `ValidationError` items (`{ property, messages, value? }`). Note that the request validation decorators (`@validatedBody` / `@validatedQuery` etc.) do **not** throw it; they answer invalid requests directly with a plain JSON 400 (see [Validation](./validation.mdx)). Throw `ValidationErrorClass` yourself when you want a validation failure to go through the exception-filter pipeline.
 
 ## RFC 7807 problem details
 
-By default the global exception filter turns any `AppError` (or subclass) into a problem-details JSON response:
+With exception filters enabled (see [Wiring the exception-filter pipeline](#wiring-the-exception-filter-pipeline) below), the built-in filters turn any `AppError` (or subclass) into a problem-details JSON response. `BaseExceptionFilter.sendErrorResponse` sets `Content-Type: application/problem+json` on these responses, unless a filter set its own Content-Type first:
 
 ```http
 HTTP/1.1 404 Not Found
 Content-Type: application/problem+json
 
 {
-  "type": "https://expresso-ts.com/errors/not-found",
-  "title": "Resource not found",
+  "type": "https://expressots.dev/errors/not-found",
+  "title": "User with id u_xyz123 not found",
   "status": 404,
-  "detail": "User u_xyz123 not found",
-  "instance": "/api/users/u_xyz123"
+  "instance": "/api/users/u_xyz123",
+  "timestamp": "2026-06-10T18:45:00.000Z",
+  "detail": { "resource": "User", "id": "u_xyz123" }
 }
 ```
 
-For `ValidationErrorClass`, the payload also includes a typed `errors` array:
+For a thrown `ValidationErrorClass`, the built-in `ValidationErrorFilter` responds with status `400` and a `validationErrors` array:
 
 ```json
 {
-  "type": "https://expresso-ts.com/errors/validation",
-  "title": "Validation failed",
+  "type": "https://expressots.dev/errors/validation-failed",
+  "title": "Validation Failed",
   "status": 400,
-  "detail": "Request body did not pass validation",
   "instance": "/api/users",
-  "errors": [
-    { "field": "email",    "code": "isEmail",   "message": "must be a valid email" },
-    { "field": "password", "code": "minLength", "message": "must be at least 8 characters" }
+  "timestamp": "2026-06-10T18:45:00.000Z",
+  "validationErrors": [
+    { "property": "email", "messages": ["must be a valid email"] },
+    { "property": "password", "messages": ["must be at least 8 characters"], "value": "short" }
   ]
 }
 ```
 
-Disable RFC 7807 (e.g. when you need legacy `{statusCode, error}` shape) by registering a custom global filter: see **[Exception filters](./exception-filters.mdx)**.
+By contrast, the 400 responses produced by the request validation decorators (`@validatedBody` etc.) are plain `application/json`, not `application/problem+json`; see [Validation](./validation.mdx#validation-error-format).
+
+Need a different shape? Register a custom filter that sets its own body (and, if needed, its own Content-Type before calling `sendErrorResponse`): see **[Exception filters](./exception-filters.mdx)**.
 
 ## The `Report` helper
 
-`Report.Error()` is the ergonomic v3 helper, still supported in v4. It throws an `AppError` with one call, ideal for use cases that want to fail fast without `new`-ing an error class:
+`Report` is the ergonomic v3 helper, still supported in v4. Its `error()` method builds an `AppError` in one call, ideal for use cases that want to fail fast without `new`-ing an error class:
 
 ```typescript
 import { provide, Report, StatusCode } from "@expressots/core";
@@ -101,7 +106,7 @@ export class CreateUserUseCase {
         const { name, email } = data;
 
         if (await this.users.findByEmail(email)) {
-            throw this.report.Error(
+            throw this.report.error(
                 "User already exists",
                 StatusCode.BadRequest,
                 "users.create",
@@ -114,13 +119,30 @@ export class CreateUserUseCase {
 }
 ```
 
-`Report.Error(message, statusCode?, service?)` returns the error so you can throw it on the same line. Internally it constructs an `AppError`, which means the same RFC 7807 + filter pipeline applies.
+`report.error(message, statusCode?, service?, options?)` returns the error so you can throw it on the same line. Internally it constructs an `AppError`, which means the same filter pipeline applies. Shortcut methods are available too: `report.badRequest()`, `report.notFound()`, `report.unauthorized()`, `report.forbidden()`, `report.conflict()`, `report.validationFailed()`, and `report.internalServerError()`.
 
-## Wiring the global error handler
+## Wiring the exception-filter pipeline
 
-In v4, the global exception filter is registered automatically by the framework. You don't need to call `setErrorHandler()` in `configureServices()` anymore. Custom filters are registered with the `@Catch()` decorator: see **[Exception filters](./exception-filters.mdx)**.
+Exception filters are opt-in. Enable them once in your `App` class:
 
-If you only want to toggle stack-trace verbosity (development vs production), set the `LOG_LEVEL` env var or call `Logger.configure({ level: "DEBUG" })` before bootstrap. Stack traces are emitted at `DEBUG` and `INFO`, hidden at `WARN` and above.
+```typescript
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    async configureServices(): Promise<void> {
+        this.Middleware.setErrorHandler({
+            enableExceptionFilters: true,
+            showStackTrace: await this.isDevelopment(),
+        });
+    }
+}
+```
+
+With `enableExceptionFilters: true`, every imported class decorated with `@Catch()` is auto-discovered, including the built-in `AppErrorFilter`, `NotFoundFilter`, `ValidationErrorFilter`, and `GlobalExceptionFilter` shipped by `@expressots/core`. Custom filters are registered with the `@Catch()` decorator: see **[Exception filters](./exception-filters.mdx)**.
+
+Calling `setErrorHandler()` with no options (or omitting `enableExceptionFilters`) installs a minimal default handler that responds with `{ "code": <status>, "error": "<message>" }` as plain JSON.
+
+`showStackTrace` controls whether stack traces are written to the logs. `GlobalExceptionFilter` additionally includes the stack in the response body when `NODE_ENV` is `development` or `test`.
 
 ## Try / catch around async work
 
@@ -133,7 +155,7 @@ async execute(data: ICreateUserRequestDTO) {
     } catch (err) {
         // Transform a third-party DB error into a domain error.
         if (isUniqueConstraintError(err)) {
-            throw new AppError(StatusCode.Conflict, "User already exists", "users.create");
+            throw new AppError("User already exists", StatusCode.Conflict, "users.create");
         }
         throw err;
     }
@@ -144,5 +166,5 @@ async execute(data: ICreateUserRequestDTO) {
 
 - **[Exception filters](./exception-filters.mdx)**: `@Catch`, `@UseFilters`, custom global filters, removing RFC 7807.
 - **[Status codes](./status-code.mdx)**: the `StatusCode` enum used everywhere.
-- **[Validation](./validation.mdx)**: how `ValidationErrorClass` is produced and the error format.
+- **[Validation](./validation.mdx)**: request validation and its plain JSON 400 error format.
 - **[Logging](./logging.mdx)**: structured error logs and redaction.

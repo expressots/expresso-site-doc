@@ -46,7 +46,7 @@ import { CustomLoggingInterceptor, CacheInterceptor } from "./interceptors";
 export class App extends AppExpress {
     async configureServices(): Promise<void> {
         const { interceptorsRegistered } = setupInterceptorsForExpress(
-            this.config.Container,
+            this.container.Container,
             {
                 builtIn: { 
                     performance: true  // Enable built-in performance interceptor
@@ -968,24 +968,29 @@ import { bootstrap } from "@expressots/core";
 import { App } from "./app";
 
 describe("Interceptors E2E", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
 
     beforeAll(async () => {
         app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
     });
 
     it("should add timing header to response", async () => {
-        const response = await fetch(`http://localhost:${app.port}/users`);
+        const response = await fetch(`http://localhost:${port}/users`);
 
         expect(response.headers.get("X-Response-Time")).toMatch(/\d+ms/);
     });
 
     it("should transform response format", async () => {
-        const response = await fetch(`http://localhost:${app.port}/users`);
+        const response = await fetch(`http://localhost:${port}/users`);
         const data = await response.json();
 
         expect(data).toHaveProperty("success", true);
@@ -994,7 +999,7 @@ describe("Interceptors E2E", () => {
     });
 
     it("should cache GET requests", async () => {
-        const url = `http://localhost:${app.port}/users`;
+        const url = `http://localhost:${port}/users`;
 
         const start1 = Date.now();
         const response1 = await fetch(url);
@@ -1015,7 +1020,7 @@ describe("Interceptors E2E", () => {
 
     it("should handle errors gracefully", async () => {
         const response = await fetch(
-            `http://localhost:${app.port}/users/error`
+            `http://localhost:${port}/users/error`
         );
 
         expect(response.status).toBe(500);
@@ -1282,8 +1287,10 @@ import {
   whenInterceptor,
   unlessInterceptor,
   PerformanceInterceptor,
-  CacheInterceptor,
+  LoggingInterceptor,
 } from "@expressots/core";
+import { controller, Get } from "@expressots/adapter-express";
+import { CacheInterceptor } from "./interceptors";
 
 @controller("/users")
 export class UserController {
@@ -1291,11 +1298,11 @@ export class UserController {
   @UseInterceptors(
     PerformanceInterceptor,
     whenInterceptor(
-      (ctx) => ctx.request.headers["x-cache"] === "true",
+      (ctx) => ctx.getRequest().headers["x-cache"] === "true",
       CacheInterceptor,
     ),
     unlessInterceptor(
-      (ctx) => ctx.request.method === "POST",
+      (ctx) => ctx.getRequest().method === "POST",
       LoggingInterceptor,
     ),
   )
@@ -1350,7 +1357,7 @@ if (isConditionalInterceptor(x))  { /* it's a when or unless */ }
 | `LoggingInterceptor`         | Structured request/response logging.                                                     |
 | `PerformanceInterceptor`     | Per-request timing that feeds the Studio "slow routes" view.                                |
 | `PerformanceInterceptorService` | Aggregated metrics service (P50/P95/P99 per route).                                  |
-| `TimeoutInterceptor`         | Aborts handlers that exceed `TimeoutOptions.ms`.                                          |
+| `TimeoutInterceptor`         | Aborts handlers that exceed `TimeoutOptions.timeout` (default 30000 ms).                  |
 
 ```ts
 import {
@@ -1358,11 +1365,12 @@ import {
   PerformanceInterceptor,
   TimeoutInterceptor,
 } from "@expressots/core";
+import { controller, Get } from "@expressots/adapter-express";
 
 @controller("/api")
 export class ApiController {
   @Get("/slow")
-  @UseInterceptors(TimeoutInterceptor({ ms: 5000 }), PerformanceInterceptor)
+  @UseInterceptors(new TimeoutInterceptor({ timeout: 5000 }), PerformanceInterceptor)
   slow() {}
 }
 ```

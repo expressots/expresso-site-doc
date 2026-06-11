@@ -18,7 +18,7 @@ Zero-config module loading with automatic route detection.
 |---------|-------------|
 | Zero-Config | Routes auto-detected from `@controller()` |
 | One-Liner Setup | `setupLazyLoadingForExpress()` |
-| Warmup Strategies | Idle, immediate, manual |
+| Warmup Strategies | Idle, immediate, scheduled |
 | Preload Hints | Low, medium, high, never |
 | Performance Metrics | Built-in tracking |
 | Auto Middleware | Loads middleware for lazy routes |
@@ -73,7 +73,7 @@ export class App extends AppExpress {
     async configureServices(): Promise<void> {
         // One-liner setup!
         const { lazyModulesCount, middleware, routeMappings } = 
-            setupLazyLoadingForExpress(this.config.Container, {
+            setupLazyLoadingForExpress(this.container.Container, {
                 lazyModules: [ReportsLazyModule, AdminLazyModule],
                 globalPrefix: "/api",
                 enableMetrics: true,
@@ -155,7 +155,9 @@ For complex scenarios, provide manual mappings:
 ```typescript
 setupLazyLoadingForExpress(container, {
     lazyModules: [ReportsLazyModule],
-    routePrefixes: ["/api/reports", "/api/analytics"],  // Manual mapping
+    routePrefixes: {
+        ReportsModule: "/reports",  // Manual mapping: module name -> route prefix
+    },
     globalPrefix: "/api"
 });
 ```
@@ -253,18 +255,37 @@ warmupConfig: {
 
 **Best for**: Applications where startup time isn't critical
 
-### Manual Warmup
+### Scheduled Warmup
 
-Control warmup timing manually:
+Start warmup after a fixed delay:
 
 ```typescript
 warmupConfig: {
-    strategy: "manual"
+    strategy: "scheduled",
+    delay: 30000,  // Start warmup 30s after setup
+    hints: ["low", "medium"]
 }
+```
+
+**Best for**: Deferring warmup until after peak startup traffic
+
+### Manual Warmup
+
+Omit `warmupConfig` and trigger warmup (or load modules) yourself using the instances returned by setup:
+
+```typescript
+const { manager, warmup } = setupLazyLoadingForExpress(container, {
+    lazyModules: [ReportsLazyModule, AdminLazyModule],
+    enableWarmup: true
+    // No warmupConfig: warmup does not start automatically
+});
 
 // Later in code
-const lazyManager = this.Provider.get(LazyLoadingManager);
-await lazyManager.warmupModules(["ReportsModule", "AdminModule"]);
+await warmup?.start({ strategy: "immediate", hints: ["low", "medium"] });
+
+// Or load specific modules directly
+await manager.load("ReportsModule");
+await manager.loadByHint("low");
 ```
 
 **Best for**: Custom warmup logic based on conditions
@@ -311,27 +332,15 @@ const AdminLazyModule = CreateLazyModule(
 
 ### Load Timeout
 
-Configure maximum load time:
+Configure maximum load time (default is 30000ms):
 
 ```typescript
 const HeavyLazyModule = CreateLazyModule(
     [HeavyController],
     { name: "HeavyModule" }
 ).withLazyConfig({
-    loadTimeout: 5000  // 5 second timeout
+    timeout: 5000  // 5 second timeout
 });
-```
-
-### Retry Configuration
-
-Configure retry behavior for failed loads:
-
-```typescript
-.withLazyConfig({
-    retryOnError: true,
-    maxRetries: 3,
-    retryDelay: 1000
-})
 ```
 
 ---
@@ -350,53 +359,57 @@ setupLazyLoadingForExpress(container, {
 ### Access Metrics
 
 ```typescript
-import { LazyLoadingManager } from "@expressots/adapter-express";
+import { LazyModuleManager, LazyLoadMetrics } from "@expressots/core";
 
 @controller("/diagnostics")
 export class DiagnosticsController {
     constructor(
-        @inject(LazyLoadingManager) 
-        private lazyManager: LazyLoadingManager
+        @inject(LazyModuleManager)
+        private manager: LazyModuleManager,
+        @inject(LazyLoadMetrics)
+        private metrics: LazyLoadMetrics
     ) {}
 
     @Get("/lazy-loading")
-    getMetrics() {
-        const metrics = this.lazyManager.getMetrics();
+    getStatistics() {
+        const stats = this.manager.getStatistics();
 
         return {
-            totalModules: metrics.totalModules,
-            loadedModules: metrics.loadedModules,
-            loadTimes: metrics.loadTimes,
-            averageLoadTime: metrics.averageLoadTime,
-            moduleStatus: metrics.moduleStatus
+            totalModules: stats.totalModules,
+            loadedModules: stats.loadedModules,
+            lazyModules: stats.lazyModules,
+            failedModules: stats.failedModules,
+            avgLoadTime: stats.avgLoadTime,
+            recommendations: this.metrics.getRecommendations()
         };
     }
 }
 ```
 
 **Metrics Available**:
-- Total lazy modules
-- Currently loaded modules
-- Load times per module
-- Average load time
-- Module status (loaded/pending/failed)
-- First load timestamp
+- Total registered modules
+- Loaded / lazy / failed module counts
+- Average and total load time
+- Estimated memory saved
+- Per-module recommendations (via `LazyLoadMetrics`)
 
 ### Real-Time Monitoring
 
 ```typescript
-const lazyManager = this.Provider.get(LazyLoadingManager);
+const manager = this.Provider.get(LazyModuleManager);
 
-// Get specific module info
-const reportModuleInfo = lazyManager.getModuleInfo("ReportsModule");
-console.log(reportModuleInfo.loaded);      // true/false
-console.log(reportModuleInfo.loadTime);    // milliseconds
-console.log(reportModuleInfo.routes);       // ["/api/reports/*"]
+// Inspect module state
+console.log(manager.getLoadedModules());   // ["ReportsModule"]
+console.log(manager.getPendingModules());  // ["AdminModule"]
+console.log(manager.getFailedModules());   // []
 
-// Check if module is loaded
-if (lazyManager.isModuleLoaded("AdminModule")) {
+// Check if a module is loaded
+if (manager.isLoaded("AdminModule")) {
     console.log("Admin module is ready");
 }
+
+// Load a module manually
+await manager.load("AdminModule");
 ```
 
 ---
@@ -412,18 +425,13 @@ const { routeMappings } = setupLazyLoadingForExpress(container, {
 
 console.log(routeMappings);
 // [
-//   { 
-//     moduleName: "ReportsModule", 
-//     prefix: "/api/reports",
-//     controllers: ["ReportsController"]
-//   },
-//   { 
-//     moduleName: "AdminModule", 
-//     prefix: "/api/admin",
-//     controllers: ["AdminController"]
-//   }
+//   { prefix: "/reports", moduleName: "ReportsModule", loaded: false },
+//   { prefix: "/admin", moduleName: "AdminModule", loaded: false }
 // ]
 ```
+
+Prefixes are auto-detected from `@controller()` decorators. The `globalPrefix`
+(e.g. `"/api"`) is prepended at request-matching time.
 
 ---
 
@@ -540,8 +548,8 @@ test("Reports module loads on demand", async () => {
         .expect(200);
 
     // Verify module loaded
-    const manager = app.get(LazyLoadingManager);
-    expect(manager.isModuleLoaded("ReportsModule")).toBe(true);
+    const manager = container.get(LazyModuleManager);
+    expect(manager.isLoaded("ReportsModule")).toBe(true);
 });
 ```
 
@@ -586,7 +594,7 @@ export class App extends AppExpress {
 
     async configureServices(): Promise<void> {
         const { middleware } = setupLazyLoadingForExpress(
-            this.config.Container,
+            this.container.Container,
             {
                 lazyModules: [
                     ReportsLazyModule,
@@ -642,7 +650,7 @@ export class ReportsController {}
 ```typescript
 setupLazyLoadingForExpress(container, {
     lazyModules: [ReportsLazyModule],
-    routePrefixes: ["/api/reports"]  // Manual mapping
+    routePrefixes: { ReportsModule: "/reports" }  // Manual mapping
 });
 ```
 
@@ -652,7 +660,7 @@ setupLazyLoadingForExpress(container, {
 ```typescript
 CreateLazyModule([Controller], { name: "Module" })
 .withLazyConfig({
-    loadTimeout: 3000  // Reduce from default 5000ms
+    timeout: 3000  // Reduce from default 30000ms
 });
 ```
 
@@ -684,50 +692,82 @@ warmupConfig: {
 
 ### setupLazyLoadingForExpress()
 
+Exported from `@expressots/adapter-express`:
+
 ```typescript
 function setupLazyLoadingForExpress(
     container: Container,
-    options: {
-        lazyModules: LazyModule[];
-        routePrefixes?: string[];  // Optional manual mapping
+    options?: {
+        lazyModules?: ILazyModule[];
+        routePrefixes?: Record<string, string>;  // { moduleName: "/prefix" }
         globalPrefix?: string;
-        enableMetrics?: boolean;
-        enableWarmup?: boolean;
+        enableAutoLoad?: boolean;   // default: true
+        enableMetrics?: boolean;    // default: true in development
+        enableWarmup?: boolean;     // default: true
+        alwaysLoad?: string[];      // module names to load eagerly
+        neverLoad?: string[];       // module names to skip entirely
+        logLevel?: "debug" | "info" | "warn" | "error" | "none";
         warmupConfig?: {
-            strategy: "idle" | "immediate" | "manual";
+            strategy: "idle" | "immediate" | "scheduled";
             delay?: number;
+            maxConcurrent?: number;
+            priority?: string[];
             hints?: ("low" | "medium" | "high" | "never")[];
         };
     }
 ): {
+    loader: LazyModuleLoader;
+    manager: LazyModuleManager;
+    metrics?: LazyLoadMetrics;
+    warmup?: LazyModuleWarmup;
+    middleware?: RequestHandler;
+    routeMappings: LazyRouteMapping[];
     lazyModulesCount: number;
-    manager: LazyLoadingManager;
-    middleware: RequestHandler | null;
-    routeMappings: RouteMapping[];
+    eagerModulesCount: number;
 }
 ```
 
 ### CreateLazyModule()
 
+Exported from `@expressots/core`:
+
 ```typescript
 function CreateLazyModule(
-    controllers: any[],
-    options: { name: string }
-): {
-    withPreloadHint: (hint: "low" | "medium" | "high" | "never") => LazyModule;
-    withLazyConfig: (config: LazyConfig) => LazyModule;
-}
+    controllers: Array<new (...args: unknown[]) => unknown>,
+    config?: {
+        name?: string;
+        preloadHint?: "high" | "medium" | "low" | "never";  // default: "low"
+        timeout?: number;                                    // default: 30000
+        prefetchOn?: Array<{ route: string; reason?: string }>;
+        prefetchAfterIdle?: number;
+        dependencies?: string[];
+        routePrefixes?: string[];
+        estimatedMemoryUsage?: number;
+    }
+): ILazyModule
 ```
 
-### LazyLoadingManager
+The returned `ILazyModule` supports the fluent methods
+`.withPreloadHint(hint)` and `.withLazyConfig(config)`, plus `load()`,
+`status`, `isLoaded`, `loadTime`, and `error`.
+
+There is also `createLazyModule(factory, config?)` for building a lazy
+module from a custom `ContainerModule` factory.
+
+### LazyModuleManager
+
+Exported from `@expressots/core`:
 
 ```typescript
-interface LazyLoadingManager {
-    getMetrics(): LazyLoadingMetrics;
-    getModuleInfo(moduleName: string): ModuleInfo;
-    isModuleLoaded(moduleName: string): boolean;
-    warmupModules(moduleNames: string[]): Promise<void>;
-    getRouteMapping(route: string): string | null;
+interface ILazyModuleManager {
+    isLoaded(moduleName: string): boolean;
+    getLoadedModules(): string[];
+    getPendingModules(): string[];
+    getFailedModules(): string[];
+    load(moduleName: string): Promise<void>;
+    loadByHint(hint: "high" | "medium" | "low" | "never"): Promise<void>;
+    getStatistics(): ModuleLoadStatistics;
+    unload(moduleName: string): Promise<boolean>;
 }
 ```
 

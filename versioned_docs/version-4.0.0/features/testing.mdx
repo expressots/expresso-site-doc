@@ -48,11 +48,11 @@ describe("UserController", () => {
     });
 
     afterAll(async () => {
-        await testApp.close();
+        await testApp.cleanup();
     });
 
     test("GET /users returns user list", async () => {
-        const response = await testApp.request.get("/users");
+        const response = await testApp.request.get("/users").execute();
         expect(response.status).toBe(200);
     });
 });
@@ -64,10 +64,12 @@ The `createTestApp` function returns:
 
 ```typescript
 const {
-    app,        // The Express application instance
+    app,        // Test app wrapper (get services, override providers, close)
     container,  // The DI container for resolving services
     request,    // Fluent HTTP testing client
-    close,      // Cleanup function
+    port,       // The actual port the test server listens on
+    baseUrl,    // http://localhost:{port}
+    cleanup,    // Cleanup function: closes the server and restores env vars
 } = await createTestApp(App);
 ```
 
@@ -81,23 +83,30 @@ The fluent request API provides a chainable, readable interface for HTTP testing
 import { request } from "@expressots/core";
 
 // GET request
-await request(app).get("/users").expectStatus(200);
+await request(app).get("/users").expectStatus(200).execute();
 
 // POST request
 await request(app)
     .post("/users")
     .send({ name: "John", email: "john@test.com" })
-    .expectStatus(201);
+    .expectStatus(201)
+    .execute();
 
 // PUT request
 await request(app)
     .put("/users/123")
     .send({ name: "Jane" })
-    .expectStatus(200);
+    .expectStatus(200)
+    .execute();
 
 // DELETE request
-await request(app).delete("/users/123").expectStatus(204);
+await request(app).delete("/users/123").expectStatus(204).execute();
 ```
+
+:::note
+The chained `expect…` matchers only run when you finish the chain with
+`.execute()` (or its alias `.end()`).
+:::
 
 ### Response Assertions
 
@@ -110,7 +119,8 @@ await request(app)
         name: "John",
         email: "john@test.com",
     })
-    .expectHeaders({ "content-type": "application/json" });
+    .expectHeaders({ "content-type": "application/json" })
+    .execute();
 ```
 
 ### Reading the parsed response
@@ -169,7 +179,8 @@ response.body.foo;      // ❌ Type error: Property 'foo' does not exist
 await request(app)
     .get("/users")
     .expectStatus(200)
-    .expectTime({ lessThan: 100 }); // Response under 100ms
+    .expectTime({ lessThan: 100 }) // Response under 100ms
+    .execute();
 ```
 
 ### Custom Assertions
@@ -178,11 +189,12 @@ await request(app)
 await request(app)
     .get("/users/123")
     .expectStatus(200)
-    .expect((user: User) => {
-        // Custom assertions with full TypeScript support
-        expect(user.email).toContain("@");
-        expect(user.createdAt).toBeDefined();
-    });
+    .expect<User>((response) => {
+        // Custom assertions receive the full FluentResponse
+        expect(response.body.email).toContain("@");
+        expect(response.body.createdAt).toBeDefined();
+    })
+    .execute();
 ```
 
 ### Predicate Assertions
@@ -191,7 +203,8 @@ await request(app)
 await request(app)
     .get("/users")
     .expectStatus(200)
-    .expectBody<User[]>((users) => users.length > 0);
+    .expectBody<User[]>((users) => users.length > 0)
+    .execute();
 ```
 
 ### Regex Matching
@@ -201,7 +214,8 @@ await request(app)
     .post("/users")
     .send({ name: "John" })
     .expectStatus(201)
-    .expectHeader("location", /\/users\/\d+/);
+    .expectHeader("location", /\/users\/\d+/)
+    .execute();
 ```
 
 ## Smart Mocks
@@ -261,7 +275,7 @@ import { snapshotRequest } from "@expressots/core";
 
 describe("API Snapshots", () => {
     test("GET /users matches snapshot", async () => {
-        await snapshotRequest(app).get("/users").expect();
+        await snapshotRequest(app).get("/users").expectSnapshot();
         // Creates snapshot on first run, compares on subsequent runs
     });
 
@@ -321,9 +335,9 @@ test("response time percentiles", async () => {
     });
 
     // Percentile assertions
-    expect(results.p50ResponseTime).toBeLessThan(50);  // 50th percentile
-    expect(results.p95ResponseTime).toBeLessThan(200); // 95th percentile
-    expect(results.p99ResponseTime).toBeLessThan(500); // 99th percentile
+    expect(results.medianResponseTime).toBeLessThan(50); // 50th percentile
+    expect(results.p95ResponseTime).toBeLessThan(200);   // 95th percentile
+    expect(results.p99ResponseTime).toBeLessThan(500);   // 99th percentile
 });
 ```
 
@@ -379,7 +393,7 @@ describe("Database Tests", () => {
 Mock the entire request context for testing guards and middleware:
 
 ```typescript
-import { mockContext } from "@expressots/core";
+import { mockContext, GuardContext } from "@expressots/core";
 
 describe("Guards", () => {
     test("admin guard allows admin users", async () => {
@@ -390,7 +404,9 @@ describe("Guards", () => {
         });
 
         const guard = container.get(AdminGuard);
-        const result = await guard.canActivate(context);
+        const result = await guard.canActivate(
+            context as unknown as GuardContext,
+        );
 
         expect(result).toBe(true);
     });
@@ -401,7 +417,9 @@ describe("Guards", () => {
         });
 
         const guard = container.get(AdminGuard);
-        const result = await guard.canActivate(context);
+        const result = await guard.canActivate(
+            context as unknown as GuardContext,
+        );
 
         expect(result).toBe(false);
     });
@@ -417,7 +435,7 @@ The testing module integrates seamlessly with Jest:
 Call `setupExpressoTSMatchers()` once in your test setup file (or at the top of every spec) to extend Jest with the ExpressoTS-specific matchers shipped by `@expressots/core`:
 
 ```typescript
-// jest.setup.ts (referenced from jest.config.ts: setupFilesAfterEach: ["<rootDir>/jest.setup.ts"])
+// jest.setup.ts (referenced from jest.config.ts: setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"])
 import { setupExpressoTSMatchers } from "@expressots/core";
 
 setupExpressoTSMatchers();
@@ -456,7 +474,7 @@ describe("API Tests", () => {
     });
 
     afterAll(async () => {
-        await testApp.close(); // Cleanup
+        await testApp.cleanup(); // Cleanup
     });
 
     beforeEach(async () => {
@@ -486,23 +504,26 @@ import { setupInterceptorsForExpress, setupAuthorizationForExpress } from "@expr
 import { App } from "./app";
 
 describe("Full Stack Testing", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
     let authToken: string;
 
     beforeAll(async () => {
         app = await bootstrap(App, { port: 0 });
-        
+        port = await app.getPort();
+
         // Get test authentication token
         authToken = await getTestAuthToken({ roles: ["admin"] });
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => httpServer.close(() => resolve()));
     });
 
     it("should execute interceptors and guards in correct order", async () => {
         const response = await fetch(
-            `http://localhost:${app.port}/api/admin/dashboard`,
+            `http://localhost:${port}/api/admin/dashboard`,
             {
                 headers: { 
                     Authorization: `Bearer ${authToken}`,
@@ -525,7 +546,7 @@ describe("Full Stack Testing", () => {
 
     it("should block unauthorized requests before hitting handler", async () => {
         const response = await fetch(
-            `http://localhost:${app.port}/api/admin/dashboard`
+            `http://localhost:${port}/api/admin/dashboard`
         );
 
         expect(response.status).toBe(401);
@@ -542,20 +563,23 @@ Test multiple components working together:
 
 ```typescript
 describe("User Workflow Integration", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
 
     beforeAll(async () => {
         app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => httpServer.close(() => resolve()));
     });
 
     it("should complete full user registration flow", async () => {
         // Step 1: Register user
         const registerResponse = await fetch(
-            `http://localhost:${app.port}/auth/register`,
+            `http://localhost:${port}/auth/register`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -573,7 +597,7 @@ describe("User Workflow Integration", () => {
 
         // Step 2: Login with credentials
         const loginResponse = await fetch(
-            `http://localhost:${app.port}/auth/login`,
+            `http://localhost:${port}/auth/login`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -590,7 +614,7 @@ describe("User Workflow Integration", () => {
 
         // Step 3: Access protected resource
         const profileResponse = await fetch(
-            `http://localhost:${app.port}/users/profile`,
+            `http://localhost:${port}/users/profile`,
             {
                 headers: { 
                     Authorization: `Bearer ${loginData.token}`
@@ -611,19 +635,22 @@ Test performance under load:
 
 ```typescript
 describe("Load Testing", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
 
     beforeAll(async () => {
         app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => httpServer.close(() => resolve()));
     });
 
     it("should handle 100 concurrent requests", async () => {
-        const promises = Array.from({ length: 100 }, (_, i) => 
-            fetch(`http://localhost:${app.port}/users`)
+        const promises = Array.from({ length: 100 }, () => 
+            fetch(`http://localhost:${port}/users`)
         );
 
         const responses = await Promise.all(promises);
@@ -639,7 +666,7 @@ describe("Load Testing", () => {
 
         for (let i = 0; i < 50; i++) {
             const start = Date.now();
-            await fetch(`http://localhost:${app.port}/users`);
+            await fetch(`http://localhost:${port}/users`);
             times.push(Date.now() - start);
         }
 
@@ -659,7 +686,7 @@ describe("Load Testing", () => {
 
         // Make 1000 requests
         for (let i = 0; i < 1000; i++) {
-            await fetch(`http://localhost:${app.port}/users`);
+            await fetch(`http://localhost:${port}/users`);
             
             if (i % 100 === 0) {
                 global.gc?.(); // Force garbage collection if available
@@ -680,39 +707,42 @@ describe("Load Testing", () => {
 Test with database fixtures:
 
 ```typescript
+import { bootstrap, createTestDatabase, ITestDatabase } from "@expressots/core";
+
 describe("Database Integration", () => {
-    let app: any;
-    let db: Database;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
+    let db: ITestDatabase;
 
     beforeAll(async () => {
-        // Set up test database
-        db = await createTestDatabase({
+        // Set up test database with fixtures
+        db = createTestDatabase({
             type: "postgres",
-            url: process.env.TEST_DATABASE_URL,
+            connectionString: process.env.TEST_DATABASE_URL,
+            fixtures: [
+                { table: "users", data: testUsers },
+                { table: "posts", data: testPosts }
+            ],
         });
 
-        await db.migrate();
+        app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     beforeEach(async () => {
-        // Reset database state between tests
+        // Reset database state (re-applies fixtures) between tests
         await db.reset();
-        
-        // Load fixtures
-        await db.fixtures([
-            { table: "users", data: testUsers },
-            { table: "posts", data: testPosts }
-        ]);
     });
 
     afterAll(async () => {
         await db.close();
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => httpServer.close(() => resolve()));
     });
 
     it("should create user and persist to database", async () => {
         const response = await fetch(
-            `http://localhost:${app.port}/users`,
+            `http://localhost:${port}/users`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -751,7 +781,12 @@ describe("Database Integration", () => {
 1. **Always close servers in afterAll:**
 ```typescript
 afterAll(async () => {
-    await app.close();
+    // createTestApp: use the returned cleanup function
+    await testApp.cleanup();
+
+    // bootstrap: close the underlying HTTP server
+    const httpServer = await app.getHttpServer();
+    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
 });
 ```
 
@@ -792,7 +827,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-    await app.close();
+    await testApp.cleanup();
     await database.disconnect();
 });
 ```
@@ -868,9 +903,8 @@ const mockService = { method: jest.fn() }; // Declared once
 ## Example: Complete Test Suite
 
 ```typescript
-import { createTestApp, request, mockProvider } from "@expressots/core";
+import { createTestApp } from "@expressots/core";
 import { App } from "./app";
-import { UserService } from "./user.service";
 
 describe("User API", () => {
     let testApp: Awaited<ReturnType<typeof createTestApp>>;
@@ -880,42 +914,46 @@ describe("User API", () => {
     });
 
     afterAll(async () => {
-        await testApp.close();
+        await testApp.cleanup();
     });
 
     describe("GET /users", () => {
         test("returns user list", async () => {
-            await request(testApp.app)
+            await testApp.request
                 .get("/users")
                 .expectStatus(200)
-                .expectBody<User[]>((users) => users.length >= 0);
+                .expectBody<User[]>((users) => users.length >= 0)
+                .execute();
         });
 
         test("responds within 100ms", async () => {
-            await request(testApp.app)
+            await testApp.request
                 .get("/users")
                 .expectStatus(200)
-                .expectTime({ lessThan: 100 });
+                .expectTime({ lessThan: 100 })
+                .execute();
         });
     });
 
     describe("POST /users", () => {
         test("creates a new user", async () => {
-            await request(testApp.app)
+            await testApp.request
                 .post("/users")
                 .send({ name: "John", email: "john@test.com" })
                 .expectStatus(201)
-                .expect((user: User) => {
-                    expect(user.id).toBeDefined();
-                    expect(user.name).toBe("John");
-                });
+                .expect<User>((response) => {
+                    expect(response.body.id).toBeDefined();
+                    expect(response.body.name).toBe("John");
+                })
+                .execute();
         });
 
         test("validates required fields", async () => {
-            await request(testApp.app)
+            await testApp.request
                 .post("/users")
                 .send({})
-                .expectStatus(400);
+                .expectStatus(400)
+                .execute();
         });
     });
 });

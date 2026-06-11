@@ -140,7 +140,8 @@ There is no built-in deprecation header, but the recipe is short:
 
 ```typescript
 import { provide, Logger, inject } from "@expressots/core";
-import { Version, controller, Get, response, Response } from "@expressots/adapter-express";
+import { Version, controller, Get, response } from "@expressots/adapter-express";
+import type { Response } from "express";
 
 @provide(UsersV1Controller)
 @Version("1")

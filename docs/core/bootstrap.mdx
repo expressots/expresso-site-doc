@@ -361,7 +361,7 @@ export type AppConfig = typeof config;
 | **Validation** | Helpful errors with context | "DB_POOL_SIZE must be between 1 and 100" |
 | **Defaults** | Fallback values per environment | `\{ development: "debug", production: "error" \}` |
 | **Secret Redaction** | Automatic hiding of sensitive data | Secrets hidden in logs automatically |
-| **Multi-Environment** | Different configs per env | `Env.string("HOST", \{ dev: "localhost", prod: "0.0.0.0" \})` |
+| **Multi-Environment** | Different configs per env | `Env.string("HOST", \{ development: "localhost", production: "0.0.0.0" \})` |
 | **Centralized** | Single source of truth | One file for all configuration |
 
 :::
@@ -375,7 +375,7 @@ import { bootstrap } from "@expressots/core";
 import { App } from "./app";
 import { appConfig } from "./config";
 
-// Pass the whole config — bootstrap extracts app, server, and envFileConfig
+// Pass the whole config: bootstrap extracts app, server, and envFileConfig
 bootstrap(App, appConfig.values);
 ```
 
@@ -844,7 +844,11 @@ describe("User API", () => {
     });
 
     afterAll(async () => {
-        await server.close(); // Cleanup
+        // Cleanup: the public server type exposes getHttpServer(), not close()
+        const httpServer = await server.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
     });
 
     test("should create user", async () => {
@@ -1228,17 +1232,17 @@ config.values.database.ssl; // → true
 database: {
     url: Env.url("DATABASE_URL", {
         development: "postgresql://localhost:5432/dev_db", // Safe default
-        production: undefined, // Must provide via env var or crashes
-    });
-}
+        production: undefined, // No default; must come from the env var
+    }),
+},
 
 // ❌ Bad: Production has a default (might use wrong DB!)
 database: {
     url: Env.url("DATABASE_URL", {
         development: "postgresql://localhost:5432/dev_db",
         production: "postgresql://localhost:5432/prod_db", // Dangerous!
-    });
-}
+    }),
+},
 ```
 
 :::

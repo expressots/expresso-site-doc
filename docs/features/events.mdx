@@ -247,11 +247,9 @@ Configure retry behavior for failed handlers:
 @provide(RetryableHandler)
 @OnEvent(UserCreatedEvent, { 
     async: true,
-    retry: {
-        maxRetries: 3,
-        backoff: "exponential",
-        initialDelay: 1000,
-    }
+    retry: 3,
+    backoff: "exponential",
+    retryDelay: 1000,
 })
 export class RetryableHandler implements IEventHandler<UserCreatedEvent> {
     async handle(event: UserCreatedEvent) {
@@ -275,7 +273,7 @@ export class DebugController {
 
     @Get("/events")
     getRecordedEvents() {
-        return this.recorder.getEvents();
+        return this.recorder.getRecordedEvents();
     }
 
     @Get("/events/replay")
@@ -305,9 +303,9 @@ recorder.replay({
     eventTypes: [UserCreatedEvent, UserUpdatedEvent],
 });
 
-// Replay with filter
+// Replay with filter (receives the RecordedEvent wrapper)
 recorder.replay({
-    filter: (event) => event.userId === "specific-user-id",
+    filter: (recorded) => (recorded.data as UserCreatedEvent).userId === "specific-user-id",
 });
 ```
 
@@ -344,7 +342,7 @@ export class DiagnosticsController {
 
     @Get("/flow/:requestId/visualize")
     visualizeFlow(@param("requestId") requestId: string) {
-        return this.flowTracker.visualize(requestId);
+        return this.flowTracker.getFlow(requestId)?.visualize();
         // Returns ASCII art visualization:
         // UserCreatedEvent
         //   ├── SendWelcomeEmailHandler (12ms)
@@ -359,21 +357,38 @@ export class DiagnosticsController {
 Enable the event system in your application:
 
 ```typescript
-import { AppExpress } from "@expressots/adapter-express";
-import { EventEmitter, EventRecorder, EventFlowTracker } from "@expressots/core";
+import { AppExpress, setupEventSystemForExpress } from "@expressots/adapter-express";
+import { AppContainer, CreateModule } from "@expressots/core";
+import { AppController } from "./app.controller";
+import { SendWelcomeEmailHandler } from "./handlers/send-welcome-email.handler";
 
 export class App extends AppExpress {
+    private readonly container: AppContainer = this.configContainer([
+        CreateModule([AppController, SendWelcomeEmailHandler]),
+    ]);
+
     async configureServices(): Promise<void> {
-        // Register event system services
-        this.Provider.register(EventEmitter);
-        
-        // Optional: Enable event recording (development only)
-        if (await this.isDevelopment()) {
-            this.Provider.register(EventRecorder);
-            this.Provider.register(EventFlowTracker);
-        }
+        // Registers EventRegistry, EventEmitter, EventRecorder, EventFlowTracker
+        // and auto-discovers all @OnEvent decorated handlers
+        const { handlersDiscovered } = setupEventSystemForExpress(
+            this.container.Container
+        );
+        console.log(`Discovered ${handlersDiscovered} event handlers`);
     }
 }
+```
+
+Recording and flow tracking are enabled automatically in development (`NODE_ENV` unset or `development`). Override with options:
+
+```typescript
+setupEventSystemForExpress(this.container.Container, {
+    enableRecording: true,
+    maxRecordedEvents: 500,
+    defaultTimeout: 10000,
+    onError: (error, event, handler) => {
+        console.error(`Handler ${handler} failed:`, error);
+    },
+});
 ```
 
 ## Testing Events
@@ -467,7 +482,8 @@ import { bootstrap } from "@expressots/core";
 import { App } from "./app";
 
 describe("Event Handler Priority", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
     let executionLog: string[] = [];
 
     beforeAll(async () => {
@@ -488,16 +504,20 @@ describe("Event Handler Priority", () => {
             });
 
         app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
     });
 
     it("should execute handlers in priority order", async () => {
         executionLog = [];
 
-        const response = await fetch(`http://localhost:${app.port}/users`, {
+        const response = await fetch(`http://localhost:${port}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: "test@example.com" }),
@@ -555,18 +575,23 @@ import { bootstrap } from "@expressots/core";
 import { App } from "./app";
 
 describe("User Events E2E", () => {
-    let app: any;
+    let app: Awaited<ReturnType<typeof bootstrap>>;
+    let port: number;
 
     beforeAll(async () => {
         app = await bootstrap(App, { port: 0 });
+        port = await app.getPort();
     });
 
     afterAll(async () => {
-        await app.close();
+        const httpServer = await app.getHttpServer();
+        await new Promise<void>((resolve) => {
+            httpServer.close(() => resolve());
+        });
     });
 
     it("should trigger all event handlers when user is created", async () => {
-        const response = await fetch(`http://localhost:${app.port}/users`, {
+        const response = await fetch(`http://localhost:${port}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

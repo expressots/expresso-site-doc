@@ -247,8 +247,8 @@ import { defineConfig, Env } from "@expressots/core";
 
 export default defineConfig({
     database: {
-        url: Env.string("DATABASE_URL").required(),
-        pool: Env.number("DB_POOL_SIZE").default(10),
+        url: Env.string("DATABASE_URL", { required: true }),
+        pool: Env.number("DB_POOL_SIZE", { default: 10 }),
     },
 });
 ```

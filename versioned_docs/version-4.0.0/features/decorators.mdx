@@ -43,7 +43,8 @@ Imported from `@expressots/adapter-express` unless noted.
 | Decorator | Purpose | Example |
 | --- | --- | --- |
 | `@controller(path, ...middleware)` | Mark a class as a controller, prefix its routes. | `@controller("/users", AuthMiddleware)` |
-| `@scope(scope)` (`@expressots/core`) | Override the controller's DI scope. | `@scope("Singleton")` |
+
+There is no dedicated scope decorator for controllers. DI scope is controlled with `@provide` / `@provideSingleton` / `@provideTransient` / `@provideInScope` or `@Provider({ scope })` from `@expressots/core` (see the DI table above).
 
 ### Method (HTTP verbs)
 
@@ -65,9 +66,9 @@ All accept `(path, ...middleware)`.
 | Decorator | Purpose | Example |
 | --- | --- | --- |
 | `@Http(code)` | Set the response status code. | `@Http(StatusCode.Created)` |
-| `@Version(version)` | Bind a route handler to a specific API version (header or path-based). See [API versioning](./api-versioning.mdx). | `@Version("2")` |
+| `@Version(version)` | Bind a controller or route handler to a specific API version (path-based `/vN` prefix). See [API versioning](./api-versioning.mdx). | `@Version("2")` |
 | `@Render(view, data?)` | Render a view through the unified render service. | `@Render("home", { user })` |
-| `@FileUpload(opts?)` | Multer-backed file upload. | `@FileUpload({ field: "avatar" })` |
+| `@FileUpload(opts?, multerOpts?)` | Multer-backed file upload. | `@FileUpload({ fieldName: "avatar" })` |
 
 ### Parameter
 
@@ -82,10 +83,10 @@ All accept `(path, ...middleware)`.
 | `@body()` | Parsed request body | `execute(@body() dto: MyDTO)` |
 | `@headers(name?)` | Request header | `execute(@headers("authorization") auth: string)` |
 | `@cookies(name?)` | Cookie value | `execute(@cookies("session") session: string)` |
-| `@validatedBody(schema)` | Validated body (Zod / Yup / class-validator) | `execute(@validatedBody(CreateUserDTO) dto: CreateUserDTO)` |
-| `@validatedQuery(schema)` | Validated query | `execute(@validatedQuery(ListQuerySchema) q: ListQuery)` |
-| `@validatedParam(name, schema)` | Validated path param | `execute(@validatedParam("id", uuidSchema) id: string)` |
-| `@validatedHeaders(schema)` | Validated headers | `execute(@validatedHeaders(authHeaders) h: AuthHeaders)` |
+| `@validatedBody(schema?)` | Validated body (Zod / Yup / class-validator) | `execute(@validatedBody(CreateUserDTO) dto: CreateUserDTO)` |
+| `@validatedQuery(schema)` or `@validatedQuery(name, schema)` | Validated query (whole object, or a single named param) | `execute(@validatedQuery(ListQuerySchema) q: ListQuery)` |
+| `@validatedParam(schema)` or `@validatedParam(name, schema)` | Validated path param(s) | `execute(@validatedParam("id", uuidSchema) id: string)` |
+| `@validatedHeaders(schema)` or `@validatedHeaders(name, schema)` | Validated headers (whole object, or a single named header) | `execute(@validatedHeaders(authHeaders) h: AuthHeaders)` |
 
 See **[Validation](./validation.mdx)** for the full validation flow.
 
@@ -95,11 +96,11 @@ Imported from `@expressots/adapter-express`. See **[Content Negotiation](./conte
 
 | Decorator | Purpose | Example |
 | --- | --- | --- |
-| `@Accept(...types)` | Restrict what `Content-Type` the route accepts. | `@Accept("application/json", "application/xml")` |
 | `@Produces(...types)` | Declare what types the route produces (used to format the response). | `@Produces("application/json", "text/csv")` |
-| `@Consumes(...types)` | Document the request body content type. | `@Consumes("application/json")` |
+| `@Accept(...types)` | Same as `@Produces` (`@Produces` is an alias of `@Accept`). | `@Accept("application/json", "application/xml")` |
+| `@Consumes(...types)` | Restrict the request body `Content-Type`. Non-matching requests get `415 Unsupported Media Type`. | `@Consumes("application/json")` |
 | `@CsvOptions(opts)` | Configure CSV serialization for this handler. | `@CsvOptions({ delimiter: ";" })` |
-| `@XmlOptions(opts)` | Configure XML serialization. | `@XmlOptions({ root: "users" })` |
+| `@XmlOptions(opts)` | Configure XML serialization. | `@XmlOptions({ rootElement: "users" })` |
 | `@YamlOptions(opts)` | Configure YAML serialization. | `@YamlOptions({ indent: 2 })` |
 | `@StreamResponse()` | Stream the response body instead of buffering. | `@StreamResponse()` |
 
@@ -145,7 +146,7 @@ Imported from `@expressots/core` and `@expressots/adapter-express`. See **[Valid
 
 | Decorator | Purpose |
 | --- | --- |
-| `@Validate(schema, options?)` | Class-level: validate every method's input against a schema. |
+| `@Validate(schema, options?)` | Parameter-level: attach a validation schema to a parameter explicitly (combine with `@body()` etc.). |
 | `@validatedBody(schema)` / `@validatedQuery(schema)` / `@validatedParam(name, schema)` / `@validatedHeaders(schema)` | Parameter-level (see the Parameter table above). |
 
 ## Exception filters

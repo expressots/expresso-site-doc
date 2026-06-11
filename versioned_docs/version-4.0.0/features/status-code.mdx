@@ -43,7 +43,7 @@ See the [MDN status code reference](https://developer.mozilla.org/en-US/docs/Web
 The cleanest pattern: declare the success status next to the route, return the body, and let the framework do the wiring.
 
 ```typescript
-import { controller, Get, Http, Post, body } from "@expressots/adapter-express";
+import { controller, Get, Http, Post, body, param } from "@expressots/adapter-express";
 import { StatusCode } from "@expressots/core";
 
 @controller("/users")
@@ -67,7 +67,7 @@ export class UsersController {
 When you need to choose the status at runtime (e.g. 200 vs 201 vs 304):
 
 ```typescript
-import { controller, Get, response } from "@expressots/adapter-express";
+import { controller, Get, param, response } from "@expressots/adapter-express";
 import { StatusCode } from "@expressots/core";
 import type { Response } from "express";
 
@@ -87,7 +87,7 @@ export class CacheController {
 }
 ```
 
-### Inside `AppError` and `Report.Error()`
+### Inside `AppError` and `report.error()`
 
 Errors thrown anywhere in the request pipeline carry a status code through to the response:
 
@@ -95,15 +95,15 @@ Errors thrown anywhere in the request pipeline carry a status code through to th
 import { AppError, NotFoundError, StatusCode } from "@expressots/core";
 
 if (!user) {
-    throw new NotFoundError(`User ${id} not found`, "users.get");
+    throw new NotFoundError("User", id); // "User with id <id> not found", 404
 }
 
 if (await this.users.findByEmail(email)) {
-    throw new AppError(StatusCode.Conflict, "Email already in use", "users.create");
+    throw new AppError("Email already in use", StatusCode.Conflict, "users.create");
 }
 
 // Or with the Report helper:
-throw this.report.Error("User already exists", StatusCode.BadRequest, "users.create");
+throw this.report.error("User already exists", StatusCode.BadRequest, "users.create");
 ```
 
 The exception filter pipeline turns these into RFC 7807 problem-details responses with the right status code automatically. See **[Error handling](./error-handling.mdx)**.
@@ -124,7 +124,7 @@ export class CreateUserUseCase {
         const { name, email } = data;
 
         if (await this.users.findByEmail(email)) {
-            throw this.report.Error(
+            throw this.report.error(
                 "User already exists",
                 StatusCode.BadRequest,
                 "users.create",
@@ -145,5 +145,5 @@ export class CreateUserUseCase {
 
 ## See also
 
-- **[Error handling](./error-handling.mdx)**: `AppError`, `Report.Error`, RFC 7807 responses.
+- **[Error handling](./error-handling.mdx)**: `AppError`, `report.error`, RFC 7807 responses.
 - **[Exception filters](./exception-filters.mdx)**: custom error → response mapping.

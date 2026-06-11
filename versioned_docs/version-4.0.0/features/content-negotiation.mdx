@@ -9,7 +9,7 @@ import TabItem from "@theme/TabItem";
 
 # Content Negotiation
 
-ExpressoTS v4 ships with a content-negotiation engine that automatically selects the right response format based on the `Accept` header, and the right request parser based on `Content-Type`, without any explicit code in your handlers. Five formatters are bundled (JSON, XML, CSV, YAML, plain text) and you can register your own.
+ExpressoTS v4 ships with a content-negotiation engine that automatically selects the right response format based on the `Accept` header, without any explicit code in your handlers. Five formatters are bundled (JSON, XML, CSV, YAML, plain text) and you can register your own. On the request side, `@Consumes` restricts which `Content-Type`s a route accepts.
 
 ## Quick start
 
@@ -19,11 +19,13 @@ import { AppExpress } from "@expressots/adapter-express";
 export class App extends AppExpress {
   async configureServices(): Promise<void> {
     this.Middleware.addContentNegotiation({
-      formatters: ["json", "xml", "csv", "yaml", "text"],
+      defaultFormat: "application/json",
     });
   }
 }
 ```
+
+All five built-in formatters are registered automatically; you don't list them by hand.
 
 ```ts title="controller.ts"
 import { controller, Get, Produces } from "@expressots/adapter-express";
@@ -43,17 +45,17 @@ export class UserController {
 | `GET /users` (no `Accept`)                           | `application/json`    | JSON-serialised array      |
 | `GET /users` `Accept: application/xml`               | `application/xml`     | XML-serialised array       |
 | `GET /users` `Accept: text/csv`                      | `text/csv`            | CSV with header row        |
-| `GET /users` `Accept: text/yaml,application/json;q=0.5` | `text/yaml`        | YAML; quality value wins   |
-| `GET /users` `Accept: image/png`                     | `406 Not Acceptable`  | No formatter for `image/*` |
+| `GET /users` `Accept: text/yaml,application/json;q=0.5` | `application/json` | YAML isn't in `@Produces`; JSON is the best remaining match |
+| `GET /users` `Accept: image/png`                     | `application/json`    | Falls back to `defaultFormat`; returns `406` only with `strictMode: true` |
 
 ## Decorators
 
 | Decorator              | Source                            | Purpose                                                                                 |
 | ---------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
-| `@Accept(...types)`    | `@expressots/adapter-express`     | Restrict the handler to specific incoming `Content-Type`s.                              |
-| `@Consumes(...types)`  | `@expressots/adapter-express`     | Alias of `@Accept`. Declares what the **request body** must be.                          |
 | `@Produces(...types)`  | `@expressots/adapter-express`     | Declares what the **response** can be. Drives `Accept` negotiation.                      |
-| `@Version("v1")`       | `@expressots/adapter-express`     | URL / header / query versioning, orthogonal to negotiation but often paired.            |
+| `@Accept(...types)`    | `@expressots/adapter-express`     | Same as `@Produces` (`@Produces` is an alias of `@Accept`). Declares response types.     |
+| `@Consumes(...types)`  | `@expressots/adapter-express`     | Declares what the **request body** must be. Enforced with `415` (see below).             |
+| `@Version("1")`        | `@expressots/adapter-express`     | Path-based URL versioning, orthogonal to negotiation but often paired.                   |
 
 ### `@Produces`
 
@@ -65,9 +67,9 @@ listUsers() {
 }
 ```
 
-If the client's `Accept` header doesn't match any of the declared types, the framework returns **406 Not Acceptable**. If multiple match, the highest [quality value](https://developer.mozilla.org/en-US/docs/Glossary/Quality_values) wins.
+If the client's `Accept` header doesn't match any of the declared types, the response **falls back to the `defaultFormat`** (`application/json` by default). Set `strictMode: true` in `addContentNegotiation` to return **406 Not Acceptable** instead. If multiple types match, the highest [quality value](https://developer.mozilla.org/en-US/docs/Glossary/Quality_values) wins.
 
-### `@Consumes` / `@Accept`
+### `@Consumes`
 
 ```ts
 @Post("/")
@@ -77,85 +79,119 @@ createUser(@body() body: CreateUserDto) {
 }
 ```
 
-Requests with any other `Content-Type` are rejected with **415 Unsupported Media Type**.
+Requests carrying a `Content-Type` that doesn't match any declared type are rejected with **415 Unsupported Media Type** before guards and validation run. The response body is `application/problem+json`:
 
-## Built-in formatters
-
-| Formatter | Default Content-Types          | Options interface                  | Notes                                                          |
-| --------- | ------------------------------ | ---------------------------------- | -------------------------------------------------------------- |
-| `json`    | `application/json`             | (none)                             | Pretty-prints in development; compact in production.            |
-| `xml`     | `application/xml`, `text/xml`  | [`XmlOptions`](#xmloptions)        | Element-based; attribute mapping available via options.         |
-| `csv`     | `text/csv`                     | [`CsvOptions`](#csvoptions)        | Header row, custom delimiter, custom quoting.                   |
-| `yaml`    | `text/yaml`, `application/yaml`| [`YamlOptions`](#yamloptions)      | Indent and line-width control.                                  |
-| `text`    | `text/plain`                   | (none)                             | Calls `.toString()` on the response body.                       |
-
-### XmlOptions
-
-```ts
-import { XmlOptions } from "@expressots/adapter-express";
-
-this.Middleware.addContentNegotiation({
-  xml: {
-    rootName: "root",
-    indent: "  ",
-    declaration: { version: "1.0", encoding: "UTF-8" },
-    cdata: ["description"],
-  } satisfies XmlOptions,
-});
-```
-
-### CsvOptions
-
-```ts
-import { CsvOptions } from "@expressots/adapter-express";
-
-this.Middleware.addContentNegotiation({
-  csv: {
-    delimiter: ",",
-    quote: '"',
-    header: true,
-    columns: ["id", "name", "email"],
-  } satisfies CsvOptions,
-});
-```
-
-### YamlOptions
-
-```ts
-import { YamlOptions } from "@expressots/adapter-express";
-
-this.Middleware.addContentNegotiation({
-  yaml: {
-    indent: 2,
-    lineWidth: 120,
-    noRefs: true,
-  } satisfies YamlOptions,
-});
-```
-
-## Streaming responses
-
-For large payloads, return a `StreamResponse` so the framework streams data through the chosen formatter without buffering.
-
-```ts
-import { StreamResponse } from "@expressots/adapter-express";
-
-@Get("/export")
-@Produces("text/csv")
-exportUsers() {
-  return new StreamResponse(async function* (write) {
-    for await (const user of usersService.cursor()) {
-      write(user);
-    }
-  });
+```json
+{
+  "type": "https://expressots.dev/errors/unsupported-media-type",
+  "title": "Unsupported Media Type",
+  "status": 415,
+  "detail": "Content-Type \"text/plain\" is not supported by this route. Supported: application/json, application/xml",
+  "instance": "/users"
 }
 ```
 
-The framework calls the generator function with a `write` helper that pushes one record through the formatter at a time. Backpressure is handled automatically.
+Requests **without** a `Content-Type` header are not rejected.
+
+## Built-in formatters
+
+| Formatter | Content-Types                                                      | Options interface                          | Notes                                                |
+| --------- | ------------------------------------------------------------------ | ------------------------------------------ | ---------------------------------------------------- |
+| `json`    | `application/json`                                                 | (none)                                     | Compact output by default.                            |
+| `xml`     | `application/xml`, `text/xml`                                      | [`XmlFormatOptions`](#xmlformatoptions)    | Element-based; attribute mapping available via options. |
+| `csv`     | `text/csv`, `application/csv`                                      | [`CsvFormatOptions`](#csvformatoptions)    | Header row, custom delimiter, field selection.        |
+| `yaml`    | `application/yaml`, `text/yaml`, `application/x-yaml`, `text/x-yaml` | [`YamlFormatOptions`](#yamlformatoptions)  | Indent and line-width control.                        |
+| `text`    | `text/plain`                                                       | (none)                                     | Strings pass through; objects become `key: value` lines. |
+
+The options interfaces are exported from `@expressots/core`. You can set app-wide defaults via the `formatDefaults` option:
+
+```ts
+this.Middleware.addContentNegotiation({
+  formatDefaults: {
+    xml: { rootElement: "root", prettyPrint: false, xmlDeclaration: true },
+    csv: { includeHeaders: true, delimiter: ",", escape: true },
+    yaml: { indent: 2, quoteStrings: false, lineWidth: 80 },
+  },
+});
+```
+
+Per-route overrides use the `@CsvOptions`, `@XmlOptions`, and `@YamlOptions` decorators from `@expressots/adapter-express`.
+
+### XmlFormatOptions
+
+```ts
+import { Get, Produces, XmlOptions } from "@expressots/adapter-express";
+
+@Get("/")
+@Produces("application/xml")
+@XmlOptions({
+  rootElement: "users",
+  itemElement: "user",
+  prettyPrint: true,
+  xmlDeclaration: true,
+})
+listUsers() {
+  return [{ id: 1, name: "Ada" }];
+}
+```
+
+Fields: `rootElement` (default `"root"`), `itemElement` (default `"item"`), `attributes`, `prettyPrint` (default `false`), `xmlDeclaration` (default `true`), `attributeMap`.
+
+### CsvFormatOptions
+
+```ts
+import { Get, Produces, CsvOptions } from "@expressots/adapter-express";
+
+@Get("/")
+@Produces("text/csv")
+@CsvOptions({
+  fields: ["id", "name", "email"],
+  includeHeaders: true,
+  delimiter: ",",
+})
+exportUsers() {
+  return this.usersService.findAll();
+}
+```
+
+Fields: `fields` (all fields if omitted), `includeHeaders` (default `true`), `delimiter` (default `","`), `transform`, `escape` (default `true`).
+
+### YamlFormatOptions
+
+```ts
+import { Get, Produces, YamlOptions } from "@expressots/adapter-express";
+
+@Get("/")
+@Produces("application/yaml")
+@YamlOptions({
+  indent: 2,
+  lineWidth: 80,
+})
+getConfig() {
+  return this.configService.getAll();
+}
+```
+
+Fields: `indent` (default `2`), `quoteStrings` (default `false`), `lineWidth` (default `80`).
+
+## Streaming responses
+
+For large payloads, mark the route with the `@StreamResponse()` decorator and return an async iterator:
+
+```ts
+import { Get, Produces, StreamResponse } from "@expressots/adapter-express";
+
+@Get("/export")
+@Produces("text/csv")
+@StreamResponse()
+exportUsers() {
+  return this.usersService.streamLargeDataset(); // returns an async iterator
+}
+```
 
 ## Quality value handling
 
-The framework parses `Accept` with full RFC 7231 quality value support:
+The framework parses `Accept` with full RFC 7231 quality value support (enabled by default via the `qualityValueSupport` option):
 
 ```http
 Accept: text/csv;q=0.9, application/xml;q=0.5, application/json;q=1.0
@@ -168,28 +204,65 @@ Accept: text/csv;q=0.9, application/xml;q=0.5, application/json;q=1.0
 | 3. Match handler  | Handler `@Produces`d JSON, CSV, XML.        |
 | 4. Pick best      | **JSON**, first match with highest `q`.    |
 
+Wildcard (`*/*`) and partial (`application/*`) entries are also negotiated; control this with the `negotiateWildcards` and `negotiatePartial` options (both default `true`).
+
 ## Custom formatters
 
-Register your own formatter for a new content type:
+Implement the `IContentFormatter` interface from `@expressots/core` and register the class via the `customFormatters` option:
 
 ```ts
-import { FormatterRegistry } from "@expressots/adapter-express";
+import { IContentFormatter } from "@expressots/core";
 
-FormatterRegistry.register({
-  contentType: "application/x-msgpack",
-  serialize: (value) => msgpack.encode(value),
-  deserialize: (buf) => msgpack.decode(buf),
+export class MsgpackFormatter implements IContentFormatter {
+  canFormat(contentType: string): boolean {
+    return contentType === "application/x-msgpack";
+  }
+
+  format(data: unknown): Buffer {
+    return msgpack.encode(data);
+  }
+
+  getContentType(): string {
+    return "application/x-msgpack";
+  }
+
+  getSupportedTypes(): Array<string> {
+    return ["application/x-msgpack"];
+  }
+}
+```
+
+```ts title="app.ts"
+this.Middleware.addContentNegotiation({
+  customFormatters: [MsgpackFormatter],
 });
 ```
 
-Once registered, the formatter participates in `Accept` negotiation exactly like the built-ins.
+Once registered, the formatter participates in `Accept` negotiation exactly like the built-ins. For advanced scenarios, the underlying `FormatterRegistry` (exported from `@expressots/core`) exposes `register(formatterClass)`, `registerAll(formatterClasses)`, `getFormatter(contentType)`, `findFormatter(contentType)`, `hasFormatter(contentType)`, and `getAllFormatters()`; you can reach the active registry through the content-negotiation service's `getRegistry()` method.
+
+## Configuration reference
+
+`addContentNegotiation` accepts a `ContentNegotiationOptions` object (exported from `@expressots/core`):
+
+| Option                | Default                                              | Purpose                                                       |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| `defaultFormat`       | `"application/json"`                                  | Format used when `Accept` is missing or nothing matches.       |
+| `formatters`          | `[]`                                                  | Extra formatter classes (built-ins are always registered).     |
+| `customFormatters`    | `[]`                                                  | Custom formatter classes.                                      |
+| `strictMode`          | `false`                                               | Return `406` instead of falling back to `defaultFormat`.       |
+| `negotiateWildcards`  | `true`                                                | Negotiate `*/*` Accept entries.                                |
+| `negotiatePartial`    | `true`                                                | Negotiate `application/*`-style entries.                       |
+| `qualityValueSupport` | `true`                                                | Honour `q=` quality values.                                    |
+| `cacheFormatters`     | `true`                                                | Cache formatter instances.                                     |
+| `preload`             | `["application/json"]`                                | Content types whose formatters are instantiated eagerly.       |
+| `formatDefaults`      | see above                                             | App-wide `csv` / `xml` / `yaml` option defaults.               |
 
 ## Composing with other systems
 
 | Other system                | Interaction                                                                                  |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
-| [Interceptors](./interceptors.mdx) | Negotiation runs **after** interceptors return, so they see the raw return value.       |
-| [Validation](./dto-validator.mdx)  | Validation runs on the **request body**, before content negotiation parses the response. |
+| [Interceptors](./interceptors.mdx) | Negotiation runs **after** the handler returns, so interceptors see the raw return value. |
+| [Validation](./dto-validator.mdx)  | Validation runs on the **request body**, before the response is formatted.              |
 | [Render engines](./render.mdx)     | HTML responses route to the render engine, not the formatter registry.                 |
 | [Studio](../studio/overview.mdx)   | The Studio Request Timeline records the negotiated response Content-Type.              |
 

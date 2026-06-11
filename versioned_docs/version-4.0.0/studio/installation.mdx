@@ -86,17 +86,23 @@ The studio-agent only loads when **all** of the following are true:
 
 Production deployments (`NODE_ENV=production`) never import the agent module, so there is zero runtime overhead in production.
 
-To force-enable Studio in a non-dev `NODE_ENV` (e.g. a staging probe), pass `enabled: true` to `bootstrap()`:
+To force-enable Studio in a non-dev `NODE_ENV` (e.g. a staging probe), call `this.setStudio({ enabled: true })` on your `App` class:
 
 ```ts
-await bootstrap(App, {
-  studio: {
-    enabled: true,
-    port: 3334,
-    dbPath: ".studio/studio.db",
-  },
-});
+import { AppExpress } from "@expressots/adapter-express";
+
+export class App extends AppExpress {
+    protected globalConfiguration(): void {
+        this.setStudio({
+            enabled: true,
+            port: 3334,
+            dbPath: ".studio/studio.db",
+        });
+    }
+}
 ```
+
+`setStudio()` accepts `enabled`, `port`, `dbPath`, and `serviceName`. Call it before the server starts listening (e.g. in `globalConfiguration()`) so the agent picks the config up during initialization.
 
 ## Environment variables
 
@@ -113,13 +119,14 @@ await bootstrap(App, {
 npx expressots-studio [command] [options]
 ```
 
-| Command  | Description                                                |
-| -------- | ---------------------------------------------------------- |
-| `start`  | Default. Starts the UI and probes the agent.               |
-| `info`   | Prints discovered routes and DI bindings from your `src/`. |
-| `clean`  | Deletes the SQLite recording.                              |
+| Command        | Description                                                          |
+| -------------- | -------------------------------------------------------------------- |
+| `start`        | Default (alias `s`). Starts the UI and probes the agent.             |
+| `info`         | Prints discovered routes and project structure from your `src/`.     |
+| `clean`        | Deletes the SQLite recording.                                        |
+| `emit-openapi` | Generates an OpenAPI 3.1 document from a static scan of your `src/`. |
 
-### Common options
+### Common options (`start`)
 
 | Option                        | Default              | Description                                |
 | ----------------------------- | -------------------- | ------------------------------------------ |
@@ -127,7 +134,8 @@ npx expressots-studio [command] [options]
 | `-a, --agent-port <port>`     | `3334`               | Agent WebSocket port.                      |
 | `-d, --db-path <path>`        | `.studio/studio.db`  | Path to the SQLite recording.              |
 | `--src <path>`                | `./src`              | Source directory to scan.                  |
-| `--no-browser`                | `false`              | Don't open the browser automatically.      |
+| `--no-browser`                | (browser opens)      | Don't open the browser automatically.      |
+| `--standalone`                | `false`              | Run in standalone mode (starts own agent). |
 
 ## .gitignore
 
