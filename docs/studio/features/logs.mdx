@@ -1,0 +1,25 @@
+---
+sidebar_position: 3
+title: Logs
+description: Stream every framework and app log line in one Studio view.
+---
+
+import logsImg from "@site/static/img/studio/logs.png";
+
+# Logs
+
+The **Logs** view streams the in-memory log buffer the agent collects from ExpressoTS and your application code.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={logsImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio logs view with level filters and route context"
+    />
+</div>
+
+- Filter by level (`TRACE` through `FATAL`), route, or logger context.
+- Follow a single request's log trail after selecting it in the timeline.
+- Export a Markdown report when you need to attach evidence to a ticket or PR.
+
+No more grepping terminal output across three restart cycles.

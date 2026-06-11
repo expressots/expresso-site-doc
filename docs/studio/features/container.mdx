@@ -1,0 +1,25 @@
+---
+sidebar_position: 5
+title: Container
+description: Inspect the DI graph binding-by-binding in Studio.
+---
+
+import containerImg from "@site/static/img/studio/container.png";
+
+# Container
+
+The **Container** view shows the DI snapshot the agent captured at startup (and highlights bindings resolved for a selected request).
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={containerImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio Container view listing DI bindings with scope badges"
+    />
+</div>
+
+- Browse a filterable table of every binding: identifier, implementation, and scope (`Singleton`, `Request`, `Transient`).
+- Switch to an interactive **dependency graph** (React Flow) to see how controllers, use cases, and providers connect.
+- When a request is selected in **Requests**, the graph emphasizes which services participated in that call.
+
+Use this when onboarding to an unfamiliar codebase or verifying that a new `provide()` registration landed in the right scope.

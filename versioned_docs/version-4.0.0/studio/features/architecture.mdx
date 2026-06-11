@@ -1,0 +1,25 @@
+---
+sidebar_position: 6
+title: Architecture
+description: See how controllers, use cases, and providers connect in Studio.
+---
+
+import architectureImg from "@site/static/img/studio/architecture.png";
+
+# Architecture
+
+The **Architecture** view renders a read-only map from `AppContainer.introspect()`, the same metadata the framework uses internally.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={architectureImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio architecture map showing controllers, services, and DI dependencies"
+    />
+</div>
+
+- Controllers, use cases, providers, and middleware appear as nodes with DI scope badges.
+- Active paths highlight as requests flow, so you can see which slice of the graph your traffic actually exercises.
+- Complements **Container** (binding-level detail) with a higher-level structural map of the application.
+
+Toggle **Hide orphans**, **Hide leaves**, and layout direction (LR/TB) from the toolbar. Per-node badges show recorded request counts and P95 latency when traffic exists.

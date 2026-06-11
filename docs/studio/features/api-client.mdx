@@ -1,0 +1,27 @@
+---
+sidebar_position: 4
+title: API Client
+description: Send HTTP requests from Studio without leaving the UI.
+---
+
+import apiClientImg from "@site/static/img/studio/api-client.png";
+
+# API Client
+
+The **API Client** is a built-in HTTP client aimed at your running app.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={apiClientImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio API Client with method, URL, headers, and body panels"
+    />
+</div>
+
+- Compose method, URL, headers, query string, and body in one panel.
+- Fire the request and read status, headers, and body from the live response pane.
+- Use it to smoke-test an endpoint while you watch the same call appear seconds later in **Requests** and **Logs**.
+
+Handy when you want to trigger traffic deliberately for architecture or security analysis.
+
+The API Client also exposes an **OpenAPI spec** panel. From there you can generate, download, and compare an OpenAPI 3.1 document enriched with real recorded traffic. See [OpenAPI generation](../../features/openapi.mdx) for the full CLI and drift-check workflow.

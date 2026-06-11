@@ -1,0 +1,37 @@
+---
+sidebar_position: 2
+title: Requests
+description: Record, inspect, and replay every HTTP call in Studio.
+---
+
+import requestsImg from "@site/static/img/studio/requests.png";
+import requestsTraceImg from "@site/static/img/studio/requests-trace.png";
+
+# Requests
+
+The **Requests** view is a live timeline of every HTTP exchange the agent captured to `.studio/studio.db`.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={requestsImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio request timeline with method, path, status, and duration columns"
+    />
+</div>
+
+- **Filter and search** by path fragment or HTTP method; pause auto-scroll while you read a long trace.
+- **Open any row** to see Trace Detail: OpenTelemetry spans, request/response headers and bodies, status code, and timing breakdown.
+- **Replay** a recorded request against your still-running app and diff the new response against the original, ideal for reproducing bugs without rewriting `curl` commands.
+- **Clear or snapshot** the recording buffer when you want a clean slate before a focused test run.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={requestsTraceImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio request timeline filtered to API traffic with status codes and replay actions"
+    />
+</div>
+
+Errors surfaced during requests also feed the error inspector (stack frames with `openInEditor` deep-links when your editor supports it).
+
+Use the **API Client** or your own HTTP client to generate traffic; every call appears here within seconds.

@@ -1,0 +1,26 @@
+---
+sidebar_position: 1
+title: Status
+description: Studio Status dashboard — uptime, memory, slow routes, error rates, and security grade at a glance.
+---
+
+import statusImg from "@site/static/img/studio/status.png";
+
+# Status
+
+The **Status** view is the landing screen when Studio connects. Use it to answer "is my app healthy right now?" without digging through logs.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={statusImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio Status dashboard showing server config, health metrics, route counts, and security grade"
+    />
+</div>
+
+- See process uptime, memory, and the ExpressoTS version your app is running.
+- Review DI scope counts (how many singleton, request, and transient bindings are registered).
+- Spot your slowest routes and error rates from **real recorded traffic**, not synthetic probes.
+- Jump to the [Security](./security.mdx) view from the aggregate letter grade (A to F) when supply-chain or runtime posture needs attention.
+
+The preset panel at the bottom reflects middleware applied via `applyPreset("api")` (CORS, helmet, rate limit, compression, JSON body limits).

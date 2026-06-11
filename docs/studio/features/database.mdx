@@ -1,0 +1,52 @@
+---
+sidebar_position: 7
+title: Database
+description: Browse your in-memory provider from Studio.
+---
+
+import databaseEmptyImg from "@site/static/img/studio/database.png";
+import databaseTablesImg from "@site/static/img/studio/database-tables.png";
+
+# Database
+
+If your app registers the v4 `InMemoryDBProvider`, the **Database** view becomes a read-only data browser.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={databaseTablesImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio Database view showing the users table schema, field badges, and live row data"
+    />
+</div>
+
+- List every entity table with live record counts.
+- Inspect field schemas (keys, unique constraints, indexes, auto-generate hints) and relations (`hasOne`, `hasMany`, `belongsTo`, `manyToMany`).
+- Page through rows (50 per page) without writing ad-hoc scripts.
+
+The left rail lists tables; selecting one opens **Fields** (schema metadata) and **Rows** (paginated data) on the right. Summary cards at the top show table count, total records, and when the snapshot was captured.
+
+## Empty state
+
+When no in-memory provider is registered, Studio shows a friendly empty state with the exact wiring you need:
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={databaseEmptyImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio Database view empty state when InMemoryDBProvider is not registered"
+    />
+</div>
+
+See [In-Memory DB](../../features/in-memory-db.mdx) for the full provider API. Register it in your module bindings:
+
+```typescript
+import { CreateModule, InMemoryDBProvider } from "@expressots/core";
+
+CreateModule([AppController, UsersController, UsersRepository], (bind) => {
+    bind(InMemoryDBProvider)
+        .toDynamicValue(() => new InMemoryDBProvider())
+        .inSingletonScope();
+});
+```
+
+The agent introspects the provider at runtime, so counts and rows update as your app creates data during development.

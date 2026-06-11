@@ -1,0 +1,25 @@
+---
+sidebar_position: 9
+title: Replay
+description: Batch re-run recorded HTTP exchanges and diff responses in Studio.
+---
+
+import replayImg from "@site/static/img/studio/replay.png";
+
+# Replay
+
+The dedicated **Replay** view focuses on re-executing past requests.
+
+<div style={{ textAlign: "center" }}>
+    <img
+        src={replayImg}
+        style={{ width: "100%", maxWidth: "960px" }}
+        alt="ExpressoTS Studio Replay view for re-running recorded exchanges"
+    />
+</div>
+
+- Pick any recorded exchange and replay it against the current code.
+- Review side-by-side diffs (status, headers, body) when the replay diverges, for example after you change validation or auth.
+- Tune diff filters from the Settings drawer (ignore headers you expect to change, such as `Date` or `ETag`).
+
+Pair with **Requests** when you need full trace context; use **Replay** when you are iterating on response shape.

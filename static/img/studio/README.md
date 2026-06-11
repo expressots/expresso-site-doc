@@ -1,7 +1,45 @@
 # Studio screenshots
 
-These images are **no longer referenced** by any docs page after the Security view was folded into the Studio Overview.
+Real captures from the [Guide app-demo](https://github.com/expressots/expresso-site-doc) running against ExpressoTS Studio v4.
 
-The **Overview** page uses the architecture diagram at `docs/core/img/studio-architecture.png` instead of UI screenshots.
+| File | Studio view |
+| ---- | ----------- |
+| `status.png` | Status dashboard |
+| `requests.png` | Request timeline |
+| `requests-trace.png` | Request timeline with traffic |
+| `logs.png` | Logs stream |
+| `api-client.png` | API Client |
+| `container.png` | Container / DI inspector |
+| `architecture.png` | Architecture map |
+| `database.png` | Database empty state |
+| `database-tables.png` | Database with live table data |
+| `metrics.png` | Metrics dashboard |
+| `replay.png` | Replay view |
+| `security.png` | Security Dependencies tab + grade |
+| `security-posture.png` | Runtime Posture (OWASP) tab |
+| `security-grade.png` | Grade calculation + rescan controls |
+| `coverage.png` | Coverage summary after test run |
+| `coverage-source.png` | Annotated source viewer |
+| `coverage-run-tests.png` | Run tests in progress |
 
-The security PNGs (`security-overview.png`, `security-finding-detail.png`, `security-recommended-fixes.png`, `security-runtime-posture.png`) are retained here for potential future use but are not linked from any page.
+## Regenerating
+
+From `app-demo`:
+
+```bash
+npm run dev
+npx expressots-studio start --no-browser --port 3456
+npm run test:cov   # refresh coverage artifact before capture
+```
+
+From `expresso-site-doc`:
+
+```bash
+npm install playwright --no-save
+npx playwright install chromium
+npm run capture-studio-screenshots
+```
+
+Use port **3456** for Studio if Docusaurus dev server occupies 3333. The capture script waits for **Agent connected** before shooting.
+
+Target size: **1440×900**, dark theme (Studio default).
