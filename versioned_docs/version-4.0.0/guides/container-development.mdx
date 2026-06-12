@@ -40,7 +40,7 @@ What happens:
 2. It runs `docker compose -f docker-compose.development.yml up`
    in the foreground (`-d` to detach).
 3. Your `./src` folder is bind-mounted into the container, so
-   `tsx --watch` reloads the moment you save a file on the host.
+   `tsx watch` reloads the moment you save a file on the host.
 4. Port `3000` (or your configured port) and debug port `9229`
    are forwarded to localhost.
 

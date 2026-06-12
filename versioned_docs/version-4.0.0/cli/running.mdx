@@ -13,7 +13,7 @@ Four CLI commands cover the full local lifecycle: write code with `dev`, compile
 
 | Command         | What it does                                                                  |
 | --------------- | ----------------------------------------------------------------------------- |
-| `dev`           | Hot-reload dev server via `tsx --watch`                                       |
+| `dev`           | Hot-reload dev server via `tsx watch`                                         |
 | `build`         | `tsc -p tsconfig.build.json`; rewrites alias imports in opinionated projects   |
 | `prod`          | `node` against the compiled JavaScript                                        |
 | `container-dev` | Docker-compose-based development workflow (`start`, `stop`, `attach`, `shell`, `status`, `logs`) |
@@ -38,12 +38,43 @@ expressots dev
 Under the hood it shells out to:
 
 ```bash
-npx tsx --watch [-r tsconfig-paths/register] ./src/<entryPoint>.ts
+tsx watch --clear-screen=false \
+  --exclude "**/dist/**" --exclude "**/build/**" \
+  --exclude "**/coverage/**" --exclude "**/*.generated.*" --exclude "**/*.log" \
+  ./src/<entryPoint>.ts
 ```
 
-- `tsx --watch` is **tsx's built-in watch mode** with no `nodemon`, no `SIGTERM` quirks on Windows.
-- `tsconfig-paths/register` is added for opinionated projects so `@useCases/...`, `@providers/...` etc. resolve at dev time.
+- `tsx watch` is **tsx's built-in watch mode** with no `nodemon`, no `SIGTERM` quirks on Windows. Reloads are sub-second.
+- **Path aliases just work.** `tsx` resolves `@useCases/...`, `@providers/...` etc. straight from `tsconfig.json` (even without a `baseUrl`), so there is no `tsconfig-paths/register` preload. Production gets the same aliases rewritten to relative paths at `build` time.
+- **Logs persist across reloads.** `--clear-screen=false` keeps tsx's `Restarting... <file>` line visible, so you always see _what_ triggered a reload.
+- **Noise is excluded.** Generated and output files (`dist/`, `build/`, `coverage/`, `*.generated.*`, `*.log`) are kept out of the watcher; `node_modules` and dotfiles like `.env*` are ignored by tsx already.
 - The process inherits stdio; press `Ctrl+C` to stop. Saved files trigger a fast restart.
+
+#### File watching on Windows and synced/network drives
+
+On Windows, OneDrive, mapped network drives, or VM-shared folders, native OS file-watch events can be unreliable. This shows up as missed reloads or a server that "keeps restarting." If you hit that, switch the watcher to polling:
+
+<Tabs>
+<TabItem value="bash" label="bash / zsh">
+
+```bash
+EXPRESSOTS_WATCH_POLL=1 expressots dev
+```
+
+</TabItem>
+<TabItem value="powershell" label="PowerShell">
+
+```powershell
+$env:EXPRESSOTS_WATCH_POLL = "1"; expressots dev
+```
+
+</TabItem>
+</Tabs>
+
+| Env var | Default | Description |
+| ----------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `EXPRESSOTS_WATCH_POLL`       | (unset) | Set to `1` / `true` to poll the filesystem instead of using native events. Steadier on Windows and synced/networked drives, at a small CPU cost. |
+| `EXPRESSOTS_WATCH_INTERVAL`   | `300`   | Poll interval in milliseconds (only used when polling is enabled).                                  |
 
 ### Options
 
@@ -135,7 +166,7 @@ expressots container-dev stop
 | `--tail`          |       | `100`                                | `logs` tail line count.                           |
 
 :::tip dev or container-dev?
-- `expressots dev` is **faster**. `tsx --watch` reload is sub-second and there is no Docker layer.
+- `expressots dev` is **faster**. `tsx watch` reload is sub-second and there is no Docker layer.
 - `expressots dev --container` is a one-shot containerized dev.
 - `expressots container-dev` is the **structured** Compose workflow when you need multiple services and a long-lived dev environment.
 :::
@@ -193,4 +224,5 @@ pnpm prod
 | `tsconfig.build.json: outDir missing`                | Add `"outDir": "build"` (or any folder name) under `compilerOptions`.                            |
 | `Cannot find module '@useCases/...'` in production   | You ran `node` directly. Use `expressots prod` so the alias rewrite is applied, or rebuild first. |
 | Port already in use (`EADDRINUSE`)                   | Stop the previous process or change the port via env / `bootstrap({ port })`.                    |
+| Dev server "keeps restarting" on Windows            | Run with `EXPRESSOTS_WATCH_POLL=1` to switch the watcher to polling. The always-visible `Restarting... <file>` line tells you which file is triggering it (often a generated file or an editor's atomic save). |
 | `--container` first run is very slow                 | Expected. It generates `Dockerfile.development`, builds the image, and pulls base layers. Subsequent runs are cached. |
