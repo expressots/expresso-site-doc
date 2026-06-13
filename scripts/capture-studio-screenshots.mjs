@@ -25,7 +25,7 @@ const OUT_DIR =
     process.env.OUT_DIR ??
     resolve(__dirname, "../static/img/studio");
 
-/** Sidebar label → output filename */
+/** Sidebar label -> output filename */
 const VIEWS = [
     { label: "Status", file: "status.png" },
     { label: "Requests", file: "requests.png" },
@@ -95,7 +95,6 @@ async function captureRequestsDetail(page) {
 
 async function captureDatabaseWithData(page) {
     await goToView(page, "Database");
-    // Wait for schema + first table selection after InMemoryDBProvider registers.
     await page.getByText("users", { exact: false }).first().waitFor({ timeout: 15_000 }).catch(() => {});
     await page.waitForTimeout(1500);
     await page.screenshot({
@@ -103,6 +102,42 @@ async function captureDatabaseWithData(page) {
         fullPage: false,
     });
     console.log("  captured database-tables.png (Database with table data)");
+}
+
+async function captureArchitectureLenses(page) {
+    await goToView(page, "Architecture");
+    await page.waitForTimeout(800);
+
+    // Overview is the default lens; capture it as the main architecture screenshot.
+    await page.screenshot({
+        path: resolve(OUT_DIR, "architecture.png"),
+        fullPage: false,
+    });
+    console.log("  captured architecture.png (Architecture Overview lens)");
+
+    // Request Flow lens
+    const requestFlowTab = page.getByRole("button", { name: /Request Flow/i });
+    if (await requestFlowTab.count()) {
+        await requestFlowTab.first().click();
+        await page.waitForTimeout(1200);
+        await page.screenshot({
+            path: resolve(OUT_DIR, "architecture-request-flow.png"),
+            fullPage: false,
+        });
+        console.log("  captured architecture-request-flow.png (Request Flow lens)");
+    }
+
+    // Explore lens
+    const exploreTab = page.getByRole("button", { name: /Explore/i });
+    if (await exploreTab.count()) {
+        await exploreTab.first().click();
+        await page.waitForTimeout(1200);
+        await page.screenshot({
+            path: resolve(OUT_DIR, "architecture-explore.png"),
+            fullPage: false,
+        });
+        console.log("  captured architecture-explore.png (Explore lens)");
+    }
 }
 
 async function captureSecurityPosture(page) {
@@ -115,7 +150,6 @@ async function captureSecurityPosture(page) {
     });
     console.log("  captured security-posture.png (Runtime Posture tab)");
 
-    // Expand grade breakdown if collapsed.
     const gradeToggle = page.getByText("How this grade is calculated", { exact: false });
     if (await gradeToggle.count()) {
         await gradeToggle.first().click();
@@ -157,7 +191,6 @@ async function captureCoverageRunTests(page) {
     });
     console.log("  captured coverage-run-tests.png (Run tests transcript)");
 
-    // Wait for run to finish so the summary cards refresh for coverage.png retake.
     await page.waitForTimeout(12_000);
     await goToView(page, "Coverage");
     await page.waitForTimeout(1500);
@@ -184,7 +217,7 @@ async function main() {
     await waitForAgent(page);
 
     for (const { label, file } of VIEWS) {
-        if (label === "Coverage" || label === "Database" || label === "Security") {
+        if (["Coverage", "Database", "Security", "Architecture", "Metrics"].includes(label)) {
             continue;
         }
         await captureView(page, label, file);
@@ -193,9 +226,17 @@ async function main() {
     await captureDatabaseWithData(page);
     await captureView(page, "Database", "database.png");
 
+    // Architecture: capture all three lenses
+    await captureArchitectureLenses(page);
+
+    // Metrics: capture the full dashboard (scrolled to show all sections)
+    await captureView(page, "Metrics", "metrics.png");
+
+    // Security: Dependencies tab + Runtime Posture + Grade breakdown
     await captureView(page, "Security", "security.png");
     await captureSecurityPosture(page);
 
+    // Coverage: summary, annotated source, run tests
     await captureView(page, "Coverage", "coverage.png");
     await captureCoverageSource(page);
     await captureCoverageRunTests(page);

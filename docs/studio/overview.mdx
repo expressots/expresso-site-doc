@@ -21,7 +21,7 @@ In v3, the framework gave you a black-box `app.listen()`. In v4, the framework a
 | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
 | `console.log` until you find the failing request       | Click a request in the Timeline, see the full trace, body, headers, and stack   |
 | Run `npm audit` once a sprint                          | Live security dashboard with reachability scoring and one-click fixes           |
-| Guess which routes are slow                            | Per-route P50/P95/P99 and error rate from real traffic                          |
+| Guess which routes are slow                            | Per-route P50/P95/P99, throughput, and slowest-endpoint highlights from real traffic |
 | Mentally rebuild the DI graph from `provide()` calls   | Architecture Map auto-generated from `AppContainer.introspect()`                |
 | Reproduce a bug with `curl` and a notes file           | Replay any recorded request and diff the new response                           |
 | Open coverage HTML in the browser after every run      | Git-aware diff coverage, annotated source, and one-click test runs in Studio    |
@@ -68,7 +68,7 @@ Each view is documented on its own page under [Features](./features/status.mdx):
 | [Container](./features/container.mdx) | DI binding table and interactive dependency graph. |
 | [Architecture](./features/architecture.mdx) | Read-only map from `AppContainer.introspect()`. |
 | [Database](./features/database.mdx) | Read-only browser for the v4 in-memory DB provider. |
-| [Metrics](./features/metrics.mdx) | Per-route P50/P95/P99 latency and error rates from real traffic. |
+| [Metrics](./features/metrics.mdx) | Throughput, per-route latency percentiles, slowest endpoints, memory, and system health. |
 | [Replay](./features/replay.mdx) | Batch re-run recorded exchanges with side-by-side diffs. |
 | [Security](./features/security.mdx) | Supply-chain advisories with reachability scoring and OWASP runtime posture. |
 | [Coverage](./features/coverage.mdx) | Git-aware code coverage, diff coverage, annotated source, and in-Studio test runs. |

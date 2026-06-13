@@ -86,7 +86,7 @@ The **Runtime Posture** tab scores your recorded HTTP traffic, routes, logs, and
     />
 </div>
 
-- **OWASP heatmap**: one tile per API1–API10 category, coloured by finding count. Click a tile to filter the list below.
+- **OWASP heatmap**: one tile per API1-API10 category, coloured by finding count. Click a tile to filter the list below.
 - **Auth coverage widget**: how many routes were hit without an `Authorization` header or session cookie during recording.
 - **Finding cards**: each posture issue links to its evidence (recorded exchange, route list, log line, or source file).
 
@@ -100,12 +100,16 @@ Checks include:
 - **Injection**: error logs containing raw SQL or shell exception patterns.
 - **Improper Inventory**: source-scanned routes that never appear in recordings (zombie routes).
 
+### Rule coverage panel
+
+Expand the **Posture Check Status** disclosure to see which individual rules passed, failed, or could not be evaluated yet. Some rules (security headers, CORS policy, authentication checks) require recorded HTTP exchanges to analyse. When no traffic has been recorded, those rules show a neutral "not evaluated" state instead of a misleading "clean" badge. Send traffic through your app (using the API Client or your test suite) to light up the remaining checks.
+
 :::caution Heuristics, not guarantees
 Posture findings are heuristic. They are a valuable development-time second opinion, not a replacement for a formal security review.
 :::
 
 ## Aggregate score
 
-Both pillars feed a single letter grade (A to F) on the Status dashboard and in the Security header. `unreachable` supply-chain findings count at ⅕ weight, so a clean codebase with only dev-only transitive advisories still scores an A. Low-severity posture findings (such as unauthenticated dev routes) may appear while you still hold an A grade if no medium-or-higher issues exist.
+Both pillars feed a single letter grade (A to F) on the Status dashboard and in the Security header. `unreachable` supply-chain findings count at 1/5 weight, so a clean codebase with only dev-only transitive advisories still scores an A. Low-severity posture findings (such as unauthenticated dev routes) may appear while you still hold an A grade if no medium-or-higher issues exist.
 
 Generate traffic with the **API Client** or your test suite so posture checks have recorded exchanges to analyse.

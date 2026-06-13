@@ -100,6 +100,10 @@ Checks include:
 - **Injection**: error logs containing raw SQL or shell exception patterns.
 - **Improper Inventory**: source-scanned routes that never appear in recordings (zombie routes).
 
+### Rule coverage panel
+
+Expand the **Posture Check Status** disclosure to see which individual rules passed, failed, or could not be evaluated yet. Some rules (security headers, CORS policy, authentication checks) require recorded HTTP exchanges to analyse. When no traffic has been recorded, those rules show a neutral "not evaluated" state instead of a misleading "clean" badge. Send traffic through your app (using the API Client or your test suite) to light up the remaining checks.
+
 :::caution Heuristics, not guarantees
 Posture findings are heuristic. They are a valuable development-time second opinion, not a replacement for a formal security review.
 :::
