@@ -8,6 +8,10 @@ description: Scaffold, build, test, and publish a reusable @expressots/* provide
 
 ExpressoTS providers are the unit of reuse in the framework: a database client, a cache adapter, an SDK wrapper, or anything else you'd want to inject into many controllers. The **`provider` template** ships everything you need to build, test, and publish one as a real npm package, complete with **dual ESM + CommonJS** output, dual type declarations, automated changelog, and CI-ready tooling.
 
+:::tip Related examples
+See [09-message-queue](https://github.com/expressots/examples/tree/main/09-message-queue) and [10-redis-cache](https://github.com/expressots/examples/tree/main/10-redis-cache) for custom provider lifecycle patterns you can extract into a published package. Browse [all 15 example projects](./example-projects.mdx).
+:::
+
 This guide walks you through scaffolding `@your-org/cool-provider`, building it, testing it, consuming it from an ExpressoTS app, and publishing it to npm.
 
 ## When to use this template

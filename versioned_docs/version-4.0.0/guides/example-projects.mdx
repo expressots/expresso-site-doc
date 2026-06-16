@@ -1,0 +1,70 @@
+---
+sidebar_position: 1
+title: Example Projects
+description: Fifteen runnable ExpressoTS v4 examples on GitHub, each mapped to a guide or feature doc.
+---
+
+# Example Projects
+
+The [expressots/examples](https://github.com/expressots/examples) repository ships **15 focused projects** for ExpressoTS v4 (pinned to `4.0.0-preview.3.4` on `main`). Each example is a standalone app you can clone, run, and test without reading the whole framework first.
+
+Pick one row below, open the GitHub folder, follow its README, then read the linked doc page for the full explanation.
+
+## Quick start
+
+```bash
+git clone https://github.com/expressots/examples.git
+cd examples
+cd 01-starter-api
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Run the full test matrix from the repo root:
+
+```bash
+./scripts/test-all.sh
+```
+
+Pre-v4 examples are archived under [previousVersions](https://github.com/expressots/examples/tree/main/previousVersions).
+
+## All 15 projects
+
+| # | Project | What it teaches | Documentation | GitHub |
+| --- | --- | --- | --- | --- |
+| 01 | **starter-api** | Minimal REST API, middleware preset, health check | [First steps](../core/first-steps.mdx) | [Open](https://github.com/expressots/examples/tree/main/01-starter-api) |
+| 02 | **jwt-authentication** | JWT, `AuthProvider`, login, guards | [Authentication](./authentication.mdx) | [Open](https://github.com/expressots/examples/tree/main/02-jwt-authentication) |
+| 03 | **authorization-rbac** | Roles, permissions, ownership guards | [Guards](../features/guards.mdx), [Authorization](../features/authorization.mdx) | [Open](https://github.com/expressots/examples/tree/main/03-authorization-rbac) |
+| 04 | **database-inmemory** | `InMemoryDBProvider`, repository pattern | [Database integration](./database-integration.mdx) | [Open](https://github.com/expressots/examples/tree/main/04-database-inmemory) |
+| 05 | **database-postgres** | PostgreSQL provider, `IBootstrap` / `IShutdown` | [Database integration](./database-integration.mdx) | [Open](https://github.com/expressots/examples/tree/main/05-database-postgres) |
+| 06 | **database-prisma** | Prisma ORM lifecycle | [Database integration](./database-integration.mdx) | [Open](https://github.com/expressots/examples/tree/main/06-database-prisma) |
+| 07 | **file-upload** | `@FileUpload`, multer | [File upload](./file-upload.mdx) | [Open](https://github.com/expressots/examples/tree/main/07-file-upload) |
+| 08 | **events** | Type-safe events, `@OnEvent` | [Events](../features/events.mdx) | [Open](https://github.com/expressots/examples/tree/main/08-events) |
+| 09 | **message-queue** | BullMQ + Redis provider | [Lifecycle](../core/lifecycle.mdx), [Provider ecosystem](./provider-ecosystem.mdx) | [Open](https://github.com/expressots/examples/tree/main/09-message-queue) |
+| 10 | **redis-cache** | Redis cache provider, health checks | [Provider ecosystem](./provider-ecosystem.mdx) | [Open](https://github.com/expressots/examples/tree/main/10-redis-cache) |
+| 11 | **testing** | Unit, integration, load testing | [Testing](../features/testing.mdx) | [Open](https://github.com/expressots/examples/tree/main/11-testing) |
+| 12 | **docker-compose** | Postgres + Redis sidecars, Docker dev | [Deployment](./deployment.mdx), [Container development](./container-development.mdx) | [Open](https://github.com/expressots/examples/tree/main/12-docker-compose) |
+| 13 | **micro-api** | `micro()` lightweight services | [Micro API](./micro-api.mdx) | [Open](https://github.com/expressots/examples/tree/main/13-micro-api) |
+| 14 | **interceptors** | AOP interceptors, `@UseInterceptors` | [Interceptors](../features/interceptors.mdx) | [Open](https://github.com/expressots/examples/tree/main/14-interceptors) |
+| 15 | **openapi-studio** | OpenAPI generation + Studio workflow | [OpenAPI](../features/openapi.mdx), [Studio](../studio/overview.mdx) | [Open](https://github.com/expressots/examples/tree/main/15-openapi-studio) |
+
+## By topic
+
+| Topic | Examples |
+| --- | --- |
+| Getting started | [01-starter-api](https://github.com/expressots/examples/tree/main/01-starter-api) |
+| Authentication & authorization | [02-jwt-authentication](https://github.com/expressots/examples/tree/main/02-jwt-authentication), [03-authorization-rbac](https://github.com/expressots/examples/tree/main/03-authorization-rbac) |
+| Databases | [04-database-inmemory](https://github.com/expressots/examples/tree/main/04-database-inmemory), [05-database-postgres](https://github.com/expressots/examples/tree/main/05-database-postgres), [06-database-prisma](https://github.com/expressots/examples/tree/main/06-database-prisma) |
+| HTTP & files | [07-file-upload](https://github.com/expressots/examples/tree/main/07-file-upload) |
+| Async & infrastructure | [08-events](https://github.com/expressots/examples/tree/main/08-events), [09-message-queue](https://github.com/expressots/examples/tree/main/09-message-queue), [10-redis-cache](https://github.com/expressots/examples/tree/main/10-redis-cache) |
+| Quality & ops | [11-testing](https://github.com/expressots/examples/tree/main/11-testing), [12-docker-compose](https://github.com/expressots/examples/tree/main/12-docker-compose) |
+| Advanced | [13-micro-api](https://github.com/expressots/examples/tree/main/13-micro-api), [14-interceptors](https://github.com/expressots/examples/tree/main/14-interceptors), [15-openapi-studio](https://github.com/expressots/examples/tree/main/15-openapi-studio) |
+
+## Requirements
+
+- Node.js `>= 20.18.0`
+- npm (or pnpm/yarn)
+- Optional: Docker for Postgres, Redis, and compose-based examples (`05`, `06` integration tests, `09`, `10`, `12`)
+
+Examples `05` and `06` skip database integration tests by default (`SKIP_DB=1`). Run `npm run test:integration` when Postgres is available.

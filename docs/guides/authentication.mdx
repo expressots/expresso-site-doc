@@ -14,6 +14,11 @@ This guide walks you from a fresh ExpressoTS v4 project to a working JWT authent
 
 The framework owns the request lifecycle (verifying the request, extracting the principal, evaluating guards). Your code owns the policy (how to verify a token, what a user looks like, who can do what).
 
+:::tip Runnable example
+- **Example repo:** [02-jwt-authentication](https://github.com/expressots/examples/tree/main/02-jwt-authentication) · [03-authorization-rbac](https://github.com/expressots/examples/tree/main/03-authorization-rbac)
+- **All examples:** [Example projects](./example-projects.mdx)
+:::
+
 <img src={authFlow} alt="Authentication and authorization flow in ExpressoTS v4" />
 
 ## How the pieces fit
@@ -158,11 +163,10 @@ Compose the four convenience decorators on controllers or methods. The framework
     <TabItem value="auth" label="Require authentication">
 
 ```typescript title="src/users/user.controller.ts"
-import { controller, Get } from "@expressots/adapter-express";
-import { provide, RequireAuthentication, principal } from "@expressots/core";
+import { controller, Get, principal } from "@expressots/adapter-express";
+import { RequireAuthentication } from "@expressots/core";
 import { AppPrincipal } from "../auth/app-principal";
 
-@provide(UserController)
 @controller("/users")
 export class UserController {
     @Get("/me")
