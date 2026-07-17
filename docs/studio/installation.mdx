@@ -23,21 +23,21 @@ Studio ships as two packages. Install both as **dev dependencies**:
 <TabItem value="npm" label="npm">
 
 ```bash
-npm install -D @expressots/studio@next @expressots/studio-agent@next
+npm install -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
 <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add -D @expressots/studio@next @expressots/studio-agent@next
+yarn add -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
 <TabItem value="pnpm" label="pnpm">
 
 ```bash
-pnpm add -D @expressots/studio@next @expressots/studio-agent@next
+pnpm add -D @expressots/studio @expressots/studio-agent
 ```
 
 </TabItem>
@@ -87,7 +87,7 @@ The studio-agent only loads when **all** of the following are true:
 Production deployments (`NODE_ENV=production`) never import the agent module, so there is zero runtime overhead in production.
 
 :::info Production monitoring
-Starting with v4.0.0-preview, the agent accepts a `mode` and `installId` configuration for future production telemetry and cloud features. See [Production & Telemetry](./production-telemetry.mdx) for details.
+Starting with v4.0.0, the agent accepts a `mode` and `installId` configuration for future production telemetry and cloud features. See [Production & Telemetry](./production-telemetry.mdx) for details.
 :::
 
 To force-enable Studio in a non-dev `NODE_ENV` (e.g. a staging probe), call `this.setStudio({ enabled: true })` on your `App` class:

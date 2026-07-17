@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Upgrade guide
-description: Upgrade guide for ExpressoTS 4.0.0 (preview).
+description: Upgrade guide for ExpressoTS 4.0.0.
 ---
 
 import Tabs from "@theme/Tabs";
@@ -12,7 +12,7 @@ import TabItem from "@theme/TabItem";
 Upgrade from ExpressoTS 3.x to 4.0.0.
 
 :::info
-v4.0.0 is currently in **preview**. Install the preview packages with the `@next` dist-tag: `npm install @expressots/core@next @expressots/adapter-express@next`.
+v4.0.0 is officially released. Install the latest packages: `npm install @expressots/core @expressots/adapter-express`.
 :::
 
 ## Prerequisites
@@ -79,7 +79,7 @@ Nothing in this section requires code changes. These are additive features you c
 `@expressots/studio` and `@expressots/studio-agent` ship alongside `@expressots/core` in the v4.0.0 release. Install both as **dev dependencies**:
 
 ```bash
-npm install -D @expressots/studio@next @expressots/studio-agent@next
+npm install -D @expressots/studio @expressots/studio-agent
 ```
 
 The agent auto-activates when `NODE_ENV=development` and the package is installed; no `app.ts` changes are needed. Production deployments pay zero runtime cost. See the [Studio section](../studio/overview.mdx) for the full tour, including supply-chain and runtime posture security analysis.
