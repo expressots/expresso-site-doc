@@ -1,0 +1,115 @@
+---
+sidebar_position: 10
+title: CONTRIBUTING
+description: "How to work in the ExpressoTS monorepo: repository layout, building and testing your changes, trying them in a real application, and opening a pull request."
+---
+
+# Contributing to the Monorepo
+
+Since v4, the entire framework lives in a single repository: **[expressots/expressots](https://github.com/expressots/expressots)**. Core, the CLI, the Express adapter, shared libraries, Studio, the official templates, and the examples are all developed, versioned, and released together. The old per-package repositories are archived and read-only.
+
+This page is the practical guide to working in that repository. For how decisions are made and how releases are governed, see [Governance](./governance.mdx).
+
+## Repository layout
+
+| Path | What lives there |
+| --- | --- |
+| `packages/core` | `@expressots/core` — the framework kernel (DI, providers, render, middleware) |
+| `packages/shared` | `@expressots/shared` — shared types and utilities used across packages |
+| `packages/adapter-express` | `@expressots/adapter-express` — the Express.js adapter |
+| `packages/cli` | `@expressots/cli` — the `expressots` / `ex` command-line tool |
+| `packages/boost-ts` | `@expressots/boost-ts` — functional programming utilities |
+| `apps/studio` | ExpressoTS Studio — the developer experience platform |
+| `apps/studio-agent` | The Studio runtime agent |
+| `templates/` | Source of truth for project templates (synced to [expressots/templates](https://github.com/expressots/templates) on each release) |
+| `examples/` | Example applications |
+| `scripts/release` | The release pipeline (maintainers) |
+
+All publishable packages share one version: a release bumps every package together, so you never reconcile cross-package version drift.
+
+## Prerequisites
+
+- **Node.js ≥ 20.19**
+- **pnpm 10** (`corepack enable` or `npm i -g pnpm`)
+
+## Getting started
+
+```bash
+git clone https://github.com/expressots/expressots.git
+cd expressots
+pnpm install
+pnpm build          # build every package (turbo-cached, dependency order)
+pnpm test           # run every test suite
+pnpm lint           # lint every package
+```
+
+The repository uses [Turborepo](https://turbo.build/): builds and tests run in dependency order and are cached, so repeat runs only rebuild what changed.
+
+To iterate on a single package **and everything that depends on it**:
+
+```bash
+pnpm turbo run build test --filter=@expressots/core...
+```
+
+## Testing your changes in a real application
+
+Unit tests catch most regressions, but before opening a PR you should verify your change works in an application installed the way users install it. The `pack:local` script builds and packs every public package into `.local-packs/` as npm tarballs:
+
+```bash
+pnpm pack:local
+```
+
+**1. Scaffold a test app with your locally built CLI:**
+
+```bash
+EXPRESSOTS_TEMPLATE_REF=main EXPRESSOTS_DEV=1 EXPRESSOTS_SKIP_INSTALL=1 \
+  npx --yes --package=<monorepo>/.local-packs/expressots-cli-<version>.tgz \
+  expressots new my-app -t application -p npm
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `EXPRESSOTS_TEMPLATE_REF=main` | Fetch templates from the `main` branch of `expressots/templates` instead of a release tag |
+| `EXPRESSOTS_DEV=1` + `EXPRESSOTS_SKIP_INSTALL=1` | Skip the automatic dependency install (your local version is not on npm) |
+
+:::note
+`--package=<tarball> expressots` is required — the CLI ships two binaries (`expressots` and `ex`), so `npx <tarball>` alone cannot pick one.
+:::
+
+**2. Install the framework from your local tarballs** — in one command, so internal `@expressots/*` dependencies resolve from the sibling tarballs instead of the npm registry:
+
+```bash
+cd my-app
+npm install <monorepo>/.local-packs/expressots-{core,shared,adapter-express,cli}-<version>.tgz
+```
+
+**3. Build and run:**
+
+```bash
+npm run build
+npm run dev
+curl http://localhost:3000/api/health
+```
+
+After editing framework code, re-run `pnpm pack:local` (fast — only changed packages rebuild) and repeat the `npm install ...tgz` command in the test app.
+
+:::tip Why tarballs instead of `npm link`?
+ExpressoTS uses inversify + reflect-metadata for dependency injection. Symlink-based linking can load a second copy of reflect-metadata, which silently breaks decorator metadata and container resolution. Packed tarballs also exercise exactly what gets published — the `exports` map, dual CJS/ESM entry points, and the `files` whitelist.
+:::
+
+## Working on templates and examples
+
+The `templates/` directory in the monorepo is the **source of truth**. On every release it is synced to the standalone [expressots/templates](https://github.com/expressots/templates) repository and tagged, which is where the CLI scaffolds from. Open template PRs against the monorepo — never against the templates repository directly.
+
+The same applies to `examples/`: change them in the monorepo.
+
+## Opening a pull request
+
+1. Fork and branch from `main`.
+2. Use **[conventional commits](https://www.conventionalcommits.org/)** (`feat:`, `fix:`, `chore:`, `docs:` …) — commit messages drive the suggested version bump at release time, and a hook lints them.
+3. Add or update tests for what you changed; make sure `pnpm build`, `pnpm test`, and `pnpm lint` pass locally.
+4. Open the PR against `main`. CI runs the build and test suite on Node 20 and 22 plus CodeQL analysis; all three checks and one review are required to merge.
+
+You do **not** need to create a changeset or bump any versions — releases are cut by the core team with a pipeline that scans the commit history, versions every package together, publishes to npm, and syncs the templates repository.
+
+Questions while working on something? Ask in [Discord](https://discord.com/invite/PyPJfGK) or on the [issue](https://github.com/expressots/expressots/issues) you're tackling.
