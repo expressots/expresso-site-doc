@@ -102,7 +102,7 @@ By default `expressots new` scaffolds a project that runs on Node.js. `--target`
 
 | Target | Template | What changes |
 | --- | --- | --- |
-| `cloudflare` | `micro` only | Adds `wrangler.toml` with `nodejs_compat` and a pinned `compatibility_date`; swaps the npm scripts to Wrangler (`dev`, `build`, `deploy`, `types`); rewrites `src/api.ts` to export a Worker `fetch` handler and `test/api.spec.ts` to call it directly; removes the Node-only files (`.env.example`, `examples/`, `expressots.config.ts`, `tsconfig.build.json`) and the `@expressots/cli` dependency. |
+| `cloudflare` | `micro` only | Adds `wrangler.toml` with `nodejs_compat` and a pinned `compatibility_date`; swaps the npm scripts to Wrangler (`dev`, `build`, `deploy`, `types`); rewrites `src/api.ts` to export a Worker `fetch` handler; swaps Jest for Vitest with `@cloudflare/vitest-pool-workers` so the suite runs inside workerd; removes the Node-only files (`.env.example`, `examples/`, `expressots.config.ts`, `tsconfig.build.json`) and the `@expressots/cli` dependency. |
 
 ```bash
 expressots new edge-api --template micro --package-manager pnpm --target cloudflare

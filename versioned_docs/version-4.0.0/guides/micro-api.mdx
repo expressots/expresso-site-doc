@@ -533,6 +533,26 @@ The generated scripts are Wrangler's, not the ExpressoTS CLI's. Workers has no H
 | `build` | `wrangler deploy --dry-run` — validates the bundle without deploying |
 | `deploy` | `wrangler deploy` |
 | `types` | `wrangler types` — regenerates `worker-configuration.d.ts` |
+| `test` | `vitest run` — the suite runs **inside workerd** |
+
+#### Testing
+
+The Cloudflare scaffold uses [`@cloudflare/vitest-pool-workers`](https://developers.cloudflare.com/workers/testing/vitest-integration/) rather than Jest, and `SELF.fetch()` dispatches through the real Worker:
+
+```typescript
+import { SELF } from "cloudflare:test";
+import { describe, expect, it } from "vitest";
+
+describe("Cloudflare Worker", () => {
+    it("returns the welcome message on GET /", async () => {
+        const response = await SELF.fetch("https://example.com/");
+
+        expect(response.status).toBe(200);
+    });
+});
+```
+
+Testing Worker code under Node is wrong in both directions, which is why the target does not simply keep Jest: `undici` omits `content-length`, so Express body middleware short-circuits and a Worker that fails every request in production goes green — and `undici` rejects a 204 response body that workerd accepts, so a correct endpoint fails its own suite.
 
 #### Request bodies
 
@@ -541,9 +561,21 @@ The adapter reads and parses the body itself, before Express sees it, dispatchin
 | Content-Type | `req.body` |
 | --- | --- |
 | `application/json`, `application/*+json` | Parsed object. Malformed JSON returns **400** `{"error":"Bad Request"}` without reaching your handler. |
-| `application/x-www-form-urlencoded` | Object of key/value pairs. |
-| `text/*`, any other type, or no `Content-Type` | The raw string. |
+| `application/x-www-form-urlencoded` | Object parsed with `qs` — the same parser `express.urlencoded({ extended: true })` uses, so `a=1&a=2`, `n[]=x` and `u[name]=jo` produce the shapes they do on Node. |
+| `multipart/form-data` | Object parsed with the runtime's native `FormData`. File parts become `{ filename, contentType, size, data }`, where `data` is a `Buffer` with the bytes intact. |
+| `text/*`, or no `Content-Type` | The raw string. |
+| Anything else (`application/octet-stream`, images, …) | A `Buffer`. Binary is never UTF-8 decoded, so uploads survive byte for byte. |
 | No body, or `GET` / `HEAD` | `undefined` |
+
+Query strings go through `qs` too, so `?tag=a&tag=b` is `{ tag: ["a", "b"] }` rather than the last value winning.
+
+Bodies larger than **1 MiB** are rejected with **413** before being read. A Workers isolate has 128 MB of memory and Cloudflare accepts bodies up to 100 MB, so an unbounded read is an availability hazard. Adjust or disable it:
+
+```typescript
+export default cloudflareAdapter(app, {
+    maxBodySize: 5 * 1024 * 1024, // 5 MiB; 0 disables the limit
+});
+```
 
 :::warning Express body-parsing middleware does not work on this target
 
