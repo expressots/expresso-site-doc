@@ -23,7 +23,7 @@ The command clones the [`expressots/templates`](https://github.com/expressots/te
 | --- | --- |
 | `application` | Default REST/GraphQL API. `AppExpress` + DI container, four lifecycle hooks, controllers, middleware presets, Jest with `createTestApp`. |
 | `application-with-events` | Same as `application` plus the type-safe Event Bus example wired in (`UserCreatedEvent` + `WelcomeEmailHandler` + `setupEventSystemForExpress`). Selected via the `--events` flag or the interactive prompt. |
-| `micro` | Single-file lightweight HTTP service. `micro()` fluent factory in `src/api.ts`, no DI. Ships serverless / circuit breaker / service mesh / service client examples in `examples/`. |
+| `micro` | Single-file lightweight HTTP service. `micro()` fluent factory in `src/api.ts`, no DI. Ships serverless / circuit breaker / service mesh / service client examples in `examples/`. Supports `--target cloudflare` to scaffold for Cloudflare Workers instead of Node.js. |
 
 > The fourth template, `provider`, is scaffolded by **[`expressots create --provider`](./providers.mdx)**, not `expressots new`. Use it when you are publishing a reusable `@expressots/*`-style npm package.
 
@@ -89,11 +89,33 @@ expressots new my-app -t application -p bun   # not on Windows
 | `--package-manager` | `-p` | `npm` \| `yarn` \| `pnpm` \| `bun` | Install backend. |
 | `--preset` | `-s` | `api` \| `web` \| `graphql` \| `microservice` \| `minimal` | Middleware preset (Application templates only). |
 | `--events` | `-e` | boolean | Use `application-with-events` (Application templates only). Pass the flag alone (`-e`), not `-e interactive`. |
+| `--target` | — | `cloudflare` | Deployment target (Micro template only). See [Deployment targets](#deployment-targets). |
 | `--directory` | `-d` | string | Parent directory for the new project. |
 
 > **`-t` and `-p` go together.** The CLI requires both when you use either one (yargs `implies`). Example: `expressots new my-api -t application -p npm`. Pass neither flag to get the interactive prompts instead.
 >
 > **`ex` is an alias** for `expressots` (same binary from `@expressots/cli`).
+
+## Deployment targets
+
+By default `expressots new` scaffolds a project that runs on Node.js. `--target` swaps that for a different runtime.
+
+| Target | Template | What changes |
+| --- | --- | --- |
+| `cloudflare` | `micro` only | Adds `wrangler.toml` with `nodejs_compat` and a pinned `compatibility_date`; swaps the npm scripts to Wrangler (`dev`, `build`, `deploy`, `types`); rewrites `src/api.ts` to export a Worker `fetch` handler and `test/api.spec.ts` to call it directly; removes the Node-only files (`.env.example`, `examples/`, `expressots.config.ts`, `tsconfig.build.json`) and the `@expressots/cli` dependency. |
+
+```bash
+expressots new edge-api --template micro --package-manager pnpm --target cloudflare
+```
+
+There is no short alias — `--target` is spelled out.
+
+**Constraints**
+
+- **`--target` implies `--template`.** Passing `--target` on its own is rejected by yargs before anything is written to disk.
+- **`cloudflare` supports only `micro`.** Any other template fails with `The "cloudflare" target supports only the "micro" template.`, and it fails *before* the project directory is created — a rejected run leaves nothing behind.
+
+The generated project's README and `AGENTS.md` document the runtime constraints that apply on Workers. See [Cloudflare Workers](../guides/micro-api.mdx#cloudflare-workers) in the Micro API guide for the runtime detail.
 
 ## Interactive vs silent
 
@@ -107,6 +129,18 @@ expressots new my-api
 # ? Middleware preset › API :: REST API with security, compression, and auto-logging.
 # ? Include the type-safe Event Bus example? › No
 ```
+
+The prompts adapt to the template you pick. Choosing **Micro** asks for a deployment target instead of a preset:
+
+```bash
+expressots new edge-api
+# ? Project name › edge-api
+# ? Package manager › pnpm
+# ? Template › Micro :: A minimalistic template for building micro APIs and serverless functions.
+# ? Select a deployment target › Cloudflare Workers :: Deploy to the edge with Wrangler.
+```
+
+Because the target prompt only appears for `micro`, the wizard cannot produce a combination the `--target` flag would reject.
 
 With the flags above it runs silently and never blocks for input: ideal for CI scripts, template generators, or `npx` recipes.
 

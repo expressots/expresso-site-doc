@@ -493,15 +493,84 @@ export default vercelAdapter(app);
 
 ### Cloudflare Workers
 
+Scaffold a Worker project directly:
+
+```bash
+expressots new edge-api --template micro --package-manager pnpm --target cloudflare
+```
+
+That produces `wrangler.toml`, Wrangler-based scripts, and this entrypoint:
+
 ```typescript
 import { micro, cloudflareAdapter } from "@expressots/adapter-express";
 
-const app = micro();
+const app = micro({
+    showBanner: false,
+    studio: { enabled: false },
+});
 
 app.get("/", () => ({ message: "Hello Workers!" }));
 
 export default cloudflareAdapter(app);
 ```
+
+**wrangler.toml:**
+
+```toml
+name = "edge-api"
+main = "src/api.ts"
+compatibility_date = "2026-07-29"
+compatibility_flags = ["nodejs_compat"]
+```
+
+`nodejs_compat` is required — the adapter runs Express, which reaches for Node built-ins. The `compatibility_date` is pinned by the CLI and bumped per release.
+
+The generated scripts are Wrangler's, not the ExpressoTS CLI's. Workers has no HTTP port to bind, so `ex dev` does not apply and `@expressots/cli` is not installed in the project:
+
+| Script | Runs |
+| --- | --- |
+| `dev` | `wrangler dev` — local Workers runtime (workerd), with bindings |
+| `build` | `wrangler deploy --dry-run` — validates the bundle without deploying |
+| `deploy` | `wrangler deploy` |
+| `types` | `wrangler types` — regenerates `worker-configuration.d.ts` |
+
+#### Request bodies
+
+The adapter reads and parses the body itself, before Express sees it, dispatching on `Content-Type`:
+
+| Content-Type | `req.body` |
+| --- | --- |
+| `application/json`, `application/*+json` | Parsed object. Malformed JSON returns **400** `{"error":"Bad Request"}` without reaching your handler. |
+| `application/x-www-form-urlencoded` | Object of key/value pairs. |
+| `text/*`, any other type, or no `Content-Type` | The raw string. |
+| No body, or `GET` / `HEAD` | `undefined` |
+
+:::warning Express body-parsing middleware does not work on this target
+
+The adapter hands Express a mock request object rather than a `Readable` stream, so anything that reads the body as a stream fails: `express.json()`, `express.urlencoded()`, `express.text()`, `express.raw()`, `multer()`, `compression()`.
+
+`micro()`'s built-in parsers stand down automatically when a serverless adapter is attached, so the default `micro()` config works unchanged. Registering one of these explicitly throws at `wrangler dev` startup rather than returning 500 on every request:
+
+```
+cloudflareAdapter: express.json() cannot be used on this runtime.
+The adapter parses the request body and hands Express a mock request, not a
+stream, so body-reading middleware fails on every request — including GET
+requests with no body.
+```
+
+Read parsed data from `req.body` instead.
+
+:::
+
+#### What behaves the same as Node
+
+`app.setErrorHandler()` and the RFC-7807 404 body with route suggestions both apply on Workers: `micro()` finalizes its middleware stack on the first request rather than inside `listen()`, so how the app is hosted makes no difference. Multiple `Set-Cookie` headers, direct `res.statusCode` assignment, and empty-body statuses (204/205/304) all behave as they do on Node.
+
+#### Known limitations
+
+- **Responses are buffered, not streamed** — the adapter collects the whole body before returning it.
+- **No `.env` files.** Configuration comes from `wrangler.toml` vars and secrets, reached through the bindings on the request context (`req.cloudflare.env`).
+- **Bundle size.** A minimal Worker is roughly 535 KB gzipped — comfortably under the 3 MB free-tier limit, but heavy for the edge, since Express and its dependencies dominate.
 
 ## Docker Deployment
 
