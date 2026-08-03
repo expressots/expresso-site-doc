@@ -598,11 +598,30 @@ Read parsed data from `req.body` instead.
 
 `app.setErrorHandler()` and the RFC-7807 404 body with route suggestions both apply on Workers: `micro()` finalizes its middleware stack on the first request rather than inside `listen()`, so how the app is hosted makes no difference. Multiple `Set-Cookie` headers, direct `res.statusCode` assignment, and empty-body statuses (204/205/304) all behave as they do on Node.
 
-#### Known limitations
+#### Platform constraints
 
-- **Responses are buffered, not streamed** — the adapter collects the whole body before returning it.
+Workers is not a small Node server — several of its limits change how you write the app. These are the ones that bite an ExpressoTS project, with what they mean here rather than in the abstract.
+
+| Limit | Free | Paid | Why it matters for ExpressoTS |
+| --- | --- | --- | --- |
+| **Startup time** | 1 second | 1 second | The whole module scope must parse and execute in 1s — and on this target that is `micro()`, every `app.get(...)` registration, and `cloudflareAdapter()`. A scaffolded app uses a small fraction of it, but this is the budget that route registration and any top-level work draw down. Move expensive setup into a handler, or behind a lazy singleton. |
+| **Memory** | 128 MB | 128 MB | Per isolate, shared by the JS heap and any WebAssembly. This is why the adapter caps buffered request bodies at 1 MiB by default: Cloudflare will accept a body far larger than the isolate can hold. |
+| **Worker size** | 3 MB | 10 MB | Compressed. A minimal ExpressoTS Worker is around **537 KB gzipped**, so there is headroom — but Express and its dependencies dominate that figure, and it grows with what you import. Check it with `wrangler deploy --dry-run` before adding heavy dependencies. |
+| **CPU time per request** | 10 ms | 5 min (default 30 s) | Wall-clock time spent waiting on I/O does not count — only CPU. On the free plan, 10 ms is not much for JSON serialisation plus Express routing, so measure before assuming. |
+| **Request body** | 100 MB | 100 MB–500 MB by plan | Cloudflare's cap, not the Worker's. The adapter's own `maxBodySize` (1 MiB) sits far below it deliberately; raising it toward the platform limit risks the 128 MB isolate. |
+| **Subrequests per request** | 50 | 10,000 | Every outbound `fetch()` counts. Fan-out patterns that are fine on Node will hit this. |
+| **Environment variables** | 64 | 128 | Declared in `wrangler.toml`, not `.env`. |
+
+Two behavioural constraints have no number attached and catch people out more often than the limits do:
+
+- **No persistent globals.** Module-scope state survives *only* for the life of an isolate, and you control neither when an isolate starts nor when it is discarded. Two requests may or may not share one. Anything you would have kept in a module-level `Map` — sessions, counters, caches — needs KV, Durable Objects, or D1. A global that "works in testing" is an isolate being reused, not a guarantee.
+- **No filesystem, no long-lived connections.** There is no `fs`, and connection pools cannot be held open between requests the way they are on Node.
+
+#### Other limitations of this target
+
+- **Responses are buffered, not streamed** — the adapter collects the whole body before returning it. Streaming is tracked in [#947](https://github.com/expressots/expressots/issues/947).
 - **No `.env` files.** Configuration comes from `wrangler.toml` vars and secrets, reached through the bindings on the request context (`req.cloudflare.env`).
-- **Bundle size.** A minimal Worker is roughly 535 KB gzipped — comfortably under the 3 MB free-tier limit, but heavy for the edge, since Express and its dependencies dominate.
+- **The multipart file shape is provisional.** File parts arrive as `{ filename, contentType, size, data }` with `data` a `Buffer`. A future fetch-native runtime ([#947](https://github.com/expressots/expressots/issues/947)) may expose the platform's native `File` instead, so treat this shape as subject to change.
 
 ## Docker Deployment
 
