@@ -15,7 +15,10 @@
         "version": "npx docusaurus docs:version next_version",
         "cache": "npx docusaurus cache clear",
         "typecheck": "tsc",
-        "capture-studio-screenshots": "node scripts/capture-studio-screenshots.mjs"
+        "capture-studio-screenshots": "node scripts/capture-studio-screenshots.mjs",
+        "prebuild": "node scripts/generate-llms.mjs",
+        "prestart": "node scripts/generate-llms.mjs",
+        "generate-llms": "node scripts/generate-llms.mjs"
     },
     "dependencies": {
         "@docusaurus/core": "^3.10.1",

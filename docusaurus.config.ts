@@ -40,17 +40,29 @@ const config: Config = {
                     lastVersion: "4.0.0",
                     onlyIncludeVersions: ["4.0.0", "3.0.0", "2.0.0"],
                     versions: {
+                        // The 4.x line (4.0.0 to current) is documented here;
+                        // the folder keeps its 4.0.0 name.
                         "4.0.0": {
-                            label: "4.0.0",
+                            label: "4.x",
                             banner: "none",
                         },
+                        // Older majors stay browsable but are marked unmaintained
+                        // and excluded from search-engine and sitemap indexing, so
+                        // people (and language models) land on 4.x first.
                         "3.0.0": {
                             label: "3.0.0",
+                            banner: "unmaintained",
+                            noIndex: true,
                         },
                         "2.0.0": {
                             label: "2.0.0",
+                            banner: "unmaintained",
+                            noIndex: true,
                         },
                     },
+                },
+                sitemap: {
+                    ignorePatterns: ["/docs/3.0.0/**", "/docs/2.0.0/**"],
                 },
                 theme: {
                     customCss: require.resolve("./src/css/custom.css"),

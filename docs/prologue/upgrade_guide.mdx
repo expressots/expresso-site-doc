@@ -1,15 +1,16 @@
 ---
 sidebar_position: 2
-title: Upgrade guide
-description: Upgrade guide for ExpressoTS 4.0.0.
+title: Upgrade guide (v3 to v4)
+description: Migrating from ExpressoTS 3.x to 4.x - what was removed, what replaced it, and the steps to upgrade.
+keywords: [migration, migrate, upgrade, v3, v4, AppFactory, bootstrap, breaking changes]
 ---
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-# Upgrade Guide
+# Upgrade Guide: v3 to v4
 
-Upgrade from ExpressoTS 3.x to 4.0.0.
+Migrate an ExpressoTS 3.x application to the 4.x line (4.0.0 and later).
 
 :::info
 v4.0.0 is officially released. Install the latest packages: `npm install @expressots/core @expressots/adapter-express`.
@@ -19,12 +20,42 @@ v4.0.0 is officially released. Install the latest packages: `npm install @expres
 
 | Requirement | Version |
 |-------------|---------|
-| Node.js | 20.18.0+ |
+| Node.js | 20.19.0+ |
 | Current app | ExpressoTS 3.x |
 
 ## Breaking changes summary
 
-There is exactly **one** breaking change in v4.0.0; everything else is additive or opt-in.
+Two things break when moving a v3 app to v4: a handful of public names were removed, and `.env` loading became explicit. Everything else is additive or opt-in.
+
+### Removed APIs and their replacements
+
+| Removed in v4 | Use instead |
+|---------------|-------------|
+| `AppFactory` / `AppFactory.create(App)` | `await bootstrap(App)` from `@expressots/core` |
+| `InMemoryDataProvider`, `InMemoryDataTable` | `InMemoryDBProvider` |
+| `LazyServiceIdentifer` (typo alias) | `LazyServiceIdentifier` |
+| `AppContainer#viewContainerBindings()` | `AppContainer#introspect()` or `getFormattedBindingsView()` |
+| `Logger#formatMessage()` (legacy) | The logger formats through transports; nothing to call |
+
+`AppFactory` is the one most code, and most AI coding assistants, still reach for. Since 4.3.0 the name exists again only as a compile-time tombstone: `AppFactory.create(...)` fails to compile with an error that names the replacement, and throws the same message at runtime. Projects scaffolded by the CLI ship an `AGENTS.md` with these rules, and `expressots llms` prints them for the installed version.
+
+**v3:**
+
+```ts
+import { AppFactory } from "@expressots/core";
+import { App } from "./app";
+
+AppFactory.create(App).then((app) => app.listen(3000));
+```
+
+**v4:**
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "./app";
+
+void bootstrap(App); // App extends AppExpress; port from PORT or 3000
+```
 
 ### `.env` files are now opt-in (ADR-001)
 
@@ -95,12 +126,12 @@ Update your `package.json` dependencies to the latest versions:
 ```json
 {
     "dependencies": {
-        "@expressots/core": "^4.0.0",
-        "@expressots/adapter-express": "^4.0.0",
-        "@expressots/shared": "^4.0.0"
+        "@expressots/core": "^4.3.0",
+        "@expressots/adapter-express": "^4.3.0",
+        "@expressots/shared": "^4.3.0"
     },
     "devDependencies": {
-        "@expressots/cli": "^4.0.0"
+        "@expressots/cli": "^4.3.0"
     }
 }
 ```
@@ -133,7 +164,7 @@ pnpm install
 
 ## Step 2: Update Node.js Version
 
-Ensure your Node.js version is 20.18.0 or higher:
+Ensure your Node.js version is 20.19.0 or higher:
 
 ```bash
 node --version
@@ -141,24 +172,24 @@ node --version
 
 ## Step 3: Application Changes
 
-### Bootstrap Function (Optional)
+### Bootstrap (required)
 
-v4 introduces a simplified `bootstrap()` function. The `AppFactory.create()` pattern still works.
+Replace `AppFactory.create()` with `bootstrap()`. It builds the container, runs the `AppExpress` lifecycle hooks, starts the server, and wires graceful shutdown; there is no separate `listen()` call.
 
 **Before (v3):**
 
 ```ts
 import { AppFactory } from "@expressots/core";
-import { App } from "app";
+import { App } from "./app";
 
 AppFactory.create(App).then((app) => app.listen(3000));
 ```
 
-**After (v4 - new option):**
+**After (v4):**
 
 ```ts
 import { bootstrap } from "@expressots/core";
-import { App } from "app";
+import { App } from "./app";
 
 await bootstrap(App);
 
@@ -170,9 +201,9 @@ await bootstrap(App, {
 });
 ```
 
-### Core APIs (No Changes)
+### Application class (no changes)
 
-All core APIs remain backward compatible: `configContainer()`, `globalConfiguration()`, `configureServices()`, `postServerInitialization()`, `serverShutdown()`.
+The `AppExpress` lifecycle keeps its v3 shape: `configContainer()`, `globalConfiguration()`, `configureServices()`, `postServerInitialization()`, `serverShutdown()`. Controllers, providers, modules and decorators are unchanged.
 
 ## Step 4: New Features (Optional)
 
@@ -291,7 +322,7 @@ pnpm test
 
 1. **Node.js Version Error**
 
-    If you see errors about unsupported Node.js features, ensure you're using Node.js 20.18.0 or higher.
+    If you see errors about unsupported Node.js features, ensure you're using Node.js 20.19.0 or higher.
 
 2. **TypeScript Errors**
 
@@ -320,9 +351,11 @@ If you encounter issues during the upgrade:
 
 | Step | Action |
 |------|--------|
-| 1 | Update dependencies to v4.0.0 |
-| 2 | Ensure Node.js 20.18.0+ |
-| 3 | Run tests |
-| 4 | Adopt new features (optional) |
+| 1 | Update dependencies to the 4.x line |
+| 2 | Ensure Node.js 20.19.0+ |
+| 3 | Replace `AppFactory.create()` with `bootstrap()` and rename any other removed API from the table above |
+| 4 | Decide how `.env` is loaded (`loadEnvSync()` or `envFileConfig`) |
+| 5 | Run tests |
+| 6 | Adopt new features (optional) |
 
-v4.0.0 is backward compatible. New features are additive and can be adopted gradually.
+Beyond the removed names and explicit `.env` loading, v4 is compatible with v3 application code. New features are additive and can be adopted gradually.
