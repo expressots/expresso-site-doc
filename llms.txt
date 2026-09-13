@@ -1,0 +1,146 @@
+# ExpressoTS
+
+> TypeScript-first Node.js framework built on Express 5: dependency injection,
+> lifecycle hooks, providers, guards, interceptors, events, and a testing
+> toolkit. Ships as @expressots/core, @expressots/adapter-express and the
+> @expressots/cli scaffolder. Requires Node >= 20.19 (Bun is supported).
+
+This file indexes the documentation for the current major (4.x).
+The full text of every page is at https://doc.expresso-ts.com/llms-full.txt.
+
+## Write code for v4, not v3
+
+The entry point is `bootstrap`:
+
+```ts
+import { bootstrap } from "@expressots/core";
+import { App } from "./app"; // class App extends AppExpress
+
+void bootstrap(App);
+```
+
+Names removed in v4 that models trained on v3 still produce:
+
+- `AppFactory` / `AppFactory.create()` -> use `await bootstrap(App)`. Since 4.3.0
+  importing it compiles to an error that names the replacement.
+- `InMemoryDataProvider` / `InMemoryDataTable` -> `InMemoryDBProvider`
+- `LazyServiceIdentifer` (typo alias) -> `LazyServiceIdentifier`
+- `AppContainer#viewContainerBindings` -> `introspect()` or `getFormattedBindingsView()`
+- `.env` is no longer loaded implicitly -> call `loadEnvSync()` before `bootstrap`,
+  or pass `envFileConfig` to `bootstrap`.
+
+Every scaffolded project carries an AGENTS.md with these rules, and
+`expressots llms` prints the guidance matching the installed package version.
+
+## Documentation (4.x)
+
+- [GOVERNANCE](https://doc.expresso-ts.com/docs/governance): How ExpressoTS is governed: how decisions are made, how to contribute, how releases work, and how to report security issues.
+- [CONTRIBUTING](https://doc.expresso-ts.com/docs/contributing): How to work in the ExpressoTS monorepo: repository layout, building and testing your changes, trying them in a real application, and opening a pull request.
+- [SUPPORT US ❤️](https://doc.expresso-ts.com/docs/support-us): How to support the ExpressoTS project: sponsorship, contributions, and community.
+
+## PROLOGUE
+
+- [Intro](https://doc.expresso-ts.com/docs/prologue/intro): Introduction to ExpressoTS.
+- [Release notes](https://doc.expresso-ts.com/docs/prologue/release): Release notes for ExpressoTS.
+- [Upgrade guide (v3 to v4)](https://doc.expresso-ts.com/docs/prologue/upgrade_guide): Migrating from ExpressoTS 3.x to 4.x - what was removed, what replaced it, and the steps to upgrade.
+
+## CORE
+
+- [First steps](https://doc.expresso-ts.com/docs/core/first-steps): Scaffold and run an ExpressoTS v4 project in five minutes.
+- [Bootstrap](https://doc.expresso-ts.com/docs/core/bootstrap): Zero-configuration application startup with comprehensive deployment options.
+- [App](https://doc.expresso-ts.com/docs/core/app-provider): The App class is the core of an ExpressoTS application.
+- [Container](https://doc.expresso-ts.com/docs/core/app-container): The AppContainer manages dependency injection configuration.
+- [Modules](https://doc.expresso-ts.com/docs/core/module): Modules are collections of controllers.
+- [Controllers](https://doc.expresso-ts.com/docs/core/controller): Controllers the mediator between the client and server.
+- [Use cases](https://doc.expresso-ts.com/docs/core/usecase): Use cases represents the business logic of the application.
+- [Providers](https://doc.expresso-ts.com/docs/core/providers): Modular services with DI scopes, optional capabilities, and publishable packages.
+- [Lifecycle Hooks](https://doc.expresso-ts.com/docs/core/lifecycle): Manage application and provider lifecycle with hooks.
+- [Injection](https://doc.expresso-ts.com/docs/core/di): Dependency Injection in ExpressoTS.
+- [Entities](https://doc.expresso-ts.com/docs/core/entities): Entities are objects that represent data.
+
+## FEATURES
+
+- [Interceptors](https://doc.expresso-ts.com/docs/features/interceptors): Aspect-oriented programming with interceptors for cross-cutting concerns like logging, caching, transformation, and timing.
+- [Event System](https://doc.expresso-ts.com/docs/features/events): Type-safe, auto-discovered event system for decoupled architecture.
+- [Guards & Authorization](https://doc.expresso-ts.com/docs/features/guards): Comprehensive guard system for authentication and authorization.
+- [Authorization Setup](https://doc.expresso-ts.com/docs/features/authorization): Wire up the v4 authorization subsystem with one call - permission hierarchy, caching, preloading, and your AuthProvider.
+- [Lazy Loading](https://doc.expresso-ts.com/docs/features/lazy-loading): Zero-config lazy loading with auto-detection, warmup strategies, and performance optimization.
+- [Testing Module](https://doc.expresso-ts.com/docs/features/testing): Comprehensive testing utilities for unit, integration, and E2E testing.
+- [Logging System](https://doc.expresso-ts.com/docs/features/logging): Production-ready logging with 11 comprehensive phases including structured logging, transports, redaction, monitoring, and query capabilities.
+- [Enhanced Configuration](https://doc.expresso-ts.com/docs/features/configuration): Type-safe configuration management with validation and environment switching.
+- [Middleware](https://doc.expresso-ts.com/docs/features/middleware): Middleware are interceptors.
+- [Decorators](https://doc.expresso-ts.com/docs/features/decorators): Reference for every decorator shipped by ExpressoTS v4: DI, controllers, methods, parameters, validation, content negotiation, AOP, security, events, and lifecycle.
+- [Status code](https://doc.expresso-ts.com/docs/features/status-code): Use the StatusCode enum to set HTTP status codes consistently across controllers, use cases, and errors.
+- [Error handling](https://doc.expresso-ts.com/docs/features/error-handling): Error handling in ExpressoTS v4: typed app errors, RFC 7807 problem details, exception filters, and the Report helper.
+- [Render engine](https://doc.expresso-ts.com/docs/features/render): How to render views in ExpressoTS.
+- [ExpressoTS config](https://doc.expresso-ts.com/docs/features/expressots-config): ExpressoTS configuration file.
+- [DTO validator](https://doc.expresso-ts.com/docs/features/dto-validator): Use the v4 validation system with class-validator, Zod, or Yup for DTO payload validation.
+- [Env validator](https://doc.expresso-ts.com/docs/features/envvalidator): Validate environment variables in v4 with defineConfig + Env.* and loadEnvSync.
+- [DB in memory](https://doc.expresso-ts.com/docs/features/in-memory-db): A Prisma-like in-memory database for development, testing, and prototyping.
+- [Content Negotiation](https://doc.expresso-ts.com/docs/features/content-negotiation): RFC 7231-compliant content negotiation in ExpressoTS v4. Accept / Consumes / Produces decorators, built-in JSON / XML / CSV / YAML / plain-text formatters, and streaming responses.
+- [Validation](https://doc.expresso-ts.com/docs/features/validation): ExpressoTS v4 Smart Validation: Zod, Yup, class-validator, and custom adapters via a single registry and parameter decorators.
+- [Exception Filters](https://doc.expresso-ts.com/docs/features/exception-filters): Customize how ExpressoTS turns errors into HTTP responses with @Catch, @UseFilters, and BaseExceptionFilter.
+- [Route Patterns](https://doc.expresso-ts.com/docs/features/route-patterns): Type-safe regex constraints on route parameters using Patterns and pattern(): Express 5 / path-to-regexp v8 compatible.
+- [API Versioning](https://doc.expresso-ts.com/docs/features/api-versioning): Run multiple API versions side by side using @Version, with controller-level or method-level overrides.
+- [Health & Monitoring](https://doc.expresso-ts.com/docs/features/health-monitoring): Built-in middleware health endpoint, IHealthCheck providers, and the aggregated health dashboard.
+- [OpenAPI Spec Generation](https://doc.expresso-ts.com/docs/features/openapi): Generate an OpenAPI 3.1 document from your ExpressoTS app with zero annotations, enrich it with real traffic, detect spec drift, and keep clients in sync.
+
+## CLI
+
+- [Overview](https://doc.expresso-ts.com/docs/cli/overview): The ExpressoTS CLI is a single binary that scaffolds projects, generates code, runs your app, and produces production-ready container / CI/CD artifacts.
+- [New](https://doc.expresso-ts.com/docs/cli/new): expressots new creates a v4 project from one of the official templates and pre-applies a middleware preset.
+- [Running the App](https://doc.expresso-ts.com/docs/cli/running): dev, build, prod, and container-dev: every way the CLI runs your ExpressoTS application.
+- [Generate](https://doc.expresso-ts.com/docs/cli/generate): expressots generate scaffolds resources (controllers, use cases, DTOs, interceptors, events, handlers, guards, config files) wired into your DI container.
+- [Providers](https://doc.expresso-ts.com/docs/cli/providers): Install, uninstall, and scaffold ExpressoTS providers from the CLI.
+- [Scripts](https://doc.expresso-ts.com/docs/cli/scripts): Run any npm script from your package.json via an interactive picker or by name.
+- [Studio](https://doc.expresso-ts.com/docs/cli/studio): Launch ExpressoTS Studio from the CLI. Auto-installs @expressots/studio if it isn't already a project devDependency.
+- [Info & Resources](https://doc.expresso-ts.com/docs/cli/info): Two read-only commands that print diagnostic information about your environment and a cheat sheet of every CLI command and generate schematic.
+- [Containerize & Profile](https://doc.expresso-ts.com/docs/cli/containerize): Generate Dockerfiles, compose files, and Kubernetes manifests. Profile and optimize existing Dockerfiles or built images.
+- [CI/CD](https://doc.expresso-ts.com/docs/cli/cicd): Generate CI/CD pipelines for GitHub Actions, GitLab CI, CircleCI, Jenkins, Bitbucket, and Azure Pipelines.
+- [Migrate](https://doc.expresso-ts.com/docs/cli/migrate): Generate migration scaffolds from one deployment platform to another: Heroku to Railway/Render/Fly, Docker Compose to Kubernetes, and more.
+- [Costs](https://doc.expresso-ts.com/docs/cli/costs): Estimate and compare cloud deployment costs across AWS, GCP, Azure, Railway, Render, Fly.io, Heroku, and DigitalOcean.
+- [Templates](https://doc.expresso-ts.com/docs/cli/templates): Manage the cached CI/CD / Docker / Kubernetes / migration templates.
+- [Pricing Data](https://doc.expresso-ts.com/docs/cli/pricing): Sources, cascading fallback, and contributing pricing corrections for the costs command.
+- [Contributing](https://doc.expresso-ts.com/docs/cli/contributing): Contribute templates and pricing corrections to the ExpressoTS CLI ecosystem.
+- [Template System Architecture](https://doc.expresso-ts.com/docs/cli/architecture): How the CLI fetches, caches, and merges templates from the local cache, remote repository, and embedded fallback.
+
+## STUDIO
+
+- [Overview](https://doc.expresso-ts.com/docs/studio/overview): ExpressoTS Studio is a local developer experience platform for v4 applications. Observability, security, and tooling, all running on your machine.
+- [Installation](https://doc.expresso-ts.com/docs/studio/installation): Install and run ExpressoTS Studio against a v4 application.
+
+### Features
+
+- [Status](https://doc.expresso-ts.com/docs/studio/features/status): Studio Status dashboard — uptime, memory, slow routes, error rates, and security grade at a glance.
+- [Requests](https://doc.expresso-ts.com/docs/studio/features/requests): Record, inspect, and replay every HTTP call in Studio.
+- [Logs](https://doc.expresso-ts.com/docs/studio/features/logs): Stream every framework and app log line in one Studio view.
+- [API Client](https://doc.expresso-ts.com/docs/studio/features/api-client): Send HTTP requests from Studio without leaving the UI.
+- [Container](https://doc.expresso-ts.com/docs/studio/features/container): Inspect the DI graph binding-by-binding in Studio.
+- [Architecture](https://doc.expresso-ts.com/docs/studio/features/architecture): See how controllers, use cases, and providers connect in Studio.
+- [Database](https://doc.expresso-ts.com/docs/studio/features/database): Browse your in-memory provider from Studio.
+- [Metrics](https://doc.expresso-ts.com/docs/studio/features/metrics): Throughput, per-route latency, slowest endpoints, memory usage, and system health from real traffic in Studio.
+- [Replay](https://doc.expresso-ts.com/docs/studio/features/replay): Batch re-run recorded HTTP exchanges and diff responses in Studio.
+- [Security](https://doc.expresso-ts.com/docs/studio/features/security): Supply-chain advisories with reachability scoring and OWASP runtime posture in Studio.
+- [Coverage](https://doc.expresso-ts.com/docs/studio/features/coverage): Git-aware code coverage, diff coverage, annotated source, and in-Studio test runs.
+
+## GUIDES
+
+- [Example Projects](https://doc.expresso-ts.com/docs/guides/example-projects): Fifteen runnable ExpressoTS v4 examples on GitHub, each mapped to a guide or feature doc.
+- [File Upload](https://doc.expresso-ts.com/docs/guides/file-upload): Learn how to handle file uploads in ExpressoTS.
+- [Micro API](https://doc.expresso-ts.com/docs/guides/micro-api): Build lightweight, production-ready microservices with ExpressoTS Micro API.
+- [Authentication](https://doc.expresso-ts.com/docs/guides/authentication): Wire JWT authentication into an ExpressoTS v4 app using the framework's AuthProvider and guards.
+- [Database Integration](https://doc.expresso-ts.com/docs/guides/database-integration): Integrate databases with ExpressoTS v4 using the provider lifecycle and the built-in InMemoryDBProvider.
+- [Deployment](https://doc.expresso-ts.com/docs/guides/deployment): Deploy an ExpressoTS app with Docker, Docker Compose, or Kubernetes.
+- [Container Development](https://doc.expresso-ts.com/docs/guides/container-development): Develop your ExpressoTS app inside Docker containers with hot reload.
+- [Provider Ecosystem](https://doc.expresso-ts.com/docs/guides/provider-ecosystem): Explore ExpressoTS providers for databases, authentication, observability, and more.
+- [Building a Provider Package](https://doc.expresso-ts.com/docs/guides/provider-package): Scaffold, build, test, and publish a reusable @expressots/* provider package using the v4 provider template.
+
+## COMPARISON
+
+- [Framework Comparison](https://doc.expresso-ts.com/docs/why-expressots/overview): A feature-by-feature comparison of ExpressoTS v4 against Spring Boot, ASP.NET Core, NestJS, Django, and Laravel.
+
+## Optional
+
+- [Everything in one file](https://doc.expresso-ts.com/llms-full.txt): all 80 pages as plain markdown
+- [GitHub repository](https://github.com/expressots/expressots)
+- [Release notes](https://github.com/expressots/expressots/releases)

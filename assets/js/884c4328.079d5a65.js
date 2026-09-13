@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkclassic=globalThis.webpackChunkclassic||[]).push([[485],{40030(e){e.exports=JSON.parse('{"categoryGeneratedIndex":{"title":"PROLOGUE","slug":"/category/prologue","permalink":"/docs/category/prologue","sidebar":"tutorialSidebar","navigation":{"next":{"title":"Intro","permalink":"/docs/prologue/intro"}}}}')}}]);
